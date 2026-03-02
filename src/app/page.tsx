@@ -180,17 +180,10 @@ function AIInsightBanner({ profile, locale }: { profile: UserFishingProfile | nu
     <section className="px-4 pt-4">
       <Link href="/concierge" className="block">
         <div className="bg-gradient-to-r from-primary to-cyan-500 rounded-2xl p-4 flex items-center gap-3 shadow-md shadow-primary/20">
-          <div className="bg-white/20 rounded-xl p-2 shrink-0">
-            {/* AI 로봇 아이콘 — SVG */}
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="11" width="18" height="10" rx="2"/>
-              <rect x="9" y="7" width="6" height="4" rx="1"/>
-              <line x1="12" y1="7" x2="12" y2="4"/>
-              <circle cx="12" cy="3" r="1"/>
-              <line x1="8" y1="16" x2="8" y2="16" strokeWidth="3" strokeLinecap="round"/>
-              <line x1="12" y1="16" x2="12" y2="16" strokeWidth="3" strokeLinecap="round"/>
-              <line x1="16" y1="16" x2="16" y2="16" strokeWidth="3" strokeLinecap="round"/>
-            </svg>
+          <div className="rounded-xl overflow-hidden shrink-0 w-10 h-10">
+            {/* AI 캐릭터 실사 이미지 */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/ai-concierge.png" alt="AI" className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider mb-0.5">
@@ -273,9 +266,17 @@ function CatchMagazineCard({ record, index }: { record: CatchRecord; index: numb
           // eslint-disable-next-line @next/next/no-img-element
           <img src={record.photos[0]} alt={record.species} className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full bg-gradient-to-tr from-primary to-cyan-400 flex items-center justify-center">
-            <span className="text-3xl" role="img" aria-label="fish">🐟</span>
-          </div>
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src="/fish-placeholder.png"
+            alt={record.species}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              const el = e.target as HTMLImageElement;
+              el.style.display = 'none';
+              el.parentElement!.classList.add('bg-gradient-to-tr', 'from-primary', 'to-cyan-400');
+            }}
+          />
         )}
       </div>
       <div className="flex-1 flex flex-col justify-center min-w-0">
@@ -308,29 +309,41 @@ function NewsCard({ item }: { item: FishingNewsItem }) {
       href={item.link}
       target="_blank"
       rel="noopener noreferrer"
-      className="block bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
+      className="block bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-md hover:scale-[1.01] transition-all active:scale-[0.99]"
     >
-      <div className="w-full h-36 overflow-hidden bg-slate-100">
+      {/* 이미지 + 타이틀 오버레이 */}
+      <div className="relative w-full h-40 overflow-hidden bg-slate-900">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={item.thumbnail || '/news-fallback.png'}
           alt=""
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover opacity-80"
           loading="lazy"
           onError={(e) => { (e.target as HTMLImageElement).src = '/news-fallback.png'; }}
         />
-      </div>
-      <div className="p-3">
-        <div className="flex items-center gap-1.5 mb-1.5">
-          <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
-          <span className="text-[10px] text-slate-400 font-medium">{item.sourceLabel}</span>
+        {/* 하단 그라데이션 오버레이 */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/30 to-transparent" />
+
+        {/* 상단 배지 */}
+        <div className="absolute top-2.5 left-3 flex items-center gap-1.5">
+          <span className={`w-1.5 h-1.5 rounded-full ${dotColor} ${item.freshness === 'realtime' ? 'animate-pulse' : ''}`} />
+          <span className="text-[9px] font-bold text-white/80 uppercase tracking-wider bg-black/30 backdrop-blur-sm px-2 py-0.5 rounded-full">
+            {item.freshness === 'realtime' ? 'LIVE' : item.sourceLabel}
+          </span>
           {item.species && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-teal-50 text-teal-600 font-semibold">
+            <span className="text-[9px] px-2 py-0.5 rounded-full bg-teal-500/80 text-white font-bold">
               🐟 {item.species}
             </span>
           )}
         </div>
-        <p className="text-sm font-semibold text-slate-800 line-clamp-2 leading-snug">{item.title}</p>
+
+        {/* 하단 타이틀 오버레이 */}
+        <div className="absolute bottom-0 left-0 right-0 p-3">
+          <p className="text-sm font-bold text-white line-clamp-2 leading-snug drop-shadow-sm">
+            {item.title}
+          </p>
+          <p className="text-[10px] text-white/60 mt-0.5">{item.sourceLabel}</p>
+        </div>
       </div>
     </a>
   );
