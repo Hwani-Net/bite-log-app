@@ -25,19 +25,19 @@ function HeroCard({ biteTime, loading }: { biteTime: BiteTimePrediction | null; 
 
   return (
     <section className="px-4 pt-4">
-      <div
-        className="relative rounded-3xl overflow-hidden h-52 shadow-xl"
-        style={{
-          background: 'linear-gradient(135deg, #0c2340 0%, #0a4975 40%, #0891b2 100%)',
-        }}
-      >
-        {/* ocean texture overlay */}
+      <div className="relative rounded-3xl overflow-hidden h-52 shadow-xl">
+        {/* 실사 배경 이미지 */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/hero-bg.png"
+          alt="fishing background"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* 그라데이션 오버레이 — 텍스트 가독성 */}
         <div
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Cpath d='M0 120 Q100 80 200 120 Q300 160 400 120 L400 200 L0 200Z' fill='%231e40af' opacity='0.5'/%3E%3Cpath d='M0 140 Q80 110 160 140 Q240 170 320 140 Q360 125 400 140 L400 200 L0 200Z' fill='%230891b2' opacity='0.7'/%3E%3C/svg%3E")`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'bottom',
+            background: 'linear-gradient(to bottom, rgba(10,30,60,0.45) 0%, rgba(8,50,80,0.75) 55%, rgba(5,25,50,0.92) 100%)',
           }}
         />
 
@@ -65,7 +65,7 @@ function HeroCard({ biteTime, loading }: { biteTime: BiteTimePrediction | null; 
                     <span className="text-3xl font-black text-white">{biteTime.gradeEmoji}</span>
                     <span className="text-xl font-bold text-white">{biteTime.gradeLabel}</span>
                   </div>
-                  <p className="text-white/80 text-xs">{biteTime.summary}</p>
+                  <p className="text-white/80 text-xs">{biteTime.gradeLabel}</p>
                 </>
               ) : (
                 <p className="text-white text-lg font-bold">조건 분석 중...</p>
