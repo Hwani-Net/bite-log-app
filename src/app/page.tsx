@@ -363,19 +363,19 @@ export default function HomePage() {
     {
       id: 'demo-1', species: '농어', sizeCm: 72, count: 1,
       date: '2024-05-20', location: { name: '제주도 서귀포시', lat: 0, lng: 0 },
-      photos: ['https://lh3.googleusercontent.com/aida-public/AB6AXuAooF4TYs_z1-nO7MoHh3d9SUfk6KbTwyQpgA3bm0lHCPfxmB4wIidRdOrvFwThAj42a9q9KD-nfsV5-dJNm4agXRbwjrFW5VFg1EPa9Evn97up6_d0QAn3l1ByRmsY0wLxr126kJQrNBDg0hs5UkpVJk4Zm5E7k3rfT9OMKTJaE4xf1nq8IKsUxEQGJjeLCDjt6tVm0-qHxDzDxt4uvkOVu7rm5QAWtfosFGnnxOW-afjA2fhPC6dYH-kEG1Q2u8e0uf1Bnkc7naC3'],
+      photos: ['/fish-placeholder.png'],
       memo: '대물 농어', createdAt: '2024-05-20', updatedAt: '2024-05-20', visibility: 'public' as const,
     },
     {
       id: 'demo-2', species: '우럭', sizeCm: undefined, count: 3,
       date: '2024-05-18', location: { name: '충남 당진시', lat: 0, lng: 0 },
-      photos: ['https://lh3.googleusercontent.com/aida-public/AB6AXuBg4mjyL5_aVCabZj6iJba_4E1cR2AOZ8_HMjTeDeT0XPN3TxWdleTRh66vrfwxpDb8y9gWX7od6rTK8w6y0y8rqCXpBisP9PYYmN4NV5f8THjVx73RUubdfx156HqHdQ3Q5JxkfXa85GQ_cSzQBDozs5Y8TLxsojP8E0cSUijoNSrMF3IMAK-UgEXV24oyWqIVzeRA_Tix-BTR7P70MGm4AmHCsIKB_YEExTnMo0ucOZs-AdurpmpjKDeZLiFX5_Q4UvEhjHrord0y'],
+      photos: ['/fish-placeholder.png'],
       memo: '방파제 우럭', createdAt: '2024-05-18', updatedAt: '2024-05-18', visibility: 'public' as const,
     },
     {
       id: 'demo-3', species: '참돔', sizeCm: 45, count: 1,
       date: '2024-05-12', location: { name: '전남 여수시', lat: 0, lng: 0 },
-      photos: ['https://lh3.googleusercontent.com/aida-public/AB6AXuBYdD0_vNJSuK0zCFFl9BcxzuzEE_7S1mCMs4SWqFw3NLmzc2NgwNIpJTC3ap4WAOYG22FTxmyTTjXvA-6lwQaAFLqZCWW1D0IA3h77OQGp7289zafURv5-1i51iwp81EDFMlOjs4U2AYhq86BtNtIiz5gRykwo2gM8Z3OHLB5uyWlcrAhOGOotlm-IzFIfdysPJYtZdjeHzRZct_0ILapiqPc-ftkZNk9Gusk_dpjYx3Xvaew10Cgm6LN7rnSF02yUct1IU1Da32fa'],
+      photos: ['/fish-placeholder.png'],
       memo: '참돔', createdAt: '2024-05-12', updatedAt: '2024-05-12', visibility: 'public' as const,
     },
   ];
