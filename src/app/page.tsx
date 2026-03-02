@@ -13,6 +13,30 @@ import { analyzeUserRecords, UserFishingProfile } from '@/services/personalizati
 import { getInSeasonSpecies } from '@/services/conciergeService';
 
 // ─── Hero Card: 오늘의 낚시 조건 ──────────────────────────────────────────────
+// 시간대별 오버레이 컬러 (아침/오후/저녁/밤)
+function getTimeOfDayOverlay(hour: number, weatherDesc?: string): string {
+  const isCloud = weatherDesc && /cloud|overcast|rain|snow/i.test(weatherDesc);
+  if (hour >= 5 && hour < 9) {
+    // 아침: 황금빛 오렌지
+    return isCloud
+      ? 'linear-gradient(to bottom, rgba(60,50,30,0.55) 0%, rgba(80,60,20,0.80) 55%, rgba(30,20,5,0.93) 100%)'
+      : 'linear-gradient(to bottom, rgba(120,70,10,0.50) 0%, rgba(180,90,10,0.72) 35%, rgba(20,10,5,0.92) 100%)';
+  } else if (hour >= 9 && hour < 17) {
+    // 오후: 맑은 청색
+    return isCloud
+      ? 'linear-gradient(to bottom, rgba(30,50,80,0.55) 0%, rgba(20,40,70,0.78) 55%, rgba(5,20,45,0.93) 100%)'
+      : 'linear-gradient(to bottom, rgba(5,35,90,0.42) 0%, rgba(8,60,110,0.70) 55%, rgba(4,25,55,0.93) 100%)';
+  } else if (hour >= 17 && hour < 20) {
+    // 저녁: 붉은 노을
+    return isCloud
+      ? 'linear-gradient(to bottom, rgba(80,30,20,0.55) 0%, rgba(100,40,15,0.80) 55%, rgba(30,10,5,0.93) 100%)'
+      : 'linear-gradient(to bottom, rgba(150,50,10,0.52) 0%, rgba(200,70,15,0.78) 35%, rgba(40,10,5,0.93) 100%)';
+  } else {
+    // 밤: 짙은 남색
+    return 'linear-gradient(to bottom, rgba(5,10,40,0.60) 0%, rgba(5,15,50,0.82) 55%, rgba(2,5,25,0.96) 100%)';
+  }
+}
+
 function HeroCard({ biteTime, loading }: { biteTime: BiteTimePrediction | null; loading: boolean }) {
   const scoreColor = biteTime
     ? biteTime.score >= 75 ? '#22c55e'
@@ -22,6 +46,14 @@ function HeroCard({ biteTime, loading }: { biteTime: BiteTimePrediction | null; 
     : '#94a3b8';
 
   const month = new Date().getMonth() + 1;
+  const hour = new Date().getHours();
+  // 시간대 레이블 (배지)
+  const timeLabel =
+    hour >= 5 && hour < 9 ? '🌅 아침' :
+    hour >= 9 && hour < 17 ? '☀️ 낮' :
+    hour >= 17 && hour < 20 ? '🌇 저녁' : '🌙 밤';
+  const weatherDesc = biteTime?.factors?.find(f => f.name.includes('날씨') || f.name.includes('Weather'))?.name;
+  const overlayBg = getTimeOfDayOverlay(hour, weatherDesc);
 
   return (
     <section className="px-4 pt-4">
@@ -33,12 +65,10 @@ function HeroCard({ biteTime, loading }: { biteTime: BiteTimePrediction | null; 
           alt="fishing background"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* 그라데이션 오버레이 — 텍스트 가독성 */}
+        {/* 시간대+날씨 동적 오버레이 */}
         <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(to bottom, rgba(10,30,60,0.45) 0%, rgba(8,50,80,0.75) 55%, rgba(5,25,50,0.92) 100%)',
-          }}
+          className="absolute inset-0 transition-all duration-1000"
+          style={{ background: overlayBg }}
         />
 
         {/* LIVE badge */}
@@ -47,8 +77,10 @@ function HeroCard({ biteTime, loading }: { biteTime: BiteTimePrediction | null; 
           <span className="text-[10px] font-bold text-white tracking-wide">LIVE</span>
         </div>
 
-        {/* Season badge */}
-        <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+        {/* Season & time badge */}
+        <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+          <span className="text-[11px] font-semibold text-white">{timeLabel}</span>
+          <span className="text-white/50 text-[10px]">|</span>
           <span className="text-[11px] font-semibold text-white">{month}월 시즌</span>
         </div>
 
@@ -149,7 +181,16 @@ function AIInsightBanner({ profile, locale }: { profile: UserFishingProfile | nu
       <Link href="/concierge" className="block">
         <div className="bg-gradient-to-r from-primary to-cyan-500 rounded-2xl p-4 flex items-center gap-3 shadow-md shadow-primary/20">
           <div className="bg-white/20 rounded-xl p-2 shrink-0">
-            <span className="material-symbols-outlined text-white text-xl">smart_toy</span>
+            {/* AI 로봇 아이콘 — SVG */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="10" rx="2"/>
+              <rect x="9" y="7" width="6" height="4" rx="1"/>
+              <line x1="12" y1="7" x2="12" y2="4"/>
+              <circle cx="12" cy="3" r="1"/>
+              <line x1="8" y1="16" x2="8" y2="16" strokeWidth="3" strokeLinecap="round"/>
+              <line x1="12" y1="16" x2="12" y2="16" strokeWidth="3" strokeLinecap="round"/>
+              <line x1="16" y1="16" x2="16" y2="16" strokeWidth="3" strokeLinecap="round"/>
+            </svg>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider mb-0.5">
@@ -233,7 +274,7 @@ function CatchMagazineCard({ record, index }: { record: CatchRecord; index: numb
           <img src={record.photos[0]} alt={record.species} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full bg-gradient-to-tr from-primary to-cyan-400 flex items-center justify-center">
-            <span className="material-symbols-outlined text-white text-2xl">set_meal</span>
+            <span className="text-3xl" role="img" aria-label="fish">🐟</span>
           </div>
         )}
       </div>
@@ -269,12 +310,16 @@ function NewsCard({ item }: { item: FishingNewsItem }) {
       rel="noopener noreferrer"
       className="block bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
     >
-      {item.thumbnail && (
-        <div className="w-full h-36 overflow-hidden bg-slate-100">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={item.thumbnail} alt="" className="w-full h-full object-cover" loading="lazy" />
-        </div>
-      )}
+      <div className="w-full h-36 overflow-hidden bg-slate-100">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={item.thumbnail || '/news-fallback.png'}
+          alt=""
+          className="w-full h-full object-cover"
+          loading="lazy"
+          onError={(e) => { (e.target as HTMLImageElement).src = '/news-fallback.png'; }}
+        />
+      </div>
       <div className="p-3">
         <div className="flex items-center gap-1.5 mb-1.5">
           <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
