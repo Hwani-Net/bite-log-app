@@ -168,7 +168,10 @@ export default function HomePage() {
           <div className="bg-primary/10 p-2 rounded-lg text-primary">
             <span className="material-symbols-outlined text-2xl font-bold">set_meal</span>
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">FishLog</h1>
+          <h1 className="text-xl font-bold tracking-tight">
+            <span className="text-primary">BITE</span>
+            <span className="text-slate-900 dark:text-white"> Log</span>
+          </h1>
         </div>
         <button className="size-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700">
           <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">notifications</span>
