@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
 import AppInitializer from "@/components/AppInitializer";
-import SplashScreen from "@/components/SplashScreen";
+import SplashWrapper from "@/components/SplashWrapper";
 import { Agentation } from 'agentation';
 
 export const metadata: Metadata = {
-  title: "FishLog - 나의 낚시 일지",
-  description: "조과 기록, 통계 대시보드, 나만의 낚시 일지 앱",
+  title: "BITE Log — 바이트로그",
+  description: "입질의 순간을 기록하다. AI 낚시 일지 앱",
 };
 
 export default function RootLayout({
@@ -39,11 +39,12 @@ export default function RootLayout({
       {/* V4: Stitch body classes — bg-background-light dark:bg-background-dark */}
       <body className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
         <AppInitializer />
-        <SplashScreen />
-        <main className="mx-auto max-w-md min-h-dvh pb-20 relative wave-bg overflow-x-hidden">
-          {children}
-        </main>
-        <BottomNav />
+        <SplashWrapper>
+          <main className="mx-auto max-w-md min-h-dvh pb-20 relative wave-bg overflow-x-hidden">
+            {children}
+          </main>
+          <BottomNav />
+        </SplashWrapper>
         {process.env.NODE_ENV === 'development' && (
           <Agentation endpoint="http://localhost:4747" />
         )}
