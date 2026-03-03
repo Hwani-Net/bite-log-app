@@ -17,6 +17,7 @@ export interface RankingData {
   myRank: RankingEntry | null;
   topThree: RankingEntry[];
   rest: RankingEntry[];         // 4th~10th
+  isRealData?: boolean;         // true = Firebase live data, false = mock
 }
 
 export interface RankingService {
