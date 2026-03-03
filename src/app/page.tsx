@@ -9,6 +9,7 @@ import { fetchTideData } from '@/services/tideService';
 import { fetchWeather } from '@/services/weatherService';
 import { fetchMarineData } from '@/services/marineService';
 import { calculateBiteTime, BiteTimePrediction } from '@/services/biteTimeService';
+import { getSpeciesBiteScores, SpeciesBiteScore } from '@/services/speciesBiteService';
 import { fetchTopNews, FishingNewsItem } from '@/services/fishingNewsService';
 import { analyzeUserRecords, UserFishingProfile } from '@/services/personalizationService';
 import { getInSeasonSpecies } from '@/services/conciergeService';
@@ -733,6 +734,11 @@ export default function HomePage() {
       {/* ── Hero: 오늘의 낚시 조건 ── */}
       <HeroCard biteTime={biteTime} loading={biteLoading} />
 
+      {/* ── 어종별 맞춤 입질 예보 ── */}
+      {biteTime && !biteLoading && (
+        <SpeciesBiteRanking biteTime={biteTime} locale={locale} />
+      )}
+
       {/* ── Stat Bar ── */}
       <StatBar totalCatch={totalCatch} thisMonth={thisMonthCatch} maxSize={maxSize} locale={locale} />
 
@@ -829,5 +835,71 @@ export default function HomePage() {
         <span className="material-symbols-outlined text-2xl font-bold">add</span>
       </Link>
     </div>
+  );
+}
+
+// ── Species Bite Ranking (어종별 맞춤 입질 예보) ──────────────────
+function SpeciesBiteRanking({ biteTime, locale }: { biteTime: BiteTimePrediction; locale: string }) {
+  const scores = useMemo(() => getSpeciesBiteScores(biteTime), [biteTime]);
+  const isKo = locale === 'ko';
+  const top5 = scores.slice(0, 5);
+
+  return (
+    <section className="px-4 pt-4">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-primary text-base">phishing</span>
+          {isKo ? '어종별 입질 예보' : 'Species Forecast'}
+        </h2>
+        <span className="text-[10px] text-slate-400">
+          {isKo ? '현재 조건 기준' : 'Based on current conditions'}
+        </span>
+      </div>
+
+      <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1">
+        {top5.map((sp, i) => {
+          const bgGradient =
+            sp.grade === 'excellent' ? 'from-emerald-500 to-teal-500' :
+            sp.grade === 'good' ? 'from-blue-500 to-cyan-500' :
+            sp.grade === 'fair' ? 'from-amber-500 to-orange-400' :
+            'from-slate-400 to-slate-500';
+          const borderColor =
+            sp.grade === 'excellent' ? 'border-emerald-200' :
+            sp.grade === 'good' ? 'border-blue-200' :
+            sp.grade === 'fair' ? 'border-amber-200' :
+            'border-slate-200';
+          const adjustText = sp.adjustment > 0 ? `+${sp.adjustment}` : `${sp.adjustment}`;
+          const adjustColor = sp.adjustment > 0 ? 'text-emerald-600' : sp.adjustment < 0 ? 'text-red-500' : 'text-slate-400';
+
+          return (
+            <div
+              key={sp.species}
+              className={`shrink-0 w-[140px] bg-white rounded-2xl border ${borderColor} shadow-sm overflow-hidden`}
+            >
+              {/* Score header */}
+              <div className={`bg-gradient-to-r ${bgGradient} px-3 py-2.5 flex items-center justify-between`}>
+                <div className="flex items-center gap-1.5">
+                  {i === 0 && <span className="text-xs">👑</span>}
+                  <span className="text-sm">{sp.emoji}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-white font-black text-xl leading-none">{sp.score}</span>
+                  <span className="text-white/70 text-[10px] ml-0.5">/100</span>
+                </div>
+              </div>
+              {/* Species info */}
+              <div className="p-2.5">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-bold text-slate-800 truncate">{sp.species}</span>
+                  <span className={`text-[10px] font-bold ${adjustColor}`}>{adjustText}</span>
+                </div>
+                <p className="text-[10px] text-slate-500 leading-snug line-clamp-2 mb-1.5">{sp.reason}</p>
+                <p className="text-[9px] text-teal-600 leading-snug line-clamp-1">💡 {sp.tip.split('.')[0]}.</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
