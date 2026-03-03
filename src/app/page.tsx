@@ -311,28 +311,42 @@ function StatBar({
   );
 }
 
-// ─── AI 인사이트 띠 ──────────────────────────────────────────────────────────
+// ─── AI 컨시어지 + 시즌 예측 통합 배너 ────────────────────────────────────────
 function AIInsightBanner({ profile, locale }: { profile: UserFishingProfile | null; locale: string }) {
   const inSeasonSpecies = useMemo(() => getInSeasonSpecies(), []);
-  const month = new Date().getMonth() + 1;
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  const isKo = locale === 'ko';
+
+  // fishSeasonDB 기반 시즌 어종 + 금어기
+  const inSeason = useMemo(() =>
+    sortByCurrentSeason(FISH_SEASON_DB, month).filter(d => {
+      const st = getSeasonStatus(d, month, day);
+      return st === 'peak' || st === 'gold';
+    }), [month, day]);
+
+  const closed = useMemo(() =>
+    FISH_SEASON_DB.filter(d => getSeasonStatus(d, month, day) === 'closed'),
+    [month, day]);
 
   return (
     <section className="px-4 pt-4">
-      <Link href="/concierge" className="block">
-        <div className="bg-gradient-to-r from-primary to-cyan-500 rounded-2xl p-4 flex items-center gap-3 shadow-md shadow-primary/20">
+      <div className="bg-gradient-to-br from-primary via-blue-500 to-cyan-500 rounded-2xl overflow-hidden shadow-md shadow-primary/20">
+        {/* ── 상단: AI 컨시어지 CTA ── */}
+        <Link href="/concierge" className="flex items-center gap-3 p-4 pb-3 group">
           <div className="rounded-xl overflow-hidden shrink-0 w-10 h-10">
-            {/* AI 캐릭터 실사 이미지 */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/ai-concierge.png" alt="AI" className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider mb-0.5">
-              {locale === 'ko' ? 'AI 컨시어지 추천' : 'AI Concierge'}
+              {isKo ? 'AI 컨시어지' : 'AI Concierge'}
             </p>
             <p className="text-sm font-bold text-white truncate">
               {inSeasonSpecies.length > 0
                 ? `${month}월 시즌: ${inSeasonSpecies.slice(0, 3).map(s => s.name).join(', ')}`
-                : (locale === 'ko' ? '오늘의 추천 포인트 확인하기' : 'Check today\'s spots')}
+                : (isKo ? '오늘의 추천 포인트 확인하기' : 'Check today\'s spots')}
             </p>
             {profile && profile.totalDays > 0 && (
               <p className="text-[10px] text-white/70 mt-0.5">
@@ -340,9 +354,65 @@ function AIInsightBanner({ profile, locale }: { profile: UserFishingProfile | nu
               </p>
             )}
           </div>
-          <span className="material-symbols-outlined text-white/80">chevron_right</span>
-        </div>
-      </Link>
+          <span className="material-symbols-outlined text-white/80 group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+        </Link>
+
+        {/* ── 구분선 ── */}
+        <div className="mx-4 border-t border-white/15" />
+
+        {/* ── 하단: 시즌 어종 칩 + 금어기 (시즌 예측 상세 링크) ── */}
+        <Link href="/season-forecast" className="block px-4 py-3 group/season">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-semibold text-white/60 uppercase tracking-wider flex items-center gap-1">
+              🎣 {isKo ? '지금 잡히는 어종' : 'In Season Now'}
+            </p>
+            <span className="text-[9px] text-white/50 flex items-center gap-0.5 group-hover/season:text-white/80 transition-colors">
+              {isKo ? '시즌 상세' : 'Details'}
+              <span className="material-symbols-outlined text-[12px] group-hover/season:translate-x-0.5 transition-transform">chevron_right</span>
+            </span>
+          </div>
+          {inSeason.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {inSeason.map(d => {
+                const st = getSeasonStatus(d, month, day);
+                const isGold = st === 'gold';
+                const total = getTotalRelease(d);
+                return (
+                  <div
+                    key={d.species}
+                    className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold ${
+                      isGold
+                        ? 'bg-amber-400/30 text-amber-100'
+                        : 'bg-white/15 text-white/90'
+                    }`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${isGold ? 'bg-amber-300' : 'bg-green-300'}`} />
+                    <span>{d.emoji}</span>
+                    <span>{d.species}</span>
+                    {total > 0 && (
+                      <span className="text-[9px] opacity-70 font-medium">{formatCount(total)}</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-xs text-white/60">
+              {isKo ? '현재 피크 시즌인 어종이 없습니다' : 'No species in peak season'}
+            </p>
+          )}
+
+          {/* 금어기 경고 */}
+          {closed.length > 0 && (
+            <div className="mt-2 flex items-center gap-1.5 text-[10px] text-red-200">
+              <span>⛔</span>
+              <span>
+                {isKo ? '금어기' : 'Closed'}: {closed.map(d => `${d.emoji} ${d.species}`).join(', ')}
+              </span>
+            </div>
+          )}
+        </Link>
+      </div>
     </section>
   );
 }
@@ -665,9 +735,6 @@ export default function HomePage() {
 
       {/* ── AI Concierge Banner ── */}
       <AIInsightBanner profile={aiProfile} locale={locale} />
-
-      {/* ── 시즌 예측 위젯 (동적 데이터) — "지금 뭐가 잡힘?" ── */}
-      <SeasonForecastWidget locale={locale} />
 
       {/* ── 최근 조과 ── */}
       <section className="px-4 pt-5">
