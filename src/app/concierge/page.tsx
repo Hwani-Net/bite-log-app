@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import { useAppStore } from '@/store/appStore';
 import { fetchWeather, WeatherData } from '@/services/weatherService';
 import { fetchTideData, TideData } from '@/services/tideService';
+import { fetchMarineData } from '@/services/marineService';
 import { calculateBiteTime, BiteTimePrediction } from '@/services/biteTimeService';
 import {
   generateRecommendation,
@@ -56,13 +57,14 @@ export default function ConciergePage() {
             const lng = pos.coords.longitude;
             setUserCoords({ lat, lng });
 
-            const [w, td] = await Promise.all([
+            const [w, td, m] = await Promise.all([
               fetchWeather(lat, lng),
               fetchTideData(lat, lng),
+              fetchMarineData(lat, lng),
             ]);
             setWeather(w);
             setTideData(td);
-            finalize(w, td, lat, lng);
+            finalize(w, td, lat, lng, m);
           },
           () => finalize(null, null, 37.5665, 126.9780),
           { timeout: 5000, maximumAge: 300000 }
@@ -72,8 +74,8 @@ export default function ConciergePage() {
       }
     }
 
-    function finalize(w: WeatherData | null, td: TideData | null, lat: number, lng: number) {
-      const bt = calculateBiteTime(w, td);
+    function finalize(w: WeatherData | null, td: TideData | null, lat: number, lng: number, m?: Awaited<ReturnType<typeof fetchMarineData>>) {
+      const bt = calculateBiteTime(w, td, m ?? null);
       setBiteTime(bt);
       const rec = generateRecommendation(w, td, bt, lat, lng);
       setRecommendation(rec);
@@ -304,10 +306,10 @@ export default function ConciergePage() {
                         f.status === 'positive' ? 'bg-emerald-400' :
                         f.status === 'negative' ? 'bg-red-400' : 'bg-amber-400'
                       }`}
-                      style={{ width: `${(f.score / 25) * 100}%` }}
+                      style={{ width: `${Math.min(100, (f.score / 20) * 100)}%` }}
                     />
                   </div>
-                  <span className="text-[10px] text-slate-400 w-8 text-right">{f.score}/25</span>
+                  <span className="text-[10px] text-slate-400 w-8 text-right">{f.score}/20</span>
                 </div>
               ))}
               <div className="flex items-center gap-1 mt-1 pt-2 border-t border-slate-100">

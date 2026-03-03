@@ -7,6 +7,7 @@ import { getDataService } from '@/services/dataServiceFactory';
 import { CatchRecord } from '@/types';
 import { fetchTideData } from '@/services/tideService';
 import { fetchWeather } from '@/services/weatherService';
+import { fetchMarineData } from '@/services/marineService';
 import { calculateBiteTime, BiteTimePrediction } from '@/services/biteTimeService';
 import { fetchTopNews, FishingNewsItem } from '@/services/fishingNewsService';
 import { analyzeUserRecords, UserFishingProfile } from '@/services/personalizationService';
@@ -660,11 +661,13 @@ export default function HomePage() {
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
             async (pos) => {
-              const [w, t] = await Promise.all([
-                fetchWeather(pos.coords.latitude, pos.coords.longitude),
-                fetchTideData(pos.coords.latitude, pos.coords.longitude),
+              const { latitude, longitude } = pos.coords;
+              const [w, t, m] = await Promise.all([
+                fetchWeather(latitude, longitude),
+                fetchTideData(latitude, longitude),
+                fetchMarineData(latitude, longitude),
               ]);
-              setBiteTime(calculateBiteTime(w, t));
+              setBiteTime(calculateBiteTime(w, t, m));
               setBiteLoading(false);
             },
             () => {

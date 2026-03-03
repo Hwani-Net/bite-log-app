@@ -37,6 +37,7 @@ export interface WeatherData extends WeatherInfo {
   icon: string;
   conditionKo: string;
   conditionEn: string;
+  pressureMsl?: number; // hPa (sea-level pressure)
 }
 
 /**
@@ -45,7 +46,7 @@ export interface WeatherData extends WeatherInfo {
  */
 export async function fetchWeather(lat: number, lng: number): Promise<WeatherData | null> {
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&timezone=auto`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,pressure_msl&timezone=auto`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Weather API error: ${res.status}`);
 
@@ -65,6 +66,7 @@ export async function fetchWeather(lat: number, lng: number): Promise<WeatherDat
       tempC: Math.round(current.temperature_2m * 10) / 10,
       windSpeed: Math.round(current.wind_speed_10m * 10) / 10,
       humidity: Math.round(current.relative_humidity_2m),
+      pressureMsl: current.pressure_msl ? Math.round(current.pressure_msl * 10) / 10 : undefined,
     };
   } catch (err) {
     console.error('Weather fetch failed:', err);

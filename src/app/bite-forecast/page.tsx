@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAppStore } from '@/store/appStore';
 import { fetchTideData } from '@/services/tideService';
 import { fetchWeather } from '@/services/weatherService';
+import { fetchMarineData } from '@/services/marineService';
 import { calculateBiteTime, BiteTimePrediction, BiteFactor } from '@/services/biteTimeService';
 import { TideData, getCurrentPhase, TidePhase } from '@/services/tideService';
 import { WeatherData } from '@/services/weatherService';
@@ -65,14 +66,14 @@ function FactorCard({ factor }: { factor: BiteFactor }) {
         </div>
         <div className="text-right">
           <span className={`text-lg font-black ${s.text}`}>{factor.score}</span>
-          <span className="text-[10px] text-slate-400">/25</span>
+          <span className="text-[10px] text-slate-400">/20</span>
         </div>
       </div>
       {/* Progress bar */}
       <div className="h-1.5 bg-white rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full ${s.bar} transition-all duration-700 ease-out`}
-          style={{ width: `${(factor.score / 25) * 100}%` }}
+          style={{ width: `${Math.min(100, (factor.score / 20) * 100)}%` }}
         />
       </div>
     </div>
@@ -222,7 +223,7 @@ function FishingTips({ biteTime }: { biteTime: BiteTimePrediction }) {
 
   // Generate tips based on factors
   for (const f of biteTime.factors) {
-    if (f.name === '시간대' && f.score >= 20) {
+    if (f.name === '시간대' && f.score >= 16) {
       tips.push('🌅 지금은 매직아워! 톱워터 루어나 생미끼로 공략하세요.');
     }
     if (f.name.includes('물') && f.status === 'positive') {
@@ -231,11 +232,20 @@ function FishingTips({ biteTime }: { biteTime: BiteTimePrediction }) {
     if (f.name === '바람' && f.status === 'negative') {
       tips.push('💨 바람이 강합니다. 무거운 채비로 교체하고 안전 장비를 확인하세요.');
     }
-    if (f.name === '기온' && f.status === 'negative') {
+    if (f.name.includes('수온') && f.status === 'negative') {
       tips.push('🌡️ 수온이 낮습니다. 바닥층을 공략하고 느린 액션을 추천합니다.');
     }
-    if (f.name === '기온' && f.score >= 18) {
+    if (f.name.includes('수온') && f.score >= 16) {
       tips.push('☀️ 수온이 적절합니다. 중층~상층까지 폭넓게 공략해보세요.');
+    }
+    if (f.name === '기압' && f.status === 'positive' && f.score >= 14) {
+      tips.push('📉 기압이 낮아지는 중! 물고기 활성도가 높아집니다. 적극 공략하세요.');
+    }
+    if (f.name === '파고' && f.status === 'negative') {
+      tips.push('🌊 파고가 높습니다. 선상낚시는 멀미 주의, 방파제 낚시를 추천합니다.');
+    }
+    if (f.name.includes('사리') || (f.icon === 'dark_mode' && f.status === 'positive')) {
+      tips.push('🌕 사리 전후입니다. 조류가 강해 먹이활동이 활발합니다!');
     }
   }
 
@@ -246,6 +256,7 @@ function FishingTips({ biteTime }: { biteTime: BiteTimePrediction }) {
   if (tips.length === 0) {
     tips.push('🎣 보통의 조건입니다. 포인트 선정에 집중하세요!');
   }
+
 
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
@@ -284,13 +295,14 @@ export default function BiteForecastPage() {
             async (pos) => {
               const lat = pos.coords.latitude;
               const lng = pos.coords.longitude;
-              const [w, t] = await Promise.all([
+              const [w, t, m] = await Promise.all([
                 fetchWeather(lat, lng),
                 fetchTideData(lat, lng),
+                fetchMarineData(lat, lng),
               ]);
               setWeather(w);
               setTideData(t);
-              setBiteTime(calculateBiteTime(w, t));
+              setBiteTime(calculateBiteTime(w, t, m));
               if (t) setLocationName(t.stationName || '현재 위치');
               setLoading(false);
             },
@@ -361,7 +373,7 @@ export default function BiteForecastPage() {
                   <span className="text-lg font-bold text-slate-900">{biteTime.gradeLabel}</span>
                 </div>
                 <p className="text-xs text-slate-500 mb-3">
-                  4가지 요소를 종합 분석한 결과입니다
+                  7가지 요소를 종합 분석한 결과입니다
                 </p>
                 {/* Mini factor tags */}
                 <div className="flex flex-wrap gap-1.5">
@@ -427,8 +439,8 @@ export default function BiteForecastPage() {
           {/* ── Data source ── */}
           <p className="text-[10px] text-slate-400 text-center pb-4">
             {isKo
-              ? '※ 물때: KHOA 바다누리, 날씨: Open-Meteo. 실제 조과는 다를 수 있습니다.'
-              : '※ Tide data: KHOA, Weather: Open-Meteo. Actual results may vary.'}
+              ? '※ 물때: KHOA 바다누리, 날씨: Open-Meteo, 수온·파고: Open-Meteo Marine. 실제 조과는 다를 수 있습니다.'
+              : '※ Tide: KHOA, Weather: Open-Meteo, SST/Waves: Open-Meteo Marine. Actual results may vary.'}
           </p>
         </div>
       ) : (
