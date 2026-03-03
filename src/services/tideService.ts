@@ -6,9 +6,21 @@ export interface TideInfo {
   level: number; // cm
 }
 
+// Current tidal phase info (들물/썰물 몇 물)
+export interface TidePhase {
+  direction: 'incoming' | 'outgoing'; // 들물 / 썰물
+  phase: number; // 1~6 (몇 물)
+  label: string; // e.g. "들물 3물"
+  strength: 'slack' | 'weak' | 'moderate' | 'strong' | 'peak'; // 유속 강도
+  strengthLabel: string; // e.g. "유속 강"
+  emoji: string; // 🌊
+  percent: number; // 0~100 progress between prev→next tide event
+}
+
 export interface TideData {
   stationName: string;
   tides: TideInfo[];
+  currentPhase?: TidePhase; // calculated client-side
 }
 
 export interface TideStation {
@@ -153,4 +165,77 @@ export async function fetchTideData(lat: number, lng: number, date?: string): Pr
     console.warn('Failed to fetch tide data, falling back to mock:', err);
     return getMockTideData(nearest.name);
   }
+}
+
+/**
+ * Calculate "지금 몇 물" based on tide data.
+ * Between Low→High = 들물 (incoming) 1~6물
+ * Between High→Low = 썰물 (outgoing) 1~6물
+ * Phase 3~4 = peak current (유속 최강, 입질 최고)
+ */
+export function getCurrentPhase(tideData: TideData | null): TidePhase | null {
+  if (!tideData || tideData.tides.length < 2) return null;
+
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  // Build timeline of tide events in minutes
+  const events = tideData.tides.map(t => {
+    const [h, m] = t.time.split(':').map(Number);
+    return { type: t.type, minutes: h * 60 + m, level: t.level };
+  }).sort((a, b) => a.minutes - b.minutes);
+
+  // Find which two events we are between
+  let prev = events[events.length - 1]; // wrap around
+  let next = events[0];
+
+  for (let i = 0; i < events.length; i++) {
+    if (events[i].minutes > currentMinutes) {
+      next = events[i];
+      prev = i > 0 ? events[i - 1] : events[events.length - 1];
+      break;
+    }
+    // If we passed all events, prev = last, next = first (next day)
+    if (i === events.length - 1) {
+      prev = events[i];
+      next = events[0];
+    }
+  }
+
+  // Direction: Low→High = incoming (들물), High→Low = outgoing (썰물)
+  const direction: TidePhase['direction'] = prev.type === 'Low' ? 'incoming' : 'outgoing';
+  const dirLabel = direction === 'incoming' ? '들물' : '썰물';
+
+  // Calculate progress (0~1) between prev and next
+  let duration = next.minutes - prev.minutes;
+  if (duration <= 0) duration += 24 * 60; // wrap midnight
+  let elapsed = currentMinutes - prev.minutes;
+  if (elapsed < 0) elapsed += 24 * 60;
+  const progress = Math.min(1, Math.max(0, elapsed / duration));
+  const percent = Math.round(progress * 100);
+
+  // Convert progress to 1~6물 (6 equal phases within one tide cycle)
+  const phase = Math.min(6, Math.max(1, Math.ceil(progress * 6)));
+
+  // Current strength follows a sine curve: peak at phase 3~4
+  const strengthMap: Record<number, { strength: TidePhase['strength']; label: string; emoji: string }> = {
+    1: { strength: 'slack', label: '정조 (물 멈춤)', emoji: '🟡' },
+    2: { strength: 'weak', label: '유속 약', emoji: '🔵' },
+    3: { strength: 'strong', label: '유속 강', emoji: '🟠' },
+    4: { strength: 'peak', label: '유속 최강', emoji: '🔴' },
+    5: { strength: 'moderate', label: '유속 중', emoji: '🔵' },
+    6: { strength: 'weak', label: '유속 약', emoji: '🟡' },
+  };
+
+  const s = strengthMap[phase];
+
+  return {
+    direction,
+    phase,
+    label: `${dirLabel} ${phase}물`,
+    strength: s.strength,
+    strengthLabel: s.label,
+    emoji: s.emoji,
+    percent,
+  };
 }

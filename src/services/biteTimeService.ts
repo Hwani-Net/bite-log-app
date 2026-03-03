@@ -1,9 +1,5 @@
-// BiteTime — Fishing Bite Prediction Service
-// Rule-based algorithm: weather + tide + time → bite probability (0-100%)
-// Cost: $0 (no external API calls, uses existing weather & tide data)
-
 import { WeatherData } from './weatherService';
-import { TideData } from './tideService';
+import { TideData, getCurrentPhase } from './tideService';
 
 export interface BiteTimePrediction {
   score: number; // 0-100
@@ -11,6 +7,8 @@ export interface BiteTimePrediction {
   gradeLabel: string;
   gradeEmoji: string;
   factors: BiteFactor[];
+  currentPhaseLabel?: string; // e.g. "들물 3물"
+  currentStrengthLabel?: string; // e.g. "유속 강"
 }
 
 export interface BiteFactor {
@@ -67,43 +65,32 @@ function getTempScore(tempC?: number): { score: number; status: 'positive' | 'ne
   return { score: 10, status: 'neutral', description: `${tempC}°C — 보통` };
 }
 
-// Tide factor
+// Tide factor — now uses "몇 물" (current strength) instead of just tide proximity
 function getTideScore(tideData?: TideData | null): { score: number; status: 'positive' | 'neutral' | 'negative'; description: string } {
   if (!tideData || tideData.tides.length === 0) {
     return { score: 10, status: 'neutral', description: '물때 정보 없음' };
   }
 
-  const now = new Date();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-  // Find nearest tide event
-  let nearestDiff = Infinity;
-  let nearestTide = tideData.tides[0];
-
-  for (const tide of tideData.tides) {
-    const [h, m] = tide.time.split(':').map(Number);
-    const tideMinutes = h * 60 + m;
-    const diff = Math.abs(currentMinutes - tideMinutes);
-    if (diff < nearestDiff) {
-      nearestDiff = diff;
-      nearestTide = tide;
-    }
+  const phase = getCurrentPhase(tideData);
+  if (!phase) {
+    return { score: 10, status: 'neutral', description: '물때 계산 불가' };
   }
 
-  // Best: 1-2 hours before/after high tide
-  if (nearestTide.type === 'High' && nearestDiff <= 120) {
-    return { score: 25, description: `만조 전후 — 최고의 입질 타이밍 (${nearestTide.time})`, status: 'positive' };
-  }
-  // Good: approaching high tide
-  if (nearestTide.type === 'High' && nearestDiff <= 180) {
-    return { score: 18, description: `만조 접근 중 — 좋은 타이밍 (${nearestTide.time})`, status: 'positive' };
-  }
-  // Low tide period
-  if (nearestTide.type === 'Low' && nearestDiff <= 60) {
-    return { score: 6, description: `간조 중 — 입질 약함 (${nearestTide.time})`, status: 'negative' };
-  }
+  // Score based on current strength (3~4물 = peak fishing)
+  const scoreMap: Record<string, { score: number; status: 'positive' | 'neutral' | 'negative' }> = {
+    'peak':     { score: 25, status: 'positive' },
+    'strong':   { score: 22, status: 'positive' },
+    'moderate': { score: 15, status: 'neutral' },
+    'weak':     { score: 8,  status: 'neutral' },
+    'slack':    { score: 4,  status: 'negative' },
+  };
 
-  return { score: 12, description: `물때 전환 중 (${tideData.stationName})`, status: 'neutral' };
+  const s = scoreMap[phase.strength] || { score: 10, status: 'neutral' as const };
+  return {
+    score: s.score,
+    status: s.status,
+    description: `${phase.label} · ${phase.strengthLabel}`,
+  };
 }
 
 function getGrade(score: number): { grade: BiteTimePrediction['grade']; gradeLabel: string; gradeEmoji: string } {
@@ -121,6 +108,7 @@ export function calculateBiteTime(
   const windResult = getWindScore(weather?.windSpeed);
   const tempResult = getTempScore(weather?.tempC);
   const tideResult = getTideScore(tideData);
+  const phase = getCurrentPhase(tideData);
 
   const factors: BiteFactor[] = [
     {
@@ -131,7 +119,7 @@ export function calculateBiteTime(
       description: timeResult.description,
     },
     {
-      name: '물때',
+      name: phase?.label || '물 세기',
       icon: 'waves',
       score: tideResult.score,
       status: tideResult.status,
@@ -158,5 +146,9 @@ export function calculateBiteTime(
   const score = Math.min(100, Math.round((rawScore / 90) * 100));
   const { grade, gradeLabel, gradeEmoji } = getGrade(score);
 
-  return { score, grade, gradeLabel, gradeEmoji, factors };
+  return {
+    score, grade, gradeLabel, gradeEmoji, factors,
+    currentPhaseLabel: phase?.label,
+    currentStrengthLabel: phase?.strengthLabel,
+  };
 }

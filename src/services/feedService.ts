@@ -14,7 +14,7 @@ import {
   runTransaction,
   Firestore,
 } from 'firebase/firestore';
-import { getFirebaseDb, isFirebaseReady } from '@/lib/firebase';
+import { getFirebaseDb, isFirebaseReady, getFirebaseAuth } from '@/lib/firebase';
 import { getDataService, isUsingFirestore } from '@/services/dataServiceFactory';
 import { CatchRecord, PublicFeedItem, FeedComment } from '@/types';
 
@@ -121,10 +121,17 @@ export async function publishToFeed(record: CatchRecord): Promise<void> {
   const db = getDb();
   if (!db) return;
 
+  // Get display name from current Firebase Auth user
+  const auth = getFirebaseAuth();
+  const currentUser = auth?.currentUser;
+  const displayName = currentUser?.displayName || record.userId?.slice(0, 6) || '익명 낚시인';
+  const photoURL = currentUser?.photoURL || null;
+
   const feedRef = collection(db, 'publicFeed');
   await addDoc(feedRef, {
     userId: record.userId || 'anonymous',
-    userDisplayName: record.userId ? record.userId.slice(0, 6) : '익명 낚시인',
+    userDisplayName: displayName,
+    userPhotoURL: photoURL,
     date: record.date,
     location: { name: record.location.name, region: record.location.region },
     species: record.species,

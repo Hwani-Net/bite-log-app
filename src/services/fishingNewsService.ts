@@ -40,6 +40,30 @@ const SPECIES_KEYWORDS = [
   '갈치', '오징어', '문어', '주꾸미', '쭈꾸미',
 ];
 
+// Relevance keywords — articles must contain at least one to be considered fishing-related
+const FISHING_RELEVANCE_KEYWORDS = [
+  // 낚시 행위
+  '낚시', '조과', '조황', '조행', '출조', '입질', '히트', '채비',
+  '캐스팅', '루어', '찌낚', '원투', '바다낚시', '선상', '방파제',
+  '갯바위', '포인트', '미끼', '에기', '지깅', '타이라바',
+  // 어종 (SPECIES_KEYWORDS와 중복이지만 확실하게)
+  ...SPECIES_KEYWORDS,
+  // 낚시 관련 명사
+  '릴', '대물', '마릿수', '쿨러', '씨알', '손맛', '올림',
+  '물때', '수온', '조류', '만조', '간조',
+  // 낚시터/선박
+  '낚시배', '피싱', '유어선', '낚시터', '갈치배',
+];
+
+/**
+ * Check if text is relevant to fishing
+ * Returns true if at least one fishing keyword is found
+ */
+function isFishingRelevant(text: string): boolean {
+  const lower = text.toLowerCase();
+  return FISHING_RELEVANCE_KEYWORDS.some(kw => lower.includes(kw.toLowerCase()));
+}
+
 /**
  * Calculate freshness based on publication time
  */
@@ -164,8 +188,10 @@ export async function fetchNaverNews(
       }
     }
 
-    items.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
-    return items.length > 0 ? items : getMockNews();
+    // Filter out irrelevant articles (e.g. Jeju travel essays)
+    const relevant = items.filter(it => isFishingRelevant(it.title + ' ' + it.description));
+    relevant.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    return relevant.length > 0 ? relevant : getMockNews();
   } catch (err) {
     console.error('Naver news fetch failed:', err);
     return getMockNews();
@@ -307,7 +333,11 @@ export async function fetchYouTubeVideos(
   try {
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=${maxResults}&order=date&relevanceLanguage=ko&key=${apiKey}`;
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`YouTube API error: ${res.status}`);
+    if (!res.ok) {
+      // Graceful fallback — don't pollute console with errors
+      console.warn(`YouTube API returned ${res.status}, using mock data`);
+      return getMockYouTube();
+    }
 
     const data = await res.json();
 
@@ -342,7 +372,7 @@ export async function fetchYouTubeVideos(
 
     return items.length > 0 ? items : getMockYouTube();
   } catch (err) {
-    console.error('YouTube fetch failed:', err);
+    console.warn('YouTube fetch failed, using mock data:', err instanceof Error ? err.message : err);
     return getMockYouTube();
   }
 }
@@ -384,6 +414,15 @@ export async function fetchAllFishingNews(
     );
   }
 
+  // Filter by source if specified
+  if (sourceFilter === 'blog') {
+    allItems = allItems.filter(item => item.source === 'naver_blog');
+  } else if (sourceFilter === 'news') {
+    allItems = allItems.filter(item => item.source === 'naver_news');
+  } else if (sourceFilter === 'youtube') {
+    allItems = allItems.filter(item => item.source === 'youtube');
+  }
+
   // Sort by date (newest first)
   allItems.sort((a, b) =>
     new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
@@ -412,6 +451,7 @@ function getMockNews(): FishingNewsItem[] {
       link: '#',
       source: 'naver_blog',
       sourceLabel: '블로그',
+      thumbnail: 'https://images.unsplash.com/photo-1545450660-3378a7f3a364?w=400&h=240&fit=crop&q=80',
       publishedAt: new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString(),
       freshness: 'today',
       reliability: 'community',
@@ -425,6 +465,7 @@ function getMockNews(): FishingNewsItem[] {
       link: '#',
       source: 'naver_cafe',
       sourceLabel: '카페',
+      thumbnail: 'https://images.unsplash.com/photo-1504472478235-9bc48ba4d60f?w=400&h=240&fit=crop&q=80',
       publishedAt: new Date(now.getTime() - 30 * 60 * 1000).toISOString(),
       freshness: 'realtime',
       reliability: 'community',
@@ -438,6 +479,7 @@ function getMockNews(): FishingNewsItem[] {
       link: '#',
       source: 'naver_news',
       sourceLabel: '뉴스',
+      thumbnail: 'https://images.unsplash.com/photo-1499125562588-29fb8a56b5d5?w=400&h=240&fit=crop&q=80',
       publishedAt: new Date(now.getTime() - 5 * 60 * 60 * 1000).toISOString(),
       freshness: 'today',
       reliability: 'official',
@@ -451,6 +493,7 @@ function getMockNews(): FishingNewsItem[] {
       link: '#',
       source: 'naver_blog',
       sourceLabel: '블로그',
+      thumbnail: 'https://images.unsplash.com/photo-1498654896293-37aacf113fd9?w=400&h=240&fit=crop&q=80',
       publishedAt: new Date(now.getTime() - 8 * 60 * 60 * 1000).toISOString(),
       freshness: 'today',
       reliability: 'community',
@@ -464,6 +507,7 @@ function getMockNews(): FishingNewsItem[] {
       link: '#',
       source: 'naver_blog',
       sourceLabel: '블로그',
+      thumbnail: 'https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=400&h=240&fit=crop&q=80',
       publishedAt: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(),
       freshness: 'week',
       reliability: 'community',
@@ -483,7 +527,7 @@ function getMockYouTube(): FishingNewsItem[] {
       link: '#',
       source: 'youtube',
       sourceLabel: 'YouTube',
-      thumbnail: 'https://placehold.co/320x180/1392ec/white?text=🐟+Fishing',
+      thumbnail: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=320&h=180&fit=crop&q=80',
       publishedAt: new Date(now.getTime() - 4 * 60 * 60 * 1000).toISOString(),
       freshness: 'today',
       reliability: 'sns',
@@ -497,7 +541,7 @@ function getMockYouTube(): FishingNewsItem[] {
       link: '#',
       source: 'youtube',
       sourceLabel: 'YouTube',
-      thumbnail: 'https://placehold.co/320x180/0a5d96/white?text=🎣+Night',
+      thumbnail: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=320&h=180&fit=crop&q=80',
       publishedAt: new Date(now.getTime() - 12 * 60 * 60 * 1000).toISOString(),
       freshness: 'today',
       reliability: 'sns',
