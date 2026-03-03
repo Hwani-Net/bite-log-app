@@ -666,8 +666,8 @@ export default function HomePage() {
       {/* ── AI Concierge Banner ── */}
       <AIInsightBanner profile={aiProfile} locale={locale} />
 
-      {/* ── AI Insights ── */}
-      <AIInsightsSection profile={aiProfile} locale={locale} />
+      {/* ── 시즌 예측 위젯 (동적 데이터) — "지금 뭐가 잡힘?" ── */}
+      <SeasonForecastWidget locale={locale} />
 
       {/* ── 최근 조과 ── */}
       <section className="px-4 pt-5">
@@ -722,11 +722,8 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ── Windy 위성 날씨: 바람·파도·해류 ── */}
-      <WindyWeatherSection locale={locale} />
-
-      {/* ── 시즌 예측 위젯 (동적 데이터) ── */}
-      <SeasonForecastWidget locale={locale} />
+      {/* ── AI Insights ── */}
+      <AIInsightsSection profile={aiProfile} locale={locale} />
 
       {/* ── 바이럴 채비 랭킹 위젯 ── */}
       <section className="px-4 pt-3 pb-2">
@@ -749,6 +746,9 @@ export default function HomePage() {
           </div>
         </Link>
       </section>
+
+      {/* ── Windy 위성 날씨: 바람·파도·해류 (하단 배치 — 스크롤 차단 방지) ── */}
+      <WindyWeatherSection locale={locale} />
 
       {/* ── FAB ── */}
       <Link
