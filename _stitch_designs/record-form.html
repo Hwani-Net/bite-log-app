@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1392ec",
+                        "ocean-blue": "#1392ec",
+                        "teal-accent": "#2dd4bf",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101a22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "Pretendard", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #FAFAFA;
+            background-image: radial-gradient(at 0% 0%, rgba(19, 146, 236, 0.05) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(45, 212, 191, 0.05) 0px, transparent 50%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display text-slate-900 antialiased">
+<div class="relative flex min-h-screen w-full max-w-md mx-auto flex-col bg-background-light dark:bg-background-dark overflow-x-hidden shadow-2xl">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 flex items-center bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-4 py-4 justify-between border-b border-slate-200/50 dark:border-slate-800">
+<button class="text-slate-900 dark:text-slate-100 flex size-10 shrink-0 items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center">조과 기록</h2>
+<div class="flex w-10 items-center justify-end">
+<button class="text-primary text-base font-bold leading-normal tracking-wide shrink-0">저장</button>
+</div>
+</header>
+<main class="flex-1 pb-24">
+<!-- Photo Upload Area -->
+<div class="p-4">
+<div class="flex flex-col items-center gap-4 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 px-6 py-10 transition-all hover:border-primary/50">
+<div class="bg-primary/10 p-4 rounded-full">
+<span class="material-symbols-outlined text-primary text-4xl">add_a_photo</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<p class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight">사진 추가</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal text-center">최고의 순간을 기록으로 남겨보세요</p>
+</div>
+<button class="mt-2 flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-11 px-6 bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 transition-transform active:scale-95">
+<span class="truncate">사진 선택</span>
+</button>
+</div>
+</div>
+<div class="px-4 space-y-4">
+<!-- Date Input -->
+<div class="glass-card rounded-2xl p-4 shadow-sm">
+<label class="flex flex-col gap-2">
+<span class="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">calendar_today</span>
+                            날짜
+                        </span>
+<div class="flex w-full items-center bg-slate-50 dark:bg-slate-800/50 rounded-xl px-4 py-3 border border-slate-200 dark:border-slate-700">
+<input class="bg-transparent border-none p-0 focus:ring-0 text-slate-900 dark:text-slate-100 w-full font-medium" readonly="" type="text" value="2023. 10. 24 (화)"/>
+<span class="material-symbols-outlined text-slate-400">chevron_right</span>
+</div>
+</label>
+</div>
+<!-- Location Input -->
+<div class="glass-card rounded-2xl p-4 shadow-sm">
+<label class="flex flex-col gap-2">
+<span class="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">location_on</span>
+                            장소
+                        </span>
+<div class="relative">
+<input class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary transition-all text-slate-900 dark:text-slate-100 placeholder:text-slate-400" placeholder="낚시 포인트를 입력하세요 (예: 거문도)" type="text"/>
+<div class="mt-2 flex gap-2">
+<span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">#거문도</span>
+<span class="bg-slate-100 dark:bg-slate-800 text-slate-500 text-xs px-2 py-1 rounded-full">#통영항</span>
+</div>
+</div>
+</label>
+</div>
+<!-- Species Dropdown -->
+<div class="glass-card rounded-2xl p-4 shadow-sm">
+<label class="flex flex-col gap-2">
+<span class="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">set_meal</span>
+                            어종
+                        </span>
+<div class="relative">
+<select class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 appearance-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-slate-900 dark:text-slate-100">
+<option disabled="" selected="" value="">어종을 선택하세요</option>
+<option value="감성돔">감성돔</option>
+<option value="참돔">참돔</option>
+<option value="농어">농어</option>
+<option value="뱅에돔">뱅에돔</option>
+<option value="부시리">부시리</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+</div>
+</label>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Catch Count (Stepper) -->
+<div class="glass-card rounded-2xl p-4 shadow-sm">
+<span class="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary text-xl">numbers</span>
+                            마릿수
+                        </span>
+<div class="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 rounded-xl p-1 border border-slate-200 dark:border-slate-700">
+<button class="size-9 flex items-center justify-center bg-white dark:bg-slate-700 rounded-lg shadow-sm text-slate-600 dark:text-slate-200">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<span class="text-lg font-bold text-slate-900 dark:text-slate-100">1</span>
+<button class="size-9 flex items-center justify-center bg-primary rounded-lg shadow-sm text-white">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<!-- Size (Ruler) -->
+<div class="glass-card rounded-2xl p-4 shadow-sm">
+<label class="flex flex-col gap-2">
+<span class="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">straighten</span>
+                                사이즈(cm)
+                            </span>
+<div class="flex items-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
+<input class="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-900 dark:text-slate-100 font-bold text-center" placeholder="0.0" type="number"/>
+</div>
+</label>
+</div>
+</div>
+<!-- Memo Area -->
+<div class="glass-card rounded-2xl p-4 shadow-sm">
+<label class="flex flex-col gap-2">
+<span class="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">edit_note</span>
+                            메모
+                        </span>
+<textarea class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary transition-all text-slate-900 dark:text-slate-100 placeholder:text-slate-400 resize-none" placeholder="오늘의 낚시 환경이나 특별한 점을 기록해보세요" rows="4"></textarea>
+</label>
+</div>
+</div>
+</main>
+<!-- Fixed Bottom Button -->
+<div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md p-4 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md">
+<button class="w-full h-14 rounded-2xl bg-gradient-to-r from-ocean-blue to-teal-accent text-white font-bold text-lg shadow-xl shadow-primary/30 flex items-center justify-center gap-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">save</span>
+                기록 저장
+            </button>
+</div>
+</div>
+</body></html>

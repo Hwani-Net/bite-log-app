@@ -1,0 +1,38 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============ User-scoped catch records ============
+    // Only the owner can read/write their own catches
+    match /users/{userId}/catches/{catchId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ============ Public Feed ============
+    // Anyone authenticated can read public feed
+    // Only the record owner can create/delete their own feed entries
+    match /publicFeed/{feedId} {
+      allow read: if true;  // Public feed is readable by everyone (including anonymous)
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null;  // For likeCount updates
+      allow delete: if request.auth != null
+                    && resource.data.userId == request.auth.uid;
+
+      // Comments sub-collection
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if request.auth != null;
+        allow delete: if request.auth != null
+                      && resource.data.userId == request.auth.uid;
+      }
+    }
+
+    // ============ User Profiles (future) ============
+    match /userProfiles/{userId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1392ec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101a22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "Noto Sans KR", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(19, 146, 236, 0.1);
+        }
+        .wave-bg {
+            background-image: radial-gradient(circle at 2px 2px, rgba(19, 146, 236, 0.05) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col wave-bg overflow-x-hidden pb-24">
+<header class="flex items-center justify-between px-5 pt-6 pb-2">
+<div class="flex items-center gap-2">
+<div class="bg-primary/10 p-2 rounded-lg text-primary">
+<span class="material-symbols-outlined text-2xl font-bold">set_meal</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">FishLog</h1>
+</div>
+<button class="size-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow-sm">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">notifications</span>
+</button>
+</header>
+<section class="px-5 pt-4">
+<h2 class="text-2xl font-bold leading-tight">
+                대표님의 <span class="text-primary">낚시 일지</span> 🎣
+            </h2>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-1">오늘도 대물을 낚으러 떠나볼까요?</p>
+</section>
+<section class="flex gap-3 px-5 pt-6 overflow-x-auto no-scrollbar">
+<div class="flex-1 min-w-[110px] glass-card rounded-2xl p-4 shadow-sm border-l-4 border-l-primary">
+<p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">총 조과</p>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="text-xl font-bold">128</span>
+<span class="text-xs text-slate-400">마리</span>
+</div>
+</div>
+<div class="flex-1 min-w-[110px] glass-card rounded-2xl p-4 shadow-sm border-l-4 border-l-teal-400">
+<p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">이번 달</p>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="text-xl font-bold">15</span>
+<span class="text-xs text-slate-400">마리</span>
+</div>
+</div>
+<div class="flex-1 min-w-[110px] glass-card rounded-2xl p-4 shadow-sm border-l-4 border-l-blue-400">
+<p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">최대 사이즈</p>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="text-xl font-bold">58</span>
+<span class="text-xs text-slate-400">cm</span>
+</div>
+</div>
+</section>
+<section class="px-5 pt-8">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold">최근 조과</h3>
+<a class="text-sm font-medium text-primary flex items-center" href="#">
+                    전체보기
+                    <span class="material-symbols-outlined text-sm ml-0.5">chevron_right</span>
+</a>
+</div>
+<div class="space-y-3">
+<div class="flex bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-sm border border-slate-100 dark:border-slate-700">
+<div class="size-20 rounded-xl bg-slate-100 dark:bg-slate-700 overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="Close up of a freshly caught large sea bass" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAooF4TYs_z1-nO7MoHh3d9SUfk6KbTwyQpgA3bm0lHCPfxmB4wIidRdOrvFwThAj42a9q9KD-nfsV5-dJNm4agXRbwjrFW5VFg1EPa9Evn97up6_d0QAn3l1ByRmsY0wLxr126kJQrNBDg0hs5UkpVJk4Zm5E7k3rfT9OMKTJaE4xf1nq8IKsUxEQGJjeLCDjt6tVm0-qHxDzDxt4uvkOVu7rm5QAWtfosFGnnxOW-afjA2fhPC6dYH-kEG1Q2u8e0uf1Bnkc7naC3"/>
+</div>
+<div class="ml-4 flex-1 flex flex-col justify-center">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-full">농어</span>
+<span class="text-[11px] text-slate-400">2024.05.20</span>
+</div>
+<h4 class="text-base font-bold mt-1">대물 농어 72cm</h4>
+<div class="flex items-center mt-1 text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-[14px] mr-1">location_on</span>
+<span class="text-xs">제주도 서귀포시</span>
+</div>
+</div>
+</div>
+<div class="flex bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-sm border border-slate-100 dark:border-slate-700">
+<div class="size-20 rounded-xl bg-slate-100 dark:bg-slate-700 overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A small colorful rockfish being held" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBg4mjyL5_aVCabZj6iJba_4E1cR2AOZ8_HMjTeDeT0XPN3TxWdleTRh66vrfwxpDb8y9gWX7od6rTK8w6y0y8rqCXpBisP9PYYmN4NV5f8THjVx73RUubdfx156HqHdQ3Q5JxkfXa85GQ_cSzQBDozs5Y8TLxsojP8E0cSUijoNSrMF3IMAK-UgEXV24oyWqIVzeRA_Tix-BTR7P70MGm4AmHCsIKB_YEExTnMo0ucOZs-AdurpmpjKDeZLiFX5_Q4UvEhjHrord0y"/>
+</div>
+<div class="ml-4 flex-1 flex flex-col justify-center">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-teal-500/10 text-teal-600 text-[10px] font-bold rounded-full">우럭</span>
+<span class="text-[11px] text-slate-400">2024.05.18</span>
+</div>
+<h4 class="text-base font-bold mt-1">방파제 우럭 3마리</h4>
+<div class="flex items-center mt-1 text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-[14px] mr-1">location_on</span>
+<span class="text-xs">충남 당진시</span>
+</div>
+</div>
+</div>
+<div class="flex bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-sm border border-slate-100 dark:border-slate-700">
+<div class="size-20 rounded-xl bg-slate-100 dark:bg-slate-700 overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A silver colored fish on a boat deck" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYdD0_vNJSuK0zCFFl9BcxzuzEE_7S1mCMs4SWqFw3NLmzc2NgwNIpJTC3ap4WAOYG22FTxmyTTjXvA-6lwQaAFLqZCWW1D0IA3h77OQGp7289zafURv5-1i51iwp81EDFMlOjs4U2AYhq86BtNtIiz5gRykwo2gM8Z3OHLB5uyWlcrAhOGOotlm-IzFIfdysPJYtZdjeHzRZct_0ILapiqPc-ftkZNk9Gusk_dpjYx3Xvaew10Cgm6LN7rnSF02yUct1IU1Da32fa"/>
+</div>
+<div class="ml-4 flex-1 flex flex-col justify-center">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-blue-500/10 text-blue-600 text-[10px] font-bold rounded-full">참돔</span>
+<span class="text-[11px] text-slate-400">2024.05.12</span>
+</div>
+<h4 class="text-base font-bold mt-1">참돔 45cm</h4>
+<div class="flex items-center mt-1 text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-[14px] mr-1">location_on</span>
+<span class="text-xs">전남 여수시</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<button class="fixed bottom-24 right-6 size-14 rounded-full bg-gradient-to-tr from-primary to-cyan-400 text-white shadow-lg shadow-primary/40 flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-3xl font-bold">add</span>
+</button>
+<nav class="fixed bottom-0 w-full max-w-md mx-auto left-0 right-0 z-20">
+<div class="flex gap-2 border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-4 pb-6 pt-2">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 rounded-full text-primary" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined fill-1">home</span>
+</div>
+<p class="text-[10px] font-bold leading-normal tracking-[0.015em]">홈</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 dark:text-slate-500" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">book_5</span>
+</div>
+<p class="text-[10px] font-medium leading-normal tracking-[0.015em]">조과기록</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 dark:text-slate-500" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">map</span>
+</div>
+<p class="text-[10px] font-medium leading-normal tracking-[0.015em]">지도</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 dark:text-slate-500" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">settings</span>
+</div>
+<p class="text-[10px] font-medium leading-normal tracking-[0.015em]">설정</p>
+</a>
+</div>
+</nav>
+</div>
+</body></html>

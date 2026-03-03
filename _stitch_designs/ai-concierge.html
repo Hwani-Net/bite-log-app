@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#1392ec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101a22",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .gradient-border { position: relative; border-radius: 1.5rem; padding: 1px; background: linear-gradient(135deg, #1392ec, #00f2fe); }
+        .gradient-content { border-radius: 1.5rem; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="relative flex min-h-screen w-full flex-col max-w-md mx-auto bg-white dark:bg-background-dark overflow-x-hidden">
+<!-- Header -->
+<header class="flex items-center justify-between p-4 sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-2xl">auto_awesome</span>
+<h1 class="text-xl font-bold tracking-tight">AI 컨시어지</h1>
+</div>
+<button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<main class="flex-1 px-4 pb-32">
+<!-- AI Greeting Card -->
+<div class="mt-4 gradient-border">
+<div class="gradient-content bg-white dark:bg-slate-900 p-6 flex items-start gap-4">
+<div class="bg-primary/10 p-3 rounded-xl">
+<span class="material-symbols-outlined text-primary text-3xl">smart_toy</span>
+</div>
+<div class="flex-1">
+<h2 class="text-lg font-bold">안녕하세요, 대표님! 🎣</h2>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1 leading-relaxed">오늘의 낚시 컨디션을 분석했어요. 최고의 조과를 위한 최적의 타이밍입니다.</p>
+</div>
+</div>
+</div>
+<!-- Recommendation Section -->
+<section class="mt-8">
+<h3 class="text-lg font-bold mb-4 flex items-center gap-2">🎯 오늘의 추천</h3>
+<div class="glass rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800 dark:bg-slate-900/50">
+<div class="flex gap-4">
+<div class="w-24 h-24 rounded-xl overflow-hidden shrink-0">
+<img alt="Fishing Spot" class="w-full h-full object-cover" data-alt="Aerial view of a coastal fishing breakwater" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1fdetE72E_KbG6G61JYtCvSEzc-QSAlPS9vrR4iMuxRqkAM_pSt1IHX571YEtaPOOEV2d6gomlgEl1U1LY07ppWS7L4xhrkKUqRii86_UZxyFvDKawtolMB5D5TYqTi_MyCi1BotZ4slFPMtFzhyxEzN31grvtv1MwW1Ao_EKw-HoBW_H-ps3gEF2-_DNdlJKEn9YT_3YW9qczU8kpq5KSr4LeBaAG_tcYpq7wPXOuE8YJKdap4YrfuiVHe_sEYx_VCcjlQRwGTZA"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-1 text-primary mb-1">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="text-xs font-semibold">남해 방파제</span>
+</div>
+<p class="font-bold text-base">감성돔 히트 포인트 🐟</p>
+</div>
+<div class="flex gap-3 text-[10px] text-slate-500 font-medium">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>05:30 출발</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">directions_car</span>
+<span>1시간 20분</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Weather & Tide Analysis -->
+<section class="mt-8">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold flex items-center gap-2">🌊 날씨 &amp; 조수 분석</h3>
+<span class="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-1 rounded text-xs font-bold">입질 확률: 78%</span>
+</div>
+<div class="grid grid-cols-3 gap-3">
+<div class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl text-center border border-slate-100 dark:border-slate-800">
+<span class="material-symbols-outlined text-primary mb-1">thermostat</span>
+<p class="text-[10px] text-slate-400">기온</p>
+<p class="font-bold text-sm">18°C</p>
+</div>
+<div class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl text-center border border-slate-100 dark:border-slate-800">
+<span class="material-symbols-outlined text-primary mb-1">air</span>
+<p class="text-[10px] text-slate-400">풍속</p>
+<p class="font-bold text-sm">3.2m/s</p>
+</div>
+<div class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl text-center border border-slate-100 dark:border-slate-800">
+<span class="material-symbols-outlined text-primary mb-1">waves</span>
+<p class="text-[10px] text-slate-400">파고</p>
+<p class="font-bold text-sm">0.5m</p>
+</div>
+</div>
+<div class="mt-3 bg-slate-50 dark:bg-slate-900 rounded-xl p-4 border border-slate-100 dark:border-slate-800 h-24 flex items-end justify-between gap-1">
+<!-- Fake Tide Graph -->
+<div class="flex-1 bg-primary/20 rounded-t h-[40%]"></div>
+<div class="flex-1 bg-primary/30 rounded-t h-[60%]"></div>
+<div class="flex-1 bg-primary/40 rounded-t h-[80%]"></div>
+<div class="flex-1 bg-primary/60 rounded-t h-[95%]"></div>
+<div class="flex-1 bg-primary/80 rounded-t h-[70%]"></div>
+<div class="flex-1 bg-primary/60 rounded-t h-[40%]"></div>
+<div class="flex-1 bg-primary/40 rounded-t h-[20%]"></div>
+<div class="flex-1 bg-primary/20 rounded-t h-[30%]"></div>
+</div>
+</section>
+<!-- Trending Gear -->
+<section class="mt-8">
+<h3 class="text-lg font-bold mb-4 flex items-center gap-2">🔥 실시간 인기 장비</h3>
+<div class="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
+<div class="min-w-[140px] flex flex-col gap-2">
+<div class="aspect-square rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden relative">
+<img alt="Fishing Reel" class="w-full h-full object-cover" data-alt="High-end silver metallic fishing reel" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCS-sjkpFiv6qQaDh3QiJxjMb5MkWbk_oPaWdaMJyTNMeyxZp7vS_2rR7XvHVDA6NMzTJymkZnO2I80rFLb-H-PnuhGmQIBWtKcL_WVyVCZKjnIbzxVXVnwXtwCN9PpSLJ8qjJtLfY5w6XmjC630aAavdF3XocauvqaNUEZ55YuNZnGy1gWGn1I_QIPtLsM2ibvVayDk-kFyIR9TVY9xN7lO8gSa8j_ovGoWfrzUEc-2cq5Pg6Gqfq8dntBkJt1E9dMc9OwYZJntfkc"/>
+<span class="absolute top-2 left-2 bg-primary text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase">지금 인기</span>
+</div>
+<div>
+<p class="text-xs font-medium line-clamp-1">다이와 23 레갈리스</p>
+<p class="text-sm font-bold">₩128,000</p>
+</div>
+</div>
+<div class="min-w-[140px] flex flex-col gap-2">
+<div class="aspect-square rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden relative">
+<img alt="Fishing Rod" class="w-full h-full object-cover" data-alt="Carbon fiber fishing rod sections" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIXdRg77TJro2W2OLgABkOBYqjxjabsY-0FZXiNUNeqrak_xRCxG9qPXnwQHioc8dCOavNF_p2Ec8t6NOWQ7eb53DimDUmJT_r2v05CrSxDzah5PmozHnrGBH8wY0bPTOGdALgX3s3FOWsWR80qrcNYu1b0ohGdPHMGb3rXRxU-RTpR3V3KJtj1KNHkZq5E1N_P0OmC0Gq-cDOATyouqfL_eAdlBDWQR3zAPUdE8sqt-g-huu5-dMPDWmn8R-xyxz0t9O25dLLjUri"/>
+<span class="absolute top-2 left-2 bg-primary text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase">지금 인기</span>
+</div>
+<div>
+<p class="text-xs font-medium line-clamp-1">시마노 갯바위 로드</p>
+<p class="text-sm font-bold">₩450,000</p>
+</div>
+</div>
+<div class="min-w-[140px] flex flex-col gap-2">
+<div class="aspect-square rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden relative">
+<img alt="Fishing Lure" class="w-full h-full object-cover" data-alt="Colorful fishing lures in a box" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAH_wFIpljKpsc3egIpdFKpTfDWIWY1ZIXK-L0goovoB5v9DqyYgNqWeBnGK0IvxqrlqmOgo3NcrhCzjaAa0DkTuVPAqGglwdV2005U1HzE6um9r7LFlKsSIKpTOycsr1JuXKW4l9mgpMkhExy5ZvU1GuS1q_v97GP1WTL7pKJIbFEARoceZNFdJI7lW6do5z0-lNvMhTT5H7kENNJEbL1b0nqwizE-r4k6NyDNZQ7b5xx7wh5rGbxnjLeQyWd9OnK5EJwnOJYMuQTt"/>
+</div>
+<div>
+<p class="text-xs font-medium line-clamp-1">타이라바 세트</p>
+<p class="text-sm font-bold">₩25,000</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Fixed Bottom Actions -->
+<div class="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-md px-4 flex gap-2 justify-center pointer-events-none">
+<button class="pointer-events-auto bg-primary text-white px-4 py-2.5 rounded-full text-xs font-bold shadow-lg shadow-primary/30 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">explore</span>
+                포인트 추천
+            </button>
+<button class="pointer-events-auto bg-white/90 dark:bg-slate-800/90 backdrop-blur border border-slate-200 dark:border-slate-700 px-4 py-2.5 rounded-full text-xs font-bold shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">shopping_bag</span>
+                장비 상담
+            </button>
+<button class="pointer-events-auto bg-white/90 dark:bg-slate-800/90 backdrop-blur border border-slate-200 dark:border-slate-700 px-4 py-2.5 rounded-full text-xs font-bold shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">description</span>
+                조황 리포트
+            </button>
+</div>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white dark:bg-background-dark border-t border-slate-100 dark:border-slate-800 px-6 py-3 flex justify-between items-center z-50">
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-medium">홈</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">map</span>
+<span class="text-[10px] font-medium">지도</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined fill-1">auto_awesome</span>
+<span class="text-[10px] font-bold">AI</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="text-[10px] font-medium">커뮤니티</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-medium">내 정보</span>
+</a>
+</nav>
+</div>
+<style>
+        /* Hide scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-1 {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</body></html>

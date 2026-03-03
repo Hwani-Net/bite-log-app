@@ -1,0 +1,224 @@
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#1392ec",
+            "background-light": "#f6f7f8",
+            "background-dark": "#101a22",
+            "ocean-deep": "#0a5d96",
+          },
+          fontFamily: {
+            "display": ["Inter", "Noto Sans KR", "sans-serif"]
+          },
+          borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    body { font-family: 'Inter', 'Noto Sans KR', sans-serif; }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .wave-bg {
+      background-image: radial-gradient(circle at 2px 2px, rgba(19, 146, 236, 0.05) 1px, transparent 0);
+      background-size: 24px 24px;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen font-display">
+<div class="relative max-w-md mx-auto min-h-screen flex flex-col shadow-2xl bg-[#FAFAFA] dark:bg-background-dark overflow-hidden wave-bg">
+<!-- Top Header -->
+<header class="flex items-center justify-between px-6 pt-6 pb-2">
+<div class="w-10 h-10 flex items-center justify-start">
+<span class="material-symbols-outlined text-slate-400">search</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight">🏆 랭킹</h1>
+<div class="w-10 h-10 flex items-center justify-end">
+<span class="material-symbols-outlined text-slate-400">notifications</span>
+</div>
+</header>
+<!-- Segmented Control -->
+<div class="px-6 py-4">
+<div class="flex p-1 bg-slate-200/50 dark:bg-slate-800 rounded-xl">
+<button class="flex-1 py-2 text-sm font-bold rounded-lg bg-gradient-to-r from-primary to-ocean-deep text-white shadow-md">
+          조과왕
+        </button>
+<button class="flex-1 py-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+          대어왕
+        </button>
+<button class="flex-1 py-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+          다양왕
+        </button>
+</div>
+</div>
+<!-- Podium Section -->
+<div class="px-6 py-6 flex items-end justify-center gap-3 h-64">
+<!-- 2nd Place -->
+<div class="flex-1 flex flex-col items-center">
+<div class="relative mb-2">
+<div class="w-16 h-16 rounded-full border-4 border-slate-200 overflow-hidden bg-slate-100">
+<img alt="Avatar of runner up" data-alt="Profile picture of the second place fisherman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5yTLkEwWYneZYaID--Qb8qEM1I32QaZ7pEaSfimgxu639MOxZdEwIcoK9ZJzEFBoYr1gv18XU6wcrvQ3oDVpmei_vuCv1ohA5WD2j_EYG71Ibmthw8azT_m00xvaSy-4bxFZ4-oSynpyXfc3plPUsu45nvFahdOxzr_QfnLC-hQPlxg72FX-fQ6IzkqPSp49ZA4cdUt9pGNoBcIp5Nf3ainYipiYw-lz_P7J4jw_kLxldIb6q_LZd1nJ1IIdKsPGvenlN_4uiHaLx"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-slate-200 text-slate-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white">2nd</div>
+</div>
+<div class="glass-card w-full pt-4 pb-3 rounded-t-xl text-center shadow-sm">
+<p class="text-xs font-bold text-slate-700">박태공</p>
+<p class="text-[10px] text-primary font-medium">84 마리</p>
+</div>
+</div>
+<!-- 1st Place -->
+<div class="flex-1 flex flex-col items-center">
+<div class="relative mb-2 z-10">
+<span class="material-symbols-outlined absolute -top-6 left-1/2 -translate-x-1/2 text-yellow-400 text-3xl fill-1">crown</span>
+<div class="w-20 h-20 rounded-full border-4 border-yellow-400 overflow-hidden bg-slate-100 shadow-lg shadow-primary/20">
+<img alt="Avatar of the winner" data-alt="Profile picture of the first place fisherman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyhY6rYPirNpZJFhVVTJvDFQdddmwY1gxni50SWSi6_4UvJV6_cMlSyLS5zlX2OahuGndiORdzU81ZwwgiZJbQkMsiRXADYJIMkrcifpJI2kRet16d4imcasTXg7cW_PBREbPiNASmH9yqhOWgGP_aeDplBVZPUpZfvBPJYVaKOSxV3ql2xkWR7_1w-0mW8KpNciBwK1xw3ho6biT991yeXGhjNwbHuzQvgfWuaemDlPAgx9DQv8gRK0MZwou1dC4tE5dFtBL70czd"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-yellow-400 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white">1st</div>
+</div>
+<div class="glass-card w-full pt-6 pb-4 rounded-t-2xl text-center shadow-lg ring-1 ring-primary/10">
+<p class="text-sm font-black text-slate-900">김강태</p>
+<p class="text-xs text-primary font-bold">128 마리</p>
+</div>
+</div>
+<!-- 3rd Place -->
+<div class="flex-1 flex flex-col items-center">
+<div class="relative mb-2">
+<div class="w-16 h-16 rounded-full border-4 border-orange-200 overflow-hidden bg-slate-100">
+<img alt="Avatar of third place" data-alt="Profile picture of the third place fisherman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRJe1WxvdHVwMo6G0Xl8PyV8FKVPGXmM3eCnCPoaRGZzrZO-lZTxJVwMCfZU8GXENUnsIuI9xdI529hqnZMZRq8DIiN4wcR8UllSfWTP_ONOWSpuykRZBQtilhie-urstPUPUju2nj4-SbN_pCJzLWyiuHgR_HkCFkLiE1-c3UB9FBNKJpr8txde_SrhwhUKNDzLD5uldp4hgAN-epzyHv7WyVOc6QaKKZNY4whlwOOagcEFjBdI9iw9QUHZha1tZEqHtD84g990Oz"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-orange-200 text-orange-800 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white">3rd</div>
+</div>
+<div class="glass-card w-full pt-4 pb-3 rounded-t-xl text-center shadow-sm">
+<p class="text-xs font-bold text-slate-700">이월척</p>
+<p class="text-[10px] text-primary font-medium">72 마리</p>
+</div>
+</div>
+</div>
+<!-- My Rank Card -->
+<div class="px-6 mb-4">
+<div class="bg-primary rounded-2xl p-4 shadow-xl shadow-primary/20 text-white flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border-2 border-white/40 overflow-hidden">
+<img alt="My avatar" data-alt="Profile picture of the current user" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsksa_-kIVcmocEAfSs_93jbxeZf8uZlDKq5gl9a-3V0C-jwvdUkuwPYJz6Th4ZmkvsyHosZxSEQbGaM2rLWfqeydrwPVKvy2EnfiDKM3qHuAHGqTnzdc2eULO3ijswTdsN_Yj5DtPkfAkM6R_KSffXWgW5hRR1Cew5qZ-Z8PbC5a0RVpgmIrUXyG3mzpU5s6PdTZCgpu03ZlhZo1aWIFKckp-lOoM7986BOnnK0wuRX8E0s-Pb9UKYNcKXJB2mcO-mPtawewdrsQY"/>
+</div>
+<div>
+<p class="text-[10px] text-white/70 font-medium">나의 순위</p>
+<p class="text-sm font-bold">강태공어부 <span class="text-xs font-normal opacity-80">Lv.14</span></p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-2xl font-black">#7</p>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[10px] font-medium opacity-90">
+<span>다음 순위까지 5마리 남음</span>
+<span>42 / 47</span>
+</div>
+<div class="w-full bg-white/20 h-1.5 rounded-full overflow-hidden">
+<div class="bg-white h-full w-[80%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Leaderboard List -->
+<div class="flex-1 px-6 space-y-3 pb-24 overflow-y-auto">
+<!-- Row 4 -->
+<div class="flex items-center bg-white dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+<span class="w-6 text-sm font-bold text-slate-400">4</span>
+<div class="w-10 h-10 rounded-full overflow-hidden mx-3 bg-slate-100">
+<img alt="Rank 4 avatar" data-alt="Avatar for 4th ranked user" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpw0G6L9SQ_yNdALK6Fs_wRy_ANZrRC4hCpQZEuAEV-Xot7rIFgCmJ3SHt9w0wxtu3zLxYCnKrHtnjwUH5cCqlKSFZ_4VYmSmTLl56pLYnRFIOzjiZGnlccG0PRIBvy-DWkE6s8JXsiLVXDU6261SgtRATiwcHZbiqiYunlpE9KI0lONwSptGVLMBOFD0nJc4nd38C3Q_D8pEfUvcdfVxqLVNT2k89HI3F_lQ_EAiDCpDgm6E2GXVMeQJX6idW7Kikm0EqDbkJqfqY"/>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold">낚시왕박씨 <span class="text-[10px] font-medium bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded ml-1 text-slate-500">Lv.22</span></p>
+</div>
+<p class="text-sm font-bold text-slate-900 dark:text-slate-100">68 마리</p>
+</div>
+<!-- Row 5 -->
+<div class="flex items-center bg-white dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+<span class="w-6 text-sm font-bold text-slate-400">5</span>
+<div class="w-10 h-10 rounded-full overflow-hidden mx-3 bg-slate-100">
+<img alt="Rank 5 avatar" data-alt="Avatar for 5th ranked user" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6n8K2zGqq7CR_pTSeF9-p0NKraFh6ptAUVxGG8cVX0s7yYZR1EY8XGLX0X38mJaKOdM_gqCoiX-dmbW6ZTSOim0vSfBiWeSAmBDYcWFlpFRjsUgvjlOOpRZVnap3FnrXcnPsGCkQpdYbMCt8bOpunLiQv5fKqXvGMSoP4x8cqsQN69jYKaZL2DRs5RvwVl_R5VYw1Z-4_CZuLzw9GmMqSeCQdZf14DGpSqFkfO7DkV6VwJW5PscdA727pxAxRlB_x6VXTiF9Y1tiT"/>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold">바다의전설 <span class="text-[10px] font-medium bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded ml-1 text-slate-500">Lv.18</span></p>
+</div>
+<p class="text-sm font-bold text-slate-900 dark:text-slate-100">54 마리</p>
+</div>
+<!-- Row 6 -->
+<div class="flex items-center bg-white dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+<span class="w-6 text-sm font-bold text-slate-400">6</span>
+<div class="w-10 h-10 rounded-full overflow-hidden mx-3 bg-slate-100">
+<img alt="Rank 6 avatar" data-alt="Avatar for 6th ranked user" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwzExqVY8K45O_hL3T61SAOn0G8vPuX_zWtWvDc9XEs9nMSMbtzqZD8M4qnTjNo0ADZsI4HkmTeCwPsqGGPjNOo_OA-2eFeB2xvAqxaV--7p9NA2oXhRizBo9Rojt2ZTgi0_yuILYrxxapCx508lm6p5YYeN7QAGGeLt_Za-tdic0q8msqIK1wHHbPRkT8pmsQ6_WpaIJShuL2reaYscSL0ulukknB8p8MjpCwByRJgr-HxwnqnFYAeD-WYEL9Y_oQalcxSKJX39kB"/>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold">민물마스터 <span class="text-[10px] font-medium bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded ml-1 text-slate-500">Lv.15</span></p>
+</div>
+<p class="text-sm font-bold text-slate-900 dark:text-slate-100">47 마리</p>
+</div>
+<!-- Row 8 (Skipping 7 as it's the user above) -->
+<div class="flex items-center bg-white dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+<span class="w-6 text-sm font-bold text-slate-400">8</span>
+<div class="w-10 h-10 rounded-full overflow-hidden mx-3 bg-slate-100">
+<img alt="Rank 8 avatar" data-alt="Avatar for 8th ranked user" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaR7QLDuCLQ53D89AxiDhY795UDI78Q5BFryMZYAzbLCnSWlhXOMXJQSsYPE2q9w9TjLXqLIovyfPG_Q3zUyiE_lA6X2EwsqWF9YEaKQV7X6nRAcRgQ3PKKXsiISQj6_bOSNd_wHI9xB2mSUw1J9TjCUbnig2-1ElTNBM6rp1VwKmG32LtYsPCSi7YWvDU5ItTxmOoRzIkQSgMq2srtiKaExWHqSzKZqlaB9S1uGmeapiNPAMovyAJiF8k2yQRKNcZTagUMhu2C8Kl"/>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold">캐스팅장인 <span class="text-[10px] font-medium bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded ml-1 text-slate-500">Lv.11</span></p>
+</div>
+<p class="text-sm font-bold text-slate-900 dark:text-slate-100">39 마리</p>
+</div>
+<!-- Season Timer -->
+<div class="bg-primary/5 rounded-2xl p-4 border border-primary/20 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">schedule</span>
+</div>
+<div>
+<p class="text-xs font-bold text-slate-400">이번 달 시즌 종료까지</p>
+<p class="text-sm font-black text-primary">04일 12:45:08</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary">chevron_right</span>
+</div>
+</div>
+<!-- Bottom Navigation -->
+<div class="absolute bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-slate-200 dark:bg-slate-900/80 dark:border-slate-800 px-4 pb-8 pt-2">
+<div class="flex justify-around items-center">
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">home</span>
+<p class="text-[10px] font-medium">홈</p>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">description</span>
+<p class="text-[10px] font-medium">기록</p>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined !fill-1">trophy</span>
+<p class="text-[10px] font-bold">랭킹</p>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">person</span>
+<p class="text-[10px] font-medium">프로필</p>
+</a>
+</div>
+</div>
+</div>
+</body></html>

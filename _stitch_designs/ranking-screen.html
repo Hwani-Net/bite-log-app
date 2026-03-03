@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#25d1f4",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#101f22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glass-card {
+            background: rgba(37, 209, 244, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(37, 209, 244, 0.2);
+        }
+        .podium-1 {
+            height: 160px;
+            background: linear-gradient(180deg, rgba(37, 209, 244, 0.3) 0%, rgba(37, 209, 244, 0.05) 100%);
+        }
+        .podium-2, .podium-3 {
+            height: 130px;
+            background: linear-gradient(180deg, rgba(37, 209, 244, 0.15) 0%, rgba(37, 209, 244, 0.02) 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col font-display">
+<!-- Header Section -->
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-4 py-3 border-b border-primary/10">
+<div class="flex items-center justify-between">
+<button class="p-2 -ml-2 text-slate-900 dark:text-slate-100">
+<span class="material-symbols-outlined">arrow_back_ios</span>
+</button>
+<h1 class="text-lg font-bold tracking-tight">낚시 랭킹</h1>
+<button class="p-2 -mr-2 text-slate-900 dark:text-slate-100">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<main class="flex-1 pb-32">
+<!-- Season Countdown Banner -->
+<div class="px-4 py-6">
+<div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/30 to-background-dark border border-primary/20 p-5">
+<div class="flex flex-col gap-1 mb-4">
+<span class="text-primary text-xs font-bold uppercase tracking-wider">시즌 종료까지</span>
+<h2 class="text-xl font-bold">2024년 6월 시즌</h2>
+</div>
+<div class="flex gap-3">
+<div class="flex-1 flex flex-col items-center bg-background-dark/40 rounded-lg py-2 border border-white/5">
+<span class="text-xl font-bold text-primary">12</span>
+<span class="text-[10px] opacity-60">일</span>
+</div>
+<div class="flex-1 flex flex-col items-center bg-background-dark/40 rounded-lg py-2 border border-white/5">
+<span class="text-xl font-bold text-primary">05</span>
+<span class="text-[10px] opacity-60">시간</span>
+</div>
+<div class="flex-1 flex flex-col items-center bg-background-dark/40 rounded-lg py-2 border border-white/5">
+<span class="text-xl font-bold text-primary">42</span>
+<span class="text-[10px] opacity-60">분</span>
+</div>
+<div class="flex-1 flex flex-col items-center bg-background-dark/40 rounded-lg py-2 border border-white/5">
+<span class="text-xl font-bold text-primary">10</span>
+<span class="text-[10px] opacity-60">초</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Segmented Tab Control -->
+<div class="px-4 mb-8">
+<div class="flex p-1 bg-primary/5 dark:bg-primary/10 rounded-xl">
+<button class="flex-1 py-2 text-sm font-semibold rounded-lg bg-primary text-background-dark">조과왕</button>
+<button class="flex-1 py-2 text-sm font-medium text-slate-500 dark:text-slate-400">대어왕</button>
+<button class="flex-1 py-2 text-sm font-medium text-slate-500 dark:text-slate-400">다양왕</button>
+</div>
+</div>
+<!-- Podium Layout -->
+<div class="px-4 flex items-end justify-center gap-2 mb-10">
+<!-- Rank 2 -->
+<div class="flex-1 flex flex-col items-center">
+<div class="relative mb-3">
+<div class="w-16 h-16 rounded-full border-2 border-slate-300 overflow-hidden bg-slate-800">
+<img alt="" class="w-full h-full object-cover" data-alt="Portrait of a male angler in a hat" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBofmBgtRIU3pIUMTizafh3UYYqrifIoI0KUZ2k7CJ8f6SWBB5gLPgzZx-ZbOa6WBDxz7WWo0fIVKUO9oOUhzakliFjr1CcrdhtuxU5k6CTr2iztexKHgit6bo16IdnYypkIBe9yjkzOb0W_Q7bOG9L_Q89sO8vWXjXojBjLesmmjRzGdtLz5SWBc5FSLhNO2O468lm_1XLXAFy4VzIa9a8PqquYkORoDcrdigeRaEk0zTXc3SiWDjqm7xhWoidgV68QAJjA0cT7ow"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-slate-300 text-background-dark text-[10px] font-bold px-1.5 rounded-full border border-background-dark">2</div>
+</div>
+<div class="podium-2 w-full rounded-t-xl flex flex-col items-center justify-center p-2 text-center border-t border-x border-primary/10">
+<span class="text-xs font-bold truncate w-full">도시어부K</span>
+<span class="text-primary font-bold text-sm">42 마리</span>
+</div>
+</div>
+<!-- Rank 1 -->
+<div class="flex-1 flex flex-col items-center">
+<div class="relative mb-4">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 text-yellow-400">
+<span class="material-symbols-outlined text-3xl">workspace_premium</span>
+</div>
+<div class="w-20 h-20 rounded-full border-4 border-primary overflow-hidden bg-slate-800 shadow-[0_0_20px_rgba(37,209,244,0.4)]">
+<img alt="" class="w-full h-full object-cover" data-alt="Close up portrait of a smiling man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLeTV7sjohjgHATZHmrf0HOOKKkjQDBeQql8Gvp6nOouLLsshtsf_rj7gV2WepBmpIbytZFaeekqD_vmy_W9YTsAdCVjhud2SLbN_WLZEiae_1wzRbaU8vUpwTVC5-28FaC4jmcmK-cVV8nXovg8-a-8M1zISJwYFsX3rdLpI6K42hQXRcoE_gqX2aRno_3jDON_3vkx4V74sHGP-RGduZr5Wf79RVDj6PJKCw2LS5z9psx7tFqTB9JSw1QHD4nYmBpm4O-AHPAOU"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-primary text-background-dark text-xs font-bold px-2 py-0.5 rounded-full border-2 border-background-dark">1</div>
+</div>
+<div class="podium-1 w-full rounded-t-xl flex flex-col items-center justify-center p-2 text-center border-t border-x border-primary/30">
+<span class="text-sm font-bold truncate w-full">바다의전설</span>
+<span class="text-primary font-extrabold text-lg">58 마리</span>
+</div>
+</div>
+<!-- Rank 3 -->
+<div class="flex-1 flex flex-col items-center">
+<div class="relative mb-3">
+<div class="w-16 h-16 rounded-full border-2 border-orange-400 overflow-hidden bg-slate-800">
+<img alt="" class="w-full h-full object-cover" data-alt="Portrait of a female angler in sunglasses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhGl6yNWv1mmb6-Y8ffzjEeiCtgPeJbwnbV2nDmDBnD6T_PTBRX1jaAJ_NlpmzkfXtLEmdd525yqEkUchl36y7vyA-_dqWkHW-JYb-7EbFaTuyTJ9_7gQYXkTSYn5fBA5RZBVf2LRJMjTHyQ8C6QBuFl69OCThYCmnBDGXFUT6F3VsX0Ki84XAf7kQKiJlQ6cer2Eg6ckFFe4nCEtSsga8XPtbOjF_g5ASCEs0l9e3J_GI0o3rWsj5O5zAThxsGdv2ArpTPkK_8F8"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-orange-400 text-background-dark text-[10px] font-bold px-1.5 rounded-full border border-background-dark">3</div>
+</div>
+<div class="podium-3 w-full rounded-t-xl flex flex-col items-center justify-center p-2 text-center border-t border-x border-primary/10">
+<span class="text-xs font-bold truncate w-full">강태공언니</span>
+<span class="text-primary font-bold text-sm">39 마리</span>
+</div>
+</div>
+</div>
+<!-- Leaderboard List -->
+<div class="px-4 space-y-3">
+<!-- Rank Item -->
+<div class="flex items-center gap-4 p-3 bg-primary/5 rounded-xl border border-white/5">
+<span class="w-6 text-center font-bold text-slate-400">4</span>
+<div class="w-10 h-10 rounded-full overflow-hidden bg-slate-800">
+<img alt="" class="w-full h-full object-cover" data-alt="Profile icon of a man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCv3-Dh5C0ZT4HydvDaBRJdcedlckhy3W05dleS_6a4-eQIYFcujpo_ecJ6paAGv7RRZxpYgSSU-zqAe4FnoillXpwOSoOO3882mpDDydnrcnVU8es23RM-O6na4s1wni3vY9ZixK5MaDwveRVLHm24TcHSqEUFoLtxM3BGSMi8rYvbsEl2--n4msQmeUODfc_TXNr9INbgTSl82b7-OSIKjbOtG5JxjSZG0VRE-CIKRzq_KYIR6FNBWnjRh49OYsXR6X_lSrNwrRo"/>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-semibold">울진의아들</h4>
+</div>
+<div class="text-right">
+<span class="text-sm font-bold">35 마리</span>
+</div>
+</div>
+<div class="flex items-center gap-4 p-3 bg-primary/5 rounded-xl border border-white/5">
+<span class="w-6 text-center font-bold text-slate-400">5</span>
+<div class="w-10 h-10 rounded-full overflow-hidden bg-slate-800">
+<img alt="" class="w-full h-full object-cover" data-alt="Minimalist headshot of a person" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9ShVNpvCdsG_MyvQ-HCkCBFNpUF75lK7Y-CrGWClUj4B9S6rwmiQmwuAmMwd5dJ7cAGPdWomBIbrGc1mk3hFcPnNzMKA6qsTnspEZrSScs2CShjyc1AQkuKqFA5NpboWM934zkAARXG9jkY8zXrIPFC68kNfHY7ZuBB-kT8yDIz-esRFRcQRyfIAN7UX1sAjpc14yflATJzm91xdANyTpxITQQRnIr8GJGha7y-5t9ROuxObsnYMs-TsgSjdteNuLTG0qp1LuK20"/>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-semibold">낚시광마크</h4>
+</div>
+<div class="text-right">
+<span class="text-sm font-bold">31 마리</span>
+</div>
+</div>
+<div class="flex items-center gap-4 p-3 bg-primary/5 rounded-xl border border-white/5">
+<span class="w-6 text-center font-bold text-slate-400">6</span>
+<div class="w-10 h-10 rounded-full overflow-hidden bg-slate-800">
+<img alt="" class="w-full h-full object-cover" data-alt="Casual profile picture of a young woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTtdHYXPy_WfaTKPCRH5hYt9-7cTCH6a4llCz0KYXdqr5HashYlWEXYIM8X6iooPFa4YPUSFz4aN15zFi8iYE8So8zZ6s3SkfV865BIGzI80b-2XcaEi-entKjOQ1u6ks-eDbatwwrblwYRnhEAef_NLb991xKiDG7QY6nFoJEsbJagjo9M7jrzaPZas4xdt8x1nDm_dEHoEA9ODUy7U2YrKEVJoJa8eiMhAgaIONNlP4W92cznj7HG_rzYEsa3UiBeKVqIU5IvvQ"/>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-semibold">보리보리쌀</h4>
+</div>
+<div class="text-right">
+<span class="text-sm font-bold">28 마리</span>
+</div>
+</div>
+<div class="flex items-center gap-4 p-3 bg-primary/5 rounded-xl border border-white/5">
+<span class="w-6 text-center font-bold text-slate-400">7</span>
+<div class="w-10 h-10 rounded-full overflow-hidden bg-slate-800">
+<img alt="" class="w-full h-full object-cover" data-alt="Business profile headshot of a man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBojiEvk9zmbX4yduZGMTnm55dkUg0kGM5x4nSzYKbRE5Dr2fvd3LZ-3AW2XcC4QYlOnOz3IlcNKA3bPkmPivWNTdX-0wLN8vpZrINE06hrYfok7ki-xL3vEiNvaPA494b6UbCW5DjEt67wTBDtW-e4WezrKsEffBiDFDQ0NZY8AiUrxB247VMJa7ZnM-GKMglwmksTVhAmC36pwjUpsJZ-chRFM8kGp0HPo2K7iTnf9P1EoGqC3paEW7LAPjentih55D2Ut3NJs0I"/>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-semibold">캐스팅마스터</h4>
+</div>
+<div class="text-right">
+<span class="text-sm font-bold">26 마리</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Current User Rank Panel -->
+<div class="fixed bottom-[84px] left-0 right-0 px-4">
+<div class="bg-primary/90 dark:bg-primary rounded-xl p-4 shadow-2xl flex items-center gap-4 text-background-dark border border-white/20">
+<div class="flex flex-col items-center">
+<span class="text-[10px] font-bold uppercase opacity-80 leading-none mb-1">내 순위</span>
+<span class="text-xl font-black">24</span>
+</div>
+<div class="w-[1px] h-8 bg-background-dark/20"></div>
+<div class="w-10 h-10 rounded-full border-2 border-background-dark/30 overflow-hidden">
+<img alt="" class="w-full h-full object-cover" data-alt="Current user's profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1spPyWVrzysxyyodE6Le7_Ubarki-eHg7HLcs50xk3qqvxxgwxJrZ5jud66gHEJ8Oc_Vbb6EsVkigjFkgl3rzki4UbWb54Ggj3rXgsoOISsCZl5ouiG1cO5j8-cYYaf4K76vsaXcgnczFgMqFmKf9oF60gzylqkvZ-sQk7EscPEUgQv-ocXTIDCBO8qMIvhEARoPqu9vBrMasd9bKHjaLOmsJHry_xZNUTpzZFggIwlcLzh9HaGjPe-poubKsZfxB2LRv2_DpNj4"/>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold">어복충만한나</h4>
+<p class="text-[10px] opacity-80 font-medium">상위 12% 이내</p>
+</div>
+<div class="text-right">
+<span class="text-lg font-bold">14 마리</span>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 bg-background-light dark:bg-background-dark border-t border-primary/10 px-4 pt-2 pb-6 flex justify-between items-center z-50">
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-medium">홈</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">map</span>
+<span class="text-[10px] font-medium">지도</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="text-[10px] font-medium">기록</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">trophy</span>
+<span class="text-[10px] font-medium">랭킹</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-medium">프로필</span>
+</a>
+</nav>
+</body></html>

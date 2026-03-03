@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.fishlog.diary",
+        "sha256_cert_fingerprints": ["96:1B:4B:9A:D8:FF:49:DE:77:1B:5C:24:F3:3C:57:52:9E:D7:42:88:65:AA:6C:3A:F0:13:19:3A:EF:D1:E3:D7"]
+      }
+    }]

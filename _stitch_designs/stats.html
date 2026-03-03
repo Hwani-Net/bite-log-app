@@ -1,0 +1,222 @@
+<html><head>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">view
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1392ec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101a22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "Noto Sans KR", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(19, 146, 236, 0.1);
+        }
+        .wave-bg {
+            background-image: radial-gradient(circle at 2px 2px, rgba(19, 146, 236, 0.05) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+    </style>
+<div class="relative flex min-h-screen w-full flex-col max-w-md mx-auto wave-bg shadow-2xl overflow-x-hidden">
+<header class="sticky top-0 z-50 flex items-center bg-background-light/80 backdrop-blur-md p-4 pb-2 justify-between border-b border-primary/10">
+<div class="text-primary flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</div>
+<h1 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center">나의 통계 📊</h1>
+<div class="flex w-10 items-center justify-end">
+<button class="flex size-10 cursor-pointer items-center justify-center rounded-full bg-transparent text-slate-700 dark:text-slate-300 hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<main class="flex-1 pb-24 overflow-y-auto">
+<div class="px-4 py-4">
+<div class="flex h-11 items-center justify-center rounded-xl bg-slate-200/50 dark:bg-slate-800/50 p-1">
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-slate-700 has-[:checked]:shadow-sm has-[:checked]:text-primary text-slate-500 text-sm font-semibold transition-all">
+<span class="truncate">1주</span>
+<input class="hidden" name="period" type="radio" value="1주"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-slate-700 has-[:checked]:shadow-sm has-[:checked]:text-primary text-slate-500 text-sm font-semibold transition-all">
+<span class="truncate">1개월</span>
+<input checked="" class="hidden" name="period" type="radio" value="1개월"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-slate-700 has-[:checked]:shadow-sm has-[:checked]:text-primary text-slate-500 text-sm font-semibold transition-all">
+<span class="truncate">3개월</span>
+<input class="hidden" name="period" type="radio" value="3개월"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-slate-700 has-[:checked]:shadow-sm has-[:checked]:text-primary text-slate-500 text-sm font-semibold transition-all">
+<span class="truncate">전체</span>
+<input class="hidden" name="period" type="radio" value="전체"/>
+</label>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 px-4 py-2">
+<div class="glass-card flex flex-col gap-1 rounded-xl p-4 shadow-sm border border-primary/5">
+<p class="text-slate-500 text-xs font-medium">총 출조 횟수</p>
+<p class="text-slate-900 dark:text-slate-100 text-xl font-bold">42<span class="text-sm ml-0.5 font-normal text-slate-500">회</span></p>
+</div>
+<div class="glass-card flex flex-col gap-1 rounded-xl p-4 shadow-sm border border-primary/5">
+<p class="text-slate-500 text-xs font-medium">총 조과</p>
+<p class="text-slate-900 dark:text-slate-100 text-xl font-bold">128<span class="text-sm ml-0.5 font-normal text-slate-500">마리</span></p>
+</div>
+<div class="glass-card flex flex-col gap-1 rounded-xl p-4 shadow-sm border border-primary/5">
+<p class="text-slate-500 text-xs font-medium">평균 조과</p>
+<p class="text-slate-900 dark:text-slate-100 text-xl font-bold">3.0<span class="text-sm ml-0.5 font-normal text-slate-500">마리/회</span></p>
+</div>
+<div class="glass-card flex flex-col gap-1 rounded-xl p-4 shadow-sm border border-primary/5">
+<p class="text-slate-500 text-xs font-medium">최대 사이즈</p>
+<p class="text-slate-900 dark:text-slate-100 text-xl font-bold">58<span class="text-sm ml-0.5 font-normal text-slate-500">cm</span></p>
+</div>
+</div>
+<section class="mt-6 px-4">
+<h3 class="text-slate-900 dark:text-slate-100 text-base font-bold mb-3 flex items-center gap-2">
+                    월별 조과 추이
+                    <span class="material-symbols-outlined text-sm text-primary">bar_chart</span>
+</h3>
+<div class="glass-card p-4 rounded-xl border border-primary/5 h-48 flex items-end justify-between gap-2">
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-gradient-to-t from-primary/40 to-primary rounded-t-lg h-[40%]"></div>
+<span class="text-[10px] font-medium text-slate-400 uppercase">3월</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-gradient-to-t from-primary/40 to-primary rounded-t-lg h-[65%]"></div>
+<span class="text-[10px] font-medium text-slate-400 uppercase">4월</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-gradient-to-t from-primary/40 to-primary rounded-t-lg h-[50%]"></div>
+<span class="text-[10px] font-medium text-slate-400 uppercase">5월</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-gradient-to-t from-primary/40 to-primary rounded-t-lg h-[85%]"></div>
+<span class="text-[10px] font-medium text-slate-400 uppercase">6월</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-gradient-to-t from-primary/40 to-primary rounded-t-lg h-[70%]"></div>
+<span class="text-[10px] font-medium text-slate-400 uppercase">7월</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-gradient-to-t from-primary/40 to-primary rounded-t-lg h-[95%]"></div>
+<span class="text-[10px] font-medium text-slate-400 uppercase">8월</span>
+</div>
+</div>
+</section>
+<section class="mt-8 px-4">
+<h3 class="text-slate-900 dark:text-slate-100 text-base font-bold mb-3">어종 비율 🐠</h3>
+<div class="glass-card p-4 rounded-xl border border-primary/5 flex items-center gap-6">
+<div class="relative w-32 h-32 flex items-center justify-center">
+<div class="absolute inset-0 rounded-full border-[12px] border-slate-100 dark:border-slate-800"></div>
+<div class="absolute inset-0 rounded-full border-[12px] border-primary border-t-transparent border-r-transparent transform -rotate-45"></div>
+<div class="text-center">
+<p class="text-xs text-slate-400">대표 어종</p>
+<p class="text-sm font-bold text-slate-900 dark:text-slate-100">감성돔</p>
+</div>
+</div>
+<div class="flex-1 space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-primary"></div>
+<span class="text-xs text-slate-600 dark:text-slate-400">감성돔</span>
+</div>
+<span class="text-xs font-bold">42%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-cyan-400"></div>
+<span class="text-xs text-slate-600 dark:text-slate-400">참돔</span>
+</div>
+<span class="text-xs font-bold">28%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-teal-400"></div>
+<span class="text-xs text-slate-600 dark:text-slate-400">농어</span>
+</div>
+<span class="text-xs font-bold">15%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-slate-300"></div>
+<span class="text-xs text-slate-600 dark:text-slate-400">기타</span>
+</div>
+<span class="text-xs font-bold">15%</span>
+</div>
+</div>
+</div>
+</section>
+<section class="mt-8 px-4 mb-8">
+<h3 class="text-slate-900 dark:text-slate-100 text-base font-bold mb-3">인기 포인트 TOP 5 📍</h3>
+<div class="space-y-3">
+<div class="glass-card rounded-xl p-3 border border-primary/5 flex items-center gap-3">
+<div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center font-bold text-primary">1</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold">여수 거문도</h4>
+<p class="text-[10px] text-slate-400">출조 12회 · 조과 34마리</p>
+</div>
+<span class="material-symbols-outlined text-slate-300 text-sm">trending_up</span>
+</div>
+<div class="glass-card rounded-xl p-3 border border-primary/5 flex items-center gap-3">
+<div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center font-bold text-primary">2</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold">통영 욕지도</h4>
+<p class="text-[10px] text-slate-400">출조 8회 · 조과 22마리</p>
+</div>
+<span class="material-symbols-outlined text-slate-300 text-sm">trending_up</span>
+</div>
+<div class="glass-card rounded-xl p-3 border border-primary/5 flex items-center gap-3">
+<div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center font-bold text-primary">3</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold">제주 차귀도</h4>
+<p class="text-[10px] text-slate-400">출조 6회 · 조과 18마리</p>
+</div>
+<span class="material-symbols-outlined text-slate-300 text-sm">horizontal_rule</span>
+</div>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex border-t border-slate-200 dark:border-slate-800 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-lg px-4 pb-6 pt-2 z-50">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 transition-all hover:text-primary" href="#">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<p class="text-[10px] font-medium leading-normal">홈</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 transition-all hover:text-primary" href="#">
+<span class="material-symbols-outlined text-[24px]">menu_book</span>
+<p class="text-[10px] font-medium leading-normal">로그</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary transition-all" href="#">
+<span class="material-symbols-outlined text-[24px] font-bold" style="font-variation-settings: 'FILL' 1">bar_chart</span>
+<p class="text-[10px] font-bold leading-normal">통계</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 transition-all hover:text-primary" href="#">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<p class="text-[10px] font-medium leading-normal">프로필</p>
+</a>
+</nav>
+</div>
+</body></html>
