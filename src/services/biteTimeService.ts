@@ -74,15 +74,33 @@ function getSSTScore(sst?: number, airTemp?: number): { score: number; status: '
   return { score: 10, status: 'neutral', description: `${source} ${temp}°C — 보통` };
 }
 
-// Tide factor — uses "몇 물" (max 20)
-function getTideScore(tideData?: TideData | null): { score: number; status: 'positive' | 'neutral' | 'negative'; description: string } {
-  if (!tideData || tideData.tides.length === 0) {
-    return { score: 8, status: 'neutral', description: '물때 정보 없음' };
+// Tide + Current factor — uses real ocean_current_velocity if available, falls back to "몇 물" estimate (max 20)
+function getTideScore(tideData?: TideData | null, currentVelocity?: number): { score: number; status: 'positive' | 'neutral' | 'negative'; description: string } {
+  const phase = tideData ? getCurrentPhase(tideData) : null;
+
+  // If we have real measured current velocity (from Open-Meteo Marine API)
+  if (currentVelocity !== undefined) {
+    const phaseLabel = phase ? `${phase.label} · ` : '';
+    // 0.3~0.8 m/s is ideal for fishing (moderate current = active feeding)
+    if (currentVelocity >= 0.3 && currentVelocity <= 0.8) {
+      return { score: 20, status: 'positive', description: `${phaseLabel}유속 ${currentVelocity}m/s — 최적 조류, 입질 활발` };
+    }
+    if (currentVelocity > 0.8 && currentVelocity <= 1.2) {
+      return { score: 16, status: 'positive', description: `${phaseLabel}유속 ${currentVelocity}m/s — 강한 조류, 무거운 채비 추천` };
+    }
+    if (currentVelocity > 0.1 && currentVelocity < 0.3) {
+      return { score: 10, status: 'neutral', description: `${phaseLabel}유속 ${currentVelocity}m/s — 약한 조류` };
+    }
+    if (currentVelocity > 1.2) {
+      return { score: 6, status: 'negative', description: `${phaseLabel}유속 ${currentVelocity}m/s — 매우 강함, 채비 컨트롤 어려움` };
+    }
+    // Very slow (< 0.1) = slack
+    return { score: 4, status: 'negative', description: `${phaseLabel}유속 ${currentVelocity}m/s — 정조, 물 멈춤` };
   }
 
-  const phase = getCurrentPhase(tideData);
-  if (!phase) {
-    return { score: 8, status: 'neutral', description: '물때 계산 불가' };
+  // Fallback: estimate from tide phase ("몇 물" system)
+  if (!tideData || tideData.tides.length === 0 || !phase) {
+    return { score: 8, status: 'neutral', description: '물때 정보 없음' };
   }
 
   const scoreMap: Record<string, { score: number; status: 'positive' | 'neutral' | 'negative' }> = {
@@ -97,7 +115,7 @@ function getTideScore(tideData?: TideData | null): { score: number; status: 'pos
   return {
     score: s.score,
     status: s.status,
-    description: `${phase.label} · ${phase.strengthLabel}`,
+    description: `${phase.label} · ${phase.strengthLabel} (추정)`,
   };
 }
 
@@ -163,7 +181,7 @@ export function calculateBiteTime(
   const lunar = getLunarInfo();
   const timeResult = getMagicHourScore();
   const sstResult = getSSTScore(marine?.seaSurfaceTemp, weather?.tempC);
-  const tideResult = getTideScore(tideData);
+  const tideResult = getTideScore(tideData, marine?.currentVelocity);
   const windResult = getWindScore(weather?.windSpeed);
   const pressureResult = getPressureScore(weather?.pressureMsl);
   const waveResult = getWaveScore(marine?.waveHeight);
