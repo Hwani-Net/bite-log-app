@@ -39,3 +39,20 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# firebase
+.firebase/
+.firebaserc
+
+# build artifacts
+*.aab
+*.apk
+*.keystore
+signing-key-info.txt
+build.log
+
+# temp scripts
+resize_*.js
+
+# agent config (local only)
+.agent/
