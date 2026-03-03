@@ -113,6 +113,10 @@ export default function RecordPage() {
         setAiResult(result);
         const matched = FISH_SPECIES.find(s => s === result.koreanName);
         setSpecies(matched || result.koreanName);
+        // Auto-fill size if AI estimated it and user hasn't entered one
+        if (result.estimatedSizeCm && !sizeCm) {
+          setSizeCm(String(result.estimatedSizeCm));
+        }
       } else {
         setAiResult(result);
       }
@@ -252,6 +256,16 @@ export default function RecordPage() {
               <div className="flex-1">
                 <p className="text-sm font-bold text-emerald-700">{aiResult.koreanName} <span className="font-normal text-emerald-500">({aiResult.confidence}%)</span></p>
                 <p className="text-xs text-emerald-600">{aiResult.description}</p>
+                {(aiResult.estimatedSizeCm || aiResult.estimatedWeightKg) && (
+                  <p className="text-xs text-emerald-500 mt-0.5">
+                    📏 {aiResult.estimatedSizeCm ? `약 ${aiResult.estimatedSizeCm}cm` : ''}
+                    {aiResult.estimatedSizeCm && aiResult.estimatedWeightKg ? ' · ' : ''}
+                    {aiResult.estimatedWeightKg ? `약 ${aiResult.estimatedWeightKg}kg` : ''}
+                  </p>
+                )}
+                {aiResult.fishingTip && (
+                  <p className="text-xs text-teal-600 mt-0.5">💡 {aiResult.fishingTip}</p>
+                )}
               </div>
             </div>
           )}
