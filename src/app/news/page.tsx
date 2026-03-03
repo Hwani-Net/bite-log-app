@@ -28,7 +28,7 @@ function FreshnessBadge({ freshness }: { freshness: string }) {
   const config = {
     realtime: { bg: 'bg-red-500', text: 'text-white', label: '실시간', dot: '🔴' },
     today: { bg: 'bg-amber-400', text: 'text-amber-900', label: '오늘', dot: '🟡' },
-    week: { bg: 'bg-slate-200 dark:bg-slate-700', text: 'text-slate-600 dark:text-slate-300', label: '이번주', dot: '⚪' },
+    week: { bg: 'bg-slate-200', text: 'text-slate-600', label: '이번주', dot: '⚪' },
   }[freshness] || { bg: 'bg-slate-200', text: 'text-slate-600', label: '기타', dot: '⚪' };
 
   return (
@@ -40,9 +40,9 @@ function FreshnessBadge({ freshness }: { freshness: string }) {
 
 function ReliabilityBadge({ reliability }: { reliability: string }) {
   const config = {
-    official: { color: 'text-blue-600 dark:text-blue-400', label: '공식' },
-    community: { color: 'text-green-600 dark:text-green-400', label: '커뮤니티' },
-    sns: { color: 'text-purple-600 dark:text-purple-400', label: 'SNS' },
+    official: { color: 'text-blue-600', label: '공식' },
+    community: { color: 'text-green-600', label: '커뮤니티' },
+    sns: { color: 'text-purple-600', label: 'SNS' },
   }[reliability] || { color: 'text-slate-500', label: '기타' };
 
   return (
@@ -71,13 +71,13 @@ function NewsCard({ item }: { item: FishingNewsItem }) {
       href={item.link}
       target="_blank"
       rel="noopener noreferrer"
-      className="glass-card rounded-2xl p-4 block hover:scale-[1.01] transition-transform duration-200"
+      className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 block hover:scale-[1.01] transition-transform duration-200"
       style={{ animationDelay: '0.05s' }}
     >
       <div className="flex gap-3">
         {/* Thumbnail for YouTube */}
         {item.thumbnail && (
-          <div className="flex-shrink-0 w-28 h-20 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800">
+          <div className="flex-shrink-0 w-28 h-20 rounded-xl overflow-hidden bg-slate-100">
             <img
               src={item.thumbnail}
               alt={item.title}
@@ -102,12 +102,12 @@ function NewsCard({ item }: { item: FishingNewsItem }) {
           </div>
 
           {/* Title */}
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug">
+          <h3 className="text-sm font-bold text-slate-900 line-clamp-2 leading-snug">
             {item.title}
           </h3>
 
           {/* Description */}
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+          <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
             {item.description}
           </p>
 
@@ -119,7 +119,7 @@ function NewsCard({ item }: { item: FishingNewsItem }) {
               </span>
             )}
             {item.species && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-teal-accent/10 text-teal-600 dark:text-teal-accent font-medium">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-teal-accent/10 text-teal-600 font-medium">
                 🐟 {item.species}
               </span>
             )}
@@ -171,12 +171,12 @@ export default function NewsPage() {
   }, [loadNews]);
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark page-enter">
+    <div className="min-h-screen bg-slate-50 page-enter">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50">
+      <div className="sticky top-0 z-20 bg-slate-50/80 backdrop-blur-xl border-b border-slate-200/50">
         <div className="max-w-lg mx-auto px-4 pt-4 pb-2">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+            <h1 className="text-xl font-bold text-slate-900">
               실시간 조과 소식
             </h1>
             <button
@@ -196,7 +196,7 @@ export default function NewsPage() {
                 className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                   region === tab.key
                     ? 'bg-primary text-white shadow-md shadow-primary/30'
-                    : 'bg-white/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700'
+                    : 'bg-white/50 text-slate-600 hover:bg-white:bg-slate-700'
                 }`}
               >
                 {tab.emoji} {tab.label}
@@ -213,7 +213,7 @@ export default function NewsPage() {
                 className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                   source === tab.key
                     ? 'bg-ocean-deep text-white'
-                    : 'bg-white/50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400'
+                    : 'bg-white/50 text-slate-500'
                 }`}
               >
                 {tab.label}
@@ -228,13 +228,13 @@ export default function NewsPage() {
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="glass-card rounded-2xl p-4 animate-pulse">
+              <div key={i} className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 animate-pulse">
                 <div className="flex gap-3">
-                  <div className="w-28 h-20 rounded-xl bg-slate-200 dark:bg-slate-700" />
+                  <div className="w-28 h-20 rounded-xl bg-slate-200" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/3" />
-                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-full" />
-                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-2/3" />
+                    <div className="h-3 bg-slate-200 rounded w-1/3" />
+                    <div className="h-4 bg-slate-200 rounded w-full" />
+                    <div className="h-3 bg-slate-200 rounded w-2/3" />
                   </div>
                 </div>
               </div>
@@ -299,35 +299,6 @@ export default function NewsPage() {
           </>
         )}
       </div>
-
-      {/* Bottom Navigation (same as other pages) */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-slate-700/50 z-30">
-        <div className="max-w-lg mx-auto flex justify-around py-2">
-          {[
-            { href: '/', icon: '🏠', label: '홈' },
-            { href: '/news', icon: '🔥', label: '소식', active: true },
-            { href: '/record', icon: '✏️', label: '기록' },
-            { href: '/feed', icon: '📸', label: '피드' },
-            { href: '/settings', icon: '⚙️', label: '설정' },
-          ].map(nav => (
-            <Link
-              key={nav.href}
-              href={nav.href}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors ${
-                nav.active
-                  ? 'text-primary'
-                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-              }`}
-            >
-              <span className="text-lg">{nav.icon}</span>
-              <span className="text-[10px] font-medium">{nav.label}</span>
-            </Link>
-          ))}
-        </div>
-      </nav>
-
-      {/* Bottom padding for nav */}
-      <div className="h-20" />
     </div>
   );
 }

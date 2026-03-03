@@ -78,7 +78,7 @@ function RecordDetailContent() {
     setRecord(updated);
   }
 
-  const inputCls = 'w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary transition-all text-slate-900 dark:text-slate-100';
+  const inputCls = 'w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary transition-all text-slate-900';
 
   if (!record) {
     return (
@@ -94,11 +94,11 @@ function RecordDetailContent() {
   return (
     <div className="page-enter relative z-10 pb-24">
       {/* Header */}
-      <header className="sticky top-0 z-50 flex items-center bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-4 py-4 justify-between border-b border-slate-200/50 dark:border-slate-800">
-        <button onClick={() => router.back()} className="text-slate-900 dark:text-slate-100 flex size-10 shrink-0 items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+      <header className="sticky top-0 z-50 flex items-center bg-white/80 backdrop-blur-md px-4 py-4 justify-between border-b border-slate-200/50">
+        <button onClick={() => router.back()} className="text-slate-900 flex size-10 shrink-0 items-center justify-center hover:bg-slate-100:bg-slate-800 rounded-full transition-colors">
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
-        <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex-1 text-center">
+        <h2 className="text-lg font-bold text-slate-900 flex-1 text-center">
           {editing ? t('record.editTitle') : (locale === 'ko' ? '조과 상세' : 'Catch Detail')}
         </h2>
         <div className="flex items-center gap-1">
@@ -126,15 +126,15 @@ function RecordDetailContent() {
               >
                 <span className="material-symbols-outlined text-xl">share</span>
               </button>
-              <button onClick={handleDelete} className="text-red-400 size-10 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+              <button onClick={handleDelete} className="text-red-400 size-10 flex items-center justify-center rounded-full hover:bg-red-50:bg-red-900/20 transition-colors">
                 <span className="material-symbols-outlined text-xl">delete</span>
               </button>
               <button
                 onClick={handleToggleVisibility}
                 className={`size-10 flex items-center justify-center rounded-full transition-colors ${
                   (record.visibility || 'private') === 'public'
-                    ? 'text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20'
-                    : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'text-green-500 hover:bg-green-50:bg-green-900/20'
+                    : 'text-slate-400 hover:bg-slate-100:bg-slate-800'
                 }`}
                 title={(record.visibility || 'private') === 'public' ? (locale === 'ko' ? '공개 중' : 'Public') : (locale === 'ko' ? '비공개' : 'Private')}
               >
@@ -149,7 +149,7 @@ function RecordDetailContent() {
 
       {/* Photo hero */}
       {record.photos.length > 0 && (
-        <div className="w-full aspect-video bg-slate-100 dark:bg-slate-800 overflow-hidden">
+        <div className="w-full aspect-video bg-slate-100 overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={record.photos[0]} alt={record.species} className="w-full h-full object-cover" />
         </div>
@@ -158,9 +158,9 @@ function RecordDetailContent() {
       {editing ? (
         /* ===== EDIT MODE ===== */
         <div className="px-4 pt-4 space-y-4">
-          <div className="glass-card rounded-2xl p-4 shadow-sm">
+          <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 shadow-sm">
             <label className="flex flex-col gap-2">
-              <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
+              <span className="text-slate-800 text-sm font-semibold flex items-center gap-2">
                 <span className="material-symbols-outlined text-base text-primary">calendar_month</span>
                 {t('record.date')}
               </span>
@@ -168,9 +168,9 @@ function RecordDetailContent() {
             </label>
           </div>
 
-          <div className="glass-card rounded-2xl p-4 shadow-sm">
+          <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 shadow-sm">
             <label className="flex flex-col gap-2">
-              <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
+              <span className="text-slate-800 text-sm font-semibold flex items-center gap-2">
                 <span className="material-symbols-outlined text-base text-primary">location_on</span>
                 {t('record.location')}
               </span>
@@ -178,9 +178,9 @@ function RecordDetailContent() {
             </label>
           </div>
 
-          <div className="glass-card rounded-2xl p-4 shadow-sm">
+          <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 shadow-sm">
             <label className="flex flex-col gap-2">
-              <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
+              <span className="text-slate-800 text-sm font-semibold flex items-center gap-2">
                 <span className="material-symbols-outlined text-base text-primary">set_meal</span>
                 {t('record.species')}
               </span>
@@ -193,31 +193,31 @@ function RecordDetailContent() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="glass-card rounded-2xl p-4 shadow-sm">
+            <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 shadow-sm">
               <label className="flex flex-col gap-2">
-                <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold">{t('record.count')}</span>
-                <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 rounded-xl p-1 border border-slate-200 dark:border-slate-700">
-                  <button type="button" onClick={() => setCount((c) => Math.max(1, c - 1))} className="size-9 flex items-center justify-center bg-white dark:bg-slate-700 rounded-lg shadow-sm text-slate-600 dark:text-slate-200">
+                <span className="text-slate-800 text-sm font-semibold">{t('record.count')}</span>
+                <div className="flex items-center justify-between bg-slate-50 rounded-xl p-1 border border-slate-200">
+                  <button type="button" onClick={() => setCount((c) => Math.max(1, c - 1))} className="size-9 flex items-center justify-center bg-white rounded-lg shadow-sm text-slate-600">
                     <span className="material-symbols-outlined text-lg">remove</span>
                   </button>
-                  <span className="text-lg font-bold text-slate-900 dark:text-slate-100">{count}</span>
+                  <span className="text-lg font-bold text-slate-900">{count}</span>
                   <button type="button" onClick={() => setCount((c) => c + 1)} className="size-9 flex items-center justify-center bg-primary rounded-lg shadow-sm text-white">
                     <span className="material-symbols-outlined text-lg">add</span>
                   </button>
                 </div>
               </label>
             </div>
-            <div className="glass-card rounded-2xl p-4 shadow-sm">
+            <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 shadow-sm">
               <label className="flex flex-col gap-2">
-                <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold">{t('record.size')}</span>
+                <span className="text-slate-800 text-sm font-semibold">{t('record.size')}</span>
                 <input type="number" value={sizeCm} onChange={(e) => setSizeCm(e.target.value)} placeholder="0.0" className={`${inputCls} text-center font-bold`} />
               </label>
             </div>
           </div>
 
-          <div className="glass-card rounded-2xl p-4 shadow-sm">
+          <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 shadow-sm">
             <label className="flex flex-col gap-2">
-              <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
+              <span className="text-slate-800 text-sm font-semibold flex items-center gap-2">
                 <span className="material-symbols-outlined text-base text-primary">edit_note</span>
                 {t('record.memo')}
               </span>
@@ -243,13 +243,13 @@ function RecordDetailContent() {
               <span className="material-symbols-outlined text-white text-xl">set_meal</span>
             </div>
             <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">{record.species}</h3>
+              <h3 className="text-xl font-bold text-slate-900">{record.species}</h3>
               <div className="flex items-center gap-2 mt-0.5">
                 <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-primary/10 text-primary">
                   {record.count}{locale === 'ko' ? '마리' : ' fish'}
                 </span>
                 {record.sizeCm && (
-                  <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-500">
+                  <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-blue-50 text-blue-500">
                     {record.sizeCm}cm
                   </span>
                 )}
@@ -259,19 +259,19 @@ function RecordDetailContent() {
 
           {/* Info cards */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="glass-card rounded-2xl p-4 shadow-sm">
+            <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 shadow-sm">
               <div className="flex items-center gap-2 text-slate-500 text-xs mb-1">
                 <span className="material-symbols-outlined text-sm text-primary">calendar_month</span>
                 {t('record.date')}
               </div>
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">{record.date}</p>
+              <p className="text-sm font-semibold text-slate-900">{record.date}</p>
             </div>
-            <div className="glass-card rounded-2xl p-4 shadow-sm">
+            <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 shadow-sm">
               <div className="flex items-center gap-2 text-slate-500 text-xs mb-1">
                 <span className="material-symbols-outlined text-sm text-primary">location_on</span>
                 {t('record.location')}
               </div>
-              <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{record.location.name}</p>
+              <p className="text-sm font-semibold text-slate-900 truncate">{record.location.name}</p>
               {record.location.lat && record.location.lng && (
                 <p className="text-[10px] text-slate-400 mt-0.5">
                   📍 {record.location.lat.toFixed(4)}, {record.location.lng.toFixed(4)}
@@ -282,7 +282,7 @@ function RecordDetailContent() {
 
           {/* Weather info */}
           {record.weather && (
-            <div className="glass-card rounded-2xl p-4 shadow-sm">
+            <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 shadow-sm">
               <div className="flex items-center gap-2 text-slate-500 text-xs mb-3">
                 <span className="material-symbols-outlined text-sm text-primary">cloud</span>
                 {t('record.weather')}
@@ -290,24 +290,24 @@ function RecordDetailContent() {
               <div className="grid grid-cols-4 gap-2">
                 <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-primary/5">
                   <span className="material-symbols-outlined text-lg text-primary">partly_cloudy_day</span>
-                  <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-300 text-center">
+                  <span className="text-[10px] font-semibold text-slate-600 text-center">
                     {record.weather.condition}
                   </span>
                 </div>
-                <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-orange-50 dark:bg-orange-900/20">
+                <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-orange-50">
                   <span className="material-symbols-outlined text-lg text-orange-500">thermostat</span>
-                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{record.weather.tempC}°C</span>
+                  <span className="text-xs font-bold text-slate-900">{record.weather.tempC}°C</span>
                 </div>
                 {record.weather.windSpeed !== undefined && (
-                  <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20">
+                  <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-blue-50">
                     <span className="material-symbols-outlined text-lg text-blue-500">air</span>
-                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{record.weather.windSpeed}m/s</span>
+                    <span className="text-xs font-bold text-slate-900">{record.weather.windSpeed}m/s</span>
                   </div>
                 )}
                 {record.weather.humidity !== undefined && (
-                  <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-teal-50 dark:bg-teal-900/20">
+                  <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-teal-50">
                     <span className="material-symbols-outlined text-lg text-teal-500">water_drop</span>
-                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{record.weather.humidity}%</span>
+                    <span className="text-xs font-bold text-slate-900">{record.weather.humidity}%</span>
                   </div>
                 )}
               </div>
@@ -316,7 +316,7 @@ function RecordDetailContent() {
 
           {/* Tide info */}
           {record.tide && (
-            <div className="glass-card rounded-2xl p-4 shadow-sm bg-blue-50/50 dark:bg-slate-800/50">
+            <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 shadow-sm bg-blue-50/50">
               <div className="flex items-center gap-2 text-slate-500 text-xs mb-3">
                 <span className="material-symbols-outlined text-sm text-primary">water</span>
                 {locale === 'ko' ? '물때 정보' : 'Tide'}
@@ -324,9 +324,9 @@ function RecordDetailContent() {
               </div>
               <div className="flex flex-wrap gap-2 text-xs">
                 {record.tide.tides.map((t, i) => (
-                  <span key={i} className={`flex flex-col items-center justify-center p-2 rounded-xl flex-1 min-w-[60px] ${t.type === 'High' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400'}`}>
+                  <span key={i} className={`flex flex-col items-center justify-center p-2 rounded-xl flex-1 min-w-[60px] ${t.type === 'High' ? 'bg-blue-100 text-blue-600' : 'bg-cyan-100 text-cyan-600'}`}>
                     <span className="font-bold mb-0.5">{t.type === 'High' ? ( locale === 'ko' ? '▲ 고조' : '▲ High' ) : ( locale === 'ko' ? '▼ 저조' : '▼ Low' )}</span>
-                    <span className="text-slate-600 dark:text-slate-300 font-medium">{t.time}</span>
+                    <span className="text-slate-600 font-medium">{t.time}</span>
                   </span>
                 ))}
               </div>
@@ -335,12 +335,12 @@ function RecordDetailContent() {
 
           {/* Memo */}
           {record.memo && (
-            <div className="glass-card rounded-2xl p-4 shadow-sm">
+            <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 shadow-sm">
               <div className="flex items-center gap-2 text-slate-500 text-xs mb-2">
                 <span className="material-symbols-outlined text-sm text-primary">edit_note</span>
                 {t('record.memo')}
               </div>
-              <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{record.memo}</p>
+              <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{record.memo}</p>
             </div>
           )}
 
@@ -353,7 +353,7 @@ function RecordDetailContent() {
               </h4>
               <div className="grid grid-cols-3 gap-2">
                 {record.photos.map((p, i) => (
-                  <div key={i} className="aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800">
+                  <div key={i} className="aspect-square rounded-xl overflow-hidden bg-slate-100">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={p} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
                   </div>
@@ -374,7 +374,7 @@ function RecordDetailContent() {
 
       {/* Share toast */}
       {shareToast && (
-        <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold rounded-full shadow-xl animate-pulse">
+        <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-full shadow-xl animate-pulse">
           <span className="material-symbols-outlined text-sm align-middle mr-1">check_circle</span>
           {shareToast}
         </div>

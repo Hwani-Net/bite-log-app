@@ -35,9 +35,9 @@ const PERIOD_TABS: { value: PeriodFilter; ko: string; en: string }[] = [
 
 function MiniStatCard({ icon, label, value, unit }: { icon: string; label: string; value: number | string; unit: string }) {
   return (
-    <div className="glass-card flex flex-col gap-1 rounded-xl p-4 shadow-sm border border-primary/5">
+    <div className="bg-white border border-slate-100 shadow-sm flex flex-col gap-1 rounded-xl p-4 shadow-sm border border-primary/5">
       <p className="text-slate-500 text-xs font-medium">{label}</p>
-      <p className="text-slate-900 dark:text-slate-100 text-xl font-bold">
+      <p className="text-slate-900 text-xl font-bold">
         {value}
         <span className="text-sm ml-0.5 font-normal text-slate-500">{unit}</span>
       </p>
@@ -85,14 +85,14 @@ function CalendarView({ records, locale }: { records: CatchRecord[]; locale: str
   const today = new Date().toISOString().slice(0, 10);
 
   return (
-    <div className="glass-card rounded-xl p-4 border border-primary/5">
+    <div className="bg-white border border-slate-100 shadow-sm rounded-xl p-4 border border-primary/5">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <button onClick={() => setMonthOffset((p) => p - 1)} className="size-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+        <button onClick={() => setMonthOffset((p) => p - 1)} className="size-8 flex items-center justify-center rounded-lg hover:bg-slate-100:bg-slate-700 transition-colors">
           <span className="material-symbols-outlined text-lg text-slate-500">chevron_left</span>
         </button>
-        <h4 className="text-sm font-bold text-slate-900 dark:text-white">{monthLabel}</h4>
-        <button onClick={() => setMonthOffset((p) => Math.min(p + 1, 0))} disabled={monthOffset >= 0} className="size-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-30">
+        <h4 className="text-sm font-bold text-slate-900">{monthLabel}</h4>
+        <button onClick={() => setMonthOffset((p) => Math.min(p + 1, 0))} disabled={monthOffset >= 0} className="size-8 flex items-center justify-center rounded-lg hover:bg-slate-100:bg-slate-700 transition-colors disabled:opacity-30">
           <span className="material-symbols-outlined text-lg text-slate-500">chevron_right</span>
         </button>
       </div>
@@ -125,7 +125,7 @@ function CalendarView({ records, locale }: { records: CatchRecord[]; locale: str
                 isToday ? 'ring-2 ring-primary' : ''
               } ${catchCount > 0 ? 'bg-primary/10' : ''}`}
             >
-              <span className={`font-medium ${isToday ? 'text-primary font-bold' : 'text-slate-700 dark:text-slate-300'}`}>{day}</span>
+              <span className={`font-medium ${isToday ? 'text-primary font-bold' : 'text-slate-700'}`}>{day}</span>
               {catchCount > 0 && (
                 <div className="absolute bottom-0.5 flex gap-0.5">
                   {Array.from({ length: Math.min(catchCount, 3) }).map((_, j) => (
@@ -150,13 +150,13 @@ function CalendarView({ records, locale }: { records: CatchRecord[]; locale: str
 // ===== Badge Component =====
 function BadgeCard({ badge, locale }: { badge: AchievementBadge; locale: string }) {
   return (
-    <div className={`glass-card rounded-xl p-3 border transition-all ${badge.earned ? 'border-primary/20 shadow-sm' : 'border-slate-200 dark:border-slate-700 opacity-60'}`}>
+    <div className={`bg-white border border-slate-100 shadow-sm rounded-xl p-3 border transition-all ${badge.earned ? 'border-primary/20 shadow-sm' : 'border-slate-200 opacity-60'}`}>
       <div className="flex items-center gap-3">
-        <div className={`size-10 rounded-lg flex items-center justify-center ${badge.earned ? 'bg-gradient-to-tr from-primary to-cyan-400 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-400'}`}>
+        <div className={`size-10 rounded-lg flex items-center justify-center ${badge.earned ? 'bg-gradient-to-tr from-primary to-cyan-400 text-white' : 'bg-slate-100 text-slate-400'}`}>
           <span className="material-symbols-outlined text-lg">{badge.icon}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
+          <h4 className="text-xs font-bold text-slate-900 truncate">
             {locale === 'ko' ? badge.name.ko : badge.name.en}
           </h4>
           <p className="text-[10px] text-slate-400 truncate">
@@ -171,7 +171,7 @@ function BadgeCard({ badge, locale }: { badge: AchievementBadge; locale: string 
       </div>
       {/* Progress bar */}
       {!badge.earned && (
-        <div className="mt-2 h-1 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+        <div className="mt-2 h-1 rounded-full bg-slate-100 overflow-hidden">
           <div className="h-full rounded-full bg-gradient-to-r from-primary to-cyan-400 transition-all" style={{ width: `${badge.progress * 100}%` }} />
         </div>
       )}
@@ -215,9 +215,9 @@ export default function StatsPage() {
   return (
     <div className="page-enter relative z-10 pb-24">
       {/* Header */}
-      <header className="sticky top-0 z-50 flex items-center bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md p-4 pb-2 justify-between border-b border-primary/10">
+      <header className="sticky top-0 z-50 flex items-center bg-slate-50/80 backdrop-blur-md p-4 pb-2 justify-between border-b border-primary/10">
         <div className="text-primary flex size-10 shrink-0 items-center justify-center rounded-full" />
-        <h1 className="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center">
+        <h1 className="text-slate-900 text-lg font-bold leading-tight tracking-tight flex-1 text-center">
           {t('stats.title')}
           <span className="material-symbols-outlined text-primary ml-1 align-middle text-base">bar_chart</span>
         </h1>
@@ -226,14 +226,14 @@ export default function StatsPage() {
 
       {/* Tab bar */}
       <div className="px-4 pt-3">
-        <div className="flex h-10 items-center rounded-xl bg-slate-200/50 dark:bg-slate-800/50 p-1">
+        <div className="flex h-10 items-center rounded-xl bg-slate-200/50 p-1">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`flex cursor-pointer h-full grow items-center justify-center gap-1.5 overflow-hidden rounded-lg px-2 text-xs font-semibold transition-all ${
                 activeTab === tab.key
-                  ? 'bg-white dark:bg-slate-700 shadow-sm text-primary'
+                  ? 'bg-white shadow-sm text-primary'
                   : 'text-slate-500'
               }`}
             >
@@ -249,11 +249,11 @@ export default function StatsPage() {
           <>
             {/* Period filter */}
             <div className="px-4 py-3">
-              <div className="flex h-9 items-center justify-center rounded-xl bg-slate-200/50 dark:bg-slate-800/50 p-1">
+              <div className="flex h-9 items-center justify-center rounded-xl bg-slate-200/50 p-1">
                 {PERIOD_TABS.map((tab) => (
                   <label key={tab.value} className={`flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 text-xs font-semibold transition-all ${
                     period === tab.value
-                      ? 'bg-white dark:bg-slate-700 shadow-sm text-primary'
+                      ? 'bg-white shadow-sm text-primary'
                       : 'text-slate-500'
                   }`}>
                     <span className="truncate">{locale === 'ko' ? tab.ko : tab.en}</span>
@@ -273,11 +273,11 @@ export default function StatsPage() {
 
             {/* Monthly trend chart */}
             <section className="mt-6 px-4">
-              <h3 className="text-slate-900 dark:text-slate-100 text-base font-bold mb-3 flex items-center gap-2">
+              <h3 className="text-slate-900 text-base font-bold mb-3 flex items-center gap-2">
                 {t('stats.monthlyTrend')}
                 <span className="material-symbols-outlined text-primary text-base">trending_up</span>
               </h3>
-              <div className="glass-card p-4 rounded-xl border border-primary/5 h-48">
+              <div className="bg-white border border-slate-100 shadow-sm p-4 rounded-xl border border-primary/5 h-48">
                 {stats.monthlyTrend.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={stats.monthlyTrend}>
@@ -306,11 +306,11 @@ export default function StatsPage() {
 
             {/* Species donut */}
             <section className="mt-8 px-4">
-              <h3 className="text-slate-900 dark:text-slate-100 text-base font-bold mb-3 flex items-center gap-2">
+              <h3 className="text-slate-900 text-base font-bold mb-3 flex items-center gap-2">
                 {t('stats.speciesRatio')}
                 <span className="material-symbols-outlined text-primary text-base">donut_large</span>
               </h3>
-              <div className="glass-card p-4 rounded-xl border border-primary/5">
+              <div className="bg-white border border-slate-100 shadow-sm p-4 rounded-xl border border-primary/5">
                 {stats.speciesBreakdown.length > 0 ? (
                   <ResponsiveContainer width="100%" height={250}>
                     <PieChart>
@@ -335,14 +335,14 @@ export default function StatsPage() {
 
             {/* Top spots */}
             <section className="mt-8 px-4 mb-8">
-              <h3 className="text-slate-900 dark:text-slate-100 text-base font-bold mb-3 flex items-center gap-2">
+              <h3 className="text-slate-900 text-base font-bold mb-3 flex items-center gap-2">
                 {t('stats.topSpots')}
                 <span className="material-symbols-outlined text-primary text-base">location_on</span>
               </h3>
               <div className="space-y-3">
                 {stats.topSpots.length > 0 ? (
                   stats.topSpots.map((spot, i) => (
-                    <div key={spot.spot.name} className="glass-card rounded-xl p-3 border border-primary/5 flex items-center gap-3">
+                    <div key={spot.spot.name} className="bg-white border border-slate-100 shadow-sm rounded-xl p-3 border border-primary/5 flex items-center gap-3">
                       <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center font-bold text-primary">
                         {i === 0 ? <span className="material-symbols-outlined">emoji_events</span> : i + 1}
                       </div>
@@ -370,18 +370,18 @@ export default function StatsPage() {
             <CalendarView records={records} locale={locale} />
             {/* Recent trips from calendar */}
             <div className="mt-4">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-1">
+              <h3 className="text-sm font-bold text-slate-900 mb-2 flex items-center gap-1">
                 <span className="material-symbols-outlined text-primary text-sm">history</span>
                 {locale === 'ko' ? '최근 출조' : 'Recent Trips'}
               </h3>
               <div className="space-y-2">
                 {records.slice(0, 5).map((r) => (
-                  <Link key={r.id} href={`/records/detail?id=${r.id}`} className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                  <Link key={r.id} href={`/records/detail?id=${r.id}`} className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50:bg-slate-800 transition-colors">
                     <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center">
                       <span className="material-symbols-outlined text-primary text-sm">set_meal</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">{r.species} {r.sizeCm ? `${r.sizeCm}cm` : `${r.count}${locale === 'ko' ? '마리' : ''}`}</p>
+                      <p className="text-xs font-semibold text-slate-900 truncate">{r.species} {r.sizeCm ? `${r.sizeCm}cm` : `${r.count}${locale === 'ko' ? '마리' : ''}`}</p>
                       <p className="text-[10px] text-slate-400">{r.date} · {r.location.name}</p>
                     </div>
                     <span className="material-symbols-outlined text-slate-300 text-sm">chevron_right</span>
@@ -401,7 +401,7 @@ export default function StatsPage() {
         {activeTab === 'badges' && (
           <section className="px-4 py-4">
             {/* Summary */}
-            <div className="glass-card rounded-xl p-4 border border-primary/5 mb-4 text-center">
+            <div className="bg-white border border-slate-100 shadow-sm rounded-xl p-4 border border-primary/5 mb-4 text-center">
               <div className="text-3xl font-black text-primary">{earnedCount}<span className="text-lg text-slate-400">/{badges.length}</span></div>
               <p className="text-xs text-slate-500 mt-1">{locale === 'ko' ? '달성한 배지' : 'Badges Earned'}</p>
             </div>

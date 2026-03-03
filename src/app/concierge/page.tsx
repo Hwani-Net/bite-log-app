@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useAppStore } from '@/store/appStore';
 import { fetchWeather, WeatherData } from '@/services/weatherService';
 import { fetchTideData, TideData } from '@/services/tideService';
@@ -12,6 +12,12 @@ import {
   GearItem,
 } from '@/services/conciergeService';
 import { getGearRecommendations, trackAffiliateClick, GearRecommendation } from '@/services/affiliateService';
+import {
+  chatWithExpert,
+  getQuickReplies,
+  CHAT_SPECIES,
+  ChatMessage,
+} from '@/services/fishExpertChatService';
 
 export default function ConciergePage() {
   const t = useAppStore((s) => s.t);
@@ -24,6 +30,13 @@ export default function ConciergePage() {
   const [affiliateGear, setAffiliateGear] = useState<GearRecommendation[]>([]);
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Expert Chat state
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);
+  const chatBottomRef = useRef<HTMLDivElement>(null);
 
   // In-season species (static for current month)
   const inSeasonSpecies = useMemo(() => getInSeasonSpecies(), []);
@@ -80,15 +93,15 @@ export default function ConciergePage() {
   return (
     <div className="relative flex min-h-dvh w-full flex-col overflow-x-hidden pb-24 page-enter">
       {/* Header */}
-      <header className="flex items-center justify-between px-5 pt-6 pb-2 sticky top-0 z-30 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md">
+      <header className="flex items-center justify-between px-5 pt-6 pb-2 sticky top-0 z-30 bg-white/80 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-primary text-2xl">auto_awesome</span>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">
             {locale === 'ko' ? 'AI 컨시어지' : 'AI Concierge'}
           </h1>
         </div>
-        <button className="size-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700">
-          <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">notifications</span>
+        <button className="size-10 flex items-center justify-center rounded-full bg-white shadow-sm border border-slate-100">
+          <span className="material-symbols-outlined text-slate-600">notifications</span>
         </button>
       </header>
 
@@ -96,15 +109,15 @@ export default function ConciergePage() {
         {/* AI Greeting Card */}
         <section className="mt-4">
           <div className="rounded-2xl p-[1px] bg-gradient-to-br from-primary to-cyan-400">
-            <div className="rounded-2xl bg-white dark:bg-slate-900 p-5 flex items-start gap-4">
+            <div className="rounded-2xl bg-white p-5 flex items-start gap-4">
               <div className="bg-primary/10 p-3 rounded-xl shrink-0">
                 <span className="material-symbols-outlined text-primary text-3xl">smart_toy</span>
               </div>
               <div className="flex-1">
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                <h2 className="text-lg font-bold text-slate-900">
                   {locale === 'ko' ? '안녕하세요, 대표님!' : 'Hello!'}
                 </h2>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 leading-relaxed">
+                <p className="text-slate-500 text-sm mt-1 leading-relaxed">
                   {loading
                     ? (locale === 'ko' ? '낚시 컨디션 분석 중...' : 'Analyzing conditions...')
                     : recommendation?.reasoning
@@ -140,13 +153,13 @@ export default function ConciergePage() {
 
         {/* Today's Recommendation */}
         <section className="mt-6">
-          <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900 dark:text-white">
+          <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900">
             🎯 {locale === 'ko' ? '오늘의 추천' : "Today's Pick"}
           </h3>
           {loading ? (
             <SkeletonCard />
           ) : recommendation ? (
-            <div className="glass-card rounded-2xl p-4 shadow-sm">
+            <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 shadow-sm">
               <div className="flex gap-4">
                 <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary/20 to-cyan-400/20 flex items-center justify-center overflow-hidden shrink-0">
                   {recommendation.species.image ? (
@@ -161,7 +174,7 @@ export default function ConciergePage() {
                       <span className="material-symbols-outlined text-sm">location_on</span>
                       <span className="text-xs font-semibold">{recommendation.spot.name}</span>
                     </div>
-                    <p className="font-bold text-base text-slate-900 dark:text-white">
+                    <p className="font-bold text-base text-slate-900">
                       {recommendation.species.name} {locale === 'ko' ? '히트 포인트' : 'Hot Spot'} {recommendation.species.emoji}
                     </p>
                   </div>
@@ -195,9 +208,9 @@ export default function ConciergePage() {
 
               {/* Tips */}
               {recommendation.tips.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1.5">
+                <div className="mt-3 pt-3 border-t border-slate-100 space-y-1.5">
                   {recommendation.tips.map((tip, i) => (
-                    <p key={i} className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                    <p key={i} className="text-xs text-slate-500 leading-relaxed">
                       {tip}
                     </p>
                   ))}
@@ -210,15 +223,15 @@ export default function ConciergePage() {
         {/* Weather & Tide Analysis */}
         <section className="mt-8">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+            <h3 className="text-lg font-bold flex items-center gap-2 text-slate-900">
               🌊 {locale === 'ko' ? '날씨 & 조수 분석' : 'Weather & Tide'}
             </h3>
             {biteTime && (
               <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
-                biteScore >= 75 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
-                biteScore >= 55 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                biteScore >= 35 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
-                'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                biteScore >= 75 ? 'bg-emerald-100 text-emerald-700' :
+                biteScore >= 55 ? 'bg-blue-100 text-blue-700' :
+                biteScore >= 35 ? 'bg-amber-100 text-amber-700' :
+                'bg-red-100 text-red-600'
               }`}>
                 {locale === 'ko' ? `입질 확률: ${biteScore}%` : `Bite: ${biteScore}%`}
               </span>
@@ -246,7 +259,7 @@ export default function ConciergePage() {
 
           {/* Tide bar chart */}
           {tideData && tideData.tides.length > 0 && (
-            <div className="mt-3 bg-slate-50 dark:bg-slate-900 rounded-xl p-4 border border-slate-100 dark:border-slate-800">
+            <div className="mt-3 bg-slate-50 rounded-xl p-4 border border-slate-100">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[10px] font-semibold text-slate-400">
                   <span className="material-symbols-outlined text-[10px] text-slate-400">location_on</span> {tideData.stationName}
@@ -263,7 +276,7 @@ export default function ConciergePage() {
                       </span>
                       <div
                         className={`w-full rounded-t transition-all ${
-                          tide.type === 'High' ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600'
+                          tide.type === 'High' ? 'bg-primary' : 'bg-slate-300'
                         }`}
                         style={{ height: `${pct}%`, minHeight: '8px', opacity: 0.3 + (pct / 100) * 0.7 }}
                       />
@@ -284,8 +297,8 @@ export default function ConciergePage() {
                     f.status === 'positive' ? 'text-emerald-500' :
                     f.status === 'negative' ? 'text-red-400' : 'text-slate-400'
                   }`}>{f.icon}</span>
-                  <span className="text-slate-500 dark:text-slate-400 w-10">{f.name}</span>
-                  <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                  <span className="text-slate-500 w-10">{f.name}</span>
+                  <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${
                         f.status === 'positive' ? 'bg-emerald-400' :
@@ -297,16 +310,153 @@ export default function ConciergePage() {
                   <span className="text-[10px] text-slate-400 w-8 text-right">{f.score}/25</span>
                 </div>
               ))}
-              <div className="flex items-center gap-1 mt-1 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-1 mt-1 pt-2 border-t border-slate-100">
                 <span className="text-lg">{biteTime.gradeEmoji}</span>
                 <span className={`text-sm font-bold ${
-                  biteTime.grade === 'excellent' ? 'text-emerald-600 dark:text-emerald-400' :
-                  biteTime.grade === 'good' ? 'text-blue-600 dark:text-blue-400' :
-                  biteTime.grade === 'fair' ? 'text-amber-600 dark:text-amber-400' :
+                  biteTime.grade === 'excellent' ? 'text-emerald-600' :
+                  biteTime.grade === 'good' ? 'text-blue-600' :
+                  biteTime.grade === 'fair' ? 'text-amber-600' :
                   'text-red-500'
                 }`}>{biteTime.gradeLabel}</span>
               </div>
             </div>
+          )}
+        </section>
+
+        {/* Expert Chat Section */}
+        <section className="mt-8" id="expert-chat">
+          <h3 className="text-lg font-bold mb-1 flex items-center gap-2 text-slate-900">
+            🤖 {locale === 'ko' ? 'AI 낚시 마스터' : 'AI Fishing Master'}
+          </h3>
+          <p className="text-xs text-slate-400 mb-4">{locale === 'ko' ? '어종을 선택하고 뭐든 물어보세요 (짧고 명확하게 답해드려요)' : 'Select a species and ask anything'}</p>
+
+          {/* Species selector chips */}
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-4">
+            {CHAT_SPECIES.map((sp) => (
+              <button
+                key={sp}
+                onClick={() => setSelectedSpecies(prev => prev === sp ? null : sp)}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${
+                  selectedSpecies === sp
+                    ? 'bg-primary text-white border-primary shadow-md shadow-primary/30'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-primary/40'
+                }`}
+              >
+                {sp}
+              </button>
+            ))}
+          </div>
+
+          {/* Chat Messages */}
+          <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 min-h-[160px] max-h-[320px] overflow-y-auto flex flex-col gap-3 mb-3">
+            {chatHistory.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-slate-300">
+                <span className="material-symbols-outlined text-4xl mb-1">smart_toy</span>
+                <p className="text-xs text-center">{locale === 'ko' ? '안녕하세요! 낚시에 대해 뭐든 물어보세요 🎣' : 'Hello! Ask me anything about fishing 🎣'}</p>
+              </div>
+            ) : (
+              chatHistory.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                    msg.role === 'user'
+                      ? 'bg-primary text-white rounded-br-sm'
+                      : 'bg-white border border-slate-100 text-slate-800 rounded-bl-sm shadow-sm'
+                  }`}>
+                    {msg.text}
+                  </div>
+                </div>
+              ))
+            )}
+            {chatLoading && (
+              <div className="flex justify-start">
+                <div className="bg-white border border-slate-100 rounded-2xl rounded-bl-sm px-4 py-2.5 shadow-sm flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+              </div>
+            )}
+            <div ref={chatBottomRef} />
+          </div>
+
+          {/* Quick Reply Buttons */}
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-3">
+            {getQuickReplies(selectedSpecies).map((q) => (
+              <button
+                key={q}
+                onClick={async () => {
+                  if (chatLoading) return;
+                  const userMsg: ChatMessage = { role: 'user', text: q };
+                  const next = [...chatHistory, userMsg];
+                  setChatHistory(next);
+                  setChatLoading(true);
+                  setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+                  const answer = await chatWithExpert(chatHistory, q, selectedSpecies);
+                  setChatHistory([...next, { role: 'model', text: answer }]);
+                  setChatLoading(false);
+                  setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+                }}
+                disabled={chatLoading}
+                className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 hover:border-primary hover:text-primary transition-all whitespace-nowrap disabled:opacity-50"
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+
+          {/* Free-form Input */}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              className="flex-1 bg-white border border-slate-200 rounded-full px-4 py-2.5 text-sm outline-none focus:border-primary transition-colors placeholder:text-slate-300"
+              placeholder={locale === 'ko' ? `${selectedSpecies ? selectedSpecies + ' ' : ''}낚시 질문을 입력하세요...` : 'Ask a fishing question...'}
+              value={chatInput}
+              onChange={e => setChatInput(e.target.value)}
+              onKeyDown={async (e) => {
+                if (e.key === 'Enter' && chatInput.trim() && !chatLoading) {
+                  const q = chatInput.trim();
+                  setChatInput('');
+                  const userMsg: ChatMessage = { role: 'user', text: q };
+                  const next = [...chatHistory, userMsg];
+                  setChatHistory(next);
+                  setChatLoading(true);
+                  setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+                  const answer = await chatWithExpert(chatHistory, q, selectedSpecies);
+                  setChatHistory([...next, { role: 'model', text: answer }]);
+                  setChatLoading(false);
+                  setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+                }
+              }}
+            />
+            <button
+              disabled={!chatInput.trim() || chatLoading}
+              onClick={async () => {
+                if (!chatInput.trim() || chatLoading) return;
+                const q = chatInput.trim();
+                setChatInput('');
+                const userMsg: ChatMessage = { role: 'user', text: q };
+                const next = [...chatHistory, userMsg];
+                setChatHistory(next);
+                setChatLoading(true);
+                setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+                const answer = await chatWithExpert(chatHistory, q, selectedSpecies);
+                setChatHistory([...next, { role: 'model', text: answer }]);
+                setChatLoading(false);
+                setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+              }}
+              className="w-10 h-10 rounded-full bg-primary disabled:bg-slate-200 text-white flex items-center justify-center transition-colors shrink-0 shadow-md shadow-primary/20"
+            >
+              <span className="material-symbols-outlined text-sm">send</span>
+            </button>
+          </div>
+
+          {chatHistory.length > 0 && (
+            <button
+              onClick={() => setChatHistory([])}
+              className="mt-2 text-[10px] text-slate-300 hover:text-slate-500 w-full text-center transition-colors"
+            >
+              대화 초기화
+            </button>
           )}
         </section>
 
@@ -324,10 +474,10 @@ export default function ConciergePage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackAffiliateClick(gear.id, gear.species)}
-                className="glass-card rounded-xl p-3 flex items-center gap-3 hover:scale-[1.01] active:scale-[0.99] transition-transform"
+                className="bg-white border border-slate-100 shadow-sm rounded-xl p-3 flex items-center gap-3 hover:scale-[1.01] active:scale-[0.99] transition-transform"
               >
                 {gear.image ? (
-                  <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0">
+                  <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-100 shrink-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={gear.image} alt={gear.name} className="w-full h-full object-cover" loading="lazy" />
                   </div>
@@ -335,7 +485,7 @@ export default function ConciergePage() {
                   <span className="text-2xl w-12 text-center shrink-0">{gear.icon}</span>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{gear.name}</p>
+                  <p className="text-xs font-semibold text-slate-800 truncate">{gear.name}</p>
                   <p className="text-[10px] text-slate-400 truncate">{gear.description}</p>
                 </div>
                 <div className="text-right shrink-0">
@@ -348,11 +498,11 @@ export default function ConciergePage() {
               </a>
             ))}
           </div>
-          <p className="text-[8px] text-slate-300 dark:text-slate-600 mt-2 text-center">
+          <p className="text-[8px] text-slate-300 mt-2 text-center">
             이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다
           </p>
           {/* Coupang Search Widget */}
-          <div className="mt-4 glass-card rounded-xl p-3">
+          <div className="mt-4 bg-white border border-slate-100 shadow-sm rounded-xl p-3">
             <p className="text-[10px] text-slate-400 mb-2 text-center">
               🔍 {locale === 'ko' ? '원하는 낚시 장비를 쿠팡에서 직접 검색하세요' : 'Search fishing gear on Coupang'}
             </p>
@@ -379,7 +529,7 @@ export default function ConciergePage() {
           <span className="material-symbols-outlined text-sm">checklist</span>
           {locale === 'ko' ? '출조 준비' : 'Trip Plan'}
         </a>
-        <button className="pointer-events-auto bg-white/90 dark:bg-slate-800/90 backdrop-blur border border-slate-200 dark:border-slate-700 px-4 py-2.5 rounded-full text-xs font-bold shadow-sm flex items-center gap-1 text-slate-700 dark:text-slate-300 hover:scale-105 transition-transform active:scale-95">
+        <button className="pointer-events-auto bg-white/90 backdrop-blur border border-slate-200 px-4 py-2.5 rounded-full text-xs font-bold shadow-sm flex items-center gap-1 text-slate-700 hover:scale-105 transition-transform active:scale-95">
           <span className="material-symbols-outlined text-sm">description</span>
           {locale === 'ko' ? '조황 리포트' : 'Report'}
         </button>
@@ -392,10 +542,10 @@ export default function ConciergePage() {
 
 function WeatherStatBox({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
-    <div className="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl text-center border border-slate-100 dark:border-slate-800">
+    <div className="bg-slate-50 p-3 rounded-xl text-center border border-slate-100">
       <span className="material-symbols-outlined text-primary mb-1">{icon}</span>
       <p className="text-[10px] text-slate-400">{label}</p>
-      <p className="font-bold text-sm text-slate-900 dark:text-white">{value}</p>
+      <p className="font-bold text-sm text-slate-900">{value}</p>
     </div>
   );
 }
@@ -403,7 +553,7 @@ function WeatherStatBox({ icon, label, value }: { icon: string; label: string; v
 function GearCard({ gear, locale }: { gear: GearItem; locale: string }) {
   return (
     <div className="min-w-[140px] flex flex-col gap-2">
-      <div className="aspect-square rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden relative">
+      <div className="aspect-square rounded-xl bg-slate-100 overflow-hidden relative">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={gear.image}
@@ -418,8 +568,8 @@ function GearCard({ gear, locale }: { gear: GearItem; locale: string }) {
         )}
       </div>
       <div>
-        <p className="text-xs font-medium line-clamp-1 text-slate-900 dark:text-white">{gear.name}</p>
-        <p className="text-sm font-bold text-slate-900 dark:text-white">₩{gear.price.toLocaleString()}</p>
+        <p className="text-xs font-medium line-clamp-1 text-slate-900">{gear.name}</p>
+        <p className="text-sm font-bold text-slate-900">₩{gear.price.toLocaleString()}</p>
       </div>
     </div>
   );
@@ -427,13 +577,13 @@ function GearCard({ gear, locale }: { gear: GearItem; locale: string }) {
 
 function SkeletonCard() {
   return (
-    <div className="glass-card rounded-2xl p-4 shadow-sm animate-pulse">
+    <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 shadow-sm animate-pulse">
       <div className="flex gap-4">
-        <div className="w-20 h-20 rounded-xl bg-slate-200 dark:bg-slate-700" />
+        <div className="w-20 h-20 rounded-xl bg-slate-200" />
         <div className="flex-1 space-y-3">
-          <div className="h-3 w-20 bg-slate-200 dark:bg-slate-700 rounded" />
-          <div className="h-4 w-40 bg-slate-200 dark:bg-slate-700 rounded" />
-          <div className="h-3 w-32 bg-slate-200 dark:bg-slate-700 rounded" />
+          <div className="h-3 w-20 bg-slate-200 rounded" />
+          <div className="h-4 w-40 bg-slate-200 rounded" />
+          <div className="h-3 w-32 bg-slate-200 rounded" />
         </div>
       </div>
     </div>

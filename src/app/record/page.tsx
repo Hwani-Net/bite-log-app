@@ -18,6 +18,10 @@ export default function RecordPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const geo = useGeolocation();
 
+  // ===== 2-Step: photo → form (or skip straight to form) =====
+  const [step, setStep] = useState<'photo' | 'form'>('photo');
+
+  // ===== Form state =====
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [locationName, setLocationName] = useState('');
   const [species, setSpecies] = useState('');
@@ -34,17 +38,26 @@ export default function RecordPage() {
   const [gpsLng, setGpsLng] = useState<number | undefined>();
   const [locationMode, setLocationMode] = useState<'auto' | 'manual'>('auto');
   const [autoDetected, setAutoDetected] = useState(false);
-  const [visibility, setVisibility] = useState<RecordVisibility>('public');
+  // #6 김짜증: 비공개가 기본
+  const [visibility, setVisibility] = useState<RecordVisibility>('private');
   const [aiAnalyzing, setAiAnalyzing] = useState(false);
   const [aiResult, setAiResult] = useState<FishAIResult | null>(null);
 
-  // Auto-detect location on page load
+  // ===== Auto-detect GPS when entering form step =====
   useEffect(() => {
-    if (locationMode === 'auto' && !autoDetected) {
+    if (step === 'form' && locationMode === 'auto' && !autoDetected) {
       detectLocation();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [step]);
+
+  // ===== Auto-trigger AI when photo is uploaded (background, no separate step) =====
+  useEffect(() => {
+    if (photos.length > 0 && !aiResult && !aiAnalyzing) {
+      handleAIAnalysis();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [photos]);
 
   async function detectLocation() {
     const result = await geo.requestLocation();
@@ -53,11 +66,10 @@ export default function RecordPage() {
       setGpsLat(result.position.lat);
       setGpsLng(result.position.lng);
       setAutoDetected(true);
-      
-      // Fetch Weather & Tide concurrently
+
       setWeatherLoading(true);
       setTideLoading(true);
-      
+
       Promise.all([
         fetchWeather(result.position.lat, result.position.lng),
         fetchTideData(result.position.lat, result.position.lng)
@@ -74,11 +86,11 @@ export default function RecordPage() {
   function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files) return;
-    Array.from(files).forEach((file) => {
+    Array.from(files).slice(0, 3 - photos.length).forEach((file) => {
       const reader = new FileReader();
       reader.onload = (ev) => {
         if (ev.target?.result) {
-          setPhotos((prev) => [...prev, ev.target!.result as string]);
+          setPhotos((prev) => [...prev, ev.target!.result as string].slice(0, 3));
         }
       };
       reader.readAsDataURL(file);
@@ -88,6 +100,7 @@ export default function RecordPage() {
   function removePhoto(index: number) {
     setPhotos((prev) => prev.filter((_, i) => i !== index));
     setAiResult(null);
+    setSpecies('');
   }
 
   async function handleAIAnalysis() {
@@ -98,13 +111,8 @@ export default function RecordPage() {
       const result = await identifyFish(photos[0]);
       if (result && result.species !== 'unknown') {
         setAiResult(result);
-        // Auto-fill species if it matches known species
         const matched = FISH_SPECIES.find(s => s === result.koreanName);
-        if (matched) {
-          setSpecies(matched);
-        } else {
-          setSpecies(result.koreanName);
-        }
+        setSpecies(matched || result.koreanName);
       } else {
         setAiResult(result);
       }
@@ -117,14 +125,14 @@ export default function RecordPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!locationName.trim() || !species) return;
+    if (!species) return;
     setSaving(true);
 
     try {
       const recordData: Omit<CatchRecord, 'id' | 'createdAt' | 'updatedAt'> = {
         date,
         location: {
-          name: locationName.trim(),
+          name: locationName.trim() || (locale === 'ko' ? '위치 미지정' : 'Unknown'),
           lat: gpsLat,
           lng: gpsLng,
         },
@@ -156,145 +164,235 @@ export default function RecordPage() {
     }
   }
 
-  const inputCls = 'w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary transition-all text-slate-900 dark:text-slate-100 placeholder:text-slate-400';
+  // #3 김짜증: 빠른 기록 = 바로 폼으로
+  function skipToForm() {
+    setStep('form');
+  }
+
+  // After photo taken, go to form
+  function proceedToForm() {
+    setStep('form');
+  }
+
+  const inputCls = 'w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 focus:border-primary focus:ring-1 focus:ring-primary transition-all text-slate-900 placeholder:text-slate-400 text-base';
 
   return (
-    <div className="page-enter relative z-10">
-      {/* Header */}
-      <header className="sticky top-0 z-50 flex items-center bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-4 py-4 justify-between border-b border-slate-200/50 dark:border-slate-800">
-        <button onClick={() => router.back()} className="text-slate-900 dark:text-slate-100 flex size-10 shrink-0 items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-          <span className="material-symbols-outlined">arrow_back</span>
+    <div className="page-enter relative z-10 min-h-screen bg-gradient-to-b from-white to-slate-50">
+      {/* Header — #4: 이전 버튼은 여기에 (하단 아님) */}
+      <header className="sticky top-0 z-50 flex items-center bg-white/90 backdrop-blur-md px-4 py-3 justify-between border-b border-slate-100">
+        <button
+          onClick={() => step === 'form' && photos.length > 0 ? setStep('photo') : router.back()}
+          className="text-slate-900 flex size-11 shrink-0 items-center justify-center hover:bg-slate-100 rounded-full transition-colors"
+        >
+          <span className="material-symbols-outlined text-xl">arrow_back</span>
         </button>
-        <h2 className="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center">{t('record.title')}</h2>
-        <div className="flex w-10 items-center justify-end">
-          <button type="submit" form="record-form" className="text-primary text-base font-bold leading-normal tracking-wide shrink-0">
-            {saving ? '...' : t('record.submit')}
-          </button>
-        </div>
+        <h2 className="text-slate-900 text-lg font-bold leading-tight tracking-tight flex-1 text-center">{t('record.title')}</h2>
+        <div className="w-11" />
       </header>
 
-      <form id="record-form" onSubmit={handleSubmit} className="flex-1 pb-24">
-        {/* Photo upload */}
-        <div className="p-4">
+      {/* ===== STEP: PHOTO (optional) ===== */}
+      {step === 'photo' && (
+        <div className="px-4 pt-6 pb-32 space-y-5 animate-fadeIn">
           <div
             onClick={() => fileRef.current?.click()}
-            className="flex flex-col items-center gap-4 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 px-6 py-10 transition-all hover:border-primary/50 cursor-pointer"
+            className="flex flex-col items-center gap-4 rounded-2xl border-2 border-dashed border-slate-200 bg-white px-6 py-14 transition-all hover:border-primary/50 cursor-pointer shadow-sm"
           >
             {photos.length > 0 ? (
-              <div className="flex gap-2 flex-wrap justify-center">
+              <div className="flex gap-3 flex-wrap justify-center">
                 {photos.map((p, i) => (
-                  <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden shadow-md">
+                  <div key={i} className="relative w-28 h-28 rounded-2xl overflow-hidden shadow-lg ring-2 ring-white">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={p} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); removePhoto(i); }}
-                      className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-500 transition-colors"
+                      className="absolute top-1 right-1 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-500 transition-colors"
                     >
-                      <span className="material-symbols-outlined text-xs">close</span>
+                      <span className="material-symbols-outlined text-sm">close</span>
                     </button>
                   </div>
                 ))}
-                <div className="w-20 h-20 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center text-slate-400">
-                  <span className="material-symbols-outlined">add</span>
-                </div>
+                {photos.length < 3 && (
+                  <div className="w-28 h-28 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary transition-colors">
+                    <span className="material-symbols-outlined text-3xl">add</span>
+                  </div>
+                )}
+                {/* AI analyzing indicator on photo */}
+                {aiAnalyzing && (
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-violet-500/90 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                    {locale === 'ko' ? 'AI 분석 중...' : 'Analyzing...'}
+                  </div>
+                )}
               </div>
             ) : (
               <>
-                <div className="bg-primary/10 p-4 rounded-full">
-                  <span className="material-symbols-outlined text-3xl text-primary">add_photo_alternate</span>
+                <div className="bg-gradient-to-br from-primary/10 to-teal-accent/10 p-6 rounded-full">
+                  <span className="material-symbols-outlined text-5xl text-primary">add_photo_alternate</span>
                 </div>
-                <div className="flex flex-col items-center gap-1">
-                  <p className="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight">{t('record.addPhoto')}</p>
-                  <p className="text-slate-500 dark:text-slate-400 text-sm font-normal text-center">
-                    {locale === 'ko' ? '최고의 순간을 기록으로 남겨보세요' : 'Capture your best moments'}
+                <div className="flex flex-col items-center gap-1.5">
+                  <p className="text-slate-900 text-xl font-bold leading-tight">{t('record.photoGuide')}</p>
+                  <p className="text-slate-400 text-sm font-normal text-center">
+                    {t('record.photoSubGuide')}
                   </p>
                 </div>
-                <button type="button" className="mt-2 flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-11 px-6 bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 transition-transform active:scale-95">
-                  {locale === 'ko' ? '사진 선택' : 'Choose Photo'}
+                <button type="button" className="mt-3 flex min-w-[160px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-14 px-8 bg-gradient-to-r from-primary to-teal-accent text-white text-base font-bold shadow-lg shadow-primary/20 transition-transform active:scale-95 gap-2">
+                  <span className="material-symbols-outlined text-lg">photo_camera</span>
+                  {t('record.addPhoto')}
                 </button>
               </>
             )}
           </div>
-        </div>
-        <input ref={fileRef} type="file" accept="image/*" multiple onChange={handlePhotoUpload} className="hidden" />
+          <input ref={fileRef} type="file" accept="image/*" capture="environment" multiple onChange={handlePhotoUpload} className="hidden" />
 
-        {/* AI Fish Analysis */}
-        {photos.length > 0 && (
-          <div className="px-4 pb-2">
-            <button
-              type="button"
-              onClick={handleAIAnalysis}
-              disabled={aiAnalyzing}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 text-white font-bold text-sm shadow-lg shadow-violet-500/20 transition-all active:scale-[0.98] disabled:opacity-60"
-            >
-              {aiAnalyzing ? (
-                <>
-                  <span className="animate-spin material-symbols-outlined text-base">progress_activity</span>
-                  {locale === 'ko' ? 'AI 분석 중...' : 'Analyzing...'}
-                </>
+          {/* AI result badge (shows while still on photo step) */}
+          {aiResult && aiResult.confidence > 0 && !aiAnalyzing && (
+            <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+              <span className="text-2xl">🐟</span>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-emerald-700">{aiResult.koreanName} <span className="font-normal text-emerald-500">({aiResult.confidence}%)</span></p>
+                <p className="text-xs text-emerald-600">{aiResult.description}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Bottom actions */}
+          <div className="fixed bottom-[84px] left-0 right-0 flex flex-col gap-3 justify-center items-center p-4 bg-white/90 backdrop-blur-md z-50 border-t border-slate-100">
+            <div className="w-full max-w-lg">
+              {photos.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={proceedToForm}
+                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-teal-accent text-white font-bold text-lg shadow-xl shadow-primary/30 flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                >
+                  {t('record.next')}
+                  <span className="material-symbols-outlined text-lg">chevron_right</span>
+                </button>
               ) : (
-                <>
-                  <span className="material-symbols-outlined text-base">smart_toy</span>
-                  {locale === 'ko' ? '🐟 AI 어종 분석' : '🐟 AI Fish ID'}
-                </>
+                <button
+                  type="button"
+                  onClick={skipToForm}
+                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-teal-accent text-white font-bold text-lg shadow-xl shadow-primary/30 flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                >
+                  <span className="material-symbols-outlined text-lg">bolt</span>
+                  {t('record.skipPhoto')}
+                </button>
               )}
-            </button>
-            {aiResult && (
-              <div className={`mt-2 p-3 rounded-xl text-sm ${
-                aiResult.confidence > 0 
-                  ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800'
-                  : 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800'
-              }`}>
-                {aiResult.confidence > 0 ? (
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-emerald-700 dark:text-emerald-300">{aiResult.koreanName}</span>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-200 font-medium">
-                        {aiResult.confidence}% 확신
-                      </span>
-                    </div>
-                    <p className="text-xs text-emerald-600 dark:text-emerald-400">{aiResult.description}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== STEP: FORM (everything in one scroll) ===== */}
+      {step === 'form' && (
+        <form id="record-form" onSubmit={handleSubmit} className="px-4 pt-4 pb-32 space-y-4 animate-fadeIn">
+
+          {/* Photo summary (if any) */}
+          {photos.length > 0 && (
+            <div className="flex items-center gap-3 bg-slate-50 rounded-2xl p-3">
+              <div className="flex gap-1.5">
+                {photos.slice(0, 3).map((p, i) => (
+                  <div key={i} className="w-14 h-14 rounded-xl overflow-hidden shrink-0 shadow">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p} alt={`#${i + 1}`} className="w-full h-full object-cover" />
                   </div>
-                ) : (
-                  <p className="text-amber-700 dark:text-amber-300">{aiResult.description}</p>
+                ))}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-slate-500">{photos.length}{locale === 'ko' ? '장 사진' : ' photo(s)'}</p>
+                {aiAnalyzing && (
+                  <p className="text-xs text-violet-500 animate-pulse flex items-center gap-1">
+                    <span className="material-symbols-outlined text-xs animate-spin">progress_activity</span>
+                    {locale === 'ko' ? 'AI 분석 중...' : 'Analyzing...'}
+                  </p>
+                )}
+                {aiResult && aiResult.confidence > 0 && !aiAnalyzing && (
+                  <p className="text-xs font-medium text-emerald-600">🤖 AI: {aiResult.koreanName} ({aiResult.confidence}%)</p>
                 )}
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
-        <div className="px-4 space-y-4">
-          {/* ===== GPS Location Card ===== */}
-          <div className="glass-card rounded-2xl p-4 shadow-sm">
+          {/* ===== Species — #2: AI result is just a pre-fill, not a separate step ===== */}
+          <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4">
+            <label className="flex flex-col gap-2">
+              <span className="text-slate-800 text-sm font-semibold flex items-center gap-2">
+                <span className="material-symbols-outlined text-base text-primary">set_meal</span>
+                {t('record.species')}
+                {aiResult && aiResult.confidence > 0 && !aiAnalyzing && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-medium">
+                    🤖 AI {locale === 'ko' ? '추천' : 'suggested'}
+                  </span>
+                )}
+              </span>
+              <select value={species} onChange={(e) => setSpecies(e.target.value)} className={`${inputCls} appearance-none`} required>
+                <option value="" disabled>{t('record.selectSpecies')}</option>
+                {FISH_SPECIES.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          {/* Count + Size */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 overflow-hidden">
+              <span className="text-slate-800 text-sm font-semibold flex items-center gap-2 mb-3">
+                <span className="material-symbols-outlined text-base text-primary shrink-0">set_meal</span>
+                <span className="truncate">{t('record.count')}</span>
+              </span>
+              <div className="flex items-center justify-between bg-slate-50 rounded-xl p-1 border border-slate-200">
+                <button type="button" onClick={() => setCount((c) => Math.max(1, c - 1))} className="size-11 flex items-center justify-center bg-white rounded-lg shadow-sm text-slate-600 active:scale-95 transition-transform">
+                  <span className="material-symbols-outlined text-xl">remove</span>
+                </button>
+                <span className="text-2xl font-bold text-slate-900">{count}</span>
+                <button type="button" onClick={() => setCount((c) => c + 1)} className="size-11 flex items-center justify-center bg-primary rounded-lg shadow-sm text-white active:scale-95 transition-transform">
+                  <span className="material-symbols-outlined text-xl">add</span>
+                </button>
+              </div>
+            </div>
+
+            {/* #5 김짜증: 사이즈 placeholder "선택사항" */}
+            <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4">
+              <label className="flex flex-col gap-2">
+                <span className="text-slate-800 text-sm font-semibold flex items-center gap-2">
+                  <span className="material-symbols-outlined text-base text-primary">straighten</span>
+                  {t('record.size')}
+                </span>
+                <input
+                  type="number"
+                  value={sizeCm}
+                  onChange={(e) => setSizeCm(e.target.value)}
+                  placeholder={locale === 'ko' ? '선택사항' : 'Optional'}
+                  min={0}
+                  max={300}
+                  className={`${inputCls} text-center font-bold`}
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* ===== Location Card — GPS auto in background ===== */}
+          <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
+              <span className="text-slate-800 text-sm font-semibold flex items-center gap-2">
                 <span className="material-symbols-outlined text-base text-primary">location_on</span>
                 {t('record.location')}
               </span>
               <div className="flex items-center gap-2">
-                {locationMode === 'auto' && (
-                  <button
-                    type="button"
-                    onClick={() => { setLocationMode('manual'); }}
-                    className="text-[10px] text-slate-400 hover:text-primary transition-colors"
-                  >
+                {locationMode === 'auto' ? (
+                  <button type="button" onClick={() => setLocationMode('manual')} className="text-xs text-slate-400 hover:text-primary transition-colors py-1 px-2">
                     {t('record.manualInput')}
                   </button>
-                )}
-                {locationMode === 'manual' && (
-                  <button
-                    type="button"
-                    onClick={() => { setLocationMode('auto'); detectLocation(); }}
-                    className="text-[10px] text-primary font-semibold"
-                  >
+                ) : (
+                  <button type="button" onClick={() => { setLocationMode('auto'); detectLocation(); }} className="text-xs text-primary font-semibold py-1 px-2">
                     GPS
                   </button>
                 )}
               </div>
             </div>
 
-            {/* GPS status indicator */}
+            {/* GPS status */}
             {locationMode === 'auto' && (
               <div className="mb-2">
                 {geo.loading && (
@@ -304,13 +402,11 @@ export default function RecordPage() {
                   </div>
                 )}
                 {autoDetected && !geo.loading && (
-                  <div className="flex items-center gap-2 text-xs text-green-500">
+                  <div className="flex items-center gap-2 text-xs text-emerald-500">
                     <span className="material-symbols-outlined text-sm">check_circle</span>
                     {t('record.locationDetected')}
                     {gpsLat && gpsLng && (
-                      <span className="text-slate-400 ml-1">
-                        ({gpsLat.toFixed(4)}, {gpsLng.toFixed(4)})
-                      </span>
+                      <span className="text-slate-400 ml-1">({gpsLat.toFixed(4)}, {gpsLng.toFixed(4)})</span>
                     )}
                   </div>
                 )}
@@ -318,7 +414,7 @@ export default function RecordPage() {
                   <div className="flex items-center gap-2 text-xs text-amber-500">
                     <span className="material-symbols-outlined text-sm">warning</span>
                     {t('record.locationFailed')}
-                    <button type="button" onClick={detectLocation} className="text-primary font-semibold underline ml-1">
+                    <button type="button" onClick={detectLocation} className="text-primary font-semibold underline ml-1 py-1">
                       {t('record.retryLocation')}
                     </button>
                   </div>
@@ -332,89 +428,77 @@ export default function RecordPage() {
               onChange={(e) => setLocationName(e.target.value)}
               placeholder={t('record.locationHint')}
               className={inputCls}
-              required
             />
           </div>
 
-          {/* ===== Weather Card (auto-fetched) ===== */}
+          {/* Weather (auto, collapsed) */}
           {(weather || weatherLoading) && (
-            <div className="glass-card rounded-2xl p-4 shadow-sm">
-              <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2 mb-3">
+            <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4">
+              <span className="text-slate-800 text-sm font-semibold flex items-center gap-2 mb-3">
                 <span className="material-symbols-outlined text-base text-primary">cloud</span>
                 {t('record.weather')}
               </span>
-
               {weatherLoading ? (
-                <div className="flex items-center gap-2 text-xs text-primary animate-pulse py-2">
+                <div className="flex items-center gap-2 text-xs text-primary animate-pulse py-1">
                   <span className="material-symbols-outlined text-sm animate-spin">autorenew</span>
                   {t('record.loadingWeather')}
                 </div>
               ) : weather && (
                 <div className="grid grid-cols-4 gap-2">
-                  {/* Condition */}
                   <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-primary/5">
                     <span className="material-symbols-outlined text-xl text-primary">{weather.icon}</span>
-                    <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-300 text-center leading-tight">
+                    <span className="text-[10px] font-semibold text-slate-600 text-center leading-tight">
                       {locale === 'ko' ? weather.conditionKo : weather.conditionEn}
                     </span>
                   </div>
-                  {/* Temperature */}
-                  <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-orange-50 dark:bg-orange-900/20">
+                  <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-orange-50">
                     <span className="material-symbols-outlined text-xl text-orange-500">thermostat</span>
-                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{weather.tempC}°C</span>
-                    <span className="text-[9px] text-slate-400">{t('record.temp')}</span>
+                    <span className="text-xs font-bold text-slate-900">{weather.tempC}°C</span>
                   </div>
-                  {/* Wind */}
-                  <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20">
+                  <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-blue-50">
                     <span className="material-symbols-outlined text-xl text-blue-500">air</span>
-                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{weather.windSpeed}</span>
-                    <span className="text-[9px] text-slate-400">m/s</span>
+                    <span className="text-xs font-bold text-slate-900">{weather.windSpeed}m/s</span>
                   </div>
-                  {/* Humidity */}
-                  <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-teal-50 dark:bg-teal-900/20">
+                  <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-teal-50">
                     <span className="material-symbols-outlined text-xl text-teal-500">water_drop</span>
-                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{weather.humidity}%</span>
-                    <span className="text-[9px] text-slate-400">{t('record.humidity')}</span>
+                    <span className="text-xs font-bold text-slate-900">{weather.humidity}%</span>
                   </div>
                 </div>
               )}
             </div>
           )}
 
-          {/* ===== Tide Card (auto-fetched) ===== */}
+          {/* Tide (auto, collapsed) */}
           {(tide || tideLoading) && (
-            <div className="mb-4 glass-card rounded-xl p-4 border border-primary/20 bg-blue-50/50 dark:bg-slate-800/50">
+            <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-primary text-sm">water</span>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                  {locale === 'ko' ? '물때 정보' : 'Tide'}
-                </span>
+                <span className="text-xs font-bold text-slate-700">{locale === 'ko' ? '물때 정보' : 'Tide'}</span>
                 {tideLoading && <span className="text-[10px] text-primary animate-pulse ml-auto">{t('record.detectingLocation')}</span>}
               </div>
-              
               {!tideLoading && tide ? (
                 <div>
-                  <div className="text-[10px] text-slate-400 mb-1">📍 {tide.stationName} 관측소 기준</div>
+                  <div className="text-[10px] text-slate-400 mb-1">📍 {tide.stationName}</div>
                   <div className="flex flex-wrap gap-2 text-xs">
                     {tide.tides.map((t, i) => (
                       <span key={i} className={`flex items-center gap-1 font-semibold ${t.type === 'High' ? 'text-blue-500' : 'text-cyan-500'}`}>
-                        {t.type === 'High' ? ( locale === 'ko' ? '▲ 고조' : '▲ High' ) : ( locale === 'ko' ? '▼ 저조' : '▼ Low' )} {t.time}
+                        {t.type === 'High' ? (locale === 'ko' ? '▲ 고조' : '▲ High') : (locale === 'ko' ? '▼ 저조' : '▼ Low')} {t.time}
                       </span>
                     ))}
                   </div>
                 </div>
               ) : (
                 <div className="h-6 flex items-center">
-                  <div className="w-1/2 h-4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
+                  <div className="w-1/2 h-4 bg-slate-200 rounded animate-pulse" />
                 </div>
               )}
             </div>
           )}
 
           {/* Date */}
-          <div className="glass-card rounded-2xl p-4 shadow-sm">
+          <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4">
             <label className="flex flex-col gap-2">
-              <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
+              <span className="text-slate-800 text-sm font-semibold flex items-center gap-2">
                 <span className="material-symbols-outlined text-base text-primary">calendar_month</span>
                 {t('record.date')}
               </span>
@@ -422,74 +506,29 @@ export default function RecordPage() {
             </label>
           </div>
 
-          {/* Species */}
-          <div className="glass-card rounded-2xl p-4 shadow-sm">
-            <label className="flex flex-col gap-2">
-              <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
-                <span className="material-symbols-outlined text-base text-primary">set_meal</span>
-                {t('record.species')}
-              </span>
-              <select value={species} onChange={(e) => setSpecies(e.target.value)} className={`${inputCls} appearance-none`} required>
-                <option value="" disabled>{t('record.selectSpecies')}</option>
-                {FISH_SPECIES.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          {/* Count + Size */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="glass-card rounded-2xl p-4 shadow-sm overflow-hidden">
-              <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2 mb-3">
-                <span className="material-symbols-outlined text-base text-primary shrink-0">set_meal</span>
-                <span className="truncate">{t('record.count')}</span>
-              </span>
-              <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 rounded-xl p-1 border border-slate-200 dark:border-slate-700">
-                <button type="button" onClick={() => setCount((c) => Math.max(1, c - 1))} className="size-9 flex items-center justify-center bg-white dark:bg-slate-700 rounded-lg shadow-sm text-slate-600 dark:text-slate-200">
-                  <span className="material-symbols-outlined text-lg">remove</span>
-                </button>
-                <span className="text-lg font-bold text-slate-900 dark:text-slate-100">{count}</span>
-                <button type="button" onClick={() => setCount((c) => c + 1)} className="size-9 flex items-center justify-center bg-primary rounded-lg shadow-sm text-white">
-                  <span className="material-symbols-outlined text-lg">add</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="glass-card rounded-2xl p-4 shadow-sm">
-              <label className="flex flex-col gap-2">
-                <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
-                  <span className="material-symbols-outlined text-base text-primary">straighten</span>
-                  {t('record.size')}
-                </span>
-                <input type="number" value={sizeCm} onChange={(e) => setSizeCm(e.target.value)} placeholder="0.0" min={0} max={300} className={`${inputCls} text-center font-bold`} />
-              </label>
-            </div>
-          </div>
-
           {/* Memo */}
-          <div className="glass-card rounded-2xl p-4 shadow-sm">
+          <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4">
             <label className="flex flex-col gap-2">
-              <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
+              <span className="text-slate-800 text-sm font-semibold flex items-center gap-2">
                 <span className="material-symbols-outlined text-base text-primary">edit_note</span>
                 {t('record.memo')}
               </span>
-              <textarea value={memo} onChange={(e) => setMemo(e.target.value)} placeholder={t('record.memoHint')} rows={4} className={`${inputCls} resize-none`} />
+              <textarea value={memo} onChange={(e) => setMemo(e.target.value)} placeholder={t('record.memoHint')} rows={2} className={`${inputCls} resize-none`} />
             </label>
           </div>
 
-          {/* Visibility Toggle */}
-          <div className="glass-card rounded-2xl p-4 shadow-sm">
+          {/* Visibility — #6: 비공개 기본 */}
+          <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-base text-primary">
                   {visibility === 'public' ? 'public' : 'lock'}
                 </span>
                 <div>
-                  <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                  <span className="text-sm font-semibold text-slate-800">
                     {locale === 'ko' ? '조과 공개' : 'Share to Feed'}
                   </span>
-                  <p className="text-[10px] text-slate-400 mt-0.5">
+                  <p className="text-[11px] text-slate-400 mt-0.5">
                     {visibility === 'public'
                       ? (locale === 'ko' ? '다른 낚시인들이 내 조과를 볼 수 있어요' : 'Others can see your catch')
                       : (locale === 'ko' ? '나만 볼 수 있어요' : 'Only you can see this')}
@@ -499,27 +538,39 @@ export default function RecordPage() {
               <button
                 type="button"
                 onClick={() => setVisibility(v => v === 'private' ? 'public' : 'private')}
-                className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${visibility === 'public' ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600'}`}
+                className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${visibility === 'public' ? 'bg-primary' : 'bg-slate-300'}`}
               >
-                <span className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 ${visibility === 'public' ? 'translate-x-5' : 'translate-x-0'}`} />
+                <span className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 ${visibility === 'public' ? 'translate-x-6' : 'translate-x-0'}`} />
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Fixed bottom save button */}
-        <div className="fixed bottom-[84px] left-0 right-0 flex justify-center p-4 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md z-50">
-          <div className="w-full max-w-lg">
-          <button
-            type="submit"
-            disabled={saving || !locationName.trim() || !species}
-            className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-teal-accent text-white font-bold text-lg shadow-xl shadow-primary/30 flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-50"
-          >
-            {saving ? (locale === 'ko' ? '저장 중...' : 'Saving...') : t('record.submit')}
-          </button>
+          {/* #4: 하단은 저장 버튼 하나만 — 풀 와이드 */}
+          <div className="fixed bottom-[84px] left-0 right-0 flex justify-center p-4 bg-white/90 backdrop-blur-md z-50 border-t border-slate-100">
+            <div className="w-full max-w-lg">
+              <button
+                type="submit"
+                disabled={saving || !species}
+                className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-teal-accent text-white font-bold text-lg shadow-xl shadow-primary/30 flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-40 disabled:shadow-none"
+              >
+                {saving
+                  ? (locale === 'ko' ? '저장 중...' : 'Saving...')
+                  : t('record.submit')}
+              </button>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
+      )}
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 }

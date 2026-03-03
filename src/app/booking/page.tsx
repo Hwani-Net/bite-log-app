@@ -56,21 +56,19 @@ const PLATFORMS: BookingPlatform[] = [
   },
 ];
 
-const REGION_FILTERS = ['전체', '동해', '서해', '남해', '제주'];
-
 export default function BookingPage() {
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark page-enter">
+    <div className="min-h-screen bg-slate-50 page-enter">
       {/* Header */}
-      <div className="bg-gradient-to-br from-primary/10 via-cyan-500/5 to-transparent dark:from-primary/20 dark:via-cyan-500/10 px-5 pt-6 pb-8">
+      <div className="bg-gradient-to-br from-primary/10 via-cyan-500/5 to-transparent px-5 pt-6 pb-8">
         <Link href="/" className="inline-flex items-center gap-1 text-sm text-slate-500 mb-4 hover:text-primary transition-colors">
           <span className="material-symbols-outlined text-sm">arrow_back</span>
           홈으로
         </Link>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+        <h1 className="text-2xl font-bold text-slate-900 mb-1">
           🎣 낚시 예약
         </h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-sm text-slate-500">
           검증된 예약 플랫폼으로 바로 연결합니다
         </p>
       </div>
@@ -83,7 +81,7 @@ export default function BookingPage() {
             href={platform.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="block glass-card rounded-2xl overflow-hidden hover:scale-[1.01] transition-all duration-200"
+            className="block bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md hover:scale-[1.01] transition-all duration-200"
             style={{ animationDelay: `${i * 0.08}s` }}
           >
             {/* Gradient header */}
@@ -115,7 +113,7 @@ export default function BookingPage() {
                 {platform.features.map(feature => (
                   <span
                     key={feature}
-                    className="text-xs px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                    className="text-xs px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600"
                   >
                     ✓ {feature}
                   </span>
@@ -126,9 +124,9 @@ export default function BookingPage() {
         ))}
 
         {/* Coming Soon */}
-        <div className="glass-card rounded-2xl p-6 text-center">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 text-center">
           <span className="text-3xl mb-2 block">🚀</span>
-          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
+          <h3 className="text-sm font-bold text-slate-700 mb-1">
             BITE Log 자체 예약 시스템 준비 중
           </h3>
           <p className="text-xs text-slate-400">
@@ -136,32 +134,7 @@ export default function BookingPage() {
           </p>
         </div>
       </div>
-
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-slate-700/50 z-30">
-        <div className="max-w-lg mx-auto flex justify-around py-2">
-          {[
-            { href: '/', icon: '🏠', label: '홈' },
-            { href: '/news', icon: '🔥', label: '소식' },
-            { href: '/record', icon: '✏️', label: '기록' },
-            { href: '/booking', icon: '🎣', label: '예약', active: true },
-            { href: '/settings', icon: '⚙️', label: '설정' },
-          ].map(nav => (
-            <Link
-              key={nav.href}
-              href={nav.href}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors ${
-                nav.active
-                  ? 'text-primary'
-                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-              }`}
-            >
-              <span className="text-lg">{nav.icon}</span>
-              <span className="text-[10px] font-medium">{nav.label}</span>
-            </Link>
-          ))}
-        </div>
-      </nav>
     </div>
   );
 }
+

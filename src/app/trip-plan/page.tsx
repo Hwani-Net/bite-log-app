@@ -104,52 +104,52 @@ export default function TripPlanPage() {
   };
 
   const priorityColor = (p: string) => {
-    if (p === 'essential') return 'text-red-600 dark:text-red-400';
-    if (p === 'recommended') return 'text-amber-600 dark:text-amber-400';
-    return 'text-slate-600 dark:text-slate-400';
+    if (p === 'essential') return 'text-red-600';
+    if (p === 'recommended') return 'text-amber-600';
+    return 'text-slate-600';
   };
 
   return (
     <div className="relative flex min-h-dvh w-full flex-col overflow-x-hidden pb-24 page-enter">
       {/* Header — concierge 패턴 그대로 */}
-      <header className="flex items-center gap-3 px-5 pt-6 pb-3 sticky top-0 z-30 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-100 dark:border-white/5">
+      <header className="flex items-center gap-3 px-5 pt-6 pb-3 sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-100">
         <button
           onClick={() => router.back()}
-          className="size-9 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+          className="size-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200:bg-slate-700 transition-colors"
         >
-          <span className="material-symbols-outlined text-slate-600 dark:text-slate-400 text-xl">arrow_back</span>
+          <span className="material-symbols-outlined text-slate-600 text-xl">arrow_back</span>
         </button>
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">출조 전 브리핑</h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">AI가 날씨·물때·커뮤니티 조황을 종합합니다</p>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">출조 전 브리핑</h1>
+          <p className="text-xs text-slate-500">AI가 날씨·물때·커뮤니티 조황을 종합합니다</p>
         </div>
       </header>
 
       <main className="flex-1 px-5 mt-4 space-y-4">
 
         {/* ── 출조 계획 입력 ── */}
-        <section className="rounded-2xl bg-white dark:bg-slate-900 shadow-md border border-slate-200 dark:border-slate-800 p-5 space-y-4">
-          <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+        <section className="rounded-2xl bg-white shadow-md border border-slate-200 p-5 space-y-4">
+          <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
             <span className="material-symbols-outlined text-primary text-xl">edit_note</span>
             출조 계획 입력
           </h2>
 
           {/* 날짜 */}
           <div>
-            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 block">출조 날짜</label>
+            <label className="text-xs font-semibold text-slate-500 mb-1.5 block">출조 날짜</label>
             <input
               type="date"
               value={form.date}
               min={new Date().toISOString().split('T')[0]}
               onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
               style={{ colorScheme: 'inherit' }}
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all"
             />
           </div>
 
           {/* 어종 */}
           <div>
-            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 block">대상 어종</label>
+            <label className="text-xs font-semibold text-slate-500 mb-1.5 block">대상 어종</label>
             <div className="flex flex-wrap gap-2">
               {SPECIES_LIST.map(sp => (
                 <button
@@ -158,7 +158,7 @@ export default function TripPlanPage() {
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                     form.species === sp
                       ? 'bg-primary text-white shadow-md shadow-primary/30'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200:bg-slate-700'
                   }`}
                 >
                   {sp}
@@ -169,12 +169,12 @@ export default function TripPlanPage() {
 
           {/* 지역 */}
           <div>
-            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 block">출조 지역</label>
+            <label className="text-xs font-semibold text-slate-500 mb-1.5 block">출조 지역</label>
             <select
               value={form.location}
               onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
               style={{ colorScheme: 'inherit' }}
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-primary transition-all"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-primary transition-all"
             >
               {Object.keys(LOCATION_COORDS).map(loc => (
                 <option key={loc} value={loc}>{loc}</option>
@@ -184,7 +184,7 @@ export default function TripPlanPage() {
 
           {/* 낚시 유형 */}
           <div>
-            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 block">낚시 유형</label>
+            <label className="text-xs font-semibold text-slate-500 mb-1.5 block">낚시 유형</label>
             <div className="grid grid-cols-4 gap-2">
               {FISHING_TYPES.map(t => (
                 <button
@@ -193,7 +193,7 @@ export default function TripPlanPage() {
                   className={`py-2 rounded-xl text-[11px] font-semibold transition-all ${
                     form.fishingType === t.value
                       ? 'bg-primary text-white shadow-md shadow-primary/30'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200:bg-slate-700'
                   }`}
                 >
                   {t.label}
@@ -205,20 +205,20 @@ export default function TripPlanPage() {
           {/* 선사명 */}
           {form.fishingType === 'boat' && (
             <div>
-              <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 block">선사명 (선택)</label>
+              <label className="text-xs font-semibold text-slate-500 mb-1.5 block">선사명 (선택)</label>
               <input
                 type="text"
                 placeholder="예: 홍길동 낚시배"
                 value={form.charterName || ''}
                 onChange={e => setForm(f => ({ ...f, charterName: e.target.value }))}
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-primary transition-all"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400:text-slate-500 focus:outline-none focus:border-primary transition-all"
               />
             </div>
           )}
 
           {/* 알림 시간 */}
           <div>
-            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 flex items-center gap-1">
+            <label className="text-xs font-semibold text-slate-500 mb-1.5 flex items-center gap-1">
               🛒 브리핑 발송 시간
               <span className="text-primary text-[10px]">(쿠팡 당일배송 주문 가능)</span>
             </label>
@@ -230,7 +230,7 @@ export default function TripPlanPage() {
                   className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${
                     form.alertHour === h
                       ? 'bg-orange-500 text-white shadow-md shadow-orange-500/30'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200:bg-slate-700'
                   }`}
                 >
                   {h < 12 ? `오전 ${h}시` : `오후 ${h - 12}시`}
@@ -263,14 +263,14 @@ export default function TripPlanPage() {
           <>
             {/* AI 총평 — gradient border (concierge 스타일) */}
             <section className="rounded-2xl p-[1px] bg-gradient-to-br from-primary to-cyan-400">
-              <div className="rounded-2xl bg-white dark:bg-slate-900 p-5">
+              <div className="rounded-2xl bg-white p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="bg-primary/10 p-2 rounded-xl">
                     <span className="material-symbols-outlined text-primary text-xl">auto_awesome</span>
                   </div>
-                  <span className="text-sm font-bold text-slate-900 dark:text-white">AI 출조 총평</span>
+                  <span className="text-sm font-bold text-slate-900">AI 출조 총평</span>
                 </div>
-                <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed">{briefing.aiSummary}</p>
+                <p className="text-sm text-slate-700 leading-relaxed">{briefing.aiSummary}</p>
                 <p className="text-[11px] text-slate-400 mt-3 flex items-center gap-1">
                   <span className="material-symbols-outlined text-xs">waves</span>
                   물때: {briefing.tideInfo}
@@ -280,38 +280,38 @@ export default function TripPlanPage() {
 
             {/* 채비 추천 */}
             {briefing.tackleAdvice && (
-              <section className="rounded-2xl bg-white dark:bg-slate-900 shadow-md border border-slate-200 dark:border-slate-800 p-5">
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <section className="rounded-2xl bg-white shadow-md border border-slate-200 p-5">
+                <h2 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
                   <span className="material-symbols-outlined text-amber-500 text-xl">manage_search</span>
                   채비 추천 — {briefing.tackleAdvice.tide}
                 </h2>
                 <div className="space-y-3">
-                  <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-3.5">
+                  <div className="bg-slate-50 rounded-xl p-3.5">
                     <p className="text-[11px] text-slate-400 font-medium">봉돌 (텅스텐)</p>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">{briefing.tackleAdvice.sinkerGuide.tungsten || '—'}</p>
+                    <p className="text-sm font-bold text-slate-900 mt-0.5">{briefing.tackleAdvice.sinkerGuide.tungsten || '—'}</p>
                     <p className="text-[11px] text-slate-400 font-medium mt-2">봉돌 (납)</p>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">{briefing.tackleAdvice.sinkerGuide.lead || '—'}</p>
+                    <p className="text-sm font-bold text-slate-900 mt-0.5">{briefing.tackleAdvice.sinkerGuide.lead || '—'}</p>
                     <p className="text-[10px] text-primary mt-2">{briefing.tackleAdvice.sinkerGuide.note}</p>
                   </div>
-                  <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-3.5">
+                  <div className="bg-slate-50 rounded-xl p-3.5">
                     <p className="text-[11px] text-slate-400 font-medium">라인</p>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">{briefing.tackleAdvice.lineGuide.mainLine}</p>
+                    <p className="text-sm font-bold text-slate-900 mt-0.5">{briefing.tackleAdvice.lineGuide.mainLine}</p>
                     {briefing.tackleAdvice.lineGuide.leader && (
                       <p className="text-xs text-slate-500 mt-1">리더: {briefing.tackleAdvice.lineGuide.leader}</p>
                     )}
                     {briefing.tackleAdvice.lineGuide.length && (
-                      <p className="text-xs font-semibold text-orange-500 dark:text-orange-400 mt-0.5">최소 {briefing.tackleAdvice.lineGuide.length}</p>
+                      <p className="text-xs font-semibold text-orange-500 mt-0.5">최소 {briefing.tackleAdvice.lineGuide.length}</p>
                     )}
                   </div>
                   {briefing.tackleAdvice.lureGuide && (
-                    <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-3.5">
+                    <div className="bg-slate-50 rounded-xl p-3.5">
                       <p className="text-[11px] text-slate-400 font-medium">루어/미끼</p>
-                      <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
+                      <p className="text-sm font-bold text-slate-900 mt-0.5">
                         {briefing.tackleAdvice.lureGuide.type} {briefing.tackleAdvice.lureGuide.size}
                       </p>
                       <div className="flex gap-1 mt-2 flex-wrap">
                         {briefing.tackleAdvice.lureGuide.colors.map(c => (
-                          <span key={c} className="px-2 py-0.5 bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-300 text-[10px] rounded-full font-medium">{c}</span>
+                          <span key={c} className="px-2 py-0.5 bg-violet-100 text-violet-600 text-[10px] rounded-full font-medium">{c}</span>
                         ))}
                       </div>
                       <p className="text-[10px] text-primary mt-2">{briefing.tackleAdvice.lureGuide.note}</p>
@@ -323,8 +323,8 @@ export default function TripPlanPage() {
 
             {/* 커뮤니티 조황 */}
             {briefing.communityInsights.length > 0 && (
-              <section className="rounded-2xl bg-white dark:bg-slate-900 shadow-md border border-slate-200 dark:border-slate-800 p-5">
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <section className="rounded-2xl bg-white shadow-md border border-slate-200 p-5">
+                <h2 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
                   <span className="material-symbols-outlined text-emerald-500 text-xl">forum</span>
                   커뮤니티 조황 인사이트
                 </h2>
@@ -335,11 +335,11 @@ export default function TripPlanPage() {
                       href={ins.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block bg-slate-50 dark:bg-slate-800 rounded-xl p-3 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                      className="block bg-slate-50 rounded-xl p-3 hover:bg-slate-100:bg-slate-700 transition-colors"
                     >
                       <div className="flex items-start gap-2">
-                        <span className="text-[10px] px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-full shrink-0 mt-0.5 font-semibold">{ins.source}</span>
-                        <p className="text-xs text-slate-700 dark:text-slate-300 line-clamp-2">{ins.title}</p>
+                        <span className="text-[10px] px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full shrink-0 mt-0.5 font-semibold">{ins.source}</span>
+                        <p className="text-xs text-slate-700 line-clamp-2">{ins.title}</p>
                       </div>
                     </a>
                   ))}
@@ -348,8 +348,8 @@ export default function TripPlanPage() {
             )}
 
             {/* 날씨 체크리스트 */}
-            <section className="rounded-2xl bg-white dark:bg-slate-900 shadow-md border border-slate-200 dark:border-slate-800 p-5">
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+            <section className="rounded-2xl bg-white shadow-md border border-slate-200 p-5">
+              <h2 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
                 <span className="material-symbols-outlined text-orange-500 text-xl">checklist</span>
                 날씨 체크리스트
               </h2>
@@ -366,7 +366,7 @@ export default function TripPlanPage() {
                         href={`https://www.coupang.com/np/search?q=${encodeURIComponent(item.coupangQuery)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="shrink-0 size-7 flex items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-500/20 hover:bg-orange-200 dark:hover:bg-orange-500/30 transition-colors"
+                        className="shrink-0 size-7 flex items-center justify-center rounded-lg bg-orange-100 hover:bg-orange-200:bg-orange-500/30 transition-colors"
                       >
                         <span className="text-sm">🛒</span>
                       </a>
@@ -377,19 +377,19 @@ export default function TripPlanPage() {
             </section>
 
             {/* 기본 준비물 */}
-            <section className="rounded-2xl bg-white dark:bg-slate-900 shadow-md border border-slate-200 dark:border-slate-800 p-5">
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+            <section className="rounded-2xl bg-white shadow-md border border-slate-200 p-5">
+              <h2 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
                 <span className="material-symbols-outlined text-slate-500 text-xl">backpack</span>
                 기본 준비물
               </h2>
               <div className="space-y-2.5">
                 {briefing.basicChecklist.map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <div className="size-8 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-xl shrink-0">
+                    <div className="size-8 flex items-center justify-center bg-slate-100 rounded-xl shrink-0">
                       <span className="text-base">{item.icon}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-slate-800 dark:text-slate-200">{item.item}</p>
+                      <p className="text-xs font-medium text-slate-800">{item.item}</p>
                       <p className="text-[10px] text-slate-400">{item.reason}</p>
                     </div>
                   </div>
@@ -399,8 +399,8 @@ export default function TripPlanPage() {
 
             {/* 장비 추천 (쿠팡) */}
             {briefing.gearSuggestions.length > 0 && (
-              <section className="rounded-2xl bg-white dark:bg-slate-900 shadow-md border border-slate-200 dark:border-slate-800 p-5">
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <section className="rounded-2xl bg-white shadow-md border border-slate-200 p-5">
+                <h2 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
                   <span className="material-symbols-outlined text-pink-500 text-xl">shopping_bag</span>
                   추천 장비 (당일배송)
                 </h2>
@@ -411,17 +411,17 @@ export default function TripPlanPage() {
                       href={g.affiliateUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800 rounded-xl p-3 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                      className="flex items-center gap-3 bg-slate-50 rounded-xl p-3 hover:bg-slate-100:bg-slate-700 transition-colors"
                     >
-                      <div className="size-10 flex items-center justify-center bg-white dark:bg-slate-700 rounded-xl shadow-sm shrink-0">
+                      <div className="size-10 flex items-center justify-center bg-white rounded-xl shadow-sm shrink-0">
                         <span className="text-xl">{g.icon}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">{g.name}</p>
+                        <p className="text-xs font-semibold text-slate-900 truncate">{g.name}</p>
                         <p className="text-[10px] text-slate-500 truncate">{g.reason}</p>
                       </div>
-                      <div className="size-8 flex items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-500/20 shrink-0">
-                        <span className="material-symbols-outlined text-orange-500 dark:text-orange-400 text-base">open_in_new</span>
+                      <div className="size-8 flex items-center justify-center rounded-lg bg-orange-100 shrink-0">
+                        <span className="material-symbols-outlined text-orange-500 text-base">open_in_new</span>
                       </div>
                     </a>
                   ))}
@@ -433,12 +433,12 @@ export default function TripPlanPage() {
             )}
 
             {/* 알림 설정 */}
-            <section className="rounded-2xl bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-500/20 p-5">
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+            <section className="rounded-2xl bg-orange-50 border border-orange-200 p-5">
+              <h2 className="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">
                 <span className="material-symbols-outlined text-orange-500 text-xl">notifications</span>
                 브리핑 알림 설정
               </h2>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
+              <p className="text-xs text-slate-600 mb-4 leading-relaxed">
                 출조 전날 {(briefing.tripPlan.alertHour ?? 14) < 12
                   ? `오전 ${briefing.tripPlan.alertHour ?? 14}시`
                   : `오후 ${(briefing.tripPlan.alertHour ?? 14) - 12}시`}에 이 브리핑을 알림으로 받습니다.

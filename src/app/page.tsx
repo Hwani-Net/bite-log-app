@@ -11,6 +11,135 @@ import { calculateBiteTime, BiteTimePrediction } from '@/services/biteTimeServic
 import { fetchTopNews, FishingNewsItem } from '@/services/fishingNewsService';
 import { analyzeUserRecords, UserFishingProfile } from '@/services/personalizationService';
 import { getInSeasonSpecies } from '@/services/conciergeService';
+import {
+  FISH_SEASON_DB, getSeasonStatus, getTotalRelease,
+  sortByCurrentSeason, type FishSeasonData,
+} from '@/data/fishSeasonDB';
+
+// ─── 시즌 예측 위젯 (동적 데이터 기반) ──────────────────────────────────────────
+const STATUS_STYLES: Record<string, { label: string; badge: string; dot: string }> = {
+  gold:      { label: '황금 시즌', badge: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' },
+  peak:      { label: '피크 시즌', badge: 'bg-green-100 text-green-700', dot: 'bg-green-500' },
+  closed:    { label: '금어기',     badge: 'bg-red-100 text-red-600',     dot: 'bg-red-500' },
+  offseason: { label: '비시즌',     badge: 'bg-slate-100 text-slate-500', dot: 'bg-slate-400' },
+};
+
+function formatCount(n: number) {
+  if (n >= 10000) return `${(n / 10000).toFixed(1)}만`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}천`;
+  return n.toLocaleString();
+}
+
+function SeasonForecastWidget({ locale }: { locale: string }) {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  const isKo = locale === 'ko';
+
+  const sorted = sortByCurrentSeason(FISH_SEASON_DB, month);
+  // 현재 시즌인 어종 (peak + gold)
+  const inSeason = sorted.filter(d => {
+    const st = getSeasonStatus(d, month, day);
+    return st === 'peak' || st === 'gold';
+  });
+  // 금어기 어종
+  const closed = sorted.filter(d => getSeasonStatus(d, month, day) === 'closed');
+
+  return (
+    <section className="px-4 pt-6">
+      <Link href="/season-forecast" className="block group">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden hover:shadow-md hover:border-primary/20 transition-all">
+          {/* 헤더 */}
+          <div className="bg-gradient-to-r from-sky-500 to-cyan-400 px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">📊</span>
+              <div>
+                <p className="text-xs font-bold text-white">
+                  {isKo ? `${month}월 시즌 예측` : `${month} Season Forecast`}
+                </p>
+                <p className="text-[10px] text-white/70">
+                  {isKo ? '치어 방류 데이터 기반' : 'Based on fry release data'}
+                </p>
+              </div>
+            </div>
+            <span className="material-symbols-outlined text-white/80 group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+          </div>
+
+          {/* 시즌 어종 칩 */}
+          <div className="px-4 py-3">
+            {inSeason.length > 0 ? (
+              <>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  {isKo ? '🎣 지금 잡히는 어종' : '🎣 In Season Now'}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {inSeason.map(d => {
+                    const st = getSeasonStatus(d, month, day);
+                    const style = STATUS_STYLES[st];
+                    const total = getTotalRelease(d);
+                    return (
+                      <div
+                        key={d.species}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl ${style.badge} border border-transparent`}
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
+                        <span className="text-sm">{d.emoji}</span>
+                        <span className="text-xs font-bold">{d.species}</span>
+                        {total > 0 && (
+                          <span className="text-[9px] opacity-70">{formatCount(total)} 방류</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <p className="text-xs text-slate-500">
+                {isKo ? '현재 피크 시즌인 어종이 없습니다' : 'No species in peak season'}
+              </p>
+            )}
+
+            {/* 금어기 경고 */}
+            {closed.length > 0 && (
+              <div className="mt-2 flex items-center gap-1.5 text-[10px] text-red-500">
+                <span>⛔</span>
+                <span>
+                  {isKo ? '금어기' : 'Closed'}: {closed.map(d => `${d.emoji} ${d.species}`).join(', ')}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      </Link>
+    </section>
+  );
+}
+
+// ─── Windy 위성 날씨 ─────────────────────────────────────────────────────────
+function WindyWeatherSection({ locale }: { locale: string }) {
+  return (
+    <section className="px-4 pt-6">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="material-symbols-outlined text-sky-500 text-base">satellite_alt</span>
+        <h2 className="text-sm font-bold text-slate-800">
+          {locale === 'ko' ? '출항 날씨' : 'Departure Weather'}
+        </h2>
+      </div>
+      <div className="rounded-2xl overflow-hidden shadow-lg border border-slate-200">
+        <iframe
+          title="Windy Weather"
+          width="100%"
+          height="300"
+          src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=°C&metricWind=m/s&zoom=7&overlay=wind&product=ecmwf&level=surface&lat=35.5&lon=128.5&detailLat=35.5&detailLon=128.5&marker=true&message=true"
+          frameBorder="0"
+        />
+      </div>
+      <p className="text-[10px] text-slate-400 text-center mt-2">
+        바람 · 파도 · 해류를 터치로 확인하세요 · Powered by Windy.com
+      </p>
+    </section>
+  );
+}
 
 // ─── Hero Card: 오늘의 낚시 조건 ──────────────────────────────────────────────
 // 시간대별 오버레이 컬러 (아침/오후/저녁/밤)
@@ -57,6 +186,7 @@ function HeroCard({ biteTime, loading }: { biteTime: BiteTimePrediction | null; 
 
   return (
     <section className="px-4 pt-4">
+      <Link href="/bite-forecast" className="block">
       <div className="relative rounded-3xl overflow-hidden h-52 shadow-xl">
         {/* 실사 배경 이미지 */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -77,11 +207,20 @@ function HeroCard({ biteTime, loading }: { biteTime: BiteTimePrediction | null; 
           <span className="text-[10px] font-bold text-white tracking-wide">LIVE</span>
         </div>
 
-        {/* Season & time badge */}
-        <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
-          <span className="text-[11px] font-semibold text-white">{timeLabel}</span>
-          <span className="text-white/50 text-[10px]">|</span>
-          <span className="text-[11px] font-semibold text-white">{month}월 시즌</span>
+        {/* Tidal phase + season badge */}
+        <div className="absolute top-4 right-4 flex items-center gap-1.5">
+          {biteTime?.currentPhaseLabel && (
+            <div className="flex items-center gap-1 bg-cyan-500/80 backdrop-blur-sm rounded-full px-2.5 py-1">
+              <span className="text-[10px]">🌊</span>
+              <span className="text-[10px] font-bold text-white">{biteTime.currentPhaseLabel}</span>
+              {biteTime.currentStrengthLabel && (
+                <span className="text-[9px] font-medium text-white/80">{biteTime.currentStrengthLabel}</span>
+              )}
+            </div>
+          )}
+          <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+            <span className="text-[11px] font-semibold text-white">{timeLabel}</span>
+          </div>
         </div>
 
         {/* Content */}
@@ -140,6 +279,7 @@ function HeroCard({ biteTime, loading }: { biteTime: BiteTimePrediction | null; 
           )}
         </div>
       </div>
+      </Link>
     </section>
   );
 }
@@ -248,6 +388,20 @@ function AIInsightsSection({ profile, locale }: { profile: UserFishingProfile | 
   );
 }
 
+// Fish species default image/color mapping
+const FISH_COLORS: Record<string, { gradient: string; emoji: string }> = {
+  '농어': { gradient: 'from-blue-500 to-cyan-400', emoji: '🐟' },
+  '우럭': { gradient: 'from-amber-500 to-orange-400', emoji: '🪨' },
+  '참돔': { gradient: 'from-rose-400 to-pink-300', emoji: '🍣' },
+  '감성돔': { gradient: 'from-violet-500 to-purple-400', emoji: '🐠' },
+  '볼락': { gradient: 'from-emerald-500 to-green-400', emoji: '🔮' },
+  '광어': { gradient: 'from-yellow-400 to-amber-300', emoji: '🫓' },
+  '고등어': { gradient: 'from-indigo-500 to-blue-400', emoji: '🐟' },
+  '방어': { gradient: 'from-sky-500 to-cyan-400', emoji: '🐟' },
+  '주꾸미': { gradient: 'from-red-400 to-orange-300', emoji: '🐙' },
+};
+const DEFAULT_FISH = { gradient: 'from-slate-400 to-slate-300', emoji: '🎣' };
+
 // ─── 최근 조과 (매거진 카드) ──────────────────────────────────────────────────
 function CatchMagazineCard({ record, index }: { record: CatchRecord; index: number }) {
   const tagColors = [
@@ -255,6 +409,9 @@ function CatchMagazineCard({ record, index }: { record: CatchRecord; index: numb
     'bg-teal-500/10 text-teal-600',
     'bg-violet-500/10 text-violet-600',
   ];
+  const fishStyle = FISH_COLORS[record.species] || DEFAULT_FISH;
+  // Use real user photos; skip bundled placeholder images
+  const hasRealPhoto = record.photos.length > 0 && !record.photos[0].startsWith('/fish-');
 
   return (
     <Link
@@ -262,21 +419,13 @@ function CatchMagazineCard({ record, index }: { record: CatchRecord; index: numb
       className="flex gap-3 bg-white rounded-2xl p-3 shadow-sm border border-slate-100 hover:shadow-md hover:border-primary/20 transition-all active:scale-[0.98]"
     >
       <div className="w-[72px] h-[72px] rounded-xl overflow-hidden flex-shrink-0 bg-slate-100">
-        {record.photos.length > 0 ? (
+        {hasRealPhoto ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={record.photos[0]} alt={record.species} className="w-full h-full object-cover" />
         ) : (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src="/fish-placeholder.png"
-            alt={record.species}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              const el = e.target as HTMLImageElement;
-              el.style.display = 'none';
-              el.parentElement!.classList.add('bg-gradient-to-tr', 'from-primary', 'to-cyan-400');
-            }}
-          />
+          <div className={`w-full h-full bg-gradient-to-br ${fishStyle.gradient} flex items-center justify-center`}>
+            <span className="text-3xl drop-shadow-md">{fishStyle.emoji}</span>
+          </div>
         )}
       </div>
       <div className="flex-1 flex flex-col justify-center min-w-0">
@@ -299,10 +448,20 @@ function CatchMagazineCard({ record, index }: { record: CatchRecord; index: numb
 }
 
 // ─── 낚시 뉴스 카드 (full-bleed image) ───────────────────────────────────────
-function NewsCard({ item }: { item: FishingNewsItem }) {
+const NEWS_GRADIENTS = [
+  'from-blue-600 via-blue-500 to-cyan-400',
+  'from-slate-700 via-slate-600 to-slate-500',
+  'from-amber-600 via-orange-500 to-yellow-400',
+  'from-emerald-600 via-teal-500 to-cyan-400',
+  'from-violet-600 via-purple-500 to-pink-400',
+];
+const NEWS_EMOJIS = ['🎣', '🐟', '🌊', '⛵', '🦑'];
+
+function NewsCard({ item, index = 0 }: { item: FishingNewsItem; index?: number }) {
   const dotColor = item.freshness === 'realtime' ? 'bg-red-500'
     : item.freshness === 'today' ? 'bg-amber-400'
     : 'bg-slate-300';
+  const hasThumbnail = !!item.thumbnail;
 
   return (
     <a
@@ -313,14 +472,20 @@ function NewsCard({ item }: { item: FishingNewsItem }) {
     >
       {/* 이미지 + 타이틀 오버레이 */}
       <div className="relative w-full h-40 overflow-hidden bg-slate-900">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={item.thumbnail || '/news-fallback.png'}
-          alt=""
-          className="w-full h-full object-cover opacity-80"
-          loading="lazy"
-          onError={(e) => { (e.target as HTMLImageElement).src = '/news-fallback.png'; }}
-        />
+        {hasThumbnail ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={item.thumbnail}
+            alt=""
+            className="w-full h-full object-cover opacity-80"
+            loading="lazy"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          />
+        ) : (
+          <div className={`w-full h-full bg-gradient-to-br ${NEWS_GRADIENTS[index % NEWS_GRADIENTS.length]} flex items-center justify-center`}>
+            <span className="text-5xl opacity-30">{NEWS_EMOJIS[index % NEWS_EMOJIS.length]}</span>
+          </div>
+        )}
         {/* 하단 그라데이션 오버레이 */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/30 to-transparent" />
 
@@ -353,38 +518,66 @@ function NewsCard({ item }: { item: FishingNewsItem }) {
 export default function HomePage() {
   const locale = useAppStore((s) => s.locale);
   const [records, setRecords] = useState<CatchRecord[]>([]);
+  const [recordsLoading, setRecordsLoading] = useState(true);
   const [biteTime, setBiteTime] = useState<BiteTimePrediction | null>(null);
   const [biteLoading, setBiteLoading] = useState(true);
   const [topNews, setTopNews] = useState<FishingNewsItem[]>([]);
   const [aiProfile, setAiProfile] = useState<UserFishingProfile | null>(null);
 
-  // Demo records shown when no real records exist
+  // Demo records — dynamic dates relative to today for a realistic feel
+  const today = new Date();
+  const daysAgo = (d: number) => {
+    const t = new Date(today); t.setDate(today.getDate() - d);
+    return t.toISOString().slice(0, 10);
+  };
+
   const DEMO_RECORDS: CatchRecord[] = [
     {
       id: 'demo-1', species: '농어', sizeCm: 72, count: 1,
-      date: '2024-05-20', location: { name: '제주도 서귀포시', lat: 0, lng: 0 },
-      photos: ['/fish-placeholder.png'],
-      memo: '대물 농어', createdAt: '2024-05-20', updatedAt: '2024-05-20', visibility: 'public' as const,
+      date: daysAgo(1), location: { name: '제주 서귀포 범섬', lat: 33.22, lng: 126.51 },
+      photos: [],
+      memo: '범섬 포인트 캐스팅, 미노우 12cm 히트! 대물 농어 72cm 🎉',
+      createdAt: daysAgo(1), updatedAt: daysAgo(1), visibility: 'public' as const,
     },
     {
-      id: 'demo-2', species: '우럭', sizeCm: undefined, count: 3,
-      date: '2024-05-18', location: { name: '충남 당진시', lat: 0, lng: 0 },
-      photos: ['/fish-placeholder.png'],
-      memo: '방파제 우럭', createdAt: '2024-05-18', updatedAt: '2024-05-18', visibility: 'public' as const,
+      id: 'demo-2', species: '우럭', sizeCm: 28, count: 5,
+      date: daysAgo(3), location: { name: '충남 당진 왜목항', lat: 36.96, lng: 126.88 },
+      photos: [],
+      memo: '왜목항 방파제 야간 원투, 우럭 5마리 마릿수 조과',
+      createdAt: daysAgo(3), updatedAt: daysAgo(3), visibility: 'public' as const,
     },
     {
-      id: 'demo-3', species: '참돔', sizeCm: 45, count: 1,
-      date: '2024-05-12', location: { name: '전남 여수시', lat: 0, lng: 0 },
-      photos: ['/fish-placeholder.png'],
-      memo: '참돔', createdAt: '2024-05-12', updatedAt: '2024-05-12', visibility: 'public' as const,
+      id: 'demo-3', species: '참돔', sizeCm: 45, count: 2,
+      date: daysAgo(5), location: { name: '전남 여수 금오도', lat: 34.5, lng: 127.75 },
+      photos: [],
+      memo: '금오도 선상 타이라바, 45cm급 참돔 2마리! 물때 최고',
+      createdAt: daysAgo(5), updatedAt: daysAgo(5), visibility: 'public' as const,
+    },
+    {
+      id: 'demo-4', species: '감성돔', sizeCm: 42, count: 1,
+      date: daysAgo(8), location: { name: '경남 통영 욕지도', lat: 34.59, lng: 128.25 },
+      photos: [],
+      memo: '욕지도 갯바위 찌낚시, 감성돔 42cm 1마리',
+      createdAt: daysAgo(8), updatedAt: daysAgo(8), visibility: 'public' as const,
+    },
+    {
+      id: 'demo-5', species: '볼락', sizeCm: 22, count: 8,
+      date: daysAgo(12), location: { name: '강원 속초 대포항', lat: 38.18, lng: 128.6 },
+      photos: [],
+      memo: '대포항 야간 루어, 볼락 마릿수 폭발 🔥 지그헤드 1.5g',
+      createdAt: daysAgo(12), updatedAt: daysAgo(12), visibility: 'public' as const,
     },
   ];
 
   useEffect(() => {
     async function load() {
-      const catches = await getDataService().getCatchRecords();
-      setRecords(catches);
-      setAiProfile(analyzeUserRecords(catches));
+      try {
+        const catches = await getDataService().getCatchRecords();
+        setRecords(catches);
+        setAiProfile(analyzeUserRecords(catches));
+      } finally {
+        setRecordsLoading(false);
+      }
     }
     load();
     fetchTopNews().then(setTopNews).catch(console.error);
@@ -422,14 +615,14 @@ export default function HomePage() {
     loadBiteTime();
   }, []);
 
-  const displayRecords = records.length > 0 ? records : DEMO_RECORDS;
-  const isDemo = records.length === 0;
-  const totalCatch = isDemo ? 128 : records.reduce((acc, r) => acc + r.count, 0);
-  const maxSize = isDemo ? 58 : records.reduce((acc, r) => Math.max(acc, r.sizeCm ?? 0), 0);
+  const isDemo = !recordsLoading && records.length === 0;
+  const displayRecords = recordsLoading ? [] : (records.length > 0 ? records : DEMO_RECORDS);
+  const totalCatch = recordsLoading ? 0 : (isDemo ? 128 : records.reduce((acc, r) => acc + r.count, 0));
+  const maxSize = recordsLoading ? 0 : (isDemo ? 58 : records.reduce((acc, r) => Math.max(acc, r.sizeCm ?? 0), 0));
   const currentMonthPrefix = new Date().toISOString().slice(0, 7);
-  const thisMonthCatch = isDemo ? 15 : records
+  const thisMonthCatch = recordsLoading ? 0 : (isDemo ? 15 : records
     .filter((r) => r.date.startsWith(currentMonthPrefix))
-    .reduce((acc, r) => acc + r.count, 0);
+    .reduce((acc, r) => acc + r.count, 0));
 
   return (
     <div className="relative flex min-h-dvh w-full flex-col bg-slate-50 overflow-x-hidden pb-24">
@@ -454,9 +647,13 @@ export default function HomePage() {
           >
             <span className="material-symbols-outlined text-lg">auto_awesome</span>
           </Link>
-          <button className="size-9 flex items-center justify-center rounded-full bg-white shadow-sm border border-slate-100">
+          <Link
+            href="/alerts"
+            className="size-9 flex items-center justify-center rounded-full bg-white shadow-sm border border-slate-100 hover:bg-sky-50 hover:border-sky-200 transition-colors"
+            aria-label="알림 설정"
+          >
             <span className="material-symbols-outlined text-slate-500 text-lg">notifications</span>
-          </button>
+          </Link>
         </div>
       </header>
 
@@ -484,9 +681,23 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="space-y-2.5">
-          {displayRecords.map((r, i) => (
-            <CatchMagazineCard key={r.id} record={r} index={i} />
-          ))}
+          {recordsLoading ? (
+            // Skeleton cards while loading — prevents DEMO flash
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-3 flex gap-3 animate-pulse">
+                <div className="w-[72px] h-[72px] rounded-xl bg-slate-200" />
+                <div className="flex-1 space-y-2 py-1">
+                  <div className="h-3 bg-slate-200 rounded w-16" />
+                  <div className="h-4 bg-slate-200 rounded w-32" />
+                  <div className="h-3 bg-slate-200 rounded w-24" />
+                </div>
+              </div>
+            ))
+          ) : (
+            displayRecords.slice(0, 3).map((r, i) => (
+              <CatchMagazineCard key={r.id} record={r} index={i} />
+            ))
+          )}
         </div>
       </section>
 
@@ -504,12 +715,40 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="space-y-3">
-            {topNews.slice(0, 3).map((item) => (
-              <NewsCard key={item.id} item={item} />
+            {topNews.slice(0, 3).map((item, i) => (
+              <NewsCard key={item.id} item={item} index={i} />
             ))}
           </div>
         </section>
       )}
+
+      {/* ── Windy 위성 날씨: 바람·파도·해류 ── */}
+      <WindyWeatherSection locale={locale} />
+
+      {/* ── 시즌 예측 위젯 (동적 데이터) ── */}
+      <SeasonForecastWidget locale={locale} />
+
+      {/* ── 바이럴 채비 랭킹 위젯 ── */}
+      <section className="px-4 pt-3 pb-2">
+        <Link href="/viral-gear" className="block">
+          <div className="bg-gradient-to-r from-orange-500 to-amber-400 rounded-2xl p-4 flex items-center gap-3 shadow-lg shadow-orange-200">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <span className="text-2xl">🔥</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider mb-0.5">
+                {locale === 'ko' ? '바이럴 채비 랭킹' : 'Viral Gear Ranking'}
+              </p>
+              <p className="text-sm font-bold text-white truncate">
+                {locale === 'ko'
+                  ? '🛒 지금 커뮤니티에서 가장 핫한 채비 TOP 5'
+                  : '🛒 Most talked-about gear in fishing communities'}
+              </p>
+            </div>
+            <span className="material-symbols-outlined text-white/80">chevron_right</span>
+          </div>
+        </Link>
+      </section>
 
       {/* ── FAB ── */}
       <Link
