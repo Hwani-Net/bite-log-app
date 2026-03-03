@@ -59,11 +59,13 @@ function getWindScore(windSpeed?: number): { score: number; status: 'positive' |
 
 // Sea Surface Temperature factor (max 20) — THE KEY FACTOR
 function getSSTScore(sst?: number, airTemp?: number): { score: number; status: 'positive' | 'neutral' | 'negative'; description: string } {
-  // Use SST if available, otherwise fall back to air temp with disclaimer
-  const temp = sst ?? airTemp;
-  const source = sst !== undefined ? '수온' : '기온(추정)';
+  // Use SST if available and realistic, otherwise fall back to air temp
+  // SST of exactly 0 is unreliable (often returned for land-locked coordinates)
+  const hasSst = sst !== undefined && sst > 0;
+  const temp = hasSst ? sst : airTemp;
+  const source = hasSst ? '수온' : '기온(추정)';
   
-  if (temp === undefined) return { score: 8, status: 'neutral', description: '수온 정보 없음' };
+  if (temp === undefined || temp === 0) return { score: 8, status: 'neutral', description: '수온 정보 없음' };
 
   if (temp >= 14 && temp <= 22) return { score: 20, status: 'positive', description: `${source} ${temp}°C — 최적 활동 수온대` };
   if (temp >= 10 && temp < 14) return { score: 16, status: 'positive', description: `${source} ${temp}°C — 볼락·우럭 적합` };
@@ -143,7 +145,7 @@ function getPressureScore(pressureMsl?: number): { score: number; status: 'posit
 
 // Wave height factor (max 10) — safety + fishing condition
 function getWaveScore(waveHeight?: number): { score: number; status: 'positive' | 'neutral' | 'negative'; description: string } {
-  if (waveHeight === undefined) return { score: 5, status: 'neutral', description: '파고 정보 없음' };
+  if (waveHeight === undefined || isNaN(waveHeight)) return { score: 5, status: 'neutral', description: '파고 정보 없음' };
 
   if (waveHeight <= 0.5) return { score: 10, status: 'positive', description: `파고 ${waveHeight}m — 잔잔, 최적 조건` };
   if (waveHeight <= 1.0) return { score: 8, status: 'positive', description: `파고 ${waveHeight}m — 약한 파도, 양호` };
@@ -180,7 +182,9 @@ export function calculateBiteTime(
 ): BiteTimePrediction {
   const lunar = getLunarInfo();
   const timeResult = getMagicHourScore();
-  const sstResult = getSSTScore(marine?.seaSurfaceTemp, weather?.tempC);
+  // SST of 0 is unreliable (land coordinates) — skip it and let airTemp fallback work
+  const reliableSST = marine?.seaSurfaceTemp && marine.seaSurfaceTemp > 0 ? marine.seaSurfaceTemp : undefined;
+  const sstResult = getSSTScore(reliableSST, weather?.tempC);
   const tideResult = getTideScore(tideData, marine?.currentVelocity);
   const windResult = getWindScore(weather?.windSpeed);
   const pressureResult = getPressureScore(weather?.pressureMsl);
@@ -190,7 +194,7 @@ export function calculateBiteTime(
 
   const factors: BiteFactor[] = [
     {
-      name: marine?.seaSurfaceTemp !== undefined ? `수온 ${marine.seaSurfaceTemp}°C` : '수온',
+      name: reliableSST !== undefined ? `수온 ${reliableSST}°C` : (weather?.tempC !== undefined ? `수온(기온추정)` : '수온'),
       icon: 'thermostat',
       score: sstResult.score,
       status: sstResult.status,
@@ -252,6 +256,6 @@ export function calculateBiteTime(
     currentPhaseLabel: phase?.label,
     currentStrengthLabel: phase?.strengthLabel,
     lunarInfo: lunar,
-    seaSurfaceTemp: marine?.seaSurfaceTemp,
+    seaSurfaceTemp: reliableSST ?? undefined,
   };
 }
