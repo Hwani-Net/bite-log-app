@@ -47,3 +47,13 @@
 - **해결**: Google AI Studio(https://aistudio.google.com/apikey)에서 별도의 Gemini API 전용 키 발급 → `.env.local`에 교체 → `.next` 캐시 삭제(`rm -rf .next`) → dev 서버 재시작
 - **🚫 금지**: Firebase API 키를 Gemini API 키로 사용하지 말 것. 반드시 AI Studio에서 별도 발급.
 - **추가 주의**: `.env.local` 변경 후 반드시 `.next` 캐시 삭제 필요 — Next.js가 이전 환경변수를 캐시하는 경우가 있음.
+
+## ❌ Marine API 수온 0°C — 내륙 좌표 문제 (2026-03-03)
+- **증상**: HeroCard에 "수온 0°C" 표시 → 모든 어종별 입질 점수 대폭 하락 (-15점/어종)
+- **원인**: Open-Meteo Marine API에 내륙 좌표(서울 37.56, 126.97) 전송 → `wave_height: null`, `sea_surface_temperature: 3.7°C` (인천 앞바다 값) → `Math.round(null)` = NaN → 극저수온 판정
+- **해결**: 
+  1. `marineService.ts`에 한국 해안 10개 기준점 추가 → 파고 null이면 가장 가까운 해안으로 자동 보정
+  2. `biteTimeService.ts`에서 SST 0°C를 unreliable로 취급 → airTemp 폴백
+  3. NaN 방어 추가 (`isNaN(waveHeight)` 체크)
+- **🚫 금지**: Marine API 응답의 null/NaN 값을 그대로 Math 연산에 넣지 말 것. 반드시 null 체크 후 처리.
+

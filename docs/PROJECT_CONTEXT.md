@@ -1,6 +1,6 @@
 # BITE Log — Project Context
 
-> **최종 갱신**: 2026-03-03 (14:15 KST)
+> **최종 갱신**: 2026-03-03 (17:15 KST)
 > **경로**: `e:/AI_Programing/Fishing/fish-log`
 > **서버**: `npm run dev -- -p 3002`
 
