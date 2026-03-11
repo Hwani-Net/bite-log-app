@@ -110,7 +110,7 @@ export default function PrivacyPage() {
       <section style={{ marginBottom: 24 }}>
         <h2 style={{ fontSize: 17, fontWeight: 600, color: 'var(--color-text)', marginBottom: 8 }}>7. 개인정보 보호 책임자</h2>
         <p style={{ color: 'var(--color-text-secondary)', fontSize: 14 }}>
-          이메일: fishlog.app@gmail.com
+          이메일: hwanizero01@gmail.com
         </p>
       </section>
 

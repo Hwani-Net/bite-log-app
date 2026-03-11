@@ -196,6 +196,10 @@ export default function SettingsPage() {
             <span className="text-2xl">🔥</span>
             <span className="text-xs font-medium text-slate-700">{locale === 'ko' ? '조과 소식' : 'News'}</span>
           </Link>
+          <Link href="/regulations" className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col items-center gap-2 hover:border-primary/30 transition-colors">
+            <span className="text-2xl">⚖️</span>
+            <span className="text-xs font-medium text-slate-700">{locale === 'ko' ? '금어기·법규' : 'Regulations'}</span>
+          </Link>
         </div>
       </section>
 

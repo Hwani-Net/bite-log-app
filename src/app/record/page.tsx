@@ -9,6 +9,7 @@ import { useGeolocation } from '@/hooks/useGeolocation';
 import { fetchWeather, WeatherData } from '@/services/weatherService';
 import { fetchTideData } from '@/services/tideService';
 import { identifyFish, FishAIResult } from '@/services/fishAIService';
+import { parseVoiceInput, applyParsedResult, VoiceParsedResult } from '@/services/voiceParseService';
 import { CatchRecord, FISH_SPECIES, TideRecordData, RecordVisibility } from '@/types';
 
 export default function RecordPage() {
@@ -42,6 +43,14 @@ export default function RecordPage() {
   const [visibility, setVisibility] = useState<RecordVisibility>('private');
   const [aiAnalyzing, setAiAnalyzing] = useState(false);
   const [aiResult, setAiResult] = useState<FishAIResult | null>(null);
+
+  // ===== Voice recording state =====
+  const [voiceState, setVoiceState] = useState<'idle' | 'listening' | 'review'>('idle');
+  const [voiceTranscript, setVoiceTranscript] = useState('');
+  const [voiceParsed, setVoiceParsed] = useState<VoiceParsedResult | null>(null);
+  const [voiceFilled, setVoiceFilled] = useState<string[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null);
 
   // ===== Auto-detect GPS when entering form step =====
   useEffect(() => {
@@ -173,6 +182,66 @@ export default function RecordPage() {
     setStep('form');
   }
 
+  // ===== Voice Recording (Web Speech API) =====
+  function startVoiceRecording() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognitionAPI) {
+      alert(locale === 'ko' ? '이 브라우저는 음성 인식을 지원하지 않습니다.\nChrome 또는 Samsung Internet을 사용해 주세요.' : 'Speech recognition not supported. Please use Chrome.');
+      return;
+    }
+
+    const recognition = new SpeechRecognitionAPI();
+    recognition.lang = 'ko-KR';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognitionRef.current = recognition;
+
+    setVoiceState('listening');
+    setVoiceTranscript('');
+    setVoiceParsed(null);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript as string;
+      setVoiceTranscript(transcript);
+      const parsed = parseVoiceInput(transcript);
+      setVoiceParsed(parsed);
+      setVoiceState('review');
+    };
+
+    recognition.onerror = () => {
+      setVoiceState('idle');
+    };
+
+    recognition.onend = () => {
+      if (voiceState === 'listening') setVoiceState('idle');
+    };
+
+    recognition.start();
+  }
+
+  function cancelVoice() {
+    recognitionRef.current?.stop();
+    setVoiceState('idle');
+    setVoiceTranscript('');
+    setVoiceParsed(null);
+  }
+
+  function confirmVoice() {
+    if (!voiceParsed) return;
+    const filled = applyParsedResult(voiceParsed, {
+      setSpecies,
+      setCount,
+      setSizeCm,
+      setLocationName,
+    });
+    setVoiceFilled(filled);
+    setVoiceState('idle');
+    setStep('form');
+  }
+
   // After photo taken, go to form
   function proceedToForm() {
     setStep('form');
@@ -272,25 +341,68 @@ export default function RecordPage() {
 
           {/* Bottom actions */}
           <div className="fixed bottom-[84px] left-0 right-0 flex flex-col gap-3 justify-center items-center p-4 bg-white/90 backdrop-blur-md z-50 border-t border-slate-100">
-            <div className="w-full max-w-lg">
-              {photos.length > 0 ? (
-                <button
-                  type="button"
-                  onClick={proceedToForm}
-                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-teal-accent text-white font-bold text-lg shadow-xl shadow-primary/30 flex items-center justify-center gap-2 active:scale-95 transition-transform"
-                >
-                  {t('record.next')}
-                  <span className="material-symbols-outlined text-lg">chevron_right</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={skipToForm}
-                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-teal-accent text-white font-bold text-lg shadow-xl shadow-primary/30 flex items-center justify-center gap-2 active:scale-95 transition-transform"
-                >
-                  <span className="material-symbols-outlined text-lg">bolt</span>
-                  {t('record.skipPhoto')}
-                </button>
+            <div className="w-full max-w-lg flex flex-col gap-2">
+              {/* Voice review panel */}
+              {voiceState === 'review' && voiceParsed && (
+                <div className="bg-violet-50 border border-violet-200 rounded-2xl p-4 mb-1">
+                  <p className="text-xs text-violet-500 font-semibold mb-1">🎤 인식된 내용</p>
+                  <p className="text-sm text-slate-700 mb-2">&quot;{voiceTranscript}&quot;</p>
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {voiceParsed.species && <span className="text-xs px-2 py-1 bg-violet-100 text-violet-700 rounded-full font-medium">🐟 {voiceParsed.species}</span>}
+                    {voiceParsed.count && <span className="text-xs px-2 py-1 bg-violet-100 text-violet-700 rounded-full font-medium">× {voiceParsed.count}마리</span>}
+                    {voiceParsed.sizeCm && <span className="text-xs px-2 py-1 bg-violet-100 text-violet-700 rounded-full font-medium">📏 {voiceParsed.sizeCm}cm</span>}
+                    {voiceParsed.locationHint && <span className="text-xs px-2 py-1 bg-violet-100 text-violet-700 rounded-full font-medium">📍 {voiceParsed.locationHint}</span>}
+                  </div>
+                  <div className="flex gap-2">
+                    <button type="button" onClick={cancelVoice} className="flex-1 h-11 rounded-xl border border-slate-300 text-slate-600 font-semibold text-sm active:scale-95 transition-transform">다시 말하기</button>
+                    <button type="button" onClick={confirmVoice} className="flex-1 h-11 rounded-xl bg-violet-500 text-white font-bold text-sm active:scale-95 transition-transform shadow-lg shadow-violet-200">확인 → 기록</button>
+                  </div>
+                </div>
+              )}
+
+              {/* Voice listening indicator */}
+              {voiceState === 'listening' && (
+                <div className="flex items-center justify-between bg-red-50 border border-red-200 rounded-2xl px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
+                    <span className="text-sm font-semibold text-red-600">듣는 중... 말씀해 주세요</span>
+                  </div>
+                  <button type="button" onClick={cancelVoice} className="text-xs text-slate-400 hover:text-red-500 transition-colors">취소</button>
+                </div>
+              )}
+
+              {voiceState === 'idle' && (
+                photos.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={proceedToForm}
+                    className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-teal-accent text-white font-bold text-lg shadow-xl shadow-primary/30 flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                  >
+                    {t('record.next')}
+                    <span className="material-symbols-outlined text-lg">chevron_right</span>
+                  </button>
+                ) : (
+                  <div className="flex gap-2">
+                    {/* 🎤 Voice record button */}
+                    <button
+                      type="button"
+                      onClick={startVoiceRecording}
+                      className="flex-1 h-14 rounded-2xl bg-gradient-to-r from-violet-500 to-purple-500 text-white font-bold text-base shadow-xl shadow-violet-200 flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                    >
+                      <span className="material-symbols-outlined text-xl">mic</span>
+                      {locale === 'ko' ? '음성으로 기록' : 'Voice Record'}
+                    </button>
+                    {/* ⚡ Quick form button */}
+                    <button
+                      type="button"
+                      onClick={skipToForm}
+                      className="h-14 px-4 rounded-2xl bg-slate-100 text-slate-600 font-bold text-sm flex items-center justify-center gap-1.5 active:scale-95 transition-transform"
+                    >
+                      <span className="material-symbols-outlined text-lg">bolt</span>
+                      {locale === 'ko' ? '직접 입력' : 'Manual'}
+                    </button>
+                  </div>
+                )
               )}
             </div>
           </div>
@@ -298,6 +410,18 @@ export default function RecordPage() {
       )}
 
       {/* ===== STEP: FORM (everything in one scroll) ===== */}
+      {step === 'form' && voiceFilled.length > 0 && (
+        <div className="mx-4 mt-4 flex items-start gap-2 bg-violet-50 border border-violet-200 rounded-xl p-3 animate-fadeIn">
+          <span className="material-symbols-outlined text-violet-500 text-base mt-0.5">mic</span>
+          <div>
+            <p className="text-xs font-semibold text-violet-700 mb-0.5">음성으로 자동 채움</p>
+            <p className="text-xs text-violet-500">{voiceFilled.join(' · ')}</p>
+          </div>
+          <button type="button" onClick={() => setVoiceFilled([])} className="ml-auto text-slate-300 hover:text-slate-500">
+            <span className="material-symbols-outlined text-sm">close</span>
+          </button>
+        </div>
+      )}
       {step === 'form' && (
         <form id="record-form" onSubmit={handleSubmit} className="px-4 pt-4 pb-32 space-y-4 animate-fadeIn">
 

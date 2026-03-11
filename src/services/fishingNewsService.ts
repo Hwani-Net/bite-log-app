@@ -40,6 +40,21 @@ const SPECIES_KEYWORDS = [
   '갈치', '오징어', '문어', '주꾸미', '쭈꾸미',
 ];
 
+// 낚시 관련 기본 썸네일 (Unsplash — 핫링킹 허용, 무료)
+const FISHING_THUMBNAILS = [
+  'https://images.unsplash.com/photo-1500463959177-e0869687df26?w=480&h=270&fit=crop', // 바다 낚시
+  'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=480&h=270&fit=crop', // 물고기
+  'https://images.unsplash.com/photo-1498654896293-37aacf113fd9?w=480&h=270&fit=crop', // 보트
+  'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=480&h=270&fit=crop', // 바다
+  'https://images.unsplash.com/photo-1504472478235-9bc48ba4d60f?w=480&h=270&fit=crop', // 낚시대
+];
+
+/** thumbnail이 없는 뉴스 아이템에 기본 썸네일 할당 */
+function assignDefaultThumbnail(item: FishingNewsItem, index: number): FishingNewsItem {
+  if (item.thumbnail) return item;
+  return { ...item, thumbnail: FISHING_THUMBNAILS[index % FISHING_THUMBNAILS.length] };
+}
+
 // Relevance keywords — articles must contain at least one to be considered fishing-related
 const FISHING_RELEVANCE_KEYWORDS = [
   // 낚시 행위
@@ -55,12 +70,24 @@ const FISHING_RELEVANCE_KEYWORDS = [
   '낚시배', '피싱', '유어선', '낚시터', '갈치배',
 ];
 
+// Irrelevant/Shopping keywords to exclude from live catch news
+const SHOPPING_KEYWORDS = [
+  '할인', '구매', '특가', '쇼핑', '장비', '리뷰', '추천템', '최저가', '내돈내산',
+  '품절', '공구', '마켓', '스토어', '판매', '이벤트', '당일발송', '무료배송',
+  '사용후기', '실사용', '사용기', '체험단', '협찬', '광고', '에기', '다이와', '시마노', 'JS컴퍼니'
+];
+
 /**
- * Check if text is relevant to fishing
- * Returns true if at least one fishing keyword is found
+ * Check if text is relevant to fishing (excludes shopping/gear reviews)
+ * Returns true if at least one fishing keyword is found and NO shopping keyword is found
  */
 function isFishingRelevant(text: string): boolean {
   const lower = text.toLowerCase();
+  
+  // 먼저 쇼핑/홍보성 키워드가 포함되어 있으면 무조건 필터링 (장비 글 제외)
+  const isShoppingOrSpam = SHOPPING_KEYWORDS.some(kw => lower.includes(kw.toLowerCase()));
+  if (isShoppingOrSpam) return false;
+
   return FISHING_RELEVANCE_KEYWORDS.some(kw => lower.includes(kw.toLowerCase()));
 }
 
@@ -130,8 +157,8 @@ export async function fetchNaverNews(
     };
 
     const [blogRes, newsRes] = await Promise.allSettled([
-      fetch(`https://corsproxy.io/?${encodeURIComponent(blogUrl)}`, { headers }),
-      fetch(`https://corsproxy.io/?${encodeURIComponent(newsUrl)}`, { headers }),
+      fetch(`https://corsproxy.io/?${encodeURIComponent(blogUrl)}`, { headers, cache: 'no-store' }),
+      fetch(`https://corsproxy.io/?${encodeURIComponent(newsUrl)}`, { headers, cache: 'no-store' }),
     ]);
 
     const items: FishingNewsItem[] = [];
@@ -223,7 +250,7 @@ export async function fetchNaverCafeArticles(
       'X-Naver-Client-Secret': clientSecret,
     };
 
-    const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(cafeUrl)}`, { headers });
+    const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(cafeUrl)}`, { headers, cache: 'no-store' });
     if (!res.ok) {
       console.warn('Naver cafe API returned:', res.status);
       return [];
@@ -332,7 +359,7 @@ export async function fetchYouTubeVideos(
 
   try {
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=${maxResults}&order=date&relevanceLanguage=ko&key=${apiKey}`;
-    const res = await fetch(url);
+    const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) {
       // Graceful fallback — don't pollute console with errors
       console.warn(`YouTube API returned ${res.status}, using mock data`);
@@ -387,7 +414,8 @@ export async function fetchAllFishingNews(
   const regionQuery = regionFilter !== 'all'
     ? REGION_KEYWORDS[regionFilter]?.[0] || ''
     : '';
-  const searchQuery = `낚시 조과 ${regionQuery}`.trim();
+  // "조행기"를 필수로 포함유도하여 장비 광고성 글을 배제
+  const searchQuery = `낚시 조행기 ${regionQuery}`.trim();
 
   const promises: Promise<FishingNewsItem[]>[] = [];
 
@@ -427,6 +455,8 @@ export async function fetchAllFishingNews(
   allItems.sort((a, b) =>
     new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
   );
+  // Assign default thumbnails for items without one
+  allItems = allItems.map((item, i) => assignDefaultThumbnail(item, i));
 
   return allItems;
 }
@@ -448,9 +478,10 @@ function getMockNews(): FishingNewsItem[] {
       id: 'mock_1',
       title: '통영 감성돔 대물 시즌 활짝! 40cm급 연발',
       description: '통영 욕지도 일대에서 감성돔 40cm급이 연일 올라오고 있습니다. 물때와 수온이 딱 맞아떨어지면서...',
-      link: '#',
+      link: 'https://search.naver.com/search.naver?query=%ED%86%B5%EC%98%81+%EA%B0%90%EC%84%B1%EB%8F%94+%EC%A1%B0%ED%99%A9',
       source: 'naver_blog',
       sourceLabel: '블로그',
+      thumbnail: 'https://i.ytimg.com/vi/cQQHK36-xbQ/hqdefault.jpg',
       publishedAt: new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString(),
       freshness: 'today',
       reliability: 'community',
@@ -461,9 +492,10 @@ function getMockNews(): FishingNewsItem[] {
       id: 'mock_2',
       title: '서해 태안 볼락 야간 루어 폭발 조과',
       description: '태안 만리포 방파제에서 볼락 20cm급이 연이어 히트! 지그헤드 1.5g + 웜 조합이 특효...',
-      link: '#',
+      link: 'https://search.naver.com/search.naver?query=%ED%83%9C%EC%95%88+%EB%B3%BC%EB%9D%BD+%EC%A1%B0%ED%99%A9',
       source: 'naver_cafe',
       sourceLabel: '카페',
+      thumbnail: 'https://i.ytimg.com/vi/-l0PNR6gxgo/hqdefault.jpg',
       publishedAt: new Date(now.getTime() - 30 * 60 * 1000).toISOString(),
       freshness: 'realtime',
       reliability: 'community',
@@ -474,9 +506,10 @@ function getMockNews(): FishingNewsItem[] {
       id: 'mock_3',
       title: '[속보] 제주 방어 시즌 개막! 80cm급 방어 입질 시작',
       description: '제주 모슬포 앞바다에서 올해 첫 방어 시즌이 개막했습니다. 지깅으로 80cm급이...',
-      link: '#',
+      link: 'https://search.naver.com/search.naver?query=%EC%A0%9C%EC%A3%BC+%EB%B0%A9%EC%96%B4+%EB%82%9A%EC%8B%9C',
       source: 'naver_news',
       sourceLabel: '뉴스',
+      thumbnail: 'https://i.ytimg.com/vi/8fGqRUDGxyQ/hqdefault.jpg',
       publishedAt: new Date(now.getTime() - 5 * 60 * 60 * 1000).toISOString(),
       freshness: 'today',
       reliability: 'official',
@@ -487,9 +520,10 @@ function getMockNews(): FishingNewsItem[] {
       id: 'mock_4',
       title: '동해 속초 오징어 한 박스 조과! 에기 사이즈별 정리',
       description: '속초항 방파제에서 밤 8시부터 새벽 2시까지 한 박스 가득 채웠습니다. 2.5호 에기가...',
-      link: '#',
+      link: 'https://search.naver.com/search.naver?query=%EC%86%8D%EC%B4%88+%EC%98%A4%EC%A7%95%EC%96%B4+%EC%A1%B0%ED%99%A9',
       source: 'naver_blog',
       sourceLabel: '블로그',
+      thumbnail: 'https://i.ytimg.com/vi/bgOQo6eZ08A/hqdefault.jpg',
       publishedAt: new Date(now.getTime() - 8 * 60 * 60 * 1000).toISOString(),
       freshness: 'today',
       reliability: 'community',
@@ -500,9 +534,10 @@ function getMockNews(): FishingNewsItem[] {
       id: 'mock_5',
       title: '남해 여수 광어 플랫피싱 시즌 돌입',
       description: '여수 일대 연안에서 광어 40~50cm급이 잡히기 시작했습니다. 다운샷 리그 추천...',
-      link: '#',
+      link: 'https://search.naver.com/search.naver?query=%EC%97%AC%EC%88%98+%EA%B4%91%EC%96%B4+%EB%82%9A%EC%8B%9C',
       source: 'naver_blog',
       sourceLabel: '블로그',
+      thumbnail: 'https://i.ytimg.com/vi/eC-0QlY-bdw/hqdefault.jpg',
       publishedAt: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(),
       freshness: 'week',
       reliability: 'community',
@@ -519,9 +554,10 @@ function getMockYouTube(): FishingNewsItem[] {
       id: 'yt_mock_1',
       title: '🐟 통영 선상낚시 감성돔 대물 연발! | 원투낚시 가이드',
       description: '통영 욕지도에서 감성돔 40cm급을 연달아 잡았습니다! 채비법과 포인트 완벽 가이드...',
-      link: '#',
+      link: 'https://www.youtube.com/watch?v=cQQHK36-xbQ',
       source: 'youtube',
       sourceLabel: 'YouTube',
+      thumbnail: 'https://i.ytimg.com/vi/cQQHK36-xbQ/hqdefault.jpg',
       publishedAt: new Date(now.getTime() - 4 * 60 * 60 * 1000).toISOString(),
       freshness: 'today',
       reliability: 'sns',
@@ -532,9 +568,10 @@ function getMockYouTube(): FishingNewsItem[] {
       id: 'yt_mock_2',
       title: '🎣 볼락 루어 마릿수 폭발! 태안 밤낚시 브이로그',
       description: '볼락 야간 루어 낚시 꿀팁 대공개! 지그헤드 선택법부터 액션까지...',
-      link: '#',
+      link: 'https://www.youtube.com/watch?v=-l0PNR6gxgo',
       source: 'youtube',
       sourceLabel: 'YouTube',
+      thumbnail: 'https://i.ytimg.com/vi/-l0PNR6gxgo/hqdefault.jpg',
       publishedAt: new Date(now.getTime() - 12 * 60 * 60 * 1000).toISOString(),
       freshness: 'today',
       reliability: 'sns',

@@ -456,3 +456,160 @@ export function getInSeasonSpecies(): SpeciesInfo[] {
 export function getTrendingGear(): GearItem[] {
   return GEAR_DB.filter(g => g.trending);
 }
+
+// ─── Spot Finder (포인트 추천) ─────────────────────────────────
+
+export interface RankedSpot {
+  spot: FishingSpot;
+  score: number;
+  distanceKm: number;
+  travelMinutes: number;
+  bestSpeciesNow: string[];
+  matchReason: string;
+}
+
+/**
+ * Return TOP N fishing spots ranked by current conditions.
+ * Pure rule-based — $0 cost.
+ */
+export function getTopSpots(
+  weather: WeatherData | null,
+  userLat: number,
+  userLng: number,
+  limit = 5,
+): RankedSpot[] {
+  const month = getCurrentMonth();
+
+  return FISHING_SPOTS
+    .map((spot) => {
+      const score = scoreSpot(spot, month, weather, userLat, userLng);
+      const distKm = getDistanceKm(userLat, userLng, spot.lat, spot.lng);
+      const travelMin = estimateTravelMinutes(distKm);
+
+      // Find in-season species for this spot
+      const bestSpeciesNow = spot.bestSpecies.filter((name) => {
+        const sp = SPECIES_DB.find((s) => s.name === name);
+        return sp && sp.seasons.includes(month);
+      });
+
+      // Build reason
+      const parts: string[] = [];
+      if (spot.bestSeasons.includes(month)) parts.push(`${month}월 시즌`);
+      if (bestSpeciesNow.length > 0) parts.push(`${bestSpeciesNow.join('·')} 가능`);
+      if (distKm < 50) parts.push('근거리');
+      else if (distKm < 150) parts.push('중거리');
+      const matchReason = parts.join(' | ') || spot.description;
+
+      return { spot, score, distanceKm: Math.round(distKm), travelMinutes: travelMin, bestSpeciesNow, matchReason };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+}
+
+// ─── Catch Report (조황 리포트) ────────────────────────────────
+
+export interface CatchReportData {
+  period: string;     // e.g. "2026년 3월"
+  totalTrips: number;
+  totalFish: number;
+  topSpecies: { name: string; count: number; pct: number }[];
+  topSpots: { name: string; count: number }[];
+  bestDay: { date: string; count: number } | null;
+  biggestFish: { species: string; sizeCm: number; date: string } | null;
+  avgPerTrip: number;
+  trendVsPrev: number | null;   // % change vs previous month
+  monthSummary: string;
+}
+
+/**
+ * Generate a fishing catch report from the user's records.
+ * Pure data analysis — $0 cost.
+ */
+export function generateCatchReport(
+  records: { date: string; species?: string; location?: { name?: string }; quantity?: number; sizeCm?: number }[],
+  monthOffset = 0,
+): CatchReportData {
+  const now = new Date();
+  const targetMonth = now.getMonth() + 1 - monthOffset;
+  const targetYear = now.getFullYear() - (targetMonth <= 0 ? 1 : 0);
+  const actualMonth = targetMonth <= 0 ? targetMonth + 12 : targetMonth;
+  const prefix = `${targetYear}-${String(actualMonth).padStart(2, '0')}`;
+  const prevPrefix = actualMonth === 1
+    ? `${targetYear - 1}-12`
+    : `${targetYear}-${String(actualMonth - 1).padStart(2, '0')}`;
+
+  const monthRecords = records.filter((r) => r.date.startsWith(prefix));
+  const prevRecords = records.filter((r) => r.date.startsWith(prevPrefix));
+
+  // Species tally
+  const speciesMap = new Map<string, number>();
+  let totalFish = 0;
+  monthRecords.forEach((r) => {
+    const qty = r.quantity ?? 1;
+    totalFish += qty;
+    const sp = r.species || '미확인';
+    speciesMap.set(sp, (speciesMap.get(sp) ?? 0) + qty);
+  });
+  const topSpecies = [...speciesMap.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([name, count]) => ({ name, count, pct: totalFish > 0 ? Math.round((count / totalFish) * 100) : 0 }));
+
+  // Spot tally
+  const spotMap = new Map<string, number>();
+  monthRecords.forEach((r) => {
+    const loc = r.location?.name || '미확인';
+    spotMap.set(loc, (spotMap.get(loc) ?? 0) + 1);
+  });
+  const topSpots = [...spotMap.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([name, count]) => ({ name, count }));
+
+  // Best day
+  const dayMap = new Map<string, number>();
+  monthRecords.forEach((r) => {
+    const qty = r.quantity ?? 1;
+    dayMap.set(r.date, (dayMap.get(r.date) ?? 0) + qty);
+  });
+  const bestDayEntry = [...dayMap.entries()].sort((a, b) => b[1] - a[1])[0];
+  const bestDay = bestDayEntry ? { date: bestDayEntry[0], count: bestDayEntry[1] } : null;
+
+  // Biggest fish
+  const withSize = monthRecords.filter((r) => r.sizeCm && r.sizeCm > 0);
+  const biggest = withSize.sort((a, b) => (b.sizeCm ?? 0) - (a.sizeCm ?? 0))[0];
+  const biggestFish = biggest
+    ? { species: biggest.species || '미확인', sizeCm: biggest.sizeCm!, date: biggest.date }
+    : null;
+
+  // Unique trip days
+  const uniqueDays = new Set(monthRecords.map((r) => r.date));
+  const totalTrips = uniqueDays.size;
+  const avgPerTrip = totalTrips > 0 ? Math.round((totalFish / totalTrips) * 10) / 10 : 0;
+
+  // Trend vs previous month
+  const prevFish = prevRecords.reduce((sum, r) => sum + (r.quantity ?? 1), 0);
+  const trendVsPrev = prevFish > 0 ? Math.round(((totalFish - prevFish) / prevFish) * 100) : null;
+
+  // Summary text
+  const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+  const monthLabel = monthNames[actualMonth - 1];
+  let monthSummary: string;
+  if (totalTrips === 0) {
+    monthSummary = `${monthLabel}에는 아직 출조 기록이 없습니다. 첫 출조를 계획해보세요!`;
+  } else {
+    const top = topSpecies[0]?.name ?? '다양한 어종';
+    monthSummary = `${monthLabel} ${totalTrips}회 출조, 총 ${totalFish}마리를 잡았습니다.` +
+      ` 주력 어종은 ${top}${topSpecies[0] ? `(${topSpecies[0].pct}%)` : ''}입니다.` +
+      (trendVsPrev !== null
+        ? ` 전월 대비 ${trendVsPrev >= 0 ? '+' : ''}${trendVsPrev}% ${trendVsPrev >= 0 ? '↑' : '↓'}`
+        : '');
+  }
+
+  return {
+    period: `${targetYear}년 ${monthLabel}`,
+    totalTrips, totalFish, topSpecies, topSpots,
+    bestDay, biggestFish, avgPerTrip, trendVsPrev,
+    monthSummary,
+  };
+}

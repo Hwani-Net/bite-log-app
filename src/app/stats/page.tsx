@@ -7,6 +7,7 @@ import { useAppStore } from '@/store/appStore';
 import { getDataService } from '@/services/dataServiceFactory';
 import { CatchRecord, UserStats, PeriodFilter } from '@/types';
 import { computeBadges, AchievementBadge } from '@/services/badgeService';
+import { analyzeFishingDna, FishingDna } from '@/services/fishingDnaService';
 import {
   BarChart,
   Bar,
@@ -186,7 +187,8 @@ export default function StatsPage() {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [records, setRecords] = useState<CatchRecord[]>([]);
   const [badges, setBadges] = useState<AchievementBadge[]>([]);
-  const [activeTab, setActiveTab] = useState<'stats' | 'calendar' | 'map' | 'badges'>('stats');
+  const [dna, setDna] = useState<FishingDna | null>(null);
+  const [activeTab, setActiveTab] = useState<'stats' | 'calendar' | 'map' | 'badges' | 'dna'>('stats');
 
   const loadStats = useCallback(async (p: PeriodFilter) => {
     const s = await getDataService().getUserStats(p);
@@ -198,13 +200,22 @@ export default function StatsPage() {
     getDataService().getCatchRecords().then((r) => {
       setRecords(r);
       setBadges(computeBadges(r));
+      setDna(analyzeFishingDna(r));
     });
+
+    // Handle tab routing (e.g., from home AI insight /stats?tab=dna)
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    if (tabParam === 'dna' || tabParam === 'badges' || tabParam === 'map' || tabParam === 'calendar') {
+      setActiveTab(tabParam);
+    }
   }, [period, loadStats]);
 
   const earnedCount = badges.filter((b) => b.earned).length;
 
   const tabs = [
     { key: 'stats' as const, icon: 'bar_chart', label: locale === 'ko' ? '통계' : 'Stats' },
+    { key: 'dna' as const, icon: 'genetics', label: locale === 'ko' ? 'DNA' : 'DNA' },
     { key: 'map' as const, icon: 'map', label: locale === 'ko' ? '지도' : 'Map' },
     { key: 'calendar' as const, icon: 'calendar_month', label: locale === 'ko' ? '캘린더' : 'Calendar' },
     { key: 'badges' as const, icon: 'military_tech', label: locale === 'ko' ? `배지 ${earnedCount}/${badges.length}` : `Badges ${earnedCount}/${badges.length}` },
@@ -411,6 +422,102 @@ export default function StatsPage() {
                 <BadgeCard key={badge.id} badge={badge} locale={locale} />
               ))}
             </div>
+          </section>
+        )}
+
+        {activeTab === 'dna' && (
+          <section className="px-4 py-4">
+            {dna ? (
+              <div className="space-y-4">
+                {/* Archetype hero card */}
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 p-6 text-white shadow-xl">
+                  <div className="absolute -right-6 -top-6 text-[120px] opacity-10">🧬</div>
+                  <p className="text-xs font-medium text-violet-200 mb-1">{locale === 'ko' ? '나의 낚시 DNA' : 'My Fishing DNA'}</p>
+                  <h2 className="text-2xl font-black mb-1">{locale === 'ko' ? dna.archetypeKo : dna.archetypeEn}</h2>
+                  <p className="text-xs text-violet-200">{dna.totalRecords}{locale === 'ko' ? '개 조과 기반 분석 결과' : ' records analyzed'}</p>
+                </div>
+
+                {/* DNA stats grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white border border-slate-100 shadow-sm rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="material-symbols-outlined text-amber-500 text-base">schedule</span>
+                      <span className="text-xs font-semibold text-slate-500">{locale === 'ko' ? '최고 시간대' : 'Best Time'}</span>
+                    </div>
+                    <p className="text-sm font-bold text-slate-900">{dna.bestTimeSlot}</p>
+                    <p className="text-xs text-primary font-semibold">{dna.bestTimePercent}%</p>
+                  </div>
+                  <div className="bg-white border border-slate-100 shadow-sm rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="material-symbols-outlined text-emerald-500 text-base">set_meal</span>
+                      <span className="text-xs font-semibold text-slate-500">{locale === 'ko' ? '최다 어종' : 'Top Species'}</span>
+                    </div>
+                    <p className="text-sm font-bold text-slate-900">{dna.topSpecies}</p>
+                    <p className="text-xs text-emerald-500 font-semibold">{dna.topSpeciesCount}{locale === 'ko' ? '마리' : ''}</p>
+                  </div>
+                  <div className="bg-white border border-slate-100 shadow-sm rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="material-symbols-outlined text-blue-500 text-base">location_on</span>
+                      <span className="text-xs font-semibold text-slate-500">{locale === 'ko' ? '단골 포인트' : 'Top Spot'}</span>
+                    </div>
+                    <p className="text-sm font-bold text-slate-900 truncate">{dna.topLocation}</p>
+                    <p className="text-xs text-blue-500 font-semibold">{dna.topLocationVisits}{locale === 'ko' ? '회 방문' : ' visits'}</p>
+                  </div>
+                  <div className="bg-white border border-slate-100 shadow-sm rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="material-symbols-outlined text-orange-500 text-base">calendar_month</span>
+                      <span className="text-xs font-semibold text-slate-500">{locale === 'ko' ? '최고의 달' : 'Best Month'}</span>
+                    </div>
+                    <p className="text-sm font-bold text-slate-900">{dna.bestMonth}{locale === 'ko' ? '월' : ''}</p>
+                    <p className="text-xs text-orange-500 font-semibold">{dna.bestMonthCount}{locale === 'ko' ? '마리' : ''}</p>
+                  </div>
+                </div>
+
+                {/* Extra insights */}
+                <div className="space-y-3">
+                  {dna.bestTide && (
+                    <div className="bg-white border border-slate-100 shadow-sm rounded-xl p-4 flex items-center gap-3">
+                      <div className="size-10 rounded-lg bg-cyan-100 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-cyan-600">water</span>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-slate-500">{locale === 'ko' ? '황금 물때' : 'Golden Tide'}</p>
+                        <p className="text-sm font-bold text-slate-900">{dna.bestTide}</p>
+                      </div>
+                    </div>
+                  )}
+                  {dna.avgSizeCm && (
+                    <div className="bg-white border border-slate-100 shadow-sm rounded-xl p-4 flex items-center gap-3">
+                      <div className="size-10 rounded-lg bg-violet-100 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-violet-600">straighten</span>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-slate-500">{locale === 'ko' ? '평균 사이즈' : 'Avg Size'}</p>
+                        <p className="text-sm font-bold text-slate-900">{dna.avgSizeCm}cm</p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+                    <div className="size-10 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-amber-600">lightbulb</span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-amber-700">{locale === 'ko' ? '개선 포인트' : 'Improvement Tip'}</p>
+                      <p className="text-sm text-amber-800">{locale === 'ko' ? dna.weaknessKo : dna.weaknessEn}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <div className="inline-flex items-center justify-center size-20 rounded-full bg-violet-100 mb-4">
+                  <span className="material-symbols-outlined text-4xl text-violet-400">genetics</span>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-2">{locale === 'ko' ? '조과 5개 이상 등록하면' : 'Record 5+ catches to'}</h3>
+                <p className="text-sm text-slate-400">{locale === 'ko' ? '나만의 낚시 DNA를 분석해 드려요 🧬' : 'unlock your Fishing DNA 🧬'}</p>
+                <p className="text-xs text-slate-300 mt-2">{locale === 'ko' ? `현재 ${records.length}개` : `Current: ${records.length}`}</p>
+              </div>
+            )}
           </section>
         )}
       </main>

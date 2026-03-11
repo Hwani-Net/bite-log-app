@@ -1,0 +1,41 @@
+{
+  "additionalTrustedOrigins": [],
+  "appVersion": "1.2.0.0",
+  "appVersionCode": 7,
+  "backgroundColor": "#f6f7f8",
+  "display": "standalone",
+  "enableNotifications": false,
+  "enableSiteSettingsShortcut": true,
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": {
+      "enabled": true
+    },
+    "playBilling": {
+      "enabled": false
+    }
+  },
+  "host": "https://fishlog-diary-2026.web.app",
+  "iconUrl": "https://fishlog-diary-2026.web.app/icons/icon-512.png",
+  "includeSourceCode": false,
+  "isChromeOSOnly": false,
+  "launcherName": "BITE Log",
+  "maskableIconUrl": "https://fishlog-diary-2026.web.app/icons/icon-512.png",
+  "monochromeIconUrl": null,
+  "name": "BITE Log",
+  "navigationColor": "#1392ec",
+  "navigationColorDark": "#1392ec",
+  "navigationDividerColor": "#1392ec",
+  "navigationDividerColorDark": "#1392ec",
+  "orientation": "portrait",
+  "packageId": "com.fishlog.diary",
+  "serviceAccountJsonFile": null,
+  "shortcuts": [],
+  "signingMode": "none",
+  "signing": null,
+  "splashScreenFadeOutDuration": 300,
+  "startUrl": "/",
+  "themeColor": "#1392ec",
+  "themeColorDark": "#0d1117",
+  "webManifestUrl": "https://fishlog-diary-2026.web.app/manifest.json"
+}

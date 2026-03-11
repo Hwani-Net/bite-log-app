@@ -49,6 +49,7 @@ next-env.d.ts
 *.apk
 *.keystore
 signing-key-info.txt
+play-service-account.json
 build.log
 
 # temp scripts

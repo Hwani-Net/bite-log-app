@@ -259,3 +259,122 @@ export function calculateBiteTime(
     seaSurfaceTemp: reliableSST ?? undefined,
   };
 }
+
+// ─── Peak Fishing Timeline ──────────────────────────────────────
+
+export interface TimelineSlot {
+  hour: number;          // 0-23
+  label: string;         // "00:00"
+  score: number;         // 0-100 bite score for this hour
+  grade: 'peak' | 'good' | 'fair' | 'low'; 
+  tags: string[];        // e.g. ["🌅 매직아워", "🌊 들물3물"]
+  isMagicHour: boolean;
+  isTidePeak: boolean;
+  isGoldenTime: boolean; // magic + tide overlap
+}
+
+/**
+ * Generate 24-hour timeline with per-hour bite scores
+ * Combines: magic hour windows + tide peak windows (2-3h before high tide)
+ */
+export function getPeakFishingWindows(tideData: TideData | null): TimelineSlot[] {
+  const slots: TimelineSlot[] = [];
+
+  // --- Magic Hour Ranges ---
+  const MAGIC_DAWN = { start: 4, end: 7 };    // 04:00~07:59
+  const MAGIC_DUSK = { start: 17, end: 20 };   // 17:00~20:59
+  const NIGHT      = { start: 21, end: 3 };    // 21:00~03:59
+
+  // --- Build tide peak hours (들물 3-4물 = 1~3h before high tide) ---
+  const tidePeakHours = new Set<number>();
+  if (tideData?.tides) {
+    for (const tide of tideData.tides) {
+      if (tide.type === 'High') {
+        const [h] = tide.time.split(':').map(Number);
+        // 들물 3-4물 is roughly 1-3 hours before high tide
+        for (let offset = 1; offset <= 3; offset++) {
+          tidePeakHours.add((h - offset + 24) % 24);
+        }
+      }
+    }
+  }
+
+  for (let hour = 0; hour < 24; hour++) {
+    let score = 0;
+    const tags: string[] = [];
+    let isMagicHour = false;
+    let isTidePeak = false;
+
+    // Magic hour score
+    if (hour >= MAGIC_DAWN.start && hour <= MAGIC_DAWN.end) {
+      score += 40;
+      tags.push('🌅 새벽 매직아워');
+      isMagicHour = true;
+    } else if (hour >= MAGIC_DUSK.start && hour <= MAGIC_DUSK.end) {
+      score += 35;
+      tags.push('🌇 해질녘 매직아워');
+      isMagicHour = true;
+    } else if (hour >= NIGHT.start || hour <= NIGHT.end) {
+      score += 15; // night has some value
+      tags.push('🌙 야간');
+    } else if (hour >= 8 && hour <= 10) {
+      score += 20; // morning transition
+      tags.push('☀️ 오전');
+    } else if (hour >= 11 && hour <= 15) {
+      score += 5; // midday low
+      tags.push('☀️ 한낮');
+    } else {
+      score += 18; // afternoon transition
+      tags.push('🌤️ 오후');
+    }
+
+    // Tide peak score
+    if (tidePeakHours.has(hour)) {
+      score += 45;
+      tags.push('🌊 들물 피크');
+      isTidePeak = true;
+    } else if (tideData?.tides) {
+      // Check if it's near a low tide (slack) = bad
+      const isNearLowTide = tideData.tides.some(t => {
+        if (t.type !== 'Low') return false;
+        const [h] = t.time.split(':').map(Number);
+        return Math.abs(h - hour) <= 1 || Math.abs(h - hour) >= 23;
+      });
+      if (isNearLowTide) {
+        score += 5;
+        tags.push('⏸️ 정조');
+      } else {
+        score += 15; // moderate tide activity
+      }
+    } else {
+      score += 10; // no tide data
+    }
+
+    // Cap at 100
+    score = Math.min(100, score);
+
+    const isGoldenTime = isMagicHour && isTidePeak;
+    if (isGoldenTime) {
+      tags.unshift('⭐ 골든타임');
+    }
+
+    let grade: TimelineSlot['grade'];
+    if (score >= 70) grade = 'peak';
+    else if (score >= 50) grade = 'good';
+    else if (score >= 30) grade = 'fair';
+    else grade = 'low';
+
+    slots.push({
+      hour,
+      label: `${String(hour).padStart(2, '0')}:00`,
+      score,
+      grade,
+      tags,
+      isMagicHour,
+      isTidePeak,
+      isGoldenTime,
+    });
+  }
+
+  return slots;
+}
