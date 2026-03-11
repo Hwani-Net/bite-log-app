@@ -1,8 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { TideData } from '@/services/tideService';
-import { getPeakFishingWindows, TimelineSlot } from '@/services/biteTimeService';
+import { getSpeciesPeakWindows, TimelineSlot } from '@/services/biteTimeService';
+import { getSpeciesConditions } from '@/services/speciesBiteService';
+import { useDragScroll } from '@/hooks/useDragScroll';
 
 interface PeakTimelineProps {
   tideData: TideData | null;
@@ -16,8 +18,18 @@ const GRADE_COLORS: Record<TimelineSlot['grade'], { bar: string; bg: string; rin
   low:  { bar: 'bg-slate-200', bg: 'bg-slate-50', ring: 'ring-slate-200' },
 };
 
+// Species list for filter chips
+const SPECIES_LIST = getSpeciesConditions().map(s => ({ name: s.species, emoji: s.emoji }));
+
 export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
-  const slots = useMemo(() => getPeakFishingWindows(tideData), [tideData]);
+  const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);
+  const dragRef = useDragScroll();
+  const peakCardsDragRef = useDragScroll();
+
+  const slots = useMemo(
+    () => getSpeciesPeakWindows(tideData, selectedSpecies),
+    [tideData, selectedSpecies],
+  );
   const currentHour = new Date().getHours();
   
   // Find best slots for summary — include 'peak' and 'good' grades
@@ -53,37 +65,100 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
         </h3>
       </div>
 
-      {/* Peak Summary Cards */}
+      {/* Species Filter Chips — drag to scroll */}
+      <div className="relative mb-3">
+        <div
+          ref={dragRef}
+          className="flex gap-1.5 overflow-x-auto no-scrollbar pb-2 px-1"
+        >
+          <button
+            onClick={() => setSelectedSpecies(null)}
+            className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all ${
+              selectedSpecies === null
+                ? 'bg-gradient-to-r from-primary to-cyan-500 text-white border-transparent shadow-md shadow-primary/30 scale-105'
+                : 'bg-white text-slate-500 border-slate-200 hover:border-primary/40'
+            }`}
+          >
+            {locale === 'ko' ? '🎣 전체' : '🎣 All'}
+          </button>
+          {SPECIES_LIST.map(sp => (
+            <button
+              key={sp.name}
+              onClick={() => setSelectedSpecies(prev => prev === sp.name ? null : sp.name)}
+              className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all whitespace-nowrap ${
+                selectedSpecies === sp.name
+                  ? 'bg-gradient-to-r from-primary to-cyan-500 text-white border-transparent shadow-md shadow-primary/30 scale-105'
+                  : 'bg-white text-slate-500 border-slate-200 hover:border-primary/40'
+              }`}
+            >
+              {sp.emoji} {sp.name}
+            </button>
+          ))}
+        </div>
+        {/* Right fade overlay — scroll hint */}
+        <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none" />
+      </div>
+
+      {/* Species badge */}
+      {selectedSpecies && (
+        <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-gradient-to-r from-primary/5 to-cyan-400/5 rounded-xl border border-primary/10">
+          <span className="text-xs text-primary font-bold">
+            {SPECIES_LIST.find(s => s.name === selectedSpecies)?.emoji} {selectedSpecies}
+          </span>
+          <span className="text-[10px] text-slate-400">
+            {locale === 'ko' ? '시간대별 활성도 반영' : 'Hourly activity applied'}
+          </span>
+        </div>
+      )}
+
+      {/* Peak Summary Cards — drag to scroll */}
       {ranges.length > 0 && (
-        <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
-          {ranges.map((range, i) => {
-            const isGolden = range.tags.some(t => t.includes('골든'));
-            return (
-              <div
-                key={i}
-                className={`flex-shrink-0 px-3 py-2 rounded-xl border ${
-                  isGolden
-                    ? 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-300 shadow-sm shadow-amber-200/50'
-                    : 'bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200'
-                }`}
-              >
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  {isGolden && <span className="text-sm">⭐</span>}
-                  <span className={`text-xs font-bold ${isGolden ? 'text-amber-700' : 'text-blue-700'}`}>
-                    {isGolden ? (locale === 'ko' ? '골든타임' : 'Golden Time') : (locale === 'ko' ? '피크' : 'Peak')}
-                  </span>
+        <div className="relative mb-4">
+          {/* Force-hide scrollbar on webkit browsers */}
+          <style>{`[data-peak-cards]::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }`}</style>
+          <div
+            ref={peakCardsDragRef}
+            data-peak-cards=""
+            className="flex gap-2 pb-1 cursor-grab active:cursor-grabbing"
+            style={{
+              overflowX: 'auto',
+              overflowY: 'hidden',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
+            {ranges.map((range, i) => {
+              const isGolden = range.tags.some(t => t.includes('골든'));
+              return (
+                <div
+                  key={i}
+                  className={`flex-shrink-0 px-3 py-2 rounded-xl border ${
+                    isGolden
+                      ? 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-300 shadow-sm shadow-amber-200/50'
+                      : 'bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    {isGolden && <span className="text-sm">⭐</span>}
+                    <span className={`text-xs font-bold ${isGolden ? 'text-amber-700' : 'text-blue-700'}`}>
+                      {isGolden ? (locale === 'ko' ? '골든타임' : 'Golden Time') : (locale === 'ko' ? '피크' : 'Peak')}
+                    </span>
+                  </div>
+                  <p className={`text-sm font-bold ${isGolden ? 'text-amber-900' : 'text-blue-900'}`}>
+                    {`${String(range.start).padStart(2, '0')}:00 ~ ${String(range.end + 1).padStart(2, '0')}:00`}
+                  </p>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {range.tags.filter(t => !t.includes('골든')).slice(0, 2).map((tag, j) => (
+                      <span key={j} className="text-[10px] text-slate-500">{tag}</span>
+                    ))}
+                  </div>
                 </div>
-                <p className={`text-sm font-bold ${isGolden ? 'text-amber-900' : 'text-blue-900'}`}>
-                  {`${String(range.start).padStart(2, '0')}:00 ~ ${String(range.end + 1).padStart(2, '0')}:00`}
-                </p>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {range.tags.filter(t => !t.includes('골든')).slice(0, 2).map((tag, j) => (
-                    <span key={j} className="text-[10px] text-slate-500">{tag}</span>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+          {/* Right fade overlay — scroll hint */}
+          <div className="absolute right-0 top-0 bottom-1 w-6 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none" />
         </div>
       )}
 

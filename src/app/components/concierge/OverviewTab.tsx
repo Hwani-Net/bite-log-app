@@ -5,6 +5,7 @@ import { TideData } from '@/services/tideService';
 import { BiteTimePrediction } from '@/services/biteTimeService';
 import PeakTimeline from './PeakTimeline';
 import { ConciergeRecommendation } from '@/services/conciergeService';
+import { useDragScroll } from '@/hooks/useDragScroll';
 
 interface OverviewTabProps {
   locale: string;
@@ -26,6 +27,7 @@ export default function OverviewTab({
   inSeasonSpecies,
 }: OverviewTabProps) {
   const biteScore = biteTime?.score ?? 0;
+  const seasonChipsRef = useDragScroll();
 
   return (
     <div className="space-y-6 pb-24">
@@ -54,7 +56,7 @@ export default function OverviewTab({
           <p className="text-xs font-semibold text-slate-400 mb-2">
             {locale === 'ko' ? `📅 ${new Date().getMonth() + 1}월 시즌 어종` : `📅 ${new Date().toLocaleString('en', { month: 'long' })} Season`}
           </p>
-          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+          <div ref={seasonChipsRef} className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
             {inSeasonSpecies.map((sp) => (
               <span
                 key={sp.name}

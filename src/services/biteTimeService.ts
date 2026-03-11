@@ -378,3 +378,161 @@ export function getPeakFishingWindows(tideData: TideData | null): TimelineSlot[]
 
   return slots;
 }
+
+// ──────────────────────────────────────────────────
+// A-plan: Independent Channel Scoring (v2)
+// ──────────────────────────────────────────────────
+// 환경점수(빛 조건): 0~100
+function getEnvironmentScore(hour: number): { score: number; tag: string } {
+  if (hour >= 4 && hour <= 7)  return { score: 80, tag: '🌅 새벽 매직아워' };
+  if (hour >= 17 && hour <= 20) return { score: 75, tag: '🌇 해질녘 매직아워' };
+  if (hour >= 8 && hour <= 10)  return { score: 55, tag: '☀️ 오전' };
+  if (hour >= 15 && hour <= 16) return { score: 55, tag: '🌤️ 오후' };
+  if (hour >= 11 && hour <= 14) return { score: 40, tag: '☀️ 한낮' };
+  if (hour >= 21 || hour <= 3)  return { score: 30, tag: '🌙 야간' };
+  return { score: 45, tag: '🕐 전환 시간대' };
+}
+
+// 조석점수: 0~100
+function getHourlyTideScore(hour: number, tideData: TideData | null): { score: number; tag: string; isPeak: boolean } {
+  if (!tideData?.tides) return { score: 50, tag: '', isPeak: false };
+
+  // Build tide peak hours (들물 3-4물 = 1~3h before high tide)
+  const tidePeakHours = new Set<number>();
+  for (const tide of tideData.tides) {
+    if (tide.type === 'High') {
+      const [h] = tide.time.split(':').map(Number);
+      for (let offset = 1; offset <= 3; offset++) {
+        tidePeakHours.add((h - offset + 24) % 24);
+      }
+    }
+  }
+
+  if (tidePeakHours.has(hour)) {
+    return { score: 100, tag: '🌊 들물 피크', isPeak: true };
+  }
+
+  // Near low tide = slack = bad
+  const isNearLowTide = tideData.tides.some(t => {
+    if (t.type !== 'Low') return false;
+    const [h] = t.time.split(':').map(Number);
+    return Math.abs(h - hour) <= 1 || Math.abs(h - hour) >= 23;
+  });
+
+  if (isNearLowTide) {
+    return { score: 20, tag: '⏸️ 정조', isPeak: false };
+  }
+
+  return { score: 55, tag: '', isPeak: false };
+}
+
+/**
+ * A-plan (v2): Generate species-specific 24-hour timeline.
+ *
+ * [전체 모드]  → envScore × 0.4 + tideScore × 0.6
+ * [어종 선택]  → fishActivity × 0.5 + tideScore × 0.3 + envScore × 0.2
+ *
+ * This decouples species activity from time-of-day bias,
+ * allowing species like 주꾸미 to show midday peaks.
+ */
+export function getSpeciesPeakWindows(
+  tideData: TideData | null,
+  speciesName?: string | null,
+): TimelineSlot[] {
+  const currentMonth = new Date().getMonth() + 1;
+
+  // --- Generic mode (no species selected) ---
+  if (!speciesName) {
+    const slots: TimelineSlot[] = [];
+    const currentHour = new Date().getHours();
+
+    for (let hour = 0; hour < 24; hour++) {
+      const env = getEnvironmentScore(hour);
+      const tide = getHourlyTideScore(hour, tideData);
+
+      // 전체 = env 40% + tide 60%
+      const score = Math.round(env.score * 0.4 + tide.score * 0.6);
+      const tags: string[] = [];
+      if (env.tag) tags.push(env.tag);
+      if (tide.tag) tags.push(tide.tag);
+
+      const isMagicHour = hour >= 4 && hour <= 7 || hour >= 17 && hour <= 20;
+      const isGoldenTime = isMagicHour && tide.isPeak;
+      if (isGoldenTime) tags.unshift('⭐ 골든타임');
+
+      let grade: TimelineSlot['grade'];
+      if (score >= 70) grade = 'peak';
+      else if (score >= 50) grade = 'good';
+      else if (score >= 30) grade = 'fair';
+      else grade = 'low';
+
+      slots.push({
+        hour,
+        label: `${String(hour).padStart(2, '0')}:00`,
+        score,
+        grade,
+        tags,
+        isMagicHour,
+        isTidePeak: tide.isPeak,
+        isGoldenTime,
+      });
+    }
+    return slots;
+  }
+
+  // --- Species-specific mode ---
+  // Lazy import to avoid circular dependency
+  const { getSpeciesHourlyBoost, getSpeciesConditions } = require('./speciesBiteService');
+  const boost: number[] = getSpeciesHourlyBoost(speciesName, currentMonth);
+  const conditions = getSpeciesConditions();
+  const sp = conditions.find((s: { species: string }) => s.species === speciesName);
+  const emoji = sp?.emoji ?? '🐟';
+
+  const slots: TimelineSlot[] = [];
+
+  for (let hour = 0; hour < 24; hour++) {
+    const env = getEnvironmentScore(hour);
+    const tide = getHourlyTideScore(hour, tideData);
+    const weight = boost[hour] ?? 0.5;
+
+    // 어종 = fishActivity 50% + tide 30% + env 20%
+    const fishActivity = weight * 100; // 0~1 → 0~100
+    const score = Math.round(fishActivity * 0.5 + tide.score * 0.3 + env.score * 0.2);
+    const adjustedScore = Math.min(100, Math.max(0, score));
+
+    // Build tags
+    const tags: string[] = [];
+    if (weight >= 0.8) {
+      tags.push(`${emoji} ${speciesName} 활동 피크`);
+    } else if (weight >= 0.5) {
+      tags.push(`${emoji} ${speciesName} 활동 양호`);
+    } else if (weight <= 0.2) {
+      tags.push(`${emoji} ${speciesName} 저활성`);
+    }
+    if (tide.tag) tags.push(tide.tag);
+    if (env.tag && weight < 0.5) tags.push(env.tag); // Only show env when fish is inactive
+
+    const isMagicHour = hour >= 4 && hour <= 7 || hour >= 17 && hour <= 20;
+    const isGoldenTime = weight >= 0.7 && tide.isPeak;
+    if (isGoldenTime) tags.unshift(`⭐ ${speciesName} 골든타임`);
+
+    let grade: TimelineSlot['grade'];
+    if (adjustedScore >= 70) grade = 'peak';
+    else if (adjustedScore >= 50) grade = 'good';
+    else if (adjustedScore >= 30) grade = 'fair';
+    else grade = 'low';
+
+    slots.push({
+      hour,
+      label: `${String(hour).padStart(2, '0')}:00`,
+      score: adjustedScore,
+      grade,
+      tags,
+      isMagicHour,
+      isTidePeak: tide.isPeak,
+      isGoldenTime,
+    });
+  }
+
+  return slots;
+}

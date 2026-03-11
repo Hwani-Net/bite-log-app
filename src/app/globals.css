@@ -62,13 +62,17 @@
     background: linear-gradient(180deg, rgba(37, 209, 244, 0.15) 0%, rgba(37, 209, 244, 0.02) 100%);
   }
 
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+}
+
+/* Scrollbar hiding — must be outside @layer for specificity over global ::-webkit-scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 html {
