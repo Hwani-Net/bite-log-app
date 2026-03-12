@@ -32,10 +32,9 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
   );
   const currentHour = new Date().getHours();
   
-  // Find best slots for summary — include 'peak' and 'good' grades
-  const goldenSlots = slots.filter(s => s.isGoldenTime);
+  // Find best slots for summary — always show ALL peak + good slots (not just golden)
   const peakSlots = slots.filter(s => s.grade === 'peak' || s.grade === 'good');
-  const bestSlots = goldenSlots.length > 0 ? goldenSlots : peakSlots;
+  const bestSlots = peakSlots;
 
   // Group consecutive best hours into ranges
   const ranges = useMemo(() => {
