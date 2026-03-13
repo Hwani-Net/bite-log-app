@@ -1,7 +1,7 @@
 {
   "additionalTrustedOrigins": [],
   "appVersion": "1.2.0.0",
-  "appVersionCode": 7,
+  "appVersionCode": 8,
   "backgroundColor": "#f6f7f8",
   "display": "standalone",
   "enableNotifications": false,
@@ -15,12 +15,12 @@
       "enabled": false
     }
   },
-  "host": "https://fishlog-diary-2026.web.app",
-  "iconUrl": "https://fishlog-diary-2026.web.app/icons/icon-512.png",
+  "host": "https://bite-log-app.web.app",
+  "iconUrl": "https://bite-log-app.web.app/icons/icon-512.png",
   "includeSourceCode": false,
   "isChromeOSOnly": false,
   "launcherName": "BITE Log",
-  "maskableIconUrl": "https://fishlog-diary-2026.web.app/icons/icon-512.png",
+  "maskableIconUrl": "https://bite-log-app.web.app/icons/icon-512.png",
   "monochromeIconUrl": null,
   "name": "BITE Log",
   "navigationColor": "#1392ec",
@@ -37,5 +37,5 @@
   "startUrl": "/",
   "themeColor": "#1392ec",
   "themeColorDark": "#0d1117",
-  "webManifestUrl": "https://fishlog-diary-2026.web.app/manifest.json"
+  "webManifestUrl": "https://bite-log-app.web.app/manifest.json"
 }

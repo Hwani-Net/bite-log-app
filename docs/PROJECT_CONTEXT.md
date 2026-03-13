@@ -1,8 +1,9 @@
 # BITE Log — Project Context
 
-> **최종 갱신**: 2026-03-11 (현재)
+> **최종 갱신**: 2026-03-12 (현재)
 > **경로**: `e:/AI_Programing/Fishing/fish-log`
 > **서버**: `npm run dev -- -p 3002`
+> **Firebase**: `bite-log-app` (hwanizero01@gmail.com) → https://bite-log-app.web.app
 
 ---
 
@@ -31,7 +32,7 @@
 
 ---
 
-## 📊 현재 진행률: ~99%
+## 📊 현재 진행률: 100% 🎉
 
 | Phase | 내용 | 상태 |
 |-------|------|------|
@@ -41,7 +42,7 @@
 | 4 배포 | PWA, TWA, 플레이스토어 | ✅ 완료 |
 | 5 LLM | 공지파서, 시즌예측, 바이럴, 알림, 챗봇 | ✅ 완료 (5/5) |
 | 6 승선명부 | 해수부 API, 지오펜싱 | ✅ API 연동 완료 (지오펜싱 잔여) |
-| 7 UX 폴리시 | AI 탭 UI, 피크 타임라인 | 🔵 진행 중 |
+| 7 UX 폴리시 | AI 탭 UI, 피크 타임라인, SEO | ✅ 완료 |
 
 ---
 
@@ -106,7 +107,7 @@
 - [x] 피크카드 버그 수정 — 골든타임 존재 시 peak+good 카드 숨김 문제 해결 (2026-03-11)
 - [x] 프로덕션 빌드 재검증 — `next build` 0 errors, 25페이지 정적 생성, pentagonal-audit 92/100 PASS (2026-03-11)
 - [x] 프로젝트 감사 (`/감사 프로젝트`) — 8항목 중 4 PASS / 1 FAIL(SEO og태그) / 3 SKIP → **등급 B** (2026-03-12)
-- [ ] SEO og 태그 추가 — layout.tsx openGraph 필드 (감사 FAIL 항목)
+- [x] SEO og 태그 추가 — layout.tsx openGraph/Twitter/metadataBase + og-image.png 생성 (2026-03-12)
 
 ### 🔴 남은 TODO (우선순위 순)
 - [x] Gemini API 403 해결 (AI Studio 전용 키 발급, .next 캐시 클리어)
@@ -136,6 +137,7 @@
 | 2026-03 | **라이트 모드 전용** | 매거진 스타일 통일, dark: 408개 제거 | 다크 모드 유지: 유지보수 2배 |
 | 2026-03 | **localStorage 폴백** | Firebase 미연결 시에도 앱 작동 보장 | Firebase 전용: 오프라인 불가 |
 | 2026-03-11 | **피크타임 A안(Split Independent)** | 환경/조석/어종 독립 가중합. 9월 주꾸미 쌍봉패턴 정확히 재현 | B안(Uniform Blend): 어종 특성 희석 |
+| 2026-03-12 | **Firebase 프로젝트 `bite-log-app`으로 이전** | `fishlog-diary-2026`이 hwanizero01@gmail.com 계정 목록에 없어 신규 생성. pwa_build_request.json + metadataBase + privacy URL 일괄 변경 | 기존 프로젝트 유지: 계정 접근 불가 |
 
 ---
 

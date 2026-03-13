@@ -6,8 +6,37 @@ import SplashWrapper from "@/components/SplashWrapper";
 import { Agentation } from 'agentation';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://bite-log-app.web.app"),
   title: "BITE Log — 바이트로그",
-  description: "입질의 순간을 기록하다. AI 낚시 일지 앱",
+  description: "입질의 순간을 기록하다. AI가 분석하는 입질 시간, 피크타임 예측, 어종별 전문가 채팅까지. 한국 낚시인의 필수 앱.",
+  keywords: ["낚시", "fishing", "조황", "입질", "피크타임", "AI", "낚시 일지", "바이트로그", "BITE Log", "조과 기록"],
+  applicationName: "BITE Log",
+  authors: [{ name: "BITE Log Team" }],
+  openGraph: {
+    title: "BITE Log — 바이트로그",
+    description: "입질의 순간을 기록하다. AI가 분석하는 입질 시간, 피크타임 예측, 어종별 전문가 채팅까지.",
+    type: "website",
+    locale: "ko_KR",
+    siteName: "BITE Log",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "BITE Log — AI 낚시 일지 앱",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BITE Log — 바이트로그",
+    description: "입질의 순간을 기록하다. AI 낚시 일지 앱.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

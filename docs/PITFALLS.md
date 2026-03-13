@@ -63,3 +63,16 @@
 - **해결**: 출시 노트는 항상 사용자 관점 ("AI 어종 예측 추가, UI 개선" 등 기능 중심) 으로 작성
 - **🚫 금지**: "파이프라인 검증", "빌드 테스트", "API 연동 확인" 등 기술 내부 용어 절대 금지
 
+## ❌ Firebase 프로젝트 계정 불일치 — deploy 실패 (2026-03-12)
+- **증상**: `npx firebase deploy` 실행 시 "Failed to get Firebase project fishlog-diary-2026" 오류
+- **원인**: 로컬 `.firebaserc`의 프로젝트 ID(`fishlog-diary-2026`)가 현재 로그인된 계정(`hwanizero01@gmail.com`)의 프로젝트 목록에 없음
+- **해결**: `firebase projects:list`로 접근 가능한 프로젝트 확인 → `firebase projects:create bite-log-app` 으로 신규 생성 → `firebase use bite-log-app` 으로 전환
+- **🚫 금지**: deploy 실패 시 바로 재시도 금지. 먼저 `firebase login:list` + `projects:list`로 계정·프로젝트 매핑 확인 필수
+- **추가 주의**: 프로젝트 변경 시 `pwa_build_request.json`의 host/iconUrl/webManifestUrl, `layout.tsx`의 metadataBase, Play Console 개인정보처리방침 URL 도 함께 변경해야 함
+
+## ❌ Play Store 비공개 테스트 — 국가/지역 미설정으로 출시 불가 (2026-03-12)
+- **증상**: 비공개 테스트 트랙에 빌드를 추가했는데 출시 불가 오류 발생
+- **원인**: 비공개(Alpha) 트랙은 내부 테스트와 달리 국가/지역을 명시적으로 선택해야 함
+- **해결**: 트랙 관리 → 국가/지역 탭 → "국가/지역 추가" → 대한민국 선택 → 저장
+- **🚫 금지**: 비공개 테스트 설정 시 국가/지역 탭을 빠뜨리지 말 것
+
