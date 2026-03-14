@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { headers } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
 const KHOA_BASE = 'https://apis.data.go.kr/1192136/tideFcstHghLw/getTideFcstHghLw';
 
 export async function GET(request: NextRequest) {
+  await headers();
   const apiKey = process.env.KHOA_API_KEY ?? process.env.NEXT_PUBLIC_KHOA_API_KEY;
 
   if (!apiKey) {

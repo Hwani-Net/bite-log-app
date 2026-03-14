@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { headers } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  await headers();
   const { searchParams } = new URL(request.url);
   const type = searchParams.get('type') || 'blog'; // blog, news, cafearticle
   const query = searchParams.get('query');
