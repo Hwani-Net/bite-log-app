@@ -22,7 +22,7 @@ const DAILY_MAX_CREDITS = 3;
 export const useSubscriptionStore = create<SubscriptionState>()(
   persist(
     (set, get) => ({
-      isPro: false,
+      isPro: true,
       chatbotCredits: DAILY_MAX_CREDITS,
       lastCreditResetDate: new Date().toISOString().split('T')[0],
       isPaywallOpen: false,
