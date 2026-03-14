@@ -20,6 +20,7 @@ export interface FleetResponse {
   count: number;
   timestamp: string;
   mock: boolean;
+  fallback?: boolean;
   error?: string;
 }
 
@@ -61,7 +62,7 @@ export async function fetchFleetData(options?: FetchFleetOptions): Promise<Fleet
 const EARTH_RADIUS_KM = 6371;
 
 /** Haversine distance in km */
-function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+export function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const toRad = (deg: number) => (deg * Math.PI) / 180;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);

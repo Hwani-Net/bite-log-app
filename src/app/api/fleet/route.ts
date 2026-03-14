@@ -344,77 +344,17 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
 
 // --- Route handler ---------------------------------------------------
 
-export async function GET(request: NextRequest) {
-  const startTime = Date.now();
-  const reqTimestamp = new Date().toISOString();
-
-  const parsed = parseAndValidateQuery(request.nextUrl.searchParams);
-
-  structuredLog('info', {
-    timestamp: reqTimestamp,
-    event: 'fleet.request.received',
-    params: Object.fromEntries(request.nextUrl.searchParams),
+export async function GET() {
+  // Static export mode: return mock data (no request params available)
+  const fleet = joinFleetData(
+    MOCK_DYNAMIC,
+    new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
+  );
+  return NextResponse.json({
+    ok: true,
+    data: fleet,
+    count: fleet.length,
+    timestamp: new Date().toISOString(),
+    mock: true,
   });
-
-  if (!parsed.success) {
-    structuredLog('warn', {
-      timestamp: reqTimestamp,
-      event: 'fleet.request.validation_failed',
-      params: Object.fromEntries(request.nextUrl.searchParams),
-      error: parsed.message,
-      duration: Date.now() - startTime,
-    });
-    return NextResponse.json(
-      { ok: false, error: parsed.message },
-      { status: 400 },
-    );
-  }
-
-  const params = parsed.data;
-
-  try {
-    const [dynamicResult, staticResult] = await Promise.all([
-      fetchDynamic(),
-      fetchStatic(),
-    ]);
-
-    const isMockMode = !process.env.FLEET_API_KEY || process.env.FLEET_USE_MOCK === 'true';
-    const isFallback = dynamicResult.fallback || staticResult.fallback;
-
-    const fleet = applyFilters(
-      joinFleetData(dynamicResult.data, staticResult.data),
-      buildFilters(params),
-    );
-
-    structuredLog('info', {
-      timestamp: reqTimestamp,
-      event: 'fleet.request.success',
-      params,
-      count: fleet.length,
-      mock: isMockMode || isFallback,
-      fallback: isFallback,
-      duration: Date.now() - startTime,
-    });
-
-    return NextResponse.json({
-      ok: true,
-      data: fleet,
-      count: fleet.length,
-      timestamp: new Date().toISOString(),
-      mock: isMockMode || isFallback,
-      ...(isFallback && { fallback: true }),
-    });
-  } catch (err) {
-    structuredLog('error', {
-      timestamp: reqTimestamp,
-      event: 'fleet.request.internal_error',
-      params,
-      error: err instanceof Error ? { message: err.message, stack: err.stack } : String(err),
-      duration: Date.now() - startTime,
-    });
-    return NextResponse.json(
-      { ok: false, error: 'Internal Server Error' },
-      { status: 500 },
-    );
-  }
 }
