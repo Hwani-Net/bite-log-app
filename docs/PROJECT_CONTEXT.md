@@ -1,9 +1,9 @@
 # BITE Log — Project Context
 
-> **최종 갱신**: 2026-03-12 (현재)
+> **최종 갱신**: 2026-03-14 (현재)
 > **경로**: `e:/AI_Programing/Fishing/fish-log`
-> **서버**: `npm run dev -- -p 3002`
-> **Firebase**: `bite-log-app` (hwanizero01@gmail.com) → https://bite-log-app.web.app
+> **서버**: `npm run dev -- -p 3013`
+> **Firebase**: `bite-log-app` (hwanizero01@gmail.com, admin@gpt-korea.com) → https://bite-log-app.web.app
 
 ---
 
@@ -84,15 +84,10 @@
 - [x] Windy 날씨 7일 예보 탭
 - [x] 뉴스 이미지 중복 수정 (그라디언트 배경 분화)
 
-### Phase 6: 전자승선명부
+### Phase 6: 전자승선명부 (제거/보류 결정 - 2026-03-14)
 - [x] 승선자 프로필 입력 및 오프라인 QR 승선권 발급 UI (/boarding)
 - [x] 해수부 공공데이터 API 연동 — 낚시어선업 신고정보 (15074088)
-  - `GET /api/fishing-vessels` — Next.js API 라우트 (서버사이드 키 보호)
-  - `fishingVesselService.ts` — 어선 검색 + 데모 폴백
-  - 3탭 UI: 승선패스 / 어선검색 / 신고안내
-  - 어선 상세 바텀시트 + 낚시해(海) 앱 딥링크
-  - API키: `FISHING_VESSEL_API_KEY` (공공데이터포털 신청 필요)
-- [ ] GPS 지오펜싱 + 선장 대시보드
+- 🔴 **결정**: 승선명부 UI 및 관련 API 삭제 예정 (기능 미완성 및 리스크/효용 부족)
 
 ### Phase 7: UX 폴리시 (2026-03-10~11)
 - [x] AI 탭 채팅창 높이 최적화 — flex-1 + calc(100dvh) 동적 높이 (2026-03-10)
@@ -108,6 +103,7 @@
 - [x] 프로덕션 빌드 재검증 — `next build` 0 errors, 25페이지 정적 생성, pentagonal-audit 92/100 PASS (2026-03-11)
 - [x] 프로젝트 감사 (`/감사 프로젝트`) — 8항목 중 4 PASS / 1 FAIL(SEO og태그) / 3 SKIP → **등급 B** (2026-03-12)
 - [x] SEO og 태그 추가 — layout.tsx openGraph/Twitter/metadataBase + og-image.png 생성 (2026-03-12)
+- [x] **Play Store 업데이트 배포** — versionCode 9, internal 트랙, Firebase 호스팅 최신화 포함 (2026-03-14)
 
 ### 🔴 남은 TODO (우선순위 순)
 - [x] Gemini API 403 해결 (AI Studio 전용 키 발급, .next 캐시 클리어)
@@ -138,6 +134,8 @@
 | 2026-03 | **localStorage 폴백** | Firebase 미연결 시에도 앱 작동 보장 | Firebase 전용: 오프라인 불가 |
 | 2026-03-11 | **피크타임 A안(Split Independent)** | 환경/조석/어종 독립 가중합. 9월 주꾸미 쌍봉패턴 정확히 재현 | B안(Uniform Blend): 어종 특성 희석 |
 | 2026-03-12 | **Firebase 프로젝트 `bite-log-app`으로 이전** | `fishlog-diary-2026`이 hwanizero01@gmail.com 계정 목록에 없어 신규 생성. pwa_build_request.json + metadataBase + privacy URL 일괄 변경 | 기존 프로젝트 유지: 계정 접근 불가 |
+| 2026-03-14 | **Phase 8: PRO 페이월 테스트 (A안) 채택** | PG(결제) 개발 전 유저 결제 의향(전환율) 선제적 검증. AI전문가챗봇/시크릿포인트 등에 페이월 적용. | B안(즉시 결제연동): 리소스/리스크 큼 |
+| 2026-03-14 | **Phase 6: 승선명부 기능 제거 결정** | 미완성 상태. 자동 지오펜싱은 개인정보/무결성 리스크가 크고, 선장 도입 동인이 낮아 전략적 폐기. | C안(QR/오프라인 완성): ROI 낮음 |
 
 ---
 
