@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAppStore } from '@/store/appStore';
+
 
 const NAV_ITEMS = [
   { href: '/', icon: 'home', labelKey: 'nav.home' },
@@ -15,6 +17,15 @@ const NAV_ITEMS = [
 export default function BottomNav() {
   const pathname = usePathname();
   const t = useAppStore((s) => s.t);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return (
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-t border-slate-200 h-16" />
+  );
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-t border-slate-200">

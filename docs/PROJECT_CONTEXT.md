@@ -4,6 +4,7 @@
 > **경로**: `e:/AI_Programing/Fishing/fish-log`
 > **서버**: `npm run dev -- -p 3013`
 > **Firebase**: `bite-log-app` (hwanizero01@gmail.com, admin@gpt-korea.com) → https://bite-log-app.web.app
+> **NLM**: `ce527c4c-a5bd-4215-a349-ee9ac92fa655` (BITE Log 피크타임 리서치, 15소스)
 
 ---
 
@@ -19,6 +20,17 @@
 1. "이 작업이 북극성(정보 분산 해결)에 기여하는가?"
 2. "이 작업의 완료 기준은 사용자 관점인가, 기술 관점인가?"
 3. "이 작업이 Anti-Scope를 침범하지 않는가?"
+
+---
+
+## 🤖 Agent Operational Protocol (ADR-007)
+
+> **Antigravity(Pro) - Claude Code(CLI) 듀얼 에이전트 시스템**
+
+1. **실행 주체 분리**: 모든 실무 코딩, 디버깅, 패키지 설치, 빌드 테스트는 **Claude Code**가 담당한다. Antigravity는 직접 코드를 수정하지 않고 `run_command`를 통해 구체적인 지시(프롬프트 합성)만 내린다.
+2. **자율 복구(Self-Healing)**: Claude Code 호출 시 반드시 검증 명령어(예: `npm run build`, `npm test`)를 포함하여, 에러 발생 시 Claude Code가 스스로 수정 루프를 돌게 한다.
+3. **무조건 실행**: 인증(NLM login 등)이나 환경 설정 오류 발견 시 대표님께 묻지 말고 즉시 백그라운드 명령으로 자율 복구한 뒤 보고한다.
+4. **망각 방지**: 매 세션 시작 시 `docs/PROJECT_CONTEXT.md`와 `docs/PITFALLS.md`를 필독하여 이전의 결정과 실수를 동기화한다.
 
 ---
 
@@ -106,7 +118,8 @@
 - [x] 프로덕션 빌드 재검증 — `next build` 0 errors, 25페이지 정적 생성, pentagonal-audit 92/100 PASS (2026-03-11)
 - [x] 프로젝트 감사 (`/감사 프로젝트`) — 8항목 중 4 PASS / 1 FAIL(SEO og태그) / 3 SKIP → **등급 B** (2026-03-12)
 - [x] SEO og 태그 추가 — layout.tsx openGraph/Twitter/metadataBase + og-image.png 생성 (2026-03-12)
-- [x] **Play Store 업데이트 배포** — versionCode 9, internal 트랙, Firebase 호스팅 최신화 포함 (2026-03-14)
+- [x] **실시간 뉴스 링크 수리 및 배포** — 네이버 검색결과 데드링크를 실제 유튜브/블로그 링크로 전면 교체 및 Firebase 호스팅 배포 완료 (2026-03-14)
+- [x] **Play Store 업데이트 배포** — versionCode 11, internal 트랙, Firebase 호스팅 최신화 및 실시간 링크 반영 (2026-03-14)
 
 ### 🔴 남은 TODO (우선순위 순)
 - [x] Gemini API 403 해결 (AI Studio 전용 키 발급, .next 캐시 클리어)

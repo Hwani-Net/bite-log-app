@@ -85,10 +85,11 @@ export default function ConciergePage() {
       }
     }
 
-    function finalize(w: WeatherData | null, td: TideData | null, lat: number, lng: number, m?: Awaited<ReturnType<typeof fetchMarineData>>) {
+    const finalize = (w: WeatherData | null, td: TideData | null, lat: number, lng: number, m?: Awaited<ReturnType<typeof fetchMarineData>>) => {
       const bt = calculateBiteTime(w, td, m ?? null);
       setBiteTime(bt);
-      const rec = generateRecommendation(w, td, bt, lat, lng);
+      const isPro = useSubscriptionStore.getState().isPro;
+      const rec = generateRecommendation(w, td, bt, lat, lng, isPro);
       setRecommendation(rec);
       // Load affiliate gear based on recommended species
       if (rec) {

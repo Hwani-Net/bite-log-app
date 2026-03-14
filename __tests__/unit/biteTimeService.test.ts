@@ -36,12 +36,12 @@ const mockWeather = {
 };
 
 const mockTideData = {
+  stationName: '인천',
   tides: [
-    { type: 'High' as const, time: '08:00', height: 3.5 },
-    { type: 'Low' as const, time: '14:00', height: 0.5 },
-    { type: 'High' as const, time: '20:00', height: 3.2 },
+    { type: 'High' as const, time: '08:00', level: 350 },
+    { type: 'Low' as const, time: '14:00', level: 50 },
+    { type: 'High' as const, time: '20:00', level: 320 },
   ],
-  date: '2024-03-15',
 };
 
 const mockMarine = {
@@ -226,11 +226,11 @@ describe('getPeakFishingWindows', () => {
   it('tide peaks should be at 1–3 hours before high tide', () => {
     // High tide at 10:00 → tide peaks at 7, 8, 9
     const tideData = {
+      stationName: '인천',
       tides: [
-        { type: 'High' as const, time: '10:00', height: 3.5 },
-        { type: 'Low' as const, time: '16:00', height: 0.5 },
+        { type: 'High' as const, time: '10:00', level: 350 },
+        { type: 'Low' as const, time: '16:00', level: 50 },
       ],
-      date: '2024-03-15',
     };
     const slots = getPeakFishingWindows(tideData);
 
@@ -245,11 +245,11 @@ describe('getPeakFishingWindows', () => {
     // High tide at 09:00 → tide peaks at 6, 7, 8
     // Hours 6 and 7 fall in dawn magic hour (4–7) → golden time
     const tideData = {
+      stationName: '인천',
       tides: [
-        { type: 'High' as const, time: '09:00', height: 3.5 },
-        { type: 'Low' as const, time: '15:00', height: 0.5 },
+        { type: 'High' as const, time: '09:00', level: 350 },
+        { type: 'Low' as const, time: '15:00', level: 50 },
       ],
-      date: '2024-03-15',
     };
     const slots = getPeakFishingWindows(tideData);
 
@@ -301,11 +301,11 @@ describe('getSpeciesPeakWindows — generic mode (no species)', () => {
   it('generic mode: tide peak hours should be flagged when tideData is provided', () => {
     // High tide at 12:00 → tide peaks at 9, 10, 11
     const tideData = {
+      stationName: '인천',
       tides: [
-        { type: 'High' as const, time: '12:00', height: 3.5 },
-        { type: 'Low' as const, time: '18:00', height: 0.5 },
+        { type: 'High' as const, time: '12:00', level: 350 },
+        { type: 'Low' as const, time: '18:00', level: 50 },
       ],
-      date: '2024-03-15',
     };
     const slots = getSpeciesPeakWindows(tideData);
 

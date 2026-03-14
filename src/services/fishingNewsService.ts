@@ -148,21 +148,13 @@ export async function fetchNaverNews(
   }
 
   try {
-    // Use CORS proxy for Naver API (doesn't support CORS headers)
-    const blogUrl = `https://openapi.naver.com/v1/search/blog.json?query=${encodeURIComponent(query)}&display=${display}&sort=${sort}`;
-    const newsUrl = `https://openapi.naver.com/v1/search/news.json?query=${encodeURIComponent(query)}&display=${display}&sort=${sort}`;
-    const headers = {
-      'X-Naver-Client-Id': clientId,
-      'X-Naver-Client-Secret': clientSecret,
-    };
-
     const [blogRes, newsRes] = await Promise.allSettled([
-      fetch(`https://corsproxy.io/?${encodeURIComponent(blogUrl)}`, { headers, cache: 'no-store' }),
-      fetch(`https://corsproxy.io/?${encodeURIComponent(newsUrl)}`, { headers, cache: 'no-store' }),
+      fetch(`/api/naver?type=blog&query=${encodeURIComponent(query)}&display=${display}&sort=${sort}`),
+      fetch(`/api/naver?type=news&query=${encodeURIComponent(query)}&display=${display}&sort=${sort}`),
     ]);
 
     const items: FishingNewsItem[] = [];
-    const blogData = blogRes.status === 'fulfilled' && blogRes.value.ok ? await blogRes.value.json() : null;
+    const blogData = blogRes.status === 'fulfilled' && blogRes.status === 'fulfilled' && blogRes.value.ok ? await blogRes.value.json() : null;
     const newsData = newsRes.status === 'fulfilled' && newsRes.value.ok ? await newsRes.value.json() : null;
 
     // Process blog results
@@ -244,15 +236,9 @@ export async function fetchNaverCafeArticles(
   }
 
   try {
-    const cafeUrl = `https://openapi.naver.com/v1/search/cafearticle.json?query=${encodeURIComponent(query)}&display=${display}&sort=${sort}`;
-    const headers = {
-      'X-Naver-Client-Id': clientId,
-      'X-Naver-Client-Secret': clientSecret,
-    };
-
-    const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(cafeUrl)}`, { headers, cache: 'no-store' });
+    const res = await fetch(`/api/naver?type=cafearticle&query=${encodeURIComponent(query)}&display=${display}&sort=${sort}`);
     if (!res.ok) {
-      console.warn('Naver cafe API returned:', res.status);
+      console.warn('Naver cafe internal API returned:', res.status);
       return [];
     }
 
@@ -347,7 +333,7 @@ export async function fetchCommunityInsights(
  * Direct client-side call (static export compatible)
  */
 export async function fetchYouTubeVideos(
-  query: string = '냚시 조과',
+  query: string = '낚시 조과',
   maxResults: number = 6
 ): Promise<FishingNewsItem[]> {
   const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || '';
@@ -423,7 +409,9 @@ export async function fetchAllFishingNews(
     promises.push(fetchNaverNews(searchQuery, 15));
   }
   if (sourceFilter === 'all' || sourceFilter === 'youtube') {
-    promises.push(fetchYouTubeVideos(searchQuery, 8));
+    // 유튜브는 '조행기'보다 '오늘의 조과', '실시간 낚시' 키워드가 최신 영상 검색에 유리함
+    const ytQuery = `실시간 ${regionQuery} 낚시 조과`.trim() || '실시간 낚시 조황';
+    promises.push(fetchYouTubeVideos(ytQuery, 8));
   }
 
   const results = await Promise.allSettled(promises);
@@ -478,7 +466,7 @@ function getMockNews(): FishingNewsItem[] {
       id: 'mock_1',
       title: '통영 감성돔 대물 시즌 활짝! 40cm급 연발',
       description: '통영 욕지도 일대에서 감성돔 40cm급이 연일 올라오고 있습니다. 물때와 수온이 딱 맞아떨어지면서...',
-      link: 'https://search.naver.com/search.naver?query=%ED%86%B5%EC%98%81+%EA%B0%90%EC%84%B1%EB%8F%94+%EC%A1%B0%ED%99%A9',
+      link: 'https://www.youtube.com/watch?v=cQQHK36-xbQ',
       source: 'naver_blog',
       sourceLabel: '블로그',
       thumbnail: 'https://i.ytimg.com/vi/cQQHK36-xbQ/hqdefault.jpg',
@@ -492,7 +480,7 @@ function getMockNews(): FishingNewsItem[] {
       id: 'mock_2',
       title: '서해 태안 볼락 야간 루어 폭발 조과',
       description: '태안 만리포 방파제에서 볼락 20cm급이 연이어 히트! 지그헤드 1.5g + 웜 조합이 특효...',
-      link: 'https://search.naver.com/search.naver?query=%ED%83%9C%EC%95%88+%EB%B3%BC%EB%9D%BD+%EC%A1%B0%ED%99%A9',
+      link: 'https://www.youtube.com/watch?v=-l0PNR6gxgo',
       source: 'naver_cafe',
       sourceLabel: '카페',
       thumbnail: 'https://i.ytimg.com/vi/-l0PNR6gxgo/hqdefault.jpg',
@@ -506,7 +494,7 @@ function getMockNews(): FishingNewsItem[] {
       id: 'mock_3',
       title: '[속보] 제주 방어 시즌 개막! 80cm급 방어 입질 시작',
       description: '제주 모슬포 앞바다에서 올해 첫 방어 시즌이 개막했습니다. 지깅으로 80cm급이...',
-      link: 'https://search.naver.com/search.naver?query=%EC%A0%9C%EC%A3%BC+%EB%B0%A9%EC%96%B4+%EB%82%9A%EC%8B%9C',
+      link: 'https://www.youtube.com/watch?v=8fGqRUDGxyQ',
       source: 'naver_news',
       sourceLabel: '뉴스',
       thumbnail: 'https://i.ytimg.com/vi/8fGqRUDGxyQ/hqdefault.jpg',
@@ -520,7 +508,7 @@ function getMockNews(): FishingNewsItem[] {
       id: 'mock_4',
       title: '동해 속초 오징어 한 박스 조과! 에기 사이즈별 정리',
       description: '속초항 방파제에서 밤 8시부터 새벽 2시까지 한 박스 가득 채웠습니다. 2.5호 에기가...',
-      link: 'https://search.naver.com/search.naver?query=%EC%86%8D%EC%B4%88+%EC%98%A4%EC%A7%95%EC%96%B4+%EC%A1%B0%ED%99%A9',
+      link: 'https://www.youtube.com/watch?v=bgOQo6eZ08A',
       source: 'naver_blog',
       sourceLabel: '블로그',
       thumbnail: 'https://i.ytimg.com/vi/bgOQo6eZ08A/hqdefault.jpg',
@@ -534,7 +522,7 @@ function getMockNews(): FishingNewsItem[] {
       id: 'mock_5',
       title: '남해 여수 광어 플랫피싱 시즌 돌입',
       description: '여수 일대 연안에서 광어 40~50cm급이 잡히기 시작했습니다. 다운샷 리그 추천...',
-      link: 'https://search.naver.com/search.naver?query=%EC%97%AC%EC%88%98+%EA%B4%91%EC%96%B4+%EB%82%9A%EC%8B%9C',
+      link: 'https://www.youtube.com/watch?v=eC-0QlY-bdw',
       source: 'naver_blog',
       sourceLabel: '블로그',
       thumbnail: 'https://i.ytimg.com/vi/eC-0QlY-bdw/hqdefault.jpg',

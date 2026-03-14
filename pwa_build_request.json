@@ -1,7 +1,7 @@
 {
   "additionalTrustedOrigins": [],
   "appVersion": "1.2.0.0",
-  "appVersionCode": 10,
+  "appVersionCode": 11,
   "backgroundColor": "#f6f7f8",
   "display": "standalone",
   "enableNotifications": false,

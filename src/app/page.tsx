@@ -590,12 +590,17 @@ function NewsCard({ item, index = 0 }: { item: FishingNewsItem; index?: number }
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const locale = useAppStore((s) => s.locale);
+  const [mounted, setMounted] = useState(false);
   const [records, setRecords] = useState<CatchRecord[]>([]);
   const [recordsLoading, setRecordsLoading] = useState(true);
   const [biteTime, setBiteTime] = useState<BiteTimePrediction | null>(null);
   const [biteLoading, setBiteLoading] = useState(true);
   const [topNews, setTopNews] = useState<FishingNewsItem[]>([]);
   const [aiProfile, setAiProfile] = useState<UserFishingProfile | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Demo records — dynamic dates relative to today for a realistic feel
   const today = new Date();
@@ -699,8 +704,11 @@ export default function HomePage() {
     .filter((r) => r.date.startsWith(currentMonthPrefix))
     .reduce((acc, r) => acc + r.count, 0));
 
+  if (!mounted) return null;
+
   return (
     <div className="relative flex min-h-dvh w-full flex-col bg-slate-50 overflow-x-hidden pb-24">
+
       {/* ── Header ── */}
       <header className="flex items-center justify-between px-5 pt-6 pb-2 bg-slate-50 sticky top-0 z-30 backdrop-blur-md">
         <div className="flex items-center gap-2">

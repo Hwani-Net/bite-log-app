@@ -111,20 +111,17 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
       )}
 
       {/* Peak Summary Cards — drag to scroll */}
-      {ranges.length > 0 && (
+      {ranges.length > 0 ? (
         <div className="relative mb-4">
-          {/* Force-hide scrollbar on webkit browsers */}
           <style>{`[data-peak-cards]::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }`}</style>
           <div
             ref={peakCardsDragRef}
             data-peak-cards=""
-            className="flex gap-2 pb-1 cursor-grab active:cursor-grabbing"
+            className="flex gap-2 pb-1 overflow-x-auto no-scrollbar cursor-grab active:cursor-grabbing"
             style={{
-              overflowX: 'auto',
-              overflowY: 'hidden',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
               WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none'
             }}
           >
             {ranges.map((range, i) => {
@@ -135,7 +132,7 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
                   className={`flex-shrink-0 px-3 py-2 rounded-xl border ${
                     isGolden
                       ? 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-300 shadow-sm shadow-amber-200/50'
-                      : 'bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200'
+                      : 'bg-gradient-to-r from-blue-50 to-orange-50 border-blue-200'
                   }`}
                 >
                   <div className="flex items-center gap-1.5 mb-0.5">
@@ -158,6 +155,14 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
           </div>
           {/* Right fade overlay — scroll hint */}
           <div className="absolute right-0 top-0 bottom-1 w-6 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none" />
+        </div>
+      ) : (
+        <div className="bg-slate-50 rounded-xl px-4 py-3 mb-4 text-center border border-dashed border-slate-200">
+          <p className="text-[11px] text-slate-400 font-medium whitespace-pre-wrap">
+            {locale === 'ko' 
+              ? '선택한 어종의 현재 피크 타임 예측 정보가 없습니다.\n물때와 시간대를 고려하여 다른 어종을 탐색해보세요.' 
+              : 'No peak time info for selected species.\nTry other species based on tide and time.'}
+          </p>
         </div>
       )}
 

@@ -150,28 +150,44 @@ export default function OverviewTab({
       {/* Secret Hotspot Section */}
       <section>
         <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900">
-          🔒 {locale === 'ko' ? '시크릿 포인트' : 'Secret Hotspot'}
+          {isPro ? '💎' : '🔒'} {locale === 'ko' ? '시크릿 포인트' : 'Secret Hotspot'}
         </h3>
         <button
           onClick={() => { if (!isPro) openPaywall('secret_point'); }}
-          className="w-full bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100 rounded-2xl p-4 shadow-sm text-left transition-all hover:shadow-md active:scale-[0.99]"
+          className={`w-full border rounded-2xl p-4 shadow-sm text-left transition-all hover:shadow-md active:scale-[0.99] ${
+            isPro ? 'bg-gradient-to-br from-indigo-50/50 to-emerald-50/50 border-emerald-100' : 'bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-100'
+          }`}
         >
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/25">
-              <span className="material-symbols-outlined text-white text-2xl">lock</span>
+            <div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 shadow-lg ${
+              isPro ? 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/25' : 'bg-gradient-to-br from-indigo-500 to-purple-600 shadow-indigo-500/25'
+            }`}>
+              <span className="material-symbols-outlined text-white text-2xl">
+                {isPro ? 'verified_user' : 'lock'}
+              </span>
             </div>
             <div className="flex-1">
               <p className="font-bold text-slate-900 text-sm">
-                {locale === 'ko' ? '현지인 시크릿 포인트 공개' : 'Local Secret Spots'}
+                {isPro && recommendation?.secretSpot 
+                  ? recommendation.secretSpot.name 
+                  : (locale === 'ko' ? '현지인 시크릿 포인트 공개' : 'Local Secret Spots')}
               </p>
               <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                {locale === 'ko' ? 'PRO 회원 전용 — 지역 명인들의 폭조 포인트' : 'PRO only — Top local fishing spots'}
+                {isPro && recommendation?.secretSpot
+                  ? recommendation.secretSpot.description
+                  : (locale === 'ko' ? 'PRO 회원 전용 — 지역 명인들의 폭조 포인트' : 'PRO only — Top local fishing spots')}
               </p>
-              <span className="inline-block mt-2 px-2.5 py-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[10px] font-bold rounded-full">
-                PRO
+              <span className={`inline-block mt-2 px-2.5 py-0.5 text-white text-[10px] font-bold rounded-full ${
+                isPro ? 'bg-gradient-to-r from-emerald-500 to-teal-600' : 'bg-gradient-to-r from-indigo-500 to-purple-600'
+              }`}>
+                {isPro ? 'VERIFIED' : 'PRO'}
               </span>
             </div>
-            <span className="material-symbols-outlined text-indigo-400 text-xl">chevron_right</span>
+            {isPro ? (
+              <span className="material-symbols-outlined text-emerald-500 text-xl font-bold">check_circle</span>
+            ) : (
+              <span className="material-symbols-outlined text-indigo-400 text-xl">chevron_right</span>
+            )}
           </div>
         </button>
       </section>

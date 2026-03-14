@@ -91,43 +91,30 @@ function getMockTideData(stationName: string): TideData {
 }
 
 export async function fetchTideData(lat: number, lng: number, date?: string): Promise<TideData | null> {
-  const apiKey = process.env.NEXT_PUBLIC_KHOA_API_KEY;
   const nearest = findNearestStation(lat, lng);
-  
-  if (!apiKey) {
-    return getMockTideData(nearest.name);
-  }
 
   try {
     const targetDate = date || new Date().toISOString().split('T')[0].replace(/-/g, ''); // YYYYMMDD
-    
-    // Direct call with CORS proxy for browser environment
-    const apiUrl = `https://apis.data.go.kr/1192136/tideFcstHghLw/getTideFcstHghLw?serviceKey=${encodeURIComponent(apiKey)}&pageNo=1&numOfRows=10&obs_post_id=${nearest.code}&date=${targetDate}&resultType=json`;
-    
+
+    const params = new URLSearchParams({
+      pageNo: '1',
+      numOfRows: '10',
+      obs_post_id: nearest.code,
+      date: targetDate,
+    });
+    const apiUrl = `/api/tide?${params.toString()}`;
+
     let data: any = null;
-    
+
     try {
       const res = await fetch(apiUrl, { cache: 'no-store' });
       if (res.ok) {
         data = await res.json();
       }
     } catch {
-      // CORS blocked — try proxy
-      console.log('Direct KHOA API failed, trying CORS proxy...');
+      console.warn('Tide API proxy failed.');
     }
-    
-    if (!data) {
-      try {
-        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
-        const proxyRes = await fetch(proxyUrl, { cache: 'no-store' });
-        if (proxyRes.ok) {
-          data = await proxyRes.json();
-        }
-      } catch {
-        console.warn('CORS proxy also failed.');
-      }
-    }
-    
+
     if (!data) {
       return getMockTideData(nearest.name);
     }

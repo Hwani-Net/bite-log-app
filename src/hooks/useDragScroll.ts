@@ -1,91 +1,84 @@
 'use client';
 
-import { useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 /**
  * Custom hook enabling mouse-drag horizontal scrolling on desktop.
  * On mobile, native touch scroll works already via overflow-x: auto.
- * This hook adds click-and-drag scrolling for desktop users.
- *
+ * 
  * Returns a callback ref so listeners are re-attached whenever React
- * replaces the underlying DOM element (e.g. during re-renders in PeakTimeline).
- *
- * Prevents child click events when dragging (to avoid accidental button clicks).
+ * replaces the underlying DOM element.
  */
 export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
-  const elRef = useRef<T | null>(null);
+  const [element, setElement] = useState<T | null>(null);
   const isDragging = useRef(false);
+  const dragStart = useRef({ x: 0, scrollLeft: 0 });
   const hasMoved = useRef(false);
-  const startX = useRef(0);
-  const scrollLeft = useRef(0);
 
-  const onMouseDown = useCallback((e: MouseEvent) => {
-    const el = elRef.current;
-    if (!el) return;
-    isDragging.current = true;
-    hasMoved.current = false;
-    startX.current = e.pageX - el.offsetLeft;
-    scrollLeft.current = el.scrollLeft;
-    el.style.cursor = 'grabbing';
-    el.style.userSelect = 'none';
-  }, []);
+  useEffect(() => {
+    if (!element) return;
 
-  const onMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging.current) return;
-    const el = elRef.current;
-    if (!el) return;
-    e.preventDefault();
-    const x = e.pageX - el.offsetLeft;
-    const diff = x - startX.current;
-    if (Math.abs(diff) > 5) {
-      hasMoved.current = true;
-    }
-    const walk = diff * 1.5;
-    el.scrollLeft = scrollLeft.current - walk;
-  }, []);
+    const onMouseDown = (e: MouseEvent) => {
+      // Only handle primary button
+      if (e.button !== 0) return;
 
-  const onMouseUp = useCallback(() => {
-    isDragging.current = false;
-    const el = elRef.current;
-    if (el) {
-      el.style.cursor = 'grab';
-      el.style.removeProperty('user-select');
-    }
-  }, []);
-
-  const onClick = useCallback((e: MouseEvent) => {
-    if (hasMoved.current) {
-      e.preventDefault();
-      e.stopPropagation();
+      isDragging.current = true;
       hasMoved.current = false;
-    }
-  }, []);
+      dragStart.current = {
+        x: e.pageX - element.offsetLeft,
+        scrollLeft: element.scrollLeft
+      };
+      
+      element.style.cursor = 'grabbing';
+      element.style.userSelect = 'none';
 
-  // Callback ref: called with the new element (or null) on every DOM replacement
-  const callbackRef = useCallback(
-    (el: T | null) => {
-      // Detach from the previous element
-      if (elRef.current) {
-        const prev = elRef.current;
-        prev.removeEventListener('mousedown', onMouseDown);
-        prev.removeEventListener('click', onClick, true);
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
+      // Attach to window only while active dragging
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current) return;
+      
+      const x = e.pageX - element.offsetLeft;
+      const walk = (x - dragStart.current.x) * 1.5;
+      
+      if (Math.abs(x - dragStart.current.x) > 5) {
+        hasMoved.current = true;
       }
+      
+      element.scrollLeft = dragStart.current.scrollLeft - walk;
+    };
 
-      elRef.current = el;
+    const onMouseUp = () => {
+      isDragging.current = false;
+      element.style.cursor = 'grab';
+      element.style.removeProperty('user-select');
+      
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
 
-      // Attach to the new element
-      if (el) {
-        el.style.cursor = 'grab';
-        el.addEventListener('mousedown', onMouseDown);
-        el.addEventListener('click', onClick, true);
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('mouseup', onMouseUp);
+    const onClick = (e: MouseEvent) => {
+      if (hasMoved.current) {
+        e.preventDefault();
+        e.stopPropagation();
+        hasMoved.current = false;
       }
-    },
-    [onMouseDown, onMouseMove, onMouseUp, onClick],
-  );
+    };
 
-  return callbackRef;
+    element.addEventListener('mousedown', onMouseDown);
+    element.addEventListener('click', onClick, true); // Use capture phase to block child clicks
+    element.style.cursor = 'grab';
+
+    return () => {
+      element.removeEventListener('mousedown', onMouseDown);
+      element.removeEventListener('click', onClick, true);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+  }, [element]);
+
+  // Return a stable setter function
+  return useCallback((el: T | null) => setElement(el), []);
 }

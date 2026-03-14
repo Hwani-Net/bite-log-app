@@ -49,6 +49,7 @@ export interface ConciergeRecommendation {
   tips: string[];
   gear: GearItem[];
   reasoning: string;
+  secretSpot?: FishingSpot; // for PRO users
 }
 
 // ─── Data: Korean Fishing Spots ───────────────────────────────
@@ -143,6 +144,38 @@ const FISHING_SPOTS: FishingSpot[] = [
     bestSpecies: ['가자미', '노래미', '고등어'],
     bestSeasons: [5, 6, 7, 8, 9, 10],
     description: '속초 시내 접근 용이한 방파제',
+  },
+];
+
+// ─── Data: Secret PRO Spots ──────────────────────────────────
+
+const SECRET_FISHING_SPOTS: FishingSpot[] = [
+  {
+    name: '거문도 서쪽 콧부리',
+    region: '전남',
+    lat: 34.0045, lng: 127.3012,
+    type: 'reef',
+    bestSpecies: ['감성돔', '참돔', '긴꼬리벵에돔'],
+    bestSeasons: [1, 2, 3, 10, 11, 12],
+    description: '명인들만 아는 대물 감성돔 포인트, 급류 지대',
+  },
+  {
+    name: '추자도 절명여',
+    region: '제주',
+    lat: 33.8542, lng: 126.3124,
+    type: 'reef',
+    bestSpecies: ['감성돔', '벵에돔', '부시리'],
+    bestSeasons: [4, 5, 6, 9, 10, 11],
+    description: '대한민국 최고의 갯바위 포인트, 6자 감성돔 출몰',
+  },
+  {
+    name: '가거도 대리 포인트',
+    region: '전남',
+    lat: 34.0532, lng: 125.1235,
+    type: 'reef',
+    bestSpecies: ['감성돔', '농어', '볼락'],
+    bestSeasons: [1, 2, 6, 7, 11, 12],
+    description: '국토 최서남단, 평생 한 번은 가봐야 할 성지',
   },
 ];
 
@@ -359,6 +392,7 @@ export function generateRecommendation(
   biteTime: BiteTimePrediction | null,
   userLat: number,
   userLng: number,
+  isPro = false,
 ): ConciergeRecommendation {
   const month = getCurrentMonth();
 
@@ -416,6 +450,7 @@ export function generateRecommendation(
     tips,
     gear: recommendedGear,
     reasoning,
+    secretSpot: isPro ? SECRET_FISHING_SPOTS[Math.floor(Math.random() * SECRET_FISHING_SPOTS.length)] : undefined,
   };
 }
 
