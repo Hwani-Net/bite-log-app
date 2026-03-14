@@ -6,6 +6,7 @@ import { BiteTimePrediction } from '@/services/biteTimeService';
 import PeakTimeline from './PeakTimeline';
 import { ConciergeRecommendation } from '@/services/conciergeService';
 import { useDragScroll } from '@/hooks/useDragScroll';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 
 interface OverviewTabProps {
   locale: string;
@@ -26,6 +27,7 @@ export default function OverviewTab({
   recommendation,
   inSeasonSpecies,
 }: OverviewTabProps) {
+  const { isPro, openPaywall } = useSubscriptionStore();
   const biteScore = biteTime?.score ?? 0;
   const seasonChipsRef = useDragScroll();
 
@@ -143,6 +145,35 @@ export default function OverviewTab({
             )}
           </div>
         ) : null}
+      </section>
+
+      {/* Secret Hotspot Section */}
+      <section>
+        <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900">
+          🔒 {locale === 'ko' ? '시크릿 포인트' : 'Secret Hotspot'}
+        </h3>
+        <button
+          onClick={() => { if (!isPro) openPaywall('secret_point'); }}
+          className="w-full bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100 rounded-2xl p-4 shadow-sm text-left transition-all hover:shadow-md active:scale-[0.99]"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/25">
+              <span className="material-symbols-outlined text-white text-2xl">lock</span>
+            </div>
+            <div className="flex-1">
+              <p className="font-bold text-slate-900 text-sm">
+                {locale === 'ko' ? '현지인 시크릿 포인트 공개' : 'Local Secret Spots'}
+              </p>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                {locale === 'ko' ? 'PRO 회원 전용 — 지역 명인들의 폭조 포인트' : 'PRO only — Top local fishing spots'}
+              </p>
+              <span className="inline-block mt-2 px-2.5 py-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[10px] font-bold rounded-full">
+                PRO
+              </span>
+            </div>
+            <span className="material-symbols-outlined text-indigo-400 text-xl">chevron_right</span>
+          </div>
+        </button>
       </section>
 
       {/* Weather & Tide Analysis */}
