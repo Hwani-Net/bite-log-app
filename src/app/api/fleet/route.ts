@@ -4,10 +4,21 @@ export const dynamic = 'force-dynamic';
 
 // --- Constants -------------------------------------------------------
 
-/** gross tonnage 기준 임계값: 미만 → small, 이상 → large */
-const TONNAGE_THRESHOLD = 3;
+/** gross tonnage 기준 임계값: 미만 → small, 이상 → large
+ *  환경 변수 TONNAGE_THRESHOLD 로 재정의 가능 (기본값: 3) */
+const TONNAGE_THRESHOLD = Number(process.env.TONNAGE_THRESHOLD ?? 3);
 
 // --- Types -----------------------------------------------------------
+
+/** GET /api/fleet 쿼리 파라미터 사양 */
+interface FleetQueryParams {
+  /** 선박 크기 필터. 허용값: 'small' | 'large' */
+  size: string | null;
+  /** 최소 톤수 필터 (숫자 문자열) */
+  minTonnage: string | null;
+  /** 최대 톤수 필터 (숫자 문자열) */
+  maxTonnage: string | null;
+}
 
 interface DynamicRecord {
   mmsi: string;
@@ -40,8 +51,17 @@ interface FleetEntry {
   sizeClass: 'small' | 'large'; // < TONNAGE_THRESHOLD → small, ≥ TONNAGE_THRESHOLD → large
 }
 
-// --- Custom error class ----------------------------------------------
+// --- Custom error classes --------------------------------------------
 
+/** 400 Bad Request — 쿼리 파라미터 유효성 오류 */
+class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+
+/** 502 Bad Gateway — 외부 AIS API 호출 실패 */
 class ExternalApiError extends Error {
   constructor(message: string, public readonly cause?: unknown) {
     super(message);
@@ -166,50 +186,51 @@ async function fetchStatic(): Promise<Map<string, StaticRecord>> {
   return map;
 }
 
-// --- Query param validation ------------------------------------------
+// --- Query param parsing & validation --------------------------------
 
 const VALID_SIZE_VALUES = ['small', 'large'] as const;
 type SizeFilter = (typeof VALID_SIZE_VALUES)[number];
 
-function validateParams(
-  sizeParam: string | null,
-  minTonnage: string | null,
-  maxTonnage: string | null,
-): { ok: true } | { ok: false; message: string } {
-  if (sizeParam !== null && !VALID_SIZE_VALUES.includes(sizeParam as SizeFilter)) {
-    return {
-      ok: false,
-      message: `Invalid 'size' value "${sizeParam}". Must be one of: ${VALID_SIZE_VALUES.join(', ')}`,
-    };
+/** URLSearchParams → FleetQueryParams 변환 (타입 안전 파싱) */
+function parseQueryParams(searchParams: URLSearchParams): FleetQueryParams {
+  return {
+    size: searchParams.get('size'),
+    minTonnage: searchParams.get('minTonnage'),
+    maxTonnage: searchParams.get('maxTonnage'),
+  };
+}
+
+/** 파라미터 유효성 검사. 실패 시 ValidationError throw */
+function validateParams(params: FleetQueryParams): void {
+  const { size, minTonnage, maxTonnage } = params;
+
+  if (size !== null && !VALID_SIZE_VALUES.includes(size as SizeFilter)) {
+    throw new ValidationError(
+      `Invalid 'size' value "${size}". Must be one of: ${VALID_SIZE_VALUES.join(', ')}`,
+    );
   }
   if (minTonnage !== null && isNaN(Number(minTonnage))) {
-    return { ok: false, message: "'minTonnage' must be a numeric value" };
+    throw new ValidationError("'minTonnage' must be a numeric value");
   }
   if (maxTonnage !== null && isNaN(Number(maxTonnage))) {
-    return { ok: false, message: "'maxTonnage' must be a numeric value" };
+    throw new ValidationError("'maxTonnage' must be a numeric value");
   }
-  return { ok: true };
 }
 
 // --- Route handler ---------------------------------------------------
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = request.nextUrl;
-  const sizeParam    = searchParams.get('size');
-  const minTonnage   = searchParams.get('minTonnage');
-  const maxTonnage   = searchParams.get('maxTonnage');
+  const reqTimestamp = new Date().toISOString();
+  const params = parseQueryParams(request.nextUrl.searchParams);
 
-  const validation = validateParams(sizeParam, minTonnage, maxTonnage);
-  if (!validation.ok) {
-    return NextResponse.json(
-      { ok: false, error: validation.message },
-      { status: 400 },
-    );
-  }
-
-  const sizeFilter = sizeParam as SizeFilter | null;
+  console.info('[Fleet GET] request received', { timestamp: reqTimestamp, params });
 
   try {
+    validateParams(params);
+
+    const { size, minTonnage, maxTonnage } = params;
+    const sizeFilter = size as SizeFilter | null;
+
     const [dynamic, staticMap] = await Promise.all([
       fetchDynamic(),
       fetchStatic(),
@@ -231,6 +252,8 @@ export async function GET(request: NextRequest) {
 
     const isMock = !process.env.FLEET_API_KEY || process.env.FLEET_USE_MOCK === 'true';
 
+    console.info('[Fleet GET] success', { timestamp: reqTimestamp, params, count: fleet.length, mock: isMock });
+
     return NextResponse.json({
       ok: true,
       data: fleet,
@@ -239,14 +262,21 @@ export async function GET(request: NextRequest) {
       mock: isMock,
     });
   } catch (err) {
+    if (err instanceof ValidationError) {
+      console.warn('[Fleet 400]', { timestamp: reqTimestamp, params, message: err.message });
+      return NextResponse.json(
+        { ok: false, error: err.message },
+        { status: 400 },
+      );
+    }
     if (err instanceof ExternalApiError) {
-      console.error('[Fleet 502]', err.message, err.cause);
+      console.error('[Fleet 502]', { timestamp: reqTimestamp, params, message: err.message, cause: err.cause });
       return NextResponse.json(
         { ok: false, error: 'Bad Gateway: upstream fleet API failed' },
         { status: 502 },
       );
     }
-    console.error('[Fleet 500]', err);
+    console.error('[Fleet 500]', { timestamp: reqTimestamp, params, err });
     return NextResponse.json(
       { ok: false, error: 'Internal Server Error' },
       { status: 500 },
