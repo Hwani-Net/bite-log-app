@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
+import { useDragScroll } from '@/hooks/useDragScroll';
 import Link from 'next/link';
 import { useAppStore } from '@/store/appStore';
 import { getDataService } from '@/services/dataServiceFactory';
@@ -846,6 +847,7 @@ function SpeciesBiteRanking({ biteTime, locale }: { biteTime: BiteTimePrediction
   const scores = useMemo(() => getSpeciesBiteScores(biteTime), [biteTime]);
   const isKo = locale === 'ko';
   const top5 = scores.slice(0, 5);
+  const scrollRef = useDragScroll();
 
   return (
     <section className="px-4 pt-4">
@@ -859,7 +861,7 @@ function SpeciesBiteRanking({ biteTime, locale }: { biteTime: BiteTimePrediction
         </span>
       </div>
 
-      <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1">
+      <div ref={scrollRef} className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 cursor-grab active:cursor-grabbing">
         {top5.map((sp, i) => {
           const bgGradient =
             sp.grade === 'excellent' ? 'from-emerald-500 to-teal-500' :
