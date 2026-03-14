@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/appStore';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { fetchWeather, WeatherData } from '@/services/weatherService';
 import { fetchTideData, TideData } from '@/services/tideService';
 import { fetchMarineData } from '@/services/marineService';
@@ -27,6 +28,7 @@ type TabType = 'overview' | 'chat' | 'gear';
 export default function ConciergePage() {
   const t = useAppStore((s) => s.t);
   const locale = useAppStore((s) => s.locale);
+  const { decreaseChatbotCredit, openPaywall } = useSubscriptionStore();
   const router = useRouter();
 
   // Core Data State
@@ -102,6 +104,12 @@ export default function ConciergePage() {
   const handleSendMessage = async (msg: string) => {
     if (!msg.trim()) return;
     
+    // Check PRO Paywall
+    if (!decreaseChatbotCredit()) {
+      openPaywall('chatbot');
+      return;
+    }
+
     const userMsg: ChatMessage = { role: 'user', text: msg };
     setChatHistory(prev => [...prev, userMsg]);
     setChatInput('');

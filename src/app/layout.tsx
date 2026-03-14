@@ -3,6 +3,7 @@ import "./globals.css";
 import BottomNav from "@/components/BottomNav";
 import AppInitializer from "@/components/AppInitializer";
 import SplashWrapper from "@/components/SplashWrapper";
+import PaywallBottomSheet from "@/components/PaywallBottomSheet";
 import { Agentation } from 'agentation';
 
 export const metadata: Metadata = {
@@ -73,6 +74,7 @@ export default function RootLayout({
             {children}
           </main>
           <BottomNav />
+          <PaywallBottomSheet />
         </SplashWrapper>
         {process.env.NODE_ENV === 'development' && (
           <Agentation endpoint="http://localhost:4747" />

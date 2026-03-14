@@ -36,18 +36,19 @@ export default function TermsPage() {
       </section>
 
       <section style={sectionStyle}>
-        <h2 style={h2Style}>제3조 (서비스 내용)</h2>
-        <p style={pStyle}>서비스는 다음 기능을 무료로 제공합니다:</p>
+        <h2 style={h2Style}>제3조 (서비스 내용 및 유료 서비스)</h2>
+        <p style={pStyle}>서비스는 무료 및 유료(PRO) 기능을 제공합니다:</p>
         <ul style={ulStyle}>
-          <li>낚시 조과 기록 및 통계 분석</li>
-          <li>AI 어종 인식 (카메라/갤러리 사진 분석)</li>
-          <li>입질 시간 예측 및 물때 정보</li>
-          <li>날씨·해양 데이터 조회</li>
-          <li>커뮤니티 피드 (공개 조과 공유)</li>
-          <li>바이럴 장비 트렌드 및 낚시 뉴스</li>
+          <li>기본 조과 기록 및 통계 분석 (무료)</li>
+          <li>AI 어종 인식 및 분석 (무료, 일일 제한 가능)</li>
+          <li>입질 시간 예측 및 물때 정보 (무료)</li>
+          <li><strong>AI 컨시어지 대화 (무료 횟수 초과 시 PRO 필요)</strong></li>
+          <li><strong>이 지역 시크릿 포인트 추천 (PRO 전용)</strong></li>
+          <li>바이럴 장비 트렌드 및 낚시 뉴스 (무료)</li>
         </ul>
         <p style={pStyle}>
-          일부 기능은 외부 API(Open-Meteo, 기상청, 바다누리 등)에 의존하며, 외부 서비스의 장애 시 해당 기능이 제한될 수 있습니다.
+          운영자는 서비스 정책에 따라 무료 체험 횟수 또는 제공 범위를 조정할 수 있으며, 유료 서비스(PRO) 가입 시 추가적인 혜택을 제공합니다. 
+          일부 기능은 외부 API에 의존하며, 외부 서비스 장애 시 기능이 제한될 수 있습니다.
         </p>
       </section>
 
@@ -127,10 +128,13 @@ export default function TermsPage() {
       </section>
 
       <section style={sectionStyle}>
-        <h2 style={h2Style}>제11조 (손해배상 제한)</h2>
+        <h2 style={h2Style}>제11조 (손해배상 및 유료 서비스 환불)</h2>
         <p style={pStyle}>
-          서비스는 무료로 제공되며, 운영자는 서비스 이용과 관련하여 이용자에게 발생한 어떠한 간접적·부수적·결과적 손해에 대해서도
-          배상 책임을 지지 않습니다. 다만, 운영자의 고의 또는 중대한 과실로 인한 손해는 제외합니다.
+          1. 서비스는 무료 제공을 원칙으로 하며, 유료 서비스(PRO)의 경우 해당 스토어(Google Play, App Store 등)의 환불 정책을 따릅니다.
+        </p>
+        <p style={pStyle}>
+          2. 운영자는 서비스 이용과 관련하여 이용자에게 발생한 어떠한 간접적·부수적 손해에 대해서도 책임을 지지 않습니다. 
+          다만, 운영자의 고의 또는 중대한 과실로 인한 손해는 관계 법령에 따라 배상합니다.
         </p>
       </section>
 

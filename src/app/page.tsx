@@ -734,6 +734,9 @@ export default function HomePage() {
       {/* ── Hero: 오늘의 낚시 조건 ── */}
       <HeroCard biteTime={biteTime} loading={biteLoading} />
 
+      {/* ── 시즌 예측 위젯 ── */}
+      <SeasonForecastWidget locale={locale} />
+
       {/* ── 어종별 맞춤 입질 예보 ── */}
       {biteTime && !biteLoading && (
         <SpeciesBiteRanking biteTime={biteTime} locale={locale} />

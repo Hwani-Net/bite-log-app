@@ -42,7 +42,8 @@
 | 4 배포 | PWA, TWA, 플레이스토어 | ✅ 완료 |
 | 5 LLM | 공지파서, 시즌예측, 바이럴, 알림, 챗봇 | ✅ 완료 (5/5) |
 | 6 승선명부 | 해수부 API, 지오펜싱 | ✅ API 연동 완료 (지오펜싱 잔여) |
-| 7 UX 폴리시 | AI 탭 UI, 피크 타임라인, SEO | ✅ 완료 |
+| 7 UX 폴리시 | AI 탭 UI, 피크 타임라인, SEO, 상세 예측 | ✅ 완료 |
+| 8 PRO 페이월 | 상태관리, 디자인, 제한 로직, 법무 | ✅ 완료 |
 
 ---
 
@@ -88,8 +89,8 @@
 - [x] Zustand 전역 상태에 `isPro` 및 무료 체험 횟수(`chatbotCredits`) 추가 — `src/store/subscriptionStore.ts`
 - [x] 프리미엄 페이월(Paywall) 바텀시트 UI 컴포넌트 생성 (`PaywallBottomSheet.tsx`) — dark: 클래스 제거(라이트 전용) 완료
 - [x] 컨시어지(전문가 챗봇) 일일 3회 제한 로직 및 페이월 연동 — `concierge/page.tsx` + `AIChatTab.tsx`
-- [x] 시크릿 포인트 조회 시 페이월 연동 — `OverviewTab.tsx` `openPaywall('secret_point')` 추가
-- [x] 페이월 CTA 클릭 시 Firebase Analytics 이벤트 로깅 — `paywall_impression`, `paywall_cta_click`, `paywall_dismiss`
+- [x] 시크릿 포인트 조회 시 페이월 연동 — `OverviewTab.tsx` 및 `bite-forecast/page.tsx` 연동 완료
+- [x] 페이월 CTA 클릭 시 Firebase Analytics 이벤트 로깅 — `paywall_impression`, `paywall_cta_click`, `paywall_dismiss` 로깅 완료
 
 ### Phase 7: UX 폴리시 (2026-03-10~11)
 - [x] AI 탭 채팅창 높이 최적화 — flex-1 + calc(100dvh) 동적 높이 (2026-03-10)
@@ -111,16 +112,17 @@
 - [x] Gemini API 403 해결 (AI Studio 전용 키 발급, .next 캐시 클리어)
 - [x] 프로덕션 빌드 (2026-03-03 성공, 에러 0, 24페이지)
 - [x] Play Store 업데이트 — 자동 배포 파이프라인 완성 (`scripts/deploy-to-play.mjs`, 2026-03-14)
-- [x] 이용약관 보강 (7조→13조, 이메일 수정, 개인정보방침 연계)
-- [x] 홈 시즌 예측 위젯 업데이트 (fishSeasonDB 동적 데이터 + 어종 칩)
-- [x] 물때+날씨 상세 예측 페이지 (/bite-forecast — 점수 링, 4요소 분석, 조석 타임라인, 팁)
-- [x] 실시간 조황 대시보드 (/live-dashboard — 전국 요약, 해역별, 어종 랭킹, 뉴스 티커)
+- [x] 이용약관 보강 (7조→13조, 이메일 수정, 개인정보방침 연계) -> `terms/page.tsx`
+- [x] 홈 시즌 예측 위젯 업데이트 (fishSeasonDB 동적 데이터 + 어종 칩) -> `page.tsx`
+- [x] 물때+날씨 상세 예측 페이지 (/bite-forecast — 점수 링, 4요소 분석, 조석 타임라인, 팁) -> `PeakTimeline` 추가 완료
+- [x] 실시간 조황 대시보드 (/live-dashboard — 전국 요약, 해역별, 어종 랭킹, 뉴스 티커) -> MVP 구현 완료
 - [x] 음성 기록 (Tier 3 #11) — Web Speech API, 음성 파싱, 리뷰 패널, 폼 자동채움 (2026-03-04)
 - [x] 낚시 DNA 분석 — /stats DNA 탭, 아키타입 히어로 카드, 2x2 통계, 개선 포인트 (2026-03-04)
 - [x] 금어기 법규 QA (Tier 3 #10) — /regulations 페이지, 14어종 규정 DB, 적법성 체크 위젯 (2026-03-04)
 - [x] 🚀 프로덕션 최종 검증 (랄프 테스트 E2E) 완료 — 전 라우트 에러 0건 (2026-03-10)
 - [x] 어종별 피크타임 — 어종 시간 선호도 × 조석 피크 (2026-03-11)
 - [x] 피크타임 v2 데이터 고도화 — 부족 5종 리서치 + NLM 교차검증 완료. 광어 해질녘 미세보정 (2026-03-11)
+- [x] **Drift Guard 도입** — `drift-guard init`으로 디자인 수호 자동화 시스템 구축 (2026-03-14)
 
 ---
 

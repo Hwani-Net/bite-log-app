@@ -1,0 +1,4345 @@
+{
+  "version": "1.0.0",
+  "createdAt": "2026-03-14T07:25:46.470Z",
+  "projectRoot": "E:\\AI_Programing\\Fishing\\fish-log",
+  "sourceFiles": [
+    "src/app/globals.css",
+    "out/_next/static/chunks/5623e80c9703d159.css",
+    "out/_next/static/chunks/92775ae1698e5da0.css",
+    "out/404.html",
+    "out/index.html",
+    "_stitch_designs/ai-concierge.html",
+    "_stitch_designs/main-dashboard.html",
+    "_stitch_designs/ranking-leaderboard.html",
+    "_stitch_designs/ranking-screen.html",
+    "_stitch_designs/ranking.html",
+    "_stitch_designs/record-form.html",
+    "_stitch_designs/splash.html",
+    "_stitch_designs/stats-dashboard.html",
+    "_stitch_designs/stats.html",
+    "out/404/index.html",
+    "out/alerts/index.html",
+    "out/bite-forecast/index.html",
+    "out/booking/index.html",
+    "out/feed/index.html",
+    "out/concierge/index.html",
+    "out/news/index.html",
+    "out/privacy/index.html",
+    "out/live-dashboard/index.html",
+    "out/ranking/index.html",
+    "out/record/index.html",
+    "out/records/index.html",
+    "out/regulations/index.html",
+    "out/season-forecast/index.html",
+    "out/settings/index.html",
+    "out/stats/index.html",
+    "out/terms/index.html",
+    "out/trip-plan/index.html",
+    "out/viral-gear/index.html",
+    "out/_not-found/index.html",
+    "out/records/detail/index.html",
+    "out/tools/notice-parser/index.html"
+  ],
+  "tokens": [
+    {
+      "category": "color",
+      "property": "--color-primary",
+      "value": "#1392ec",
+      "selector": ":root",
+      "file": "src/app/globals.css",
+      "line": 6
+    },
+    {
+      "category": "color",
+      "property": "--color-ranking-primary",
+      "value": "#25d1f4",
+      "selector": ":root",
+      "file": "src/app/globals.css",
+      "line": 7
+    },
+    {
+      "category": "color",
+      "property": "--color-background-light",
+      "value": "#f6f7f8",
+      "selector": ":root",
+      "file": "src/app/globals.css",
+      "line": 8
+    },
+    {
+      "category": "color",
+      "property": "--color-background-dark",
+      "value": "#101a22",
+      "selector": ":root",
+      "file": "src/app/globals.css",
+      "line": 9
+    },
+    {
+      "category": "color",
+      "property": "--color-ranking-bg-light",
+      "value": "#f5f8f8",
+      "selector": ":root",
+      "file": "src/app/globals.css",
+      "line": 10
+    },
+    {
+      "category": "color",
+      "property": "--color-ranking-bg-dark",
+      "value": "#101f22",
+      "selector": ":root",
+      "file": "src/app/globals.css",
+      "line": 11
+    },
+    {
+      "category": "color",
+      "property": "--color-ocean-deep",
+      "value": "#0a5d96",
+      "selector": ":root",
+      "file": "src/app/globals.css",
+      "line": 12
+    },
+    {
+      "category": "color",
+      "property": "--color-teal-accent",
+      "value": "#2dd4bf",
+      "selector": ":root",
+      "file": "src/app/globals.css",
+      "line": 13
+    },
+    {
+      "category": "font",
+      "property": "--font-sans",
+      "value": "'Inter', 'Noto Sans KR', sans-serif",
+      "selector": ":root",
+      "file": "src/app/globals.css",
+      "line": 14
+    },
+    {
+      "category": "font",
+      "property": "--font-display",
+      "value": "'Inter', sans-serif",
+      "selector": ":root",
+      "file": "src/app/globals.css",
+      "line": 15
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "rgba(255,255,255,0.7)",
+      "selector": ":root",
+      "file": "src/app/globals.css",
+      "line": 20
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "none",
+      "selector": ".no-scrollbar::-webkit-scrollbar",
+      "file": "src/app/globals.css",
+      "line": 69
+    },
+    {
+      "category": "font",
+      "property": "font-family",
+      "value": "var(--font-sans)",
+      "selector": "html",
+      "file": "src/app/globals.css",
+      "line": 79
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "transparent",
+      "selector": "::-webkit-scrollbar-track",
+      "file": "src/app/globals.css",
+      "line": 85
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#e2e8f0",
+      "selector": "::-webkit-scrollbar-thumb",
+      "file": "src/app/globals.css",
+      "line": 86
+    },
+    {
+      "category": "radius",
+      "property": "border-radius",
+      "value": "2px",
+      "selector": "::-webkit-scrollbar-thumb",
+      "file": "src/app/globals.css",
+      "line": 86
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#334155",
+      "selector": ".dark ::-webkit-scrollbar-thumb",
+      "file": "src/app/globals.css",
+      "line": 87
+    },
+    {
+      "category": "shadow",
+      "property": "box-shadow",
+      "value": "0 6px 20px rgba(19,146,236,0.4)",
+      "selector": ":root",
+      "file": "src/app/globals.css",
+      "line": 103
+    },
+    {
+      "category": "color",
+      "property": "--tw-border-style",
+      "value": "solid",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--tw-gradient-from",
+      "value": "#0000",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--tw-gradient-via",
+      "value": "#0000",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--tw-gradient-to",
+      "value": "#0000",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "shadow",
+      "property": "--tw-shadow",
+      "value": "0 0 #0000",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "shadow",
+      "property": "--tw-shadow-alpha",
+      "value": "100%",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "--tw-inset-shadow",
+      "value": "0 0 #0000",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "--tw-inset-shadow-alpha",
+      "value": "100%",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--tw-ring-shadow",
+      "value": "0 0 #0000",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--tw-inset-ring-shadow",
+      "value": "0 0 #0000",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--tw-ring-offset-width",
+      "value": "0px",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--tw-ring-offset-color",
+      "value": "#fff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--tw-ring-offset-shadow",
+      "value": "0 0 #0000",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "shadow",
+      "property": "--tw-drop-shadow-alpha",
+      "value": "100%",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "--font-sans",
+      "value": "\"Inter\",\"Noto Sans KR\",sans-serif",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "--font-mono",
+      "value": "ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,\"Liberation Mono\",\"Courier New\",monospace",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-red-50",
+      "value": "#fef2f2",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-red-100",
+      "value": "#ffe2e2",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-red-200",
+      "value": "#ffcaca",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-red-300",
+      "value": "#ffa3a3",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-red-400",
+      "value": "#ff6568",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-red-500",
+      "value": "#fb2c36",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-red-600",
+      "value": "#e40014",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-red-700",
+      "value": "#bf000f",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-orange-50",
+      "value": "#fff7ed",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-orange-100",
+      "value": "#ffedd5",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-orange-200",
+      "value": "#ffd7a8",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-orange-300",
+      "value": "#ffb96d",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-orange-400",
+      "value": "#ff8b1a",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-orange-500",
+      "value": "#fe6e00",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-orange-600",
+      "value": "#f05100",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-orange-800",
+      "value": "#9f2d00",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-amber-50",
+      "value": "#fffbeb",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-amber-100",
+      "value": "#fef3c6",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-amber-200",
+      "value": "#fee685",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-amber-300",
+      "value": "#ffd236",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-amber-400",
+      "value": "#fcbb00",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-amber-500",
+      "value": "#f99c00",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-amber-600",
+      "value": "#dd7400",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-amber-700",
+      "value": "#b75000",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-amber-800",
+      "value": "#953d00",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-amber-900",
+      "value": "#7b3306",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-yellow-400",
+      "value": "#fac800",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-green-50",
+      "value": "#f0fdf4",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-green-100",
+      "value": "#dcfce7",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-green-200",
+      "value": "#b9f8cf",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-green-300",
+      "value": "#7bf1a8",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-green-400",
+      "value": "#05df72",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-green-500",
+      "value": "#00c758",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-green-600",
+      "value": "#00a544",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-green-700",
+      "value": "#008138",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-emerald-50",
+      "value": "#ecfdf5",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-emerald-100",
+      "value": "#d0fae5",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-emerald-200",
+      "value": "#a4f4cf",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-emerald-300",
+      "value": "#5ee9b5",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-emerald-400",
+      "value": "#00d294",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-emerald-500",
+      "value": "#00bb7f",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-emerald-600",
+      "value": "#009767",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-emerald-700",
+      "value": "#007956",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-emerald-900",
+      "value": "#004e3b",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-teal-50",
+      "value": "#f0fdfa",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-teal-100",
+      "value": "#cbfbf1",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-teal-400",
+      "value": "#00d3bd",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-teal-500",
+      "value": "#00baa7",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-teal-600",
+      "value": "#009588",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-teal-700",
+      "value": "#00776e",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-cyan-50",
+      "value": "#ecfeff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-cyan-100",
+      "value": "#cefafe",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-cyan-300",
+      "value": "#53eafd",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-cyan-400",
+      "value": "#00d2ef",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-cyan-500",
+      "value": "#00b7d7",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-cyan-600",
+      "value": "#0092b5",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-sky-50",
+      "value": "#f0f9ff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-sky-100",
+      "value": "#dff2fe",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-sky-200",
+      "value": "#b8e6fe",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-sky-300",
+      "value": "#77d4ff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-sky-400",
+      "value": "#00bcfe",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-sky-500",
+      "value": "#00a5ef",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-sky-600",
+      "value": "#0084cc",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-sky-700",
+      "value": "#0069a4",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-blue-50",
+      "value": "#eff6ff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-blue-100",
+      "value": "#dbeafe",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-blue-200",
+      "value": "#bedbff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-blue-300",
+      "value": "#90c5ff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-blue-400",
+      "value": "#54a2ff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-blue-500",
+      "value": "#3080ff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-blue-600",
+      "value": "#155dfc",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-blue-700",
+      "value": "#1447e6",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-blue-800",
+      "value": "#193cb8",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-blue-900",
+      "value": "#1c398e",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-blue-950",
+      "value": "#162456",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-indigo-50",
+      "value": "#eef2ff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-indigo-100",
+      "value": "#e0e7ff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-indigo-400",
+      "value": "#7d87ff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-indigo-500",
+      "value": "#625fff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-indigo-600",
+      "value": "#4f39f6",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-violet-50",
+      "value": "#f5f3ff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-violet-100",
+      "value": "#ede9fe",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-violet-200",
+      "value": "#ddd6ff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-violet-400",
+      "value": "#a685ff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-violet-500",
+      "value": "#8d54ff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-violet-600",
+      "value": "#7f22fe",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-violet-700",
+      "value": "#7008e7",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-purple-50",
+      "value": "#faf5ff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-purple-400",
+      "value": "#c07eff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-purple-500",
+      "value": "#ac4bff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-purple-600",
+      "value": "#9810fa",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-pink-300",
+      "value": "#fda5d5",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-pink-400",
+      "value": "#fb64b6",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-pink-500",
+      "value": "#f6339a",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-rose-400",
+      "value": "#ff667f",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-slate-50",
+      "value": "#f8fafc",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-slate-100",
+      "value": "#f1f5f9",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-slate-200",
+      "value": "#e2e8f0",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-slate-300",
+      "value": "#cad5e2",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-slate-400",
+      "value": "#90a1b9",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-slate-500",
+      "value": "#62748e",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-slate-600",
+      "value": "#45556c",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-slate-700",
+      "value": "#314158",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-slate-800",
+      "value": "#1d293d",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-slate-900",
+      "value": "#0f172b",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-slate-950",
+      "value": "#020618",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-gray-100",
+      "value": "#f3f4f6",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-gray-200",
+      "value": "#e5e7eb",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-gray-300",
+      "value": "#d1d5dc",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-gray-400",
+      "value": "#99a1af",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-gray-500",
+      "value": "#6a7282",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-gray-600",
+      "value": "#4a5565",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-gray-900",
+      "value": "#101828",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-black",
+      "value": "#000",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-white",
+      "value": "#fff",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "--spacing",
+      "value": ".25rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-xs",
+      "value": ".75rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-xs--line-height",
+      "value": "calc(1/.75)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-sm",
+      "value": ".875rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-sm--line-height",
+      "value": "calc(1.25/.875)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-base",
+      "value": "1rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-base--line-height",
+      "value": "calc(1.5/1)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-lg",
+      "value": "1.125rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-lg--line-height",
+      "value": "calc(1.75/1.125)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-xl",
+      "value": "1.25rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-xl--line-height",
+      "value": "calc(1.75/1.25)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-2xl",
+      "value": "1.5rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-2xl--line-height",
+      "value": "calc(2/1.5)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-3xl",
+      "value": "1.875rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-3xl--line-height",
+      "value": "calc(2.25/1.875)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-4xl",
+      "value": "2.25rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-4xl--line-height",
+      "value": "calc(2.5/2.25)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-5xl",
+      "value": "3rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-5xl--line-height",
+      "value": "1",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-6xl",
+      "value": "3.75rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--text-6xl--line-height",
+      "value": "1",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "--font-weight-normal",
+      "value": "400",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "--font-weight-medium",
+      "value": "500",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "--font-weight-semibold",
+      "value": "600",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "--font-weight-bold",
+      "value": "700",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "--font-weight-extrabold",
+      "value": "800",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "--font-weight-black",
+      "value": "900",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "--radius-sm",
+      "value": ".25rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "--radius-md",
+      "value": ".375rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "--radius-lg",
+      "value": ".5rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "--radius-xl",
+      "value": ".75rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "--radius-2xl",
+      "value": "1rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "--radius-3xl",
+      "value": "1.5rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "shadow",
+      "property": "--drop-shadow-sm",
+      "value": "0 1px 2px #00000026",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "shadow",
+      "property": "--drop-shadow-md",
+      "value": "0 3px 3px #0000001f",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "--default-font-family",
+      "value": "\"Inter\",\"Noto Sans KR\",sans-serif",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "--default-mono-font-family",
+      "value": "var(--font-mono)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-primary",
+      "value": "#1392ec",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-ranking-primary",
+      "value": "#25d1f4",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-background-light",
+      "value": "#f6f7f8",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-background-dark",
+      "value": "#101a22",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-ranking-bg-light",
+      "value": "#f5f8f8",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-ranking-bg-dark",
+      "value": "#101f22",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-ocean-deep",
+      "value": "#0a5d96",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--color-teal-accent",
+      "value": "#2dd4bf",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "--font-display",
+      "value": "\"Inter\",sans-serif",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "0",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "padding",
+      "value": "0",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "line-height",
+      "value": "1.5",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "font-family",
+      "value": "var(--default-font-family,ui-sans-serif,system-ui,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\",\"Segoe UI Symbol\",\"Noto Color Emoji\")",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "font-weight",
+      "value": "bolder",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "1em",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "position",
+      "value": "relative",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "list-item",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background-color",
+      "value": "#0000",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-radius",
+      "value": "0",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "currentColor",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "shadow",
+      "property": "box-shadow",
+      "value": "none",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-top",
+      "value": "calc(var(--spacing)*-4)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-right",
+      "value": "calc(var(--spacing)*-2)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-bottom",
+      "value": "calc(var(--spacing)*.5)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-left",
+      "value": "calc(var(--spacing)*-2)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "grid-template-columns",
+      "value": "repeat(2,minmax(0,1fr))",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "flex-direction",
+      "value": "column",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "align-items",
+      "value": "baseline",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "justify-content",
+      "value": "space-around",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "gap",
+      "value": "calc(var(--spacing)*.5)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "border-color",
+      "value": "var(--color-slate-50)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-top-left-radius",
+      "value": ".25rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-top-right-radius",
+      "value": ".25rem",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-bottom-right-radius",
+      "value": "var(--radius-sm)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-bottom-left-radius",
+      "value": "var(--radius-sm)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "padding-top",
+      "value": "calc(var(--spacing)*0)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "padding-right",
+      "value": "calc(var(--spacing)*4)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "padding-bottom",
+      "value": "calc(var(--spacing)*1)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "padding-left",
+      "value": "calc(var(--spacing)*10)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "--tw-font-weight",
+      "value": "var(--font-weight-black)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "letter-spacing",
+      "value": ".015em",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "--tw-numeric-spacing",
+      "value": "tabular-nums",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--tw-shadow-color",
+      "value": "#fee68580",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--tw-ring-color",
+      "value": "var(--color-amber-400)",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "--tw-drop-shadow-size",
+      "value": "drop-shadow(0 3px 3px var(--tw-drop-shadow-color,#0000001f))",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "shadow",
+      "property": "--tw-drop-shadow",
+      "value": "drop-shadow(var(--drop-shadow-md))",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#ffffffb3",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "none",
+      "selector": ".no-scrollbar::-webkit-scrollbar",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "font-family",
+      "value": "var(--font-sans)",
+      "selector": "html",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "0 0",
+      "selector": "::-webkit-scrollbar-track",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#e2e8f0",
+      "selector": "::-webkit-scrollbar-thumb",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-radius",
+      "value": "2px",
+      "selector": "::-webkit-scrollbar-thumb",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#334155",
+      "selector": ".dark ::-webkit-scrollbar-thumb",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--tw-inset-shadow-color",
+      "value": "initial",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--tw-inset-ring-color",
+      "value": "initial",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--tw-ring-inset",
+      "value": "initial",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "--tw-drop-shadow-color",
+      "value": "initial",
+      "selector": ":root",
+      "file": "out/_next/static/chunks/5623e80c9703d159.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "position",
+      "value": "absolute",
+      "selector": ".leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile-container,.leaflet-pane>svg,.leaflet-pane>canvas,.leaflet-zoom-box,.leaflet-image-layer,.leaflet-layer",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "0 0",
+      "selector": ".leaflet-tile::selection",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "block",
+      "selector": ".leaflet-marker-icon,.leaflet-marker-shadow",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "padding",
+      "value": "0",
+      "selector": ".leaflet-container .leaflet-marker-pane img,.leaflet-container .leaflet-shadow-pane img,.leaflet-container .leaflet-tile-pane img,.leaflet-container img.leaflet-image-layer,.leaflet-container .leaflet-tile",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "inline-block",
+      "selector": ".lvml",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "position",
+      "value": "absolute",
+      "selector": ".lvml",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "position",
+      "value": "relative",
+      "selector": ".leaflet-control",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "position",
+      "value": "absolute",
+      "selector": ".leaflet-top,.leaflet-bottom",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-top",
+      "value": "10px",
+      "selector": ".leaflet-top .leaflet-control",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-bottom",
+      "value": "10px",
+      "selector": ".leaflet-bottom .leaflet-control",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-left",
+      "value": "10px",
+      "selector": ".leaflet-left .leaflet-control",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-right",
+      "value": "10px",
+      "selector": ".leaflet-right .leaflet-control",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#ddd",
+      "selector": ".leaflet-container",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "#0078a8",
+      "selector": ".leaflet-container a",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#ffffff80",
+      "selector": ".leaflet-zoom-box",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "font-family",
+      "value": "Helvetica Neue,Arial,Helvetica,sans-serif",
+      "selector": ".leaflet-container",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": ".75rem",
+      "selector": ".leaflet-container",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "line-height",
+      "value": "1.5",
+      "selector": ".leaflet-container",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-radius",
+      "value": "4px",
+      "selector": ".leaflet-bar",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "shadow",
+      "property": "box-shadow",
+      "value": "0 1px 5px #000000a6",
+      "selector": ".leaflet-bar",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "#000",
+      "selector": ".leaflet-bar a",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background-color",
+      "value": "#fff",
+      "selector": ".leaflet-bar a",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "line-height",
+      "value": "26px",
+      "selector": ".leaflet-bar a",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "block",
+      "selector": ".leaflet-bar a",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "block",
+      "selector": ".leaflet-bar a,.leaflet-control-layers-toggle",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background-color",
+      "value": "#f4f4f4",
+      "selector": ".leaflet-bar a:hover,.leaflet-bar a:focus",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-top-left-radius",
+      "value": "4px",
+      "selector": ".leaflet-bar a:first-child",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-top-right-radius",
+      "value": "4px",
+      "selector": ".leaflet-bar a:first-child",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-bottom-right-radius",
+      "value": "4px",
+      "selector": ".leaflet-bar a:last-child",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-bottom-left-radius",
+      "value": "4px",
+      "selector": ".leaflet-bar a:last-child",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "#bbb",
+      "selector": ".leaflet-bar a.leaflet-disabled",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background-color",
+      "value": "#f4f4f4",
+      "selector": ".leaflet-bar a.leaflet-disabled",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "line-height",
+      "value": "30px",
+      "selector": ".leaflet-touch .leaflet-bar a",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-top-left-radius",
+      "value": "2px",
+      "selector": ".leaflet-touch .leaflet-bar a:first-child",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-top-right-radius",
+      "value": "2px",
+      "selector": ".leaflet-touch .leaflet-bar a:first-child",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-bottom-right-radius",
+      "value": "2px",
+      "selector": ".leaflet-touch .leaflet-bar a:last-child",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-bottom-left-radius",
+      "value": "2px",
+      "selector": ".leaflet-touch .leaflet-bar a:last-child",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "22px",
+      "selector": ".leaflet-touch .leaflet-control-zoom-in,.leaflet-touch .leaflet-control-zoom-out",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#fff",
+      "selector": ".leaflet-control-layers",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-radius",
+      "value": "5px",
+      "selector": ".leaflet-control-layers",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "shadow",
+      "property": "box-shadow",
+      "value": "0 1px 5px #0006",
+      "selector": ".leaflet-control-layers",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "none",
+      "selector": ".leaflet-control-layers .leaflet-control-layers-list,.leaflet-control-layers-expanded .leaflet-control-layers-toggle",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "block",
+      "selector": ".leaflet-control-layers-expanded .leaflet-control-layers-list",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "position",
+      "value": "relative",
+      "selector": ".leaflet-control-layers-expanded .leaflet-control-layers-list",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "#333",
+      "selector": ".leaflet-control-layers-expanded",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#fff",
+      "selector": ".leaflet-control-layers-expanded",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "padding",
+      "value": "6px 10px 6px 6px",
+      "selector": ".leaflet-control-layers-expanded",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "padding-right",
+      "value": "5px",
+      "selector": ".leaflet-control-layers-scrollbar",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-top",
+      "value": "2px",
+      "selector": ".leaflet-control-layers-selector",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "position",
+      "value": "relative",
+      "selector": ".leaflet-control-layers-selector",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "1.08333em",
+      "selector": ".leaflet-control-layers label",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "block",
+      "selector": ".leaflet-control-layers label",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "5px -10px 5px -6px",
+      "selector": ".leaflet-control-layers-separator",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#fffc",
+      "selector": ".leaflet-container .leaflet-control-attribution",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "0",
+      "selector": ".leaflet-container .leaflet-control-attribution",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "#333",
+      "selector": ".leaflet-control-attribution,.leaflet-control-scale-line",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "padding",
+      "value": "0 5px",
+      "selector": ".leaflet-control-attribution,.leaflet-control-scale-line",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "line-height",
+      "value": "1.4",
+      "selector": ".leaflet-control-attribution,.leaflet-control-scale-line",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "inline",
+      "selector": ".leaflet-attribution-flag",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-left",
+      "value": "5px",
+      "selector": ".leaflet-left .leaflet-control-scale",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-bottom",
+      "value": "5px",
+      "selector": ".leaflet-bottom .leaflet-control-scale",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "shadow",
+      "property": "text-shadow",
+      "value": "1px 1px #fff",
+      "selector": ".leaflet-control-scale-line",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#fffc",
+      "selector": ".leaflet-control-scale-line",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "padding",
+      "value": "2px 5px 1px",
+      "selector": ".leaflet-control-scale-line",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "line-height",
+      "value": "1.1",
+      "selector": ".leaflet-control-scale-line",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-top",
+      "value": "-2px",
+      "selector": ".leaflet-control-scale-line:not(:first-child)",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "shadow",
+      "property": "box-shadow",
+      "value": "none",
+      "selector": ".leaflet-touch .leaflet-control-attribution,.leaflet-touch .leaflet-control-layers,.leaflet-touch .leaflet-bar",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-bottom",
+      "value": "20px",
+      "selector": ".leaflet-popup",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "position",
+      "value": "absolute",
+      "selector": ".leaflet-popup",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-radius",
+      "value": "12px",
+      "selector": ".leaflet-popup-content-wrapper",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "padding",
+      "value": "1px",
+      "selector": ".leaflet-popup-content-wrapper",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "13px 24px 13px 20px",
+      "selector": ".leaflet-popup-content",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "1.08333em",
+      "selector": ".leaflet-popup-content",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "line-height",
+      "value": "1.3",
+      "selector": ".leaflet-popup-content",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "1.3em 0",
+      "selector": ".leaflet-popup-content p",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-top",
+      "value": "-1px",
+      "selector": ".leaflet-popup-tip-container",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-left",
+      "value": "-20px",
+      "selector": ".leaflet-popup-tip-container",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "position",
+      "value": "absolute",
+      "selector": ".leaflet-popup-tip-container",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "-10px auto 0",
+      "selector": ".leaflet-popup-tip",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "padding",
+      "value": "1px",
+      "selector": ".leaflet-popup-tip",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "#333",
+      "selector": ".leaflet-popup-content-wrapper,.leaflet-popup-tip",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#fff",
+      "selector": ".leaflet-popup-content-wrapper,.leaflet-popup-tip",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "shadow",
+      "property": "box-shadow",
+      "value": "0 3px 14px #0006",
+      "selector": ".leaflet-popup-content-wrapper,.leaflet-popup-tip",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "#757575",
+      "selector": ".leaflet-container a.leaflet-popup-close-button",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "0 0",
+      "selector": ".leaflet-container a.leaflet-popup-close-button",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "position",
+      "value": "absolute",
+      "selector": ".leaflet-container a.leaflet-popup-close-button",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "#585858",
+      "selector": ".leaflet-container a.leaflet-popup-close-button:hover,.leaflet-container a.leaflet-popup-close-button:focus",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "0 auto",
+      "selector": ".leaflet-oldie .leaflet-popup-tip",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#fff",
+      "selector": ".leaflet-div-icon",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "#222",
+      "selector": ".leaflet-tooltip",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background-color",
+      "value": "#fff",
+      "selector": ".leaflet-tooltip",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "radius",
+      "property": "border-radius",
+      "value": "3px",
+      "selector": ".leaflet-tooltip",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "padding",
+      "value": "6px",
+      "selector": ".leaflet-tooltip",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "position",
+      "value": "absolute",
+      "selector": ".leaflet-tooltip",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "shadow",
+      "property": "box-shadow",
+      "value": "0 1px 3px #0006",
+      "selector": ".leaflet-tooltip",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "0 0",
+      "selector": ".leaflet-tooltip-top:before,.leaflet-tooltip-bottom:before,.leaflet-tooltip-left:before,.leaflet-tooltip-right:before",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "position",
+      "value": "absolute",
+      "selector": ".leaflet-tooltip-top:before,.leaflet-tooltip-bottom:before,.leaflet-tooltip-left:before,.leaflet-tooltip-right:before",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-top",
+      "value": "6px",
+      "selector": ".leaflet-tooltip-bottom",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-top",
+      "value": "-6px",
+      "selector": ".leaflet-tooltip-top",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-left",
+      "value": "-6px",
+      "selector": ".leaflet-tooltip-bottom:before,.leaflet-tooltip-top:before",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-bottom",
+      "value": "-12px",
+      "selector": ".leaflet-tooltip-top:before",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-top",
+      "value": "-12px",
+      "selector": ".leaflet-tooltip-bottom:before",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-left",
+      "value": "-6px",
+      "selector": ".leaflet-tooltip-bottom:before",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-left",
+      "value": "-6px",
+      "selector": ".leaflet-tooltip-left",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-left",
+      "value": "6px",
+      "selector": ".leaflet-tooltip-right",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-top",
+      "value": "-6px",
+      "selector": ".leaflet-tooltip-left:before,.leaflet-tooltip-right:before",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-right",
+      "value": "-12px",
+      "selector": ".leaflet-tooltip-left:before",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin-left",
+      "value": "-12px",
+      "selector": ".leaflet-tooltip-right:before",
+      "file": "out/_next/static/chunks/92775ae1698e5da0.css",
+      "line": 1
+    },
+    {
+      "category": "font",
+      "property": "font-family",
+      "value": "system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"",
+      "selector": "[inline] div",
+      "file": "out/404.html"
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "flex",
+      "selector": "[inline] div",
+      "file": "out/404.html"
+    },
+    {
+      "category": "layout",
+      "property": "flex-direction",
+      "value": "column",
+      "selector": "[inline] div",
+      "file": "out/404.html"
+    },
+    {
+      "category": "layout",
+      "property": "align-items",
+      "value": "center",
+      "selector": "[inline] div",
+      "file": "out/404.html"
+    },
+    {
+      "category": "layout",
+      "property": "justify-content",
+      "value": "center",
+      "selector": "[inline] div",
+      "file": "out/404.html"
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "inline-block",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/404.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "0 20px 0 0",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/404.html"
+    },
+    {
+      "category": "spacing",
+      "property": "padding",
+      "value": "0 23px 0 0",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/404.html"
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "24px",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/404.html"
+    },
+    {
+      "category": "font",
+      "property": "font-weight",
+      "value": "500",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/404.html"
+    },
+    {
+      "category": "font",
+      "property": "line-height",
+      "value": "49px",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/404.html"
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "14px",
+      "selector": "[inline] h2",
+      "file": "out/404.html"
+    },
+    {
+      "category": "font",
+      "property": "font-weight",
+      "value": "400",
+      "selector": "[inline] h2",
+      "file": "out/404.html"
+    },
+    {
+      "category": "font",
+      "property": "line-height",
+      "value": "49px",
+      "selector": "[inline] h2",
+      "file": "out/404.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "0",
+      "selector": "[inline] h2",
+      "file": "out/404.html"
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "#000",
+      "selector": "body",
+      "file": "out/404.html",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#fff",
+      "selector": "body",
+      "file": "out/404.html",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "0",
+      "selector": "body",
+      "file": "out/404.html",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "#fff",
+      "selector": ":root",
+      "file": "out/404.html",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#000",
+      "selector": ":root",
+      "file": "out/404.html",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "linear-gradient(to bottom, rgba(5,35,90,0.42) 0%, rgba(8,60,110,0.70) 55%, rgba(4,25,55,0.93) 100%)",
+      "selector": "[inline] div.absolute.inset-0",
+      "file": "out/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-family",
+      "value": "\"Inter\",sans-serif",
+      "selector": "body",
+      "file": "_stitch_designs/ai-concierge.html",
+      "line": 2
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "rgba(255,255,255,0.7)",
+      "selector": ".glass",
+      "file": "_stitch_designs/ai-concierge.html",
+      "line": 3
+    },
+    {
+      "category": "layout",
+      "property": "position",
+      "value": "relative",
+      "selector": ".gradient-border",
+      "file": "_stitch_designs/ai-concierge.html",
+      "line": 4
+    },
+    {
+      "category": "radius",
+      "property": "border-radius",
+      "value": "1.5rem",
+      "selector": ".gradient-border",
+      "file": "_stitch_designs/ai-concierge.html",
+      "line": 4
+    },
+    {
+      "category": "spacing",
+      "property": "padding",
+      "value": "1px",
+      "selector": ".gradient-border",
+      "file": "_stitch_designs/ai-concierge.html",
+      "line": 4
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "linear-gradient(135deg,#1392ec,#00f2fe)",
+      "selector": ".gradient-border",
+      "file": "_stitch_designs/ai-concierge.html",
+      "line": 4
+    },
+    {
+      "category": "radius",
+      "property": "border-radius",
+      "value": "1.5rem",
+      "selector": ".gradient-content",
+      "file": "_stitch_designs/ai-concierge.html",
+      "line": 5
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "none",
+      "selector": ".no-scrollbar::-webkit-scrollbar",
+      "file": "_stitch_designs/ai-concierge.html",
+      "line": 3
+    },
+    {
+      "category": "color",
+      "property": "--tw-primary",
+      "value": "#1392ec",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ai-concierge.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-background-light",
+      "value": "#f6f7f8",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ai-concierge.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-background-dark",
+      "value": "#101a22",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ai-concierge.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-DEFAULT",
+      "value": "1rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ai-concierge.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-lg",
+      "value": "2rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ai-concierge.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-xl",
+      "value": "3rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ai-concierge.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-full",
+      "value": "9999px",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ai-concierge.html"
+    },
+    {
+      "category": "font",
+      "property": "--tw-font-display",
+      "value": "Inter, sans-serif",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ai-concierge.html"
+    },
+    {
+      "category": "font",
+      "property": "font-family",
+      "value": "\"Inter\",\"Noto Sans KR\",sans-serif",
+      "selector": "body",
+      "file": "_stitch_designs/main-dashboard.html",
+      "line": 3
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "rgba(255,255,255,0.7)",
+      "selector": ".glass-card",
+      "file": "_stitch_designs/main-dashboard.html",
+      "line": 7
+    },
+    {
+      "category": "color",
+      "property": "--tw-primary",
+      "value": "#1392ec",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/main-dashboard.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-background-light",
+      "value": "#f6f7f8",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/main-dashboard.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-background-dark",
+      "value": "#101a22",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/main-dashboard.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-DEFAULT",
+      "value": "0.25rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/main-dashboard.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-lg",
+      "value": "0.5rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/main-dashboard.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-xl",
+      "value": "0.75rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/main-dashboard.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-full",
+      "value": "9999px",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/main-dashboard.html"
+    },
+    {
+      "category": "font",
+      "property": "--tw-font-display",
+      "value": "Inter, Noto Sans KR, sans-serif",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/main-dashboard.html"
+    },
+    {
+      "category": "font",
+      "property": "font-family",
+      "value": "\"Inter\",\"Noto Sans KR\",sans-serif",
+      "selector": "body",
+      "file": "_stitch_designs/ranking-leaderboard.html",
+      "line": 2
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "rgba(255,255,255,0.7)",
+      "selector": ".glass-card",
+      "file": "_stitch_designs/ranking-leaderboard.html",
+      "line": 4
+    },
+    {
+      "category": "color",
+      "property": "--tw-primary",
+      "value": "#1392ec",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-leaderboard.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-background-light",
+      "value": "#f6f7f8",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-leaderboard.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-background-dark",
+      "value": "#101a22",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-leaderboard.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-ocean-deep",
+      "value": "#0a5d96",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-leaderboard.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-DEFAULT",
+      "value": "0.25rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-leaderboard.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-lg",
+      "value": "0.5rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-leaderboard.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-xl",
+      "value": "0.75rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-leaderboard.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-2xl",
+      "value": "1rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-leaderboard.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-full",
+      "value": "9999px",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-leaderboard.html"
+    },
+    {
+      "category": "font",
+      "property": "--tw-font-display",
+      "value": "Inter, Noto Sans KR, sans-serif",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-leaderboard.html"
+    },
+    {
+      "category": "font",
+      "property": "font-family",
+      "value": "\"Inter\",sans-serif",
+      "selector": "body",
+      "file": "_stitch_designs/ranking-screen.html",
+      "line": 3
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "rgba(37,209,244,0.1)",
+      "selector": ".glass-card",
+      "file": "_stitch_designs/ranking-screen.html",
+      "line": 7
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "linear-gradient(180deg,rgba(37,209,244,0.3) 0%,rgba(37,209,244,0.05) 100%)",
+      "selector": ".podium-1",
+      "file": "_stitch_designs/ranking-screen.html",
+      "line": 13
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "linear-gradient(180deg,rgba(37,209,244,0.15) 0%,rgba(37,209,244,0.02) 100%)",
+      "selector": ".podium-2,.podium-3",
+      "file": "_stitch_designs/ranking-screen.html",
+      "line": 17
+    },
+    {
+      "category": "color",
+      "property": "--tw-primary",
+      "value": "#25d1f4",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-screen.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-background-light",
+      "value": "#f5f8f8",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-screen.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-background-dark",
+      "value": "#101f22",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-screen.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-DEFAULT",
+      "value": "0.25rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-screen.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-lg",
+      "value": "0.5rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-screen.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-xl",
+      "value": "0.75rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-screen.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-full",
+      "value": "9999px",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-screen.html"
+    },
+    {
+      "category": "font",
+      "property": "--tw-font-display",
+      "value": "Inter, sans-serif",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking-screen.html"
+    },
+    {
+      "category": "font",
+      "property": "font-family",
+      "value": "\"Inter\",\"Noto Sans KR\",sans-serif",
+      "selector": "body",
+      "file": "_stitch_designs/ranking.html",
+      "line": 2
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "rgba(255,255,255,0.7)",
+      "selector": ".glass-card",
+      "file": "_stitch_designs/ranking.html",
+      "line": 4
+    },
+    {
+      "category": "color",
+      "property": "--tw-primary",
+      "value": "#1392ec",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-background-light",
+      "value": "#f6f7f8",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-background-dark",
+      "value": "#101a22",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-ocean-deep",
+      "value": "#0a5d96",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-DEFAULT",
+      "value": "0.25rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-lg",
+      "value": "0.5rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-xl",
+      "value": "0.75rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-2xl",
+      "value": "1rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-full",
+      "value": "9999px",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking.html"
+    },
+    {
+      "category": "font",
+      "property": "--tw-font-display",
+      "value": "Inter, Noto Sans KR, sans-serif",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/ranking.html"
+    },
+    {
+      "category": "color",
+      "property": "background-color",
+      "value": "#FAFAFA",
+      "selector": "body",
+      "file": "_stitch_designs/record-form.html",
+      "line": 3
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "rgba(255,255,255,0.7)",
+      "selector": ".glass-card",
+      "file": "_stitch_designs/record-form.html",
+      "line": 7
+    },
+    {
+      "category": "color",
+      "property": "--tw-primary",
+      "value": "#1392ec",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/record-form.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-ocean-blue",
+      "value": "#1392ec",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/record-form.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-teal-accent",
+      "value": "#2dd4bf",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/record-form.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-background-light",
+      "value": "#f6f7f8",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/record-form.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-background-dark",
+      "value": "#101a22",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/record-form.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-DEFAULT",
+      "value": "0.25rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/record-form.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-lg",
+      "value": "0.5rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/record-form.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-xl",
+      "value": "0.75rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/record-form.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-2xl",
+      "value": "1rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/record-form.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-full",
+      "value": "9999px",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/record-form.html"
+    },
+    {
+      "category": "font",
+      "property": "--tw-font-display",
+      "value": "Inter, Pretendard, sans-serif",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/record-form.html"
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "rgba(255,255,255,0.7)",
+      "selector": ".glass-card",
+      "file": "_stitch_designs/stats-dashboard.html",
+      "line": 3
+    },
+    {
+      "category": "color",
+      "property": "--tw-primary",
+      "value": "#1392ec",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/stats-dashboard.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-background-light",
+      "value": "#f6f7f8",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/stats-dashboard.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-background-dark",
+      "value": "#101a22",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/stats-dashboard.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-DEFAULT",
+      "value": "0.25rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/stats-dashboard.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-lg",
+      "value": "0.5rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/stats-dashboard.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-xl",
+      "value": "0.75rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/stats-dashboard.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-full",
+      "value": "9999px",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/stats-dashboard.html"
+    },
+    {
+      "category": "font",
+      "property": "--tw-font-display",
+      "value": "Inter, Noto Sans KR, sans-serif",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/stats-dashboard.html"
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "rgba(255,255,255,0.7)",
+      "selector": ".glass-card",
+      "file": "_stitch_designs/stats.html",
+      "line": 3
+    },
+    {
+      "category": "color",
+      "property": "--tw-primary",
+      "value": "#1392ec",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/stats.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-background-light",
+      "value": "#f6f7f8",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/stats.html"
+    },
+    {
+      "category": "color",
+      "property": "--tw-background-dark",
+      "value": "#101a22",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/stats.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-DEFAULT",
+      "value": "0.25rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/stats.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-lg",
+      "value": "0.5rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/stats.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-xl",
+      "value": "0.75rem",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/stats.html"
+    },
+    {
+      "category": "radius",
+      "property": "--tw-radius-full",
+      "value": "9999px",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/stats.html"
+    },
+    {
+      "category": "font",
+      "property": "--tw-font-display",
+      "value": "Inter, Noto Sans KR, sans-serif",
+      "selector": "[tailwind.config]",
+      "file": "_stitch_designs/stats.html"
+    },
+    {
+      "category": "font",
+      "property": "font-family",
+      "value": "system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"",
+      "selector": "[inline] div",
+      "file": "out/404/index.html"
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "flex",
+      "selector": "[inline] div",
+      "file": "out/404/index.html"
+    },
+    {
+      "category": "layout",
+      "property": "flex-direction",
+      "value": "column",
+      "selector": "[inline] div",
+      "file": "out/404/index.html"
+    },
+    {
+      "category": "layout",
+      "property": "align-items",
+      "value": "center",
+      "selector": "[inline] div",
+      "file": "out/404/index.html"
+    },
+    {
+      "category": "layout",
+      "property": "justify-content",
+      "value": "center",
+      "selector": "[inline] div",
+      "file": "out/404/index.html"
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "inline-block",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/404/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "0 20px 0 0",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/404/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "padding",
+      "value": "0 23px 0 0",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/404/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "24px",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/404/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-weight",
+      "value": "500",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/404/index.html"
+    },
+    {
+      "category": "font",
+      "property": "line-height",
+      "value": "49px",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/404/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "14px",
+      "selector": "[inline] h2",
+      "file": "out/404/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-weight",
+      "value": "400",
+      "selector": "[inline] h2",
+      "file": "out/404/index.html"
+    },
+    {
+      "category": "font",
+      "property": "line-height",
+      "value": "49px",
+      "selector": "[inline] h2",
+      "file": "out/404/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "0",
+      "selector": "[inline] h2",
+      "file": "out/404/index.html"
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "#000",
+      "selector": "body",
+      "file": "out/404/index.html",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#fff",
+      "selector": "body",
+      "file": "out/404/index.html",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "0",
+      "selector": "body",
+      "file": "out/404/index.html",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "#fff",
+      "selector": ":root",
+      "file": "out/404/index.html",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#000",
+      "selector": ":root",
+      "file": "out/404/index.html",
+      "line": 1
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "none",
+      "selector": "[data-peak-cards]::-webkit-scrollbar",
+      "file": "out/concierge/index.html",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "padding",
+      "value": "24px 16px",
+      "selector": "[inline] div",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "0 auto",
+      "selector": "[inline] div",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "font",
+      "property": "line-height",
+      "value": "1.8",
+      "selector": "[inline] div",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "var(--color-primary)",
+      "selector": "[inline] a",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "14px",
+      "selector": "[inline] a",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "24px",
+      "selector": "[inline] h1",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-weight",
+      "value": "700",
+      "selector": "[inline] h1",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "16px 0 8px",
+      "selector": "[inline] h1",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "var(--color-text)",
+      "selector": "[inline] h1",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "var(--color-text-secondary)",
+      "selector": "[inline] p",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "13px",
+      "selector": "[inline] p",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin-bottom",
+      "value": "24px",
+      "selector": "[inline] p",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin-bottom",
+      "value": "24px",
+      "selector": "[inline] section",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "17px",
+      "selector": "[inline] h2",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-weight",
+      "value": "600",
+      "selector": "[inline] h2",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "var(--color-text)",
+      "selector": "[inline] h2",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin-bottom",
+      "value": "8px",
+      "selector": "[inline] h2",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "13px",
+      "selector": "[inline] table",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "var(--color-text-secondary)",
+      "selector": "[inline] table",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "padding",
+      "value": "8px",
+      "selector": "[inline] th",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "var(--color-text)",
+      "selector": "[inline] th",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "padding",
+      "value": "8px",
+      "selector": "[inline] td",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "var(--color-text-secondary)",
+      "selector": "[inline] ul",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "14px",
+      "selector": "[inline] ul",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "padding-left",
+      "value": "20px",
+      "selector": "[inline] ul",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "padding-top",
+      "value": "16px",
+      "selector": "[inline] div",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin-top",
+      "value": "32px",
+      "selector": "[inline] div",
+      "file": "out/privacy/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "padding",
+      "value": "24px 16px",
+      "selector": "[inline] div",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "0 auto",
+      "selector": "[inline] div",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "font",
+      "property": "line-height",
+      "value": "1.8",
+      "selector": "[inline] div",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "var(--color-primary)",
+      "selector": "[inline] a",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "14px",
+      "selector": "[inline] a",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "24px",
+      "selector": "[inline] h1",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-weight",
+      "value": "700",
+      "selector": "[inline] h1",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "16px 0 8px",
+      "selector": "[inline] h1",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "var(--color-text)",
+      "selector": "[inline] h1",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "var(--color-text-secondary)",
+      "selector": "[inline] p",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "13px",
+      "selector": "[inline] p",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin-bottom",
+      "value": "24px",
+      "selector": "[inline] p",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin-bottom",
+      "value": "24px",
+      "selector": "[inline] section",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "17px",
+      "selector": "[inline] h2",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-weight",
+      "value": "600",
+      "selector": "[inline] h2",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "var(--color-text)",
+      "selector": "[inline] h2",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin-bottom",
+      "value": "8px",
+      "selector": "[inline] h2",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "var(--color-text-secondary)",
+      "selector": "[inline] ul",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "14px",
+      "selector": "[inline] ul",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "padding-left",
+      "value": "20px",
+      "selector": "[inline] ul",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "padding-top",
+      "value": "16px",
+      "selector": "[inline] div",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin-top",
+      "value": "32px",
+      "selector": "[inline] div",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin-top",
+      "value": "4px",
+      "selector": "[inline] p",
+      "file": "out/terms/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-family",
+      "value": "system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"",
+      "selector": "[inline] div",
+      "file": "out/_not-found/index.html"
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "flex",
+      "selector": "[inline] div",
+      "file": "out/_not-found/index.html"
+    },
+    {
+      "category": "layout",
+      "property": "flex-direction",
+      "value": "column",
+      "selector": "[inline] div",
+      "file": "out/_not-found/index.html"
+    },
+    {
+      "category": "layout",
+      "property": "align-items",
+      "value": "center",
+      "selector": "[inline] div",
+      "file": "out/_not-found/index.html"
+    },
+    {
+      "category": "layout",
+      "property": "justify-content",
+      "value": "center",
+      "selector": "[inline] div",
+      "file": "out/_not-found/index.html"
+    },
+    {
+      "category": "layout",
+      "property": "display",
+      "value": "inline-block",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/_not-found/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "0 20px 0 0",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/_not-found/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "padding",
+      "value": "0 23px 0 0",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/_not-found/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "24px",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/_not-found/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-weight",
+      "value": "500",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/_not-found/index.html"
+    },
+    {
+      "category": "font",
+      "property": "line-height",
+      "value": "49px",
+      "selector": "[inline] h1.next-error-h1",
+      "file": "out/_not-found/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-size",
+      "value": "14px",
+      "selector": "[inline] h2",
+      "file": "out/_not-found/index.html"
+    },
+    {
+      "category": "font",
+      "property": "font-weight",
+      "value": "400",
+      "selector": "[inline] h2",
+      "file": "out/_not-found/index.html"
+    },
+    {
+      "category": "font",
+      "property": "line-height",
+      "value": "49px",
+      "selector": "[inline] h2",
+      "file": "out/_not-found/index.html"
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "0",
+      "selector": "[inline] h2",
+      "file": "out/_not-found/index.html"
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "#000",
+      "selector": "body",
+      "file": "out/_not-found/index.html",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#fff",
+      "selector": "body",
+      "file": "out/_not-found/index.html",
+      "line": 1
+    },
+    {
+      "category": "spacing",
+      "property": "margin",
+      "value": "0",
+      "selector": "body",
+      "file": "out/_not-found/index.html",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "color",
+      "value": "#fff",
+      "selector": ":root",
+      "file": "out/_not-found/index.html",
+      "line": 1
+    },
+    {
+      "category": "color",
+      "property": "background",
+      "value": "#000",
+      "selector": ":root",
+      "file": "out/_not-found/index.html",
+      "line": 1
+    }
+  ],
+  "summary": {
+    "color": 266,
+    "font": 84,
+    "spacing": 85,
+    "shadow": 14,
+    "radius": 62,
+    "layout": 45,
+    "other": 0
+  },
+  "structure": {
+    "semanticTags": {
+      "nav": 1,
+      "main": 1
+    },
+    "maxDepth": 5,
+    "layoutHash": "7b3355d8",
+    "childSequenceHash": "cbe3c91f"
+  },
+  "structureSourceFile": "out/404.html"
+}

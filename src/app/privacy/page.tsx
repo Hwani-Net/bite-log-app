@@ -85,6 +85,10 @@ export default function PrivacyPage() {
               <td style={{ padding: 8 }}>Google LLC (Gemini API)</td>
               <td style={{ padding: 8 }}>AI 어종 분석 (사진 전송)</td>
             </tr>
+            <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+              <td style={{ padding: 8 }}>Google LLC (Firebase Analytics)</td>
+              <td style={{ padding: 8 }}>서비스 이용 통계 분석 및 광고 성과 측정</td>
+            </tr>
           </tbody>
         </table>
       </section>

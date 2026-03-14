@@ -1,6 +1,7 @@
 import { FirebaseApp, initializeApp, getApps } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { Firestore, getFirestore } from 'firebase/firestore';
+import { Analytics, getAnalytics, isSupported, logEvent } from 'firebase/analytics';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -9,6 +10,7 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Check if Firebase config is available (env vars set)
@@ -19,6 +21,7 @@ function isConfigured(): boolean {
 let app: FirebaseApp | null = null;
 let authInstance: Auth | null = null;
 let dbInstance: Firestore | null = null;
+let analyticsInstance: Analytics | null = null;
 
 function getApp(): FirebaseApp | null {
   if (typeof window === 'undefined') return null; // SSR safety
@@ -43,6 +46,36 @@ export function getFirebaseDb(): Firestore | null {
   if (!a) return null;
   dbInstance = getFirestore(a);
   return dbInstance;
+}
+
+export async function getFirebaseAnalytics(): Promise<Analytics | null> {
+  if (analyticsInstance) return analyticsInstance;
+  const a = getApp();
+  if (!a) return null;
+  try {
+    const supported = await isSupported();
+    if (supported) {
+      analyticsInstance = getAnalytics(a);
+      return analyticsInstance;
+    }
+  } catch (err) {
+    console.warn('Analytics not supported', err);
+  }
+  return null;
+}
+
+// Helper function to log events easily
+export async function logAppEvent(eventName: string, eventParams?: Record<string, any>) {
+  try {
+    const analytics = await getFirebaseAnalytics();
+    if (analytics) {
+      logEvent(analytics, eventName, eventParams);
+    } else {
+      console.log('[Mock Analytics]', eventName, eventParams);
+    }
+  } catch (err) {
+    console.warn('Failed to log event', err);
+  }
 }
 
 /** Check if Firebase is ready to use */

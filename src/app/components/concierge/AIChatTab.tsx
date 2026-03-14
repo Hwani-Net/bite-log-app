@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from 'react';
 import { ChatMessage, CHAT_SPECIES, getQuickReplies } from '@/services/fishExpertChatService';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 
 interface AIChatTabProps {
   locale: string;
@@ -27,6 +28,7 @@ export default function AIChatTab({
   onClear,
 }: AIChatTabProps) {
   const chatBottomRef = useRef<HTMLDivElement>(null);
+  const { isPro, chatbotCredits } = useSubscriptionStore();
 
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -34,13 +36,20 @@ export default function AIChatTab({
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <div className="mb-3">
-        <h3 className="text-lg font-bold flex items-center gap-2 text-slate-900">
-          🤖 {locale === 'ko' ? 'AI 낚시 마스터' : 'AI Fishing Master'}
-        </h3>
-        <p className="text-xs text-slate-400 mt-1">
-          {locale === 'ko' ? '어종을 선택하고 무엇이든 물어보세요. 낚시 채비, 물때, 팁을 알려드려요.' : 'Select a species and ask anything.'}
-        </p>
+      <div className="mb-3 flex justify-between items-start gap-2">
+        <div>
+          <h3 className="text-lg font-bold flex items-center gap-2 text-slate-900">
+            🤖 {locale === 'ko' ? 'AI 낚시 마스터' : 'AI Fishing Master'}
+          </h3>
+          <p className="text-xs text-slate-400 mt-1">
+            {locale === 'ko' ? '어종을 선택하고 무엇이든 물어보세요.' : 'Select a species and ask anything.'}
+          </p>
+        </div>
+        {!isPro && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 shrink-0 text-blue-600 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border border-blue-100/50 shadow-sm whitespace-nowrap">
+            {locale === 'ko' ? `무료 질문 ${chatbotCredits}/3` : `Credits ${chatbotCredits}/3`}
+          </div>
+        )}
       </div>
 
       {/* Species selector chips */}

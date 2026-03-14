@@ -1,0 +1,31 @@
+{
+  "cssFiles": [
+    "src/**/*.css",
+    "app/**/*.css",
+    "styles/**/*.css",
+    "**/*.module.css",
+    "**/*.css"
+  ],
+  "htmlFiles": [
+    "**/*.html",
+    "!node_modules/**",
+    "!dist/**",
+    "!build/**"
+  ],
+  "threshold": 10,
+  "trackCategories": [
+    "color",
+    "font",
+    "spacing",
+    "shadow",
+    "radius",
+    "layout"
+  ],
+  "ignore": [
+    "node_modules/**",
+    "dist/**",
+    "build/**",
+    ".next/**",
+    "coverage/**"
+  ]
+}

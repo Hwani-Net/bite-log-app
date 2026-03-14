@@ -3,12 +3,65 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAppStore } from '@/store/appStore';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { fetchTideData } from '@/services/tideService';
 import { fetchWeather } from '@/services/weatherService';
 import { fetchMarineData } from '@/services/marineService';
 import { calculateBiteTime, BiteTimePrediction, BiteFactor } from '@/services/biteTimeService';
 import { TideData, getCurrentPhase, TidePhase } from '@/services/tideService';
 import { WeatherData } from '@/services/weatherService';
+import PeakTimeline from '@/app/components/concierge/PeakTimeline';
+
+// ─── Secret Spots Section ─────────────────────────────────────────────────────
+function SecretSpotsSection({ isPro, onOpenPaywall }: { isPro: boolean; onOpenPaywall: () => void }) {
+  const spots = [
+    { name: '대천항 남단 테트라포드', species: '감성돔, 우럭', desc: '들물 타임에 대물 출현 빈도 매우 높음' },
+    { name: '시화방조제 1km 지점 수중여', species: '삼치, 광어', desc: '조류가 바뀌는 시점에 폭발적 피딩' },
+    { name: '영흥도 남서쪽 시크릿 여밭', species: '참돔, 갑오징어', desc: '현지인들만 아는 최고급 포인트' },
+  ];
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 overflow-hidden relative">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="material-symbols-outlined text-indigo-500 text-base">location_searching</span>
+        <h3 className="text-sm font-bold text-slate-800">이 지역 시크릿 포인트</h3>
+        {!isPro && <span className="text-[10px] bg-indigo-500 text-white px-1.5 py-0.5 rounded font-bold ml-1">PRO</span>}
+      </div>
+
+      <div className={`space-y-3 transition-all duration-500 ${!isPro ? 'blur-[6px] select-none' : ''}`}>
+        {spots.map((spot, i) => (
+          <div key={i} className="flex items-center gap-3 bg-slate-50 rounded-xl px-3 py-3">
+            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-indigo-600">place</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-slate-800 truncate">{spot.name}</p>
+              <p className="text-[10px] text-indigo-600 font-medium">{spot.species}</p>
+              <p className="text-[9px] text-slate-500 mt-0.5">{spot.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {!isPro && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-white/30 backdrop-blur-[2px] z-10">
+          <div className="bg-white/90 shadow-xl rounded-2xl p-5 border border-slate-100 flex flex-col items-center text-center max-w-[200px]">
+            <span className="material-symbols-outlined text-indigo-600 text-3xl mb-2">lock</span>
+            <p className="text-[11px] font-bold text-slate-800 leading-tight mb-3">
+              고수들만 아는<br/>시크릿 포인트 3곳 잠김
+            </p>
+            <button 
+              onClick={onOpenPaywall}
+              className="bg-indigo-600 text-white text-[10px] font-bold px-4 py-2 rounded-full shadow-lg shadow-indigo-600/30 active:scale-95 transition-transform"
+            >
+              포인트 잠금 해제
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─── Score Ring ───────────────────────────────────────────────────────────────
 function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
@@ -278,6 +331,7 @@ function FishingTips({ biteTime }: { biteTime: BiteTimePrediction }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function BiteForecastPage() {
   const locale = useAppStore((s) => s.locale);
+  const { isPro, openPaywall } = useSubscriptionStore();
   const isKo = locale === 'ko';
 
   const [biteTime, setBiteTime] = useState<BiteTimePrediction | null>(null);
@@ -414,8 +468,19 @@ export default function BiteForecastPage() {
             <TideTimeline tideData={tideData} phase={phase} />
           )}
 
+          {/* ── Peak Timeline ── */}
+          {tideData && (
+            <PeakTimeline tideData={tideData} locale={locale} />
+          )}
+
           {/* ── Weather Detail ── */}
           {weather && <WeatherDetail weather={weather} />}
+
+          {/* ── Secret Spots (PRO) ── */}
+          <SecretSpotsSection 
+            isPro={isPro} 
+            onOpenPaywall={() => openPaywall('secret_point')} 
+          />
 
           {/* ── Fishing Tips ── */}
           <FishingTips biteTime={biteTime} />
