@@ -60,7 +60,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
       },
     }),
     {
-      name: 'fishlog-subscription-v2',
+      name: 'fishlog-subscription-v3',
       partialize: (state) => ({ 
         isPro: state.isPro, 
         chatbotCredits: state.chatbotCredits, 

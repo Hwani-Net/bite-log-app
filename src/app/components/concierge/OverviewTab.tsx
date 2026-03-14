@@ -168,13 +168,13 @@ export default function OverviewTab({
             </div>
             <div className="flex-1">
               <p className="font-bold text-slate-900 text-sm">
-                {isPro && recommendation?.secretSpot 
-                  ? recommendation.secretSpot.name 
+                {isPro
+                  ? (recommendation?.secretSpot?.name ?? (locale === 'ko' ? '시크릿 포인트 준비 중' : 'Secret Spot (Loading...)'))
                   : (locale === 'ko' ? '현지인 시크릿 포인트 공개' : 'Local Secret Spots')}
               </p>
               <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                {isPro && recommendation?.secretSpot
-                  ? recommendation.secretSpot.description
+                {isPro
+                  ? (recommendation?.secretSpot?.description ?? (locale === 'ko' ? 'PRO 회원 전용 시크릿 포인트입니다' : 'PRO exclusive secret fishing spot'))
                   : (locale === 'ko' ? 'PRO 회원 전용 — 지역 명인들의 폭조 포인트' : 'PRO only — Top local fishing spots')}
               </p>
               <span className={`inline-block mt-2 px-2.5 py-0.5 text-white text-[10px] font-bold rounded-full ${

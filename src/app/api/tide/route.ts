@@ -1,36 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { headers } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
-const KHOA_BASE = 'https://apis.data.go.kr/1192136/tideFcstHghLw/getTideFcstHghLw';
+// Using OceanGrid direct API URL which matches the 64-char hex key from .env.local
+const KHOA_OCEANGRID_BASE = 'http://www.khoa.go.kr/api/oceangrid/tideObsPre/search.do';
 
 export async function GET(request: NextRequest) {
-  await headers();
-  const apiKey = process.env.KHOA_API_KEY ?? process.env.NEXT_PUBLIC_KHOA_API_KEY;
+  const apiKey = process.env.NEXT_PUBLIC_KHOA_API_KEY;
 
   if (!apiKey) {
-    return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
+    return NextResponse.json({ error: 'KHOA API key not configured' }, { status: 500 });
   }
 
   const queryParams = request.nextUrl.searchParams;
-  const params = new URLSearchParams();
-  
-  params.set('resultType', 'json');
-  params.set('obsCode', queryParams.get('obs_post_id') || '');
-  params.set('tideFcstTime', queryParams.get('date') || '');
-  params.set('pageNo', '1');
-  params.set('numOfRows', '20');
+  const obsCode = queryParams.get('obs_post_id') || '';
+  const date = queryParams.get('date') || '';
 
-  // Manual append serviceKey to avoid URLSearchParams encoding issues with some KHOA keys
-  const apiUrl = `${KHOA_BASE}?serviceKey=${apiKey}&${params.toString()}`;
+  if (!obsCode || !date) {
+    return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
+  }
+
+  const apiUrl = `${KHOA_OCEANGRID_BASE}?ServiceKey=${apiKey}&ObsCode=${obsCode}&Date=${date}&ResultType=json`;
 
   try {
     const res = await fetch(apiUrl, { cache: 'no-store' });
-    const data = await res.json();
-    return NextResponse.json(data);
+    const text = await res.text();
+    
+    // Attempt to parse JSON
+    try {
+      const data = JSON.parse(text);
+      const lowerText = text.toLowerCase();
+      if (lowerText.includes('error') || lowerText.includes('invalid')) {
+        console.error('KHOA API returned error/invalid response:', text);
+        return NextResponse.json({
+          error: 'KHOA API returned an error or invalid response',
+          details: text.substring(0, 200),
+        }, { status: 502 });
+      }
+      return NextResponse.json(data);
+    } catch (e) {
+      console.error('KHOA API Error Response:', text);
+      return NextResponse.json({ 
+        error: 'KHOA API returned non-JSON response', 
+        details: text.substring(0, 100) 
+      }, { status: 502 });
+    }
   } catch (err) {
-    console.error('Tide API Error:', err);
-    return NextResponse.json({ error: 'Failed to fetch tide data' }, { status: 502 });
+    console.error('Tide Proxy Error:', err);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
