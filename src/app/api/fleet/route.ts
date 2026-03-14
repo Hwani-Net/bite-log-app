@@ -104,16 +104,6 @@ function parseAndValidateQuery(
   return { success: true, data: result.data };
 }
 
-// --- Custom error classes --------------------------------------------
-
-/** 502 Bad Gateway — 외부 AIS API 호출 실패 */
-class ExternalApiError extends Error {
-  constructor(message: string, public readonly cause?: unknown) {
-    super(message);
-    this.name = 'ExternalApiError';
-  }
-}
-
 // --- Mock data (used while data.go.kr API key is pending) ------------
 
 const MOCK_DYNAMIC: DynamicRecord[] = [
@@ -133,6 +123,21 @@ const MOCK_STATIC: StaticRecord[] = [
 ];
 
 // --- Helpers ---------------------------------------------------------
+
+/**
+ * 공공데이터포털 AIS API의 recptnDt 값을 ISO-8601 문자열로 변환한다.
+ * API 반환 형식: "YYYYMMDDHHmmss" (14자리) 또는 이미 ISO 문자열인 경우 그대로 반환.
+ */
+function parseRecptnDt(raw: string): string {
+  if (!raw) return new Date().toISOString();
+  // ISO 형식이면 그대로 반환
+  if (raw.includes('T') || raw.includes('-')) return raw;
+  // "YYYYMMDDHHmmss" → "YYYY-MM-DDTHH:mm:ssZ"
+  if (raw.length === 14) {
+    return `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}T${raw.slice(8, 10)}:${raw.slice(10, 12)}:${raw.slice(12, 14)}Z`;
+  }
+  return new Date().toISOString();
+}
 
 function classifySize(tonnage: number): 'small' | 'large' {
   return tonnage < TONNAGE_THRESHOLD ? 'small' : 'large';
@@ -199,10 +204,16 @@ function applyFilters(fleet: FleetEntry[], filters: FleetFilter[]): FleetEntry[]
 
 // --- Data fetchers ---------------------------------------------------
 
-async function fetchDynamic(): Promise<DynamicRecord[]> {
+interface FetchResult<T> {
+  data: T;
+  /** true = 실제 API 호출 실패로 Mock 데이터로 대체됨 */
+  fallback: boolean;
+}
+
+async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
   const apiKey = process.env.FLEET_API_KEY;
   if (!apiKey || process.env.FLEET_USE_MOCK === 'true') {
-    return MOCK_DYNAMIC;
+    return { data: MOCK_DYNAMIC, fallback: false };
   }
 
   const url = `https://apis.data.go.kr/1192000/VesselAisDynamic/getDynamic?serviceKey=${apiKey}&resultType=json&numOfRows=100`;
@@ -210,30 +221,63 @@ async function fetchDynamic(): Promise<DynamicRecord[]> {
   try {
     res = await fetch(url, { cache: 'no-store' });
   } catch (err) {
-    throw new ExternalApiError('Fleet dynamic API unreachable', err);
+    structuredLog('warn', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.dynamic.fallback_to_mock',
+      error: { message: 'Fleet dynamic API unreachable', cause: String(err) },
+    });
+    return { data: MOCK_DYNAMIC, fallback: true };
   }
+
   if (!res.ok) {
-    throw new ExternalApiError(`Fleet dynamic API responded with HTTP ${res.status}`);
+    structuredLog('warn', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.dynamic.fallback_to_mock',
+      error: { message: `Fleet dynamic API responded with HTTP ${res.status}` },
+    });
+    return { data: MOCK_DYNAMIC, fallback: true };
   }
 
   const json = await res.json() as { response?: { body?: { items?: { item?: Array<Record<string, unknown>> } } } };
   const items: Array<Record<string, unknown>> =
     json?.response?.body?.items?.item ?? [];
 
-  return items.map((item) => ({
+  // 첫 번째 아이템의 키를 로깅 (필드명 진단용)
+  if (items.length > 0) {
+    structuredLog('info', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.dynamic.field_sample',
+      fields: Object.keys(items[0]),
+    });
+  }
+
+  const data = items.map((item) => ({
     mmsi: String(item['mmsi'] ?? ''),
     lat: Number(item['lat'] ?? 0),
     lon: Number(item['lon'] ?? 0),
-    speed: Number(item['speed'] ?? 0),
-    course: Number(item['course'] ?? 0),
-    timestamp: String(item['recptnDt'] ?? new Date().toISOString()),
+    // AIS 표준: sog = Speed Over Ground (대지속력), cog = Course Over Ground (대지침로)
+    speed: Number(item['sog'] ?? item['speed'] ?? 0),
+    course: Number(item['cog'] ?? item['course'] ?? 0),
+    timestamp: parseRecptnDt(String(item['recptnDt'] ?? '')),
   }));
+
+  // API 응답이 비어 있으면 mock으로 fallback
+  if (data.length === 0) {
+    structuredLog('warn', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.dynamic.fallback_to_mock',
+      error: { message: 'Fleet dynamic API returned empty dataset' },
+    });
+    return { data: MOCK_DYNAMIC, fallback: true };
+  }
+
+  return { data, fallback: false };
 }
 
-async function fetchStatic(): Promise<Map<string, StaticRecord>> {
+async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
   const apiKey = process.env.FLEET_API_KEY;
   if (!apiKey || process.env.FLEET_USE_MOCK === 'true') {
-    return new Map(MOCK_STATIC.map((s) => [s.mmsi, s]));
+    return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: false };
   }
 
   const url = `https://apis.data.go.kr/1192000/VesselAisStatic/getStatic?serviceKey=${apiKey}&resultType=json&numOfRows=100`;
@@ -241,15 +285,45 @@ async function fetchStatic(): Promise<Map<string, StaticRecord>> {
   try {
     res = await fetch(url, { cache: 'no-store' });
   } catch (err) {
-    throw new ExternalApiError('Fleet static API unreachable', err);
+    structuredLog('warn', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.static.fallback_to_mock',
+      error: { message: 'Fleet static API unreachable', cause: String(err) },
+    });
+    return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: true };
   }
+
   if (!res.ok) {
-    throw new ExternalApiError(`Fleet static API responded with HTTP ${res.status}`);
+    structuredLog('warn', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.static.fallback_to_mock',
+      error: { message: `Fleet static API responded with HTTP ${res.status}` },
+    });
+    return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: true };
   }
 
   const json = await res.json() as { response?: { body?: { items?: { item?: Array<Record<string, unknown>> } } } };
   const items: Array<Record<string, unknown>> =
     json?.response?.body?.items?.item ?? [];
+
+  // API 응답이 비어 있으면 mock으로 fallback
+  if (items.length === 0) {
+    structuredLog('warn', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.static.fallback_to_mock',
+      error: { message: 'Fleet static API returned empty dataset' },
+    });
+    return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: true };
+  }
+
+  // 첫 번째 아이템의 키를 로깅 (필드명 진단용)
+  if (items.length > 0) {
+    structuredLog('info', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.static.field_sample',
+      fields: Object.keys(items[0]),
+    });
+  }
 
   const map = new Map<string, StaticRecord>();
   for (const item of items) {
@@ -257,12 +331,15 @@ async function fetchStatic(): Promise<Map<string, StaticRecord>> {
     map.set(mmsi, {
       mmsi,
       shipName: String(item['shipNm'] ?? ''),
-      shipType: String(item['shipTp'] ?? ''),
-      tonnage: Number(item['grossTonnage'] ?? 0),
-      length: Number(item['shipLength'] ?? 0),
+      // 선박종류코드 (AIS Type 11: 낚시선 등)
+      shipType: String(item['shipTp'] ?? item['shipTypCd'] ?? ''),
+      // 총톤수: gt(공공데이터포털 표준) → grossTon → grossTonnage 순서로 fallback
+      tonnage: Number(item['gt'] ?? item['grossTon'] ?? item['grossTonnage'] ?? 0),
+      // 선체전장: loa(Length Overall, AIS 표준) → shpLoa → shipLength 순서로 fallback
+      length: Number(item['loa'] ?? item['shpLoa'] ?? item['shipLength'] ?? 0),
     });
   }
-  return map;
+  return { data: map, fallback: false };
 }
 
 // --- Route handler ---------------------------------------------------
@@ -296,24 +373,26 @@ export async function GET(request: NextRequest) {
   const params = parsed.data;
 
   try {
-    const [dynamic, staticMap] = await Promise.all([
+    const [dynamicResult, staticResult] = await Promise.all([
       fetchDynamic(),
       fetchStatic(),
     ]);
 
+    const isMockMode = !process.env.FLEET_API_KEY || process.env.FLEET_USE_MOCK === 'true';
+    const isFallback = dynamicResult.fallback || staticResult.fallback;
+
     const fleet = applyFilters(
-      joinFleetData(dynamic, staticMap),
+      joinFleetData(dynamicResult.data, staticResult.data),
       buildFilters(params),
     );
-
-    const isMock = !process.env.FLEET_API_KEY || process.env.FLEET_USE_MOCK === 'true';
 
     structuredLog('info', {
       timestamp: reqTimestamp,
       event: 'fleet.request.success',
       params,
       count: fleet.length,
-      mock: isMock,
+      mock: isMockMode || isFallback,
+      fallback: isFallback,
       duration: Date.now() - startTime,
     });
 
@@ -322,22 +401,10 @@ export async function GET(request: NextRequest) {
       data: fleet,
       count: fleet.length,
       timestamp: new Date().toISOString(),
-      mock: isMock,
+      mock: isMockMode || isFallback,
+      ...(isFallback && { fallback: true }),
     });
   } catch (err) {
-    if (err instanceof ExternalApiError) {
-      structuredLog('error', {
-        timestamp: reqTimestamp,
-        event: 'fleet.request.upstream_failed',
-        params,
-        error: { message: err.message, cause: String(err.cause) },
-        duration: Date.now() - startTime,
-      });
-      return NextResponse.json(
-        { ok: false, error: 'Bad Gateway: upstream fleet API failed' },
-        { status: 502 },
-      );
-    }
     structuredLog('error', {
       timestamp: reqTimestamp,
       event: 'fleet.request.internal_error',

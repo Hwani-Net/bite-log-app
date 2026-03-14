@@ -32,6 +32,21 @@
 3. **무조건 실행**: 인증(NLM login 등)이나 환경 설정 오류 발견 시 대표님께 묻지 말고 즉시 백그라운드 명령으로 자율 복구한 뒤 보고한다.
 4. **망각 방지**: 매 세션 시작 시 `docs/PROJECT_CONTEXT.md`와 `docs/PITFALLS.md`를 필독하여 이전의 결정과 실수를 동기화한다.
 
+## 🎭 Dual Agent 전략 (Claude Code First)
+
+> **Antigravity(나)는 두뇌, Claude Code는 손**으로 동작하며, 크레딧 효율을 극대화한다.
+
+1.  **Antigravity (Orchestrator - 5% 리소스)**
+    -   **Stitch 기반 UI/UX 설계**: 고해상도 디자인 소스 및 HTML 추출
+    -   **전략 및 기획**: 비즈니스 로직 설계, 페르소나 자문, PRD 최종 승인
+    -   **시각적 QA**: 브라우저 서브에이전트를 통한 E2E 시각적 검증 및 녹화
+    -   **Claude Code 제어**: `run_command`로 Claude Code를 호출하여 실무 작업 위임
+
+2.  **Claude Code (Worker - 95% 리소스)**
+    -   **모든 코드 구현**: API 연동, 컴포넌트 로직 완성, 리팩터링
+    -   **검증 및 디버깅**: 테스트 코드 작성, 빌드 에러 해결, 유닛 테스트 수행
+    -   **문서화**: 상세 기획안(PRD) 초안 작성 및 기술 문서 업데이트
+
 ---
 
 ## 🚫 Anti-Scope (절대 안 만들 것)
