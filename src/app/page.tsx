@@ -847,10 +847,10 @@ function SpeciesBiteRanking({ biteTime, locale }: { biteTime: BiteTimePrediction
   const scores = useMemo(() => getSpeciesBiteScores(biteTime), [biteTime]);
   const isKo = locale === 'ko';
   const top5 = scores.slice(0, 5);
-  const scrollRef = useDragScroll();
+  const scrollRef = useDragScroll<HTMLDivElement>();
 
   return (
-    <section className="px-4 pt-4">
+    <section className="px-4 pt-4" role="region" aria-label="어종별 입질 예보">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
           <span className="material-symbols-outlined text-primary text-base">phishing</span>
@@ -861,7 +861,7 @@ function SpeciesBiteRanking({ biteTime, locale }: { biteTime: BiteTimePrediction
         </span>
       </div>
 
-      <div ref={scrollRef} className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 cursor-grab active:cursor-grabbing">
+      <div ref={scrollRef} tabIndex={0} className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 cursor-grab active:cursor-grabbing touch-pan-x overscroll-contain">
         {top5.map((sp, i) => {
           const bgGradient =
             sp.grade === 'excellent' ? 'from-emerald-500 to-teal-500' :
