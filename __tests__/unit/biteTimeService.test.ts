@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 // vi.mock calls are hoisted — must be before the service import
 vi.mock('@/services/lunarService', () => ({
@@ -25,6 +25,9 @@ import {
 } from '@/services/biteTimeService';
 import type { BiteTimePrediction, TimelineSlot } from '@/services/biteTimeService';
 
+import type { WeatherData } from '@/services/weatherService';
+import type { MarineData } from '@/services/marineService';
+
 // ── Fixtures ──────────────────────────────────────────────────────
 const mockWeather = {
   tempC: 18,
@@ -33,7 +36,11 @@ const mockWeather = {
   humidity: 70,
   wmoCode: 0,
   description: '맑음',
-};
+  condition: 'clear',
+  conditionKo: '맑음',
+  conditionEn: 'Clear',
+  icon: '01d',
+} as unknown as WeatherData;
 
 const mockTideData = {
   stationName: '인천',
@@ -42,13 +49,14 @@ const mockTideData = {
     { type: 'Low' as const, time: '14:00', level: 50 },
     { type: 'High' as const, time: '20:00', level: 320 },
   ],
-};
+} as unknown as Parameters<typeof getPeakFishingWindows>[0];
 
 const mockMarine = {
   seaSurfaceTemp: 18,
   waveHeight: 0.3,
+  wavePeriod: 8,
   currentVelocity: 0.5,
-};
+} as unknown as MarineData;
 
 const poorWeather = {
   tempC: 35,
@@ -57,13 +65,18 @@ const poorWeather = {
   humidity: 90,
   wmoCode: 95,
   description: '폭풍',
-};
+  condition: 'thunderstorm',
+  conditionKo: '폭풍',
+  conditionEn: 'Thunderstorm',
+  icon: '11d',
+} as unknown as WeatherData;
 
 const poorMarine = {
   seaSurfaceTemp: 30,
   waveHeight: 3.5,
+  wavePeriod: 14,
   currentVelocity: 1.8,
-};
+} as unknown as MarineData;
 
 // ── calculateBiteTime ─────────────────────────────────────────────
 describe('calculateBiteTime', () => {
