@@ -110,7 +110,7 @@
 ### 🔴 남은 TODO (우선순위 순)
 - [x] Gemini API 403 해결 (AI Studio 전용 키 발급, .next 캐시 클리어)
 - [x] 프로덕션 빌드 (2026-03-03 성공, 에러 0, 24페이지)
-- [x] Play Store 업데이트 — 자동 배포 파이프라인 완성 (`scripts/deploy-to-play.mjs`, 2026-03-04)
+- [x] Play Store 업데이트 — 자동 배포 파이프라인 완성 (`scripts/deploy-to-play.mjs`, 2026-03-14)
 - [x] 이용약관 보강 (7조→13조, 이메일 수정, 개인정보방침 연계)
 - [x] 홈 시즌 예측 위젯 업데이트 (fishSeasonDB 동적 데이터 + 어종 칩)
 - [x] 물때+날씨 상세 예측 페이지 (/bite-forecast — 점수 링, 4요소 분석, 조석 타임라인, 팁)
