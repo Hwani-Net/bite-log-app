@@ -24,6 +24,7 @@ export default function FeedPage() {
     getPublicFeed()
       .then((items) => setFeed(items))
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLikedIds(getLikedSet());
   }, []);
 

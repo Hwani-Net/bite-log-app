@@ -385,7 +385,9 @@ export default function AlertsPage() {
   const [formInitRegion, setFormInitRegion] = useState<string | undefined>();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isPushSupported()) setPermission(getNotificationPermission());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSubs(getSubscriptions());
     getDataService().getCatchRecords().then(setRecords).catch(() => {});
   }, []);

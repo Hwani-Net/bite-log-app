@@ -482,6 +482,7 @@ export function getSpeciesPeakWindows(
 
   // --- Species-specific mode ---
   // Lazy import to avoid circular dependency
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { getSpeciesHourlyBoost, getSpeciesConditions } = require('./speciesBiteService');
   const boost: number[] = getSpeciesHourlyBoost(speciesName, currentMonth);
   const conditions = getSpeciesConditions();

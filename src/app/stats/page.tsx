@@ -196,6 +196,7 @@ export default function StatsPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadStats(period);
     getDataService().getCatchRecords().then((r) => {
       setRecords(r);

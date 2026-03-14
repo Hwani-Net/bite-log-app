@@ -29,6 +29,7 @@ export function useAuth() {
     const auth = getFirebaseAuth();
     if (!auth) {
       // Firebase not configured — stay in local-only mode
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setState({ user: null, loading: false, error: null });
       return;
     }

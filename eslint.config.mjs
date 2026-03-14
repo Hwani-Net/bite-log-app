@@ -12,6 +12,14 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Firebase build artifacts
+    ".firebase/**",
+    // Build utility scripts (CommonJS)
+    "resize_assets.js",
+    "resize_real.js",
+    "resize_tablet.js",
+    // Temporary files
+    "temp_old_page.tsx",
   ]),
 ]);
 

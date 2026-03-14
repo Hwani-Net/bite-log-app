@@ -104,6 +104,7 @@ export async function fetchTideData(lat: number, lng: number, date?: string): Pr
     });
     const apiUrl = `/api/tide?${params.toString()}`;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let data: any = null;
 
     try {
@@ -130,6 +131,7 @@ export async function fetchTideData(lat: number, lng: number, date?: string): Pr
       return getMockTideData(nearest.name);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tides = items.map((item: any) => {
       // time format: "2026-03-01 04:54:00" -> "04:54"
       const timeStr = item.tph_time || item.obs_time || '';

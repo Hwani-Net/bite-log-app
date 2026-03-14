@@ -6,7 +6,7 @@ export interface NoticeParseResult {
   species: string[];             // e.g. ["주꾸미", "갑오징어"]
   remainingSeats: number | null; // e.g. 3
   isSuccess: boolean;            // true if parsed correctly, false if hallucination/junk detected
-  rawResult: any;                // The raw parsed object for reference
+  rawResult: unknown;            // The raw parsed object for reference
   confidence: number;            // 0-100
   reasoning?: string;            // Why it parsed it this way
 }
@@ -115,8 +115,9 @@ export async function parseNotice(text: string): Promise<NoticeParseResult | nul
       reasoning: parsed.reasoning || '',
       rawResult: parsed,
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Notice Parsing failed:', err);
+    const message = err instanceof Error ? err.message : 'Unknown';
     return {
       date: null,
       species: [],
@@ -124,7 +125,7 @@ export async function parseNotice(text: string): Promise<NoticeParseResult | nul
       isSuccess: false,
       confidence: 0,
       rawResult: null,
-      reasoning: `[서버 파싱 에러] 예외가 발생했습니다: ${err.message || 'Unknown'}`
+      reasoning: `[서버 파싱 에러] 예외가 발생했습니다: ${message}`
     };
   }
 }

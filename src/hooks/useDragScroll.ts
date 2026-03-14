@@ -69,6 +69,7 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
 
     element.addEventListener('mousedown', onMouseDown);
     element.addEventListener('click', onClick, true); // Use capture phase to block child clicks
+    // eslint-disable-next-line react-hooks/immutability
     element.style.cursor = 'grab';
 
     return () => {

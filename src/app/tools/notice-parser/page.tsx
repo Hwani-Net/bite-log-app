@@ -142,7 +142,7 @@ export default function NoticeParserToolsPage() {
             <div className="h-full bg-slate-100/50 rounded-2xl border border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 p-8 text-center">
               <span className="material-symbols-outlined text-5xl mb-3 text-slate-300">document_scanner</span>
               <p className="font-medium">준비 완료</p>
-              <p className="text-sm mt-1">왼쪽에서 텍스트를 입력하고 '정보 추출하기' 버튼을 누르세요.</p>
+              <p className="text-sm mt-1">왼쪽에서 텍스트를 입력하고 &apos;정보 추출하기&apos; 버튼을 누르세요.</p>
             </div>
           )}
         </div>

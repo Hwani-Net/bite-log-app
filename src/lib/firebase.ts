@@ -65,7 +65,7 @@ export async function getFirebaseAnalytics(): Promise<Analytics | null> {
 }
 
 // Helper function to log events easily
-export async function logAppEvent(eventName: string, eventParams?: Record<string, any>) {
+export async function logAppEvent(eventName: string, eventParams?: Record<string, unknown>) {
   try {
     const analytics = await getFirebaseAnalytics();
     if (analytics) {

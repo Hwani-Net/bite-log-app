@@ -4,6 +4,7 @@ import { trackAffiliateClick } from '@/services/affiliateService';
 
 interface GearTabProps {
   locale: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   recommendedGear: any[];
 }
 

@@ -17,6 +17,7 @@ export default function PaywallBottomSheet() {
         closePaywall();
         return;
       }
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsRendered(true);
       requestAnimationFrame(() => setIsVisible(true));
       logAppEvent('paywall_impression', { feature: paywallFeature });

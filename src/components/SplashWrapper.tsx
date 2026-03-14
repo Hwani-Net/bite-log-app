@@ -9,6 +9,7 @@ export default function SplashWrapper({ children }: { children: React.ReactNode 
 
   useEffect(() => {
     // Defer sessionStorage access to useEffect to prevent hydration mismatch
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setShowSplash(!sessionStorage.getItem('bitelog_splash_shown'));
   }, []);
 

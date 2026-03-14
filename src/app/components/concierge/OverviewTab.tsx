@@ -4,7 +4,7 @@ import { WeatherData } from '@/services/weatherService';
 import { TideData } from '@/services/tideService';
 import { BiteTimePrediction } from '@/services/biteTimeService';
 import PeakTimeline from './PeakTimeline';
-import { ConciergeRecommendation } from '@/services/conciergeService';
+import { ConciergeRecommendation, SpeciesInfo } from '@/services/conciergeService';
 import { useDragScroll } from '@/hooks/useDragScroll';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 
@@ -15,7 +15,7 @@ interface OverviewTabProps {
   tideData: TideData | null;
   biteTime: BiteTimePrediction | null;
   recommendation: ConciergeRecommendation | null;
-  inSeasonSpecies: any[];
+  inSeasonSpecies: SpeciesInfo[];
 }
 
 export default function OverviewTab({
