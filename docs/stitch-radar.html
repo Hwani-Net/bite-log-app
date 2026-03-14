@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BITE Log Fleet Radar PRO</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00d4ff", /* Electric Blue Accent */
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#0a1118", /* Darker maritime feel */
+                        "panel-dark": "#1e293b", /* Glassmorphism card color */
+                        "accent-green": "#39ff14", /* Neon Green for safe/hotspots */
+                        "accent-red": "#ff073a", /* Neon Red for danger/heavy traffic */
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.75rem", "xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 h-screen w-full overflow-hidden flex flex-col font-display">
+<!-- Top App Bar -->
+<div class="flex items-center bg-background-dark/90 backdrop-blur p-4 pb-2 justify-between z-20 absolute top-0 w-full">
+<button class="text-slate-100 flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex flex-col items-center flex-1">
+<h2 class="text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em]">Fleet Radar (PRO)</h2>
+<div class="flex items-center gap-1 mt-0.5">
+<div class="size-2 rounded-full bg-accent-green animate-pulse"></div>
+<span class="text-accent-green text-xs font-medium">Live AIS/V-PASS Active</span>
+</div>
+</div>
+<div class="flex w-12 items-center justify-end">
+<button class="flex items-center justify-center size-10 rounded-full bg-transparent text-primary hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined">radar</span>
+</button>
+</div>
+</div>
+<!-- Warning Banner -->
+<div class="absolute top-[72px] left-4 right-4 z-20 bg-accent-red/90 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-3 backdrop-blur border border-accent-red/50">
+<span class="material-symbols-outlined text-white">warning</span>
+<div class="flex flex-col">
+<span class="text-sm font-bold">Warning: Large vessel approaching</span>
+<span class="text-xs opacity-90">10 knots, 1km radius</span>
+</div>
+</div>
+<!-- Main Map Area -->
+<div class="flex-1 relative w-full h-full bg-slate-900">
+<!-- Simulated Map Background -->
+<div class="absolute inset-0 bg-cover bg-center opacity-60 mix-blend-screen" data-alt="Dark maritime navigation map showing coastlines and depths" data-location="Coastal Waters" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD-74w6CA59WYmLmy525w3gWJMtwIySnlBs_tdJChETCd5s0--OkLOqGTFnYvByjQIu4eEP2-YIZ3RvppDzJZS44_phQ-ZmbVei7gDY1X-pU47lX64osV0avWyFYhwQOkjLxYaBT24BzLGbUEukzK1GwfobTJKSfeEx8FggmJTC8jTBA8CtaXVODth4Dy-ACH66vIxjYY6XAi456PdP4GLpl6p6-hBntdLQcqYDlQlUfXfSfAp754XYFPQmXA3UhXbTz7fj-5oSjqp_');">
+</div>
+<!-- Overlays (Simulated) -->
+<!-- User Location -->
+<div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 flex items-center justify-center">
+<div class="size-6 bg-primary rounded-full absolute animate-ping opacity-75"></div>
+<div class="size-3 bg-primary rounded-full shadow-[0_0_15px_#00d4ff] relative border border-white"></div>
+</div>
+<!-- Safe Hotspot (Green Neon) -->
+<div class="absolute top-[30%] left-[20%] z-0">
+<div class="size-32 bg-accent-green/20 rounded-full blur-xl absolute"></div>
+<div class="relative flex flex-col items-center justify-center text-accent-green">
+<span class="material-symbols-outlined text-sm shadow-accent-green drop-shadow-md">sailing</span>
+<span class="text-[10px] font-bold mt-1 bg-black/50 px-1 rounded">Hotspot</span>
+</div>
+</div>
+<!-- Danger Zone (Red Neon) -->
+<div class="absolute bottom-[40%] right-[15%] z-0">
+<div class="size-48 bg-accent-red/20 rounded-full blur-2xl absolute"></div>
+<div class="relative flex flex-col items-center justify-center text-accent-red">
+<span class="material-symbols-outlined text-xl drop-shadow-md">directions_boat</span>
+<span class="text-[10px] font-bold mt-1 bg-black/50 px-1 rounded">Heavy Traffic</span>
+</div>
+</div>
+<!-- Floating Action Buttons (Right) -->
+<div class="absolute right-4 top-1/2 transform -translate-y-1/2 flex flex-col gap-3 z-20">
+<button class="size-12 rounded-full glass-panel flex items-center justify-center text-slate-100 hover:bg-primary/20 hover:text-primary transition-all shadow-lg border border-slate-700/50 relative group">
+<span class="material-symbols-outlined">weight</span>
+<span class="absolute right-14 bg-panel-dark text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap border border-slate-700">Vessel Tonnage</span>
+</button>
+<button class="size-12 rounded-full glass-panel flex items-center justify-center text-slate-100 hover:bg-primary/20 hover:text-primary transition-all shadow-lg border border-slate-700/50 relative group">
+<span class="material-symbols-outlined">terrain</span>
+<span class="absolute right-14 bg-panel-dark text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap border border-slate-700">Topography</span>
+</button>
+<button class="size-12 rounded-full glass-panel flex items-center justify-center text-primary bg-primary/10 transition-all shadow-[0_0_15px_rgba(0,212,255,0.3)] border border-primary/50 relative group">
+<span class="material-symbols-outlined">device_thermostat</span>
+<span class="absolute right-14 bg-panel-dark text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap border border-slate-700">Sea Temp</span>
+</button>
+</div>
+<!-- Map Controls (Zoom/Location) -->
+<div class="absolute right-4 bottom-[220px] flex flex-col gap-2 z-20">
+<div class="flex flex-col rounded-lg glass-panel overflow-hidden border border-slate-700/50">
+<button class="size-10 flex items-center justify-center text-slate-100 hover:bg-slate-700/50 border-b border-slate-700/50">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button class="size-10 flex items-center justify-center text-slate-100 hover:bg-slate-700/50">
+<span class="material-symbols-outlined">remove</span>
+</button>
+</div>
+<button class="size-10 rounded-lg glass-panel flex items-center justify-center text-primary border border-slate-700/50 mt-1">
+<span class="material-symbols-outlined">my_location</span>
+</button>
+</div>
+</div>
+<!-- Bottom Info Card -->
+<div class="absolute bottom-6 left-4 right-4 z-30">
+<div class="glass-panel rounded-xl p-4 shadow-2xl">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2 text-slate-100">
+<span class="material-symbols-outlined text-primary size-5">anchor</span>
+<p class="text-sm font-bold">Nearest Harbor: <span class="text-primary">4.2km</span></p>
+</div>
+<div class="flex items-center gap-1 text-slate-300">
+<span class="material-symbols-outlined size-4">water_drop</span>
+<p class="text-xs font-medium">Temp: 14.2°C</p>
+</div>
+</div>
+<div class="bg-slate-900/50 rounded-lg p-3 border border-slate-700/50 flex gap-3 items-start">
+<span class="material-symbols-outlined text-primary mt-0.5">info</span>
+<p class="text-sm text-slate-200 leading-snug">
+<span class="text-accent-green font-medium">3 small boats</span> are fishing safely 2km north. <span class="text-accent-red font-medium">Beware</span> of large fleet to the east.
+                </p>
+</div>
+</div>
+</div>
+</body></html>
