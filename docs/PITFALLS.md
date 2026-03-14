@@ -82,6 +82,30 @@
 - **해결**: 모든 코딩/디버깅 작업은 반드시 `run_command`를 통해 `npx @anthropic-ai/claude-code --dangerously-skip-permissions -p "..."` 방식으로 Claude Code에게 위임. 프롬프트에는 수정할 대상 파일 경로와 검증 커맨드(예: npm run build)를 명시하여 Claude Code가 스스로 완벽히 수정할 때까지 반복하게 해야 함.
 - **🚫 금지**: Antigravity가 `replace_file_content` 등의 파일 수정 도구로 애플리케이션 코드를 직접 수정하는 행위 절대 금지. 오직 Claude Code 호출로만 해결할 것.
 
+## ❌ `output: 'export'`와 dynamic API Routes 동시 사용 불가 (2026-03-14)
+- **증상**: `next build` 시 "Page with `dynamic = 'force-dynamic'` cannot be exported" 에러
+- **원인**: `next.config.ts`의 `output: 'export'`는 순수 정적 파일만 생성. `force-dynamic` 또는 `revalidate=0`이 붙은 Route Handler가 하나라도 있으면 빌드 자체가 실패함
+- **해결**: `output: 'export'` 라인 제거 → Next.js 기본 서버 모드로 전환. Firebase Hosting은 정적 파일 배포에만 사용하고 API 라우트는 Next.js 서버가 처리
+- **🚫 금지**: `output: 'export'` 상태에서 API Routes(`/api/*`) 추가 금지. 둘은 공존 불가.
+
+## ❌ KHOA/Naver API 브라우저 직접 호출 → CORS 차단 (2026-03-14)
+- **증상**: 브라우저에서 `openapi.naver.com`, `www.khoa.go.kr` 직접 fetch 시 CORS 에러로 응답 차단
+- **원인**: 두 API 모두 서버 사이드 전용. 브라우저 origin에 CORS 헤더를 내려주지 않음. Naver는 `X-Naver-Client-Secret` 같은 민감 키를 클라이언트에 노출시키는 문제도 있음
+- **해결**: `/api/tide`, `/api/naver` 내부 Route Handler(서버) 생성 → 클라이언트는 내부 엔드포인트만 호출. 키는 서버 환경변수에서만 참조
+- **🚫 금지**: 외부 API 키(Naver secret 등)를 `NEXT_PUBLIC_` 접두사로 클라이언트에 노출하지 말 것. 프록시 Route Handler 패턴 필수.
+
+## ❌ PRO 기능 활성화 후 UI 빈 화면 (시크릿 포인트) (2026-03-14)
+- **증상**: PRO 구독 전환(`isPro = true`) 후 시크릿 포인트 섹션이 빈 화면으로 표시됨
+- **원인**: `isPro`는 true인데 `secretSpot` 데이터가 null이거나 없을 때 조건부 렌더링이 아무것도 표시 안 함. 또한 이전 세션의 stale Zustand persist 캐시가 `isPro = false`를 물고 있어 페이월이 사라지지 않는 경우도 발생
+- **해결**: `OverviewTab.tsx`에 `secretSpot` 없을 때 기본 안내 메시지 표시 로직 추가. `subscriptionStore`의 persist key를 v2 → v3으로 bump하여 stale 캐시 강제 무효화
+- **🚫 금지**: PRO 전환 후 기능 활성화 테스트 없이 배포 금지. persist key는 store 구조 변경 시마다 반드시 bump할 것.
+
+## ❌ Hydration 불일치 — useState 초기값에서 sessionStorage 접근 (2026-03-14)
+- **증상**: `SplashWrapper`가 SSR 렌더와 CSR 첫 렌더에서 다른 값 반환 → React Hydration 경고 + 스플래시 화면 깜빡임
+- **원인**: `useState(() => { if (typeof window === 'undefined') return false; return !sessionStorage.getItem(...) })` 패턴은 SSR에선 false, CSR 첫 렌더에선 sessionStorage 기반 값 → 불일치
+- **해결**: `useState(false)` (SSR 동일값) + `useEffect(() => { setShowSplash(!sessionStorage.getItem(...)) }, [])` 로 sessionStorage 접근을 마운트 이후로 지연
+- **🚫 금지**: `useState` 초기값 함수 안에서 `sessionStorage`, `localStorage`, `window.*` 등 브라우저 전용 API 직접 참조 금지. 반드시 `useEffect`로 분리할 것.
+
 ## ❌ 환경/인증 창 (NLM 등) 대표님께 수동 입력 요구 (2026-03-14)
 - **증상**: NLM 인증 만료 시 "터미널에서 nlm login을 입력해 주세요"라고 대표님께 지시하며 떠넘김.
 - **원인**: 해당 쉘 명령어(UI 인증창 팝업)가 구동 시스템 브라우저를 띄우는 특성을 오해하여 에이전트가 백그라운드 명령어(`run_command`)로 실행할 수 없다고 착각함.

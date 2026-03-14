@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { headers } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  await headers();
   const { searchParams } = new URL(request.url);
-  const type = searchParams.get('type') || 'blog'; // blog, news, cafearticle
+  const type = searchParams.get('type') || 'blog';
   const query = searchParams.get('query');
   const display = searchParams.get('display') || '10';
   const sort = searchParams.get('sort') || 'sim';
@@ -19,6 +17,7 @@ export async function GET(request: NextRequest) {
   const clientSecret = process.env.NEXT_PUBLIC_NAVER_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
+    console.error('Naver keys missing in env');
     return NextResponse.json({ error: 'Naver API keys not configured' }, { status: 500 });
   }
 
@@ -29,19 +28,21 @@ export async function GET(request: NextRequest) {
       headers: {
         'X-Naver-Client-Id': clientId,
         'X-Naver-Client-Secret': clientSecret,
+        'Accept': 'application/json',
       },
       cache: 'no-store',
     });
 
     if (!res.ok) {
-      const errorData = await res.json();
-      return NextResponse.json(errorData, { status: res.status });
+      const errorText = await res.text();
+      console.error('Naver API error status:', res.status, errorText);
+      return NextResponse.json({ error: 'Naver API error', status: res.status, details: errorText }, { status: 502 });
     }
 
     const data = await res.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Naver API Proxy Error:', error);
+    console.error('Naver Proxy Fetch Error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

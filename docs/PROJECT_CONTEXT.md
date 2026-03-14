@@ -120,6 +120,10 @@
 - [x] SEO og 태그 추가 — layout.tsx openGraph/Twitter/metadataBase + og-image.png 생성 (2026-03-12)
 - [x] **실시간 뉴스 링크 수리 및 배포** — 네이버 검색결과 데드링크를 실제 유튜브/블로그 링크로 전면 교체 및 Firebase 호스팅 배포 완료 (2026-03-14)
 - [x] **Play Store 업데이트 배포** — versionCode 11, internal 트랙, Firebase 호스팅 최신화 및 실시간 링크 반영 (2026-03-14)
+- [x] **KHOA/Naver API 프록시 구축** — `/api/tide`, `/api/naver` 내부 Route Handler 생성, CORS 우회 + 서버 사이드 키 보호 (2026-03-14)
+- [x] **빌드 에러 해결 (static export 제거)** — `output: 'export'`가 `force-dynamic` API 라우트와 충돌 → `next.config.ts`에서 제거 (2026-03-14)
+- [x] **PRO 시크릿 포인트 기본값 표시 수정** — `isPro`이지만 `secretSpot` 데이터 없을 때 빈 화면 대신 기본 안내 표시, persist key v3으로 stale 캐시 강제 초기화 (2026-03-14)
+- [x] **Hydration 불일치 수정 (SplashWrapper)** — `useState` 초기값에서 `sessionStorage` 직접 참조 제거 → `useEffect`로 지연, SSR/CSR 첫 렌더 불일치 해소 (2026-03-14)
 
 ### 🔴 남은 TODO (우선순위 순)
 - [x] Gemini API 403 해결 (AI Studio 전용 키 발급, .next 캐시 클리어)
@@ -153,6 +157,8 @@
 | 2026-03-12 | **Firebase 프로젝트 `bite-log-app`으로 이전** | `fishlog-diary-2026`이 hwanizero01@gmail.com 계정 목록에 없어 신규 생성. pwa_build_request.json + metadataBase + privacy URL 일괄 변경 | 기존 프로젝트 유지: 계정 접근 불가 |
 | 2026-03-14 | **Phase 8: PRO 페이월 테스트 (A안) 채택** | PG(결제) 개발 전 유저 결제 의향(전환율) 선제적 검증. AI전문가챗봇/시크릿포인트 등에 페이월 적용. | B안(즉시 결제연동): 리소스/리스크 큼 |
 | 2026-03-14 | **Phase 6: 승선명부 기능 제거 결정** | 미완성 상태. 자동 지오펜싱은 개인정보/무결성 리스크가 크고, 선장 도입 동인이 낮아 전략적 폐기. | C안(QR/오프라인 완성): ROI 낮음 |
+| 2026-03-14 | **`output: 'export'` 제거 → Next.js 서버 모드** | `next.config.ts`의 `output: 'export'`는 dynamic API Routes(`force-dynamic`)와 함께 사용 불가. Firebase Hosting은 정적 파일만 서빙하므로 API 프록시를 Next.js 서버가 아닌 내부 Route Handler로 유지하면서 정적 export를 포기. | static export 유지: API 라우트 전부 삭제 필요 |
+| 2026-03-14 | **KHOA/Naver CORS → 내부 API 프록시** | 브라우저에서 `openapi.naver.com`, `www.khoa.go.kr` 직접 호출 시 CORS 오류. `/api/tide`, `/api/naver` Route Handler로 서버 사이드 프록시 구축. | 클라이언트 직접 호출: CORS 차단 |
 
 ---
 
