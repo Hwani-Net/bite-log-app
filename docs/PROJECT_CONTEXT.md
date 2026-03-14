@@ -84,12 +84,12 @@
 - [x] Windy 날씨 7일 예보 탭
 - [x] 뉴스 이미지 중복 수정 (그라디언트 배경 분화)
 
-### Phase 8: PRO 페이월 테스트 (수익화 가설 검증) 🆕
-- [ ] Zustand 전역 상태에 `isPro` 및 무료 체험 횟수(예: `chatbotCredits`) 추가
-- [ ] 프리미엄 페이월(Paywall) 바텀시트 UI 컴포넌트 생성 ("PRO 버전 사전 예약 시 1개월 무료")
-- [ ] 컨시어지(전문가 챗봇) 일일 3회 제한 로직 및 페이월 연동
-- [ ] 시크릿 포인트(예: 잘 잡히는 구체적 좌표 등) 조회 시 페이월 연동
-- [ ] 페이월 CTA 클릭 시 Firebase Analytics 이벤트 로깅 (전환율 측정용)
+### Phase 8: PRO 페이월 테스트 (수익화 가설 검증) ✅ 완료 (2026-03-14)
+- [x] Zustand 전역 상태에 `isPro` 및 무료 체험 횟수(`chatbotCredits`) 추가 — `src/store/subscriptionStore.ts`
+- [x] 프리미엄 페이월(Paywall) 바텀시트 UI 컴포넌트 생성 (`PaywallBottomSheet.tsx`) — dark: 클래스 제거(라이트 전용) 완료
+- [x] 컨시어지(전문가 챗봇) 일일 3회 제한 로직 및 페이월 연동 — `concierge/page.tsx` + `AIChatTab.tsx`
+- [x] 시크릿 포인트 조회 시 페이월 연동 — `OverviewTab.tsx` `openPaywall('secret_point')` 추가
+- [x] 페이월 CTA 클릭 시 Firebase Analytics 이벤트 로깅 — `paywall_impression`, `paywall_cta_click`, `paywall_dismiss`
 
 ### Phase 7: UX 폴리시 (2026-03-10~11)
 - [x] AI 탭 채팅창 높이 최적화 — flex-1 + calc(100dvh) 동적 높이 (2026-03-10)
