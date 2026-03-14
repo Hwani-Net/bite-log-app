@@ -1,5 +1,6 @@
 'use client';
 
+import 'leaflet/dist/leaflet.css';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import {
   FleetEntry,
@@ -136,6 +137,7 @@ export default function FleetRadar() {
 
       mapRef.current = map;
       setMapReady(true);
+      setTimeout(() => map.invalidateSize(), 200);
     });
 
     return () => {
@@ -239,13 +241,6 @@ export default function FleetRadar() {
       className="flex flex-col h-screen w-full overflow-hidden relative"
       style={{ background: '#0a1118', fontFamily: "'Space Grotesk', 'Noto Sans KR', sans-serif" }}
     >
-      {/* Leaflet CSS */}
-      <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        crossOrigin=""
-      />
-
       {/* ── Top Bar ──────────────────────────────────────────────────────── */}
       <div
         className="flex items-center justify-between px-4 pt-4 pb-2 z-20 shrink-0"
@@ -358,7 +353,7 @@ export default function FleetRadar() {
       </div>
 
       {/* ── Map ──────────────────────────────────────────────────────────── */}
-      <div className="flex-1 relative">
+      <div className="flex-1 relative" style={{ minHeight: 300 }}>
         {/* Leaflet map container */}
         <div id="fleet-map" className="absolute inset-0" style={{ zIndex: 0 }} />
 
