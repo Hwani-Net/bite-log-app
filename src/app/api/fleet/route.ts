@@ -263,7 +263,18 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
     return { data: MOCK_DYNAMIC, fallback: true };
   }
 
-  const json = await res.json() as { response?: { body?: { items?: { item?: Array<Record<string, unknown>> } } } };
+  let json: { response?: { body?: { items?: { item?: Array<Record<string, unknown>> } } } };
+  try {
+    json = await res.json() as { response?: { body?: { items?: { item?: Array<Record<string, unknown>> } } } };
+  } catch (err) {
+    const rawText = await res.text().catch(() => '');
+    structuredLog('warn', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.dynamic.fallback_to_mock',
+      error: { message: 'Fleet dynamic API returned non-JSON response', preview: rawText.slice(0, 200), cause: String(err) },
+    });
+    return { data: MOCK_DYNAMIC, fallback: true };
+  }
 
   // 응답 구조 상세 로깅 (필드 매핑 검증용)
   structuredLog('info', {
@@ -283,27 +294,29 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
       event: 'fleet.dynamic.field_sample',
       fields: Object.keys(items[0]),
       sample: {
-        mmsi: items[0]['mmsi'],
-        lat: items[0]['lat'],
-        lon: items[0]['lon'],
-        sog: items[0]['sog'],
-        cog: items[0]['cog'],
-        recptnDt: items[0]['recptnDt'],
-        speed: items[0]['speed'],
-        course: items[0]['course'],
+        // lowercase (일부 엔드포인트) 및 UPPERCASE_SNAKE (대부분 공공데이터포털 AIS 표준) 모두 로깅
+        mmsi: items[0]['mmsi'] ?? items[0]['MMSI'],
+        lat: items[0]['lat'] ?? items[0]['LAT'] ?? items[0]['LATITUDE'],
+        lon: items[0]['lon'] ?? items[0]['LON'] ?? items[0]['LONGITUDE'],
+        sog: items[0]['sog'] ?? items[0]['SOG'],
+        cog: items[0]['cog'] ?? items[0]['COG'],
+        recptnDt: items[0]['recptnDt'] ?? items[0]['RECPTN_DT'],
+        speed: items[0]['speed'] ?? items[0]['SPEED'],
+        course: items[0]['course'] ?? items[0]['COURSE'],
       },
       totalItems: items.length,
     });
   }
 
   const data = items.map((item) => ({
-    mmsi: String(item['mmsi'] ?? ''),
-    lat: Number(item['lat'] ?? 0),
-    lon: Number(item['lon'] ?? 0),
+    // 공공데이터포털 AIS API: 일부 엔드포인트는 대문자 스네이크케이스 사용 (PITFALLS.md 참조)
+    mmsi: String(item['mmsi'] ?? item['MMSI'] ?? ''),
+    lat: Number(item['lat'] ?? item['LAT'] ?? item['LATITUDE'] ?? 0),
+    lon: Number(item['lon'] ?? item['LON'] ?? item['LONGITUDE'] ?? 0),
     // AIS 표준: sog = Speed Over Ground (대지속력), cog = Course Over Ground (대지침로)
-    speed: Number(item['sog'] ?? item['speed'] ?? 0),
-    course: Number(item['cog'] ?? item['course'] ?? 0),
-    timestamp: parseRecptnDt(String(item['recptnDt'] ?? '')),
+    speed: Number(item['sog'] ?? item['SOG'] ?? item['speed'] ?? item['SPEED'] ?? 0),
+    course: Number(item['cog'] ?? item['COG'] ?? item['course'] ?? item['COURSE'] ?? 0),
+    timestamp: parseRecptnDt(String(item['recptnDt'] ?? item['RECPTN_DT'] ?? '')),
   }));
 
   // API 응답이 비어 있으면 mock으로 fallback
@@ -359,7 +372,18 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
     return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: true };
   }
 
-  const json = await res.json() as { response?: { body?: { items?: { item?: Array<Record<string, unknown>> } } } };
+  let json: { response?: { body?: { items?: { item?: Array<Record<string, unknown>> } } } };
+  try {
+    json = await res.json() as { response?: { body?: { items?: { item?: Array<Record<string, unknown>> } } } };
+  } catch (err) {
+    const rawText = await res.text().catch(() => '');
+    structuredLog('warn', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.static.fallback_to_mock',
+      error: { message: 'Fleet static API returned non-JSON response', preview: rawText.slice(0, 200), cause: String(err) },
+    });
+    return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: true };
+  }
 
   // 응답 구조 상세 로깅 (필드 매핑 검증용)
   structuredLog('info', {
@@ -389,14 +413,12 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
       event: 'fleet.static.field_sample',
       fields: Object.keys(items[0]),
       sample: {
-        mmsi: items[0]['mmsi'],
-        shipNm: items[0]['shipNm'],
-        shipTp: items[0]['shipTp'],
-        shipTypCd: items[0]['shipTypCd'],
-        gt: items[0]['gt'],
-        grossTon: items[0]['grossTon'],
-        loa: items[0]['loa'],
-        shpLoa: items[0]['shpLoa'],
+        // lowercase 및 UPPERCASE_SNAKE 모두 로깅
+        mmsi: items[0]['mmsi'] ?? items[0]['MMSI'],
+        shipNm: items[0]['shipNm'] ?? items[0]['SHIP_NM'],
+        shipTp: items[0]['shipTp'] ?? items[0]['SHIP_TP'] ?? items[0]['shipTypCd'] ?? items[0]['SHIP_TYPE'],
+        gt: items[0]['gt'] ?? items[0]['GT'] ?? items[0]['grossTon'] ?? items[0]['GROSS_TON'],
+        loa: items[0]['loa'] ?? items[0]['LOA'] ?? items[0]['shpLoa'] ?? items[0]['SHP_LOA'],
       },
       totalItems: items.length,
     });
@@ -404,16 +426,17 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
 
   const map = new Map<string, StaticRecord>();
   for (const item of items) {
-    const mmsi = String(item['mmsi'] ?? '');
+    // 공공데이터포털 AIS API: 일부 엔드포인트는 대문자 스네이크케이스 사용 (PITFALLS.md 참조)
+    const mmsi = String(item['mmsi'] ?? item['MMSI'] ?? '');
     map.set(mmsi, {
       mmsi,
-      shipName: String(item['shipNm'] ?? ''),
+      shipName: String(item['shipNm'] ?? item['SHIP_NM'] ?? ''),
       // 선박종류코드 (AIS Type 11: 낚시선 등)
-      shipType: String(item['shipTp'] ?? item['shipTypCd'] ?? ''),
-      // 총톤수: gt(공공데이터포털 표준) → grossTon → grossTonnage 순서로 fallback
-      tonnage: Number(item['gt'] ?? item['grossTon'] ?? item['grossTonnage'] ?? 0),
-      // 선체전장: loa(Length Overall, AIS 표준) → shpLoa → shipLength 순서로 fallback
-      length: Number(item['loa'] ?? item['shpLoa'] ?? item['shipLength'] ?? 0),
+      shipType: String(item['shipTp'] ?? item['SHIP_TP'] ?? item['shipTypCd'] ?? item['SHIP_TYPE'] ?? item['SHIP_TYP_CD'] ?? ''),
+      // 총톤수: gt(공공데이터포털 표준) → UPPERCASE 순서로 fallback
+      tonnage: Number(item['gt'] ?? item['GT'] ?? item['grossTon'] ?? item['GROSS_TON'] ?? item['grossTonnage'] ?? item['GROSS_TONNAGE'] ?? 0),
+      // 선체전장: loa(Length Overall, AIS 표준) → UPPERCASE 순서로 fallback
+      length: Number(item['loa'] ?? item['LOA'] ?? item['shpLoa'] ?? item['SHP_LOA'] ?? item['shipLength'] ?? item['SHIP_LENGTH'] ?? 0),
     });
   }
   return { data: map, fallback: false };
