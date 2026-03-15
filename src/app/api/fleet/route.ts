@@ -106,9 +106,21 @@ function parseAndValidateQuery(
 
 // --- Mock data (used while data.go.kr API key is pending) ------------
 
-const MOCK_DYNAMIC: DynamicRecord[] = [];
+const MOCK_DYNAMIC: DynamicRecord[] = [
+  { mmsi: '111111111', lat: 34.89, lon: 128.62, speed: 10, course: 90, timestamp: new Date().toISOString() },
+  { mmsi: '222222222', lat: 34.86, lon: 128.65, speed: 0, course: 0, timestamp: new Date().toISOString() },
+  { mmsi: '333333333', lat: 34.92, lon: 128.58, speed: 15, course: 180, timestamp: new Date().toISOString() },
+  { mmsi: '444444444', lat: 34.91, lon: 128.68, speed: 5, course: 270, timestamp: new Date().toISOString() },
+  { mmsi: '555555555', lat: 34.85, lon: 128.60, speed: 2, course: 45, timestamp: new Date().toISOString() },
+];
 
-const MOCK_STATIC: StaticRecord[] = [];
+const MOCK_STATIC: StaticRecord[] = [
+  { mmsi: '111111111', shipName: '풍어호', shipType: 'fishing', tonnage: 5, length: 12 },
+  { mmsi: '222222222', shipName: '만선호', shipType: 'fishing', tonnage: 2, length: 8 },
+  { mmsi: '333333333', shipName: '오션스타', shipType: 'passenger', tonnage: 50, length: 35 },
+  { mmsi: '444444444', shipName: '바다의왕자', shipType: 'leisure', tonnage: 1, length: 6 },
+  { mmsi: '555555555', shipName: '갈매기호', shipType: 'fishing', tonnage: 9, length: 15 },
+];
 
 // --- Helpers ---------------------------------------------------------
 

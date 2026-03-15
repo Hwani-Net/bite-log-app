@@ -269,6 +269,8 @@ export default function FleetRadar() {
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
+        maxWidth: '28rem',
+        margin: '0 auto',
       }}
     >
       {/* Header */}
@@ -399,7 +401,7 @@ function ShipDetailOverlay({ ship, onClose }: { ship: FleetEntry | null; onClose
         className={`fixed left-0 right-0 bottom-0 z-[9999] bg-slate-900/98 backdrop-blur-2xl rounded-t-[32px] border-t border-white/10 shadow-2xl transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) ${
           isVisible ? 'translate-y-0' : 'translate-y-full'
         }`}
-        style={{ maxHeight: '85vh' }}
+        style={{ maxHeight: '85vh', maxWidth: '28rem', margin: '0 auto' }}
       >
         {ship && (
           <div className="px-6 pt-2 pb-10">
