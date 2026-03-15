@@ -210,16 +210,40 @@ interface FetchResult<T> {
   fallback: boolean;
 }
 
+/**
+ * apis.data.go.kr의 serviceKey는 이미 URL-encoded 상태로 발급된다.
+ * URL 객체 + URLSearchParams를 사용하면 이중 인코딩이 발생하므로
+ * 먼저 decodeURIComponent로 원문 복원 후 URLSearchParams에 전달한다.
+ */
+function safeDecodeApiKey(raw: string): string {
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
 async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
   const apiKey = process.env.FLEET_API_KEY;
   if (!apiKey || process.env.FLEET_USE_MOCK === 'true') {
     return { data: MOCK_DYNAMIC, fallback: false };
   }
 
-  const url = `https://apis.data.go.kr/1192000/VesselAisDynamic/getDynamic?serviceKey=${apiKey}&resultType=json&numOfRows=100`;
+  const endpoint = new URL('https://apis.data.go.kr/1192000/VesselAisDynamic/getDynamic');
+  endpoint.searchParams.set('serviceKey', safeDecodeApiKey(apiKey));
+  endpoint.searchParams.set('resultType', 'json');
+  endpoint.searchParams.set('numOfRows', '100');
+  const urlStr = endpoint.toString();
+
+  structuredLog('info', {
+    timestamp: new Date().toISOString(),
+    event: 'fleet.dynamic.request',
+    url: urlStr.replace(apiKey, '[REDACTED]'),
+  });
+
   let res: Response;
   try {
-    res = await fetch(url, { cache: 'no-store' });
+    res = await fetch(urlStr, { cache: 'no-store' });
   } catch (err) {
     structuredLog('warn', {
       timestamp: new Date().toISOString(),
@@ -230,24 +254,45 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
   }
 
   if (!res.ok) {
+    const body = await res.text().catch(() => '');
     structuredLog('warn', {
       timestamp: new Date().toISOString(),
       event: 'fleet.dynamic.fallback_to_mock',
-      error: { message: `Fleet dynamic API responded with HTTP ${res.status}` },
+      error: { message: `Fleet dynamic API responded with HTTP ${res.status}`, body: body.slice(0, 500) },
     });
     return { data: MOCK_DYNAMIC, fallback: true };
   }
 
   const json = await res.json() as { response?: { body?: { items?: { item?: Array<Record<string, unknown>> } } } };
+
+  // 응답 구조 상세 로깅 (필드 매핑 검증용)
+  structuredLog('info', {
+    timestamp: new Date().toISOString(),
+    event: 'fleet.dynamic.raw_response_structure',
+    topLevelKeys: Object.keys(json),
+    responseBodyKeys: json?.response?.body ? Object.keys(json.response.body) : [],
+  });
+
   const items: Array<Record<string, unknown>> =
     json?.response?.body?.items?.item ?? [];
 
-  // 첫 번째 아이템의 키를 로깅 (필드명 진단용)
+  // 첫 번째 아이템의 키와 샘플 값을 로깅 (필드명 진단용)
   if (items.length > 0) {
     structuredLog('info', {
       timestamp: new Date().toISOString(),
       event: 'fleet.dynamic.field_sample',
       fields: Object.keys(items[0]),
+      sample: {
+        mmsi: items[0]['mmsi'],
+        lat: items[0]['lat'],
+        lon: items[0]['lon'],
+        sog: items[0]['sog'],
+        cog: items[0]['cog'],
+        recptnDt: items[0]['recptnDt'],
+        speed: items[0]['speed'],
+        course: items[0]['course'],
+      },
+      totalItems: items.length,
     });
   }
 
@@ -280,10 +325,21 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
     return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: false };
   }
 
-  const url = `https://apis.data.go.kr/1192000/VesselAisStatic/getStatic?serviceKey=${apiKey}&resultType=json&numOfRows=100`;
+  const endpoint = new URL('https://apis.data.go.kr/1192000/VesselAisStatic/getStatic');
+  endpoint.searchParams.set('serviceKey', safeDecodeApiKey(apiKey));
+  endpoint.searchParams.set('resultType', 'json');
+  endpoint.searchParams.set('numOfRows', '100');
+  const urlStr = endpoint.toString();
+
+  structuredLog('info', {
+    timestamp: new Date().toISOString(),
+    event: 'fleet.static.request',
+    url: urlStr.replace(apiKey, '[REDACTED]'),
+  });
+
   let res: Response;
   try {
-    res = await fetch(url, { cache: 'no-store' });
+    res = await fetch(urlStr, { cache: 'no-store' });
   } catch (err) {
     structuredLog('warn', {
       timestamp: new Date().toISOString(),
@@ -294,15 +350,25 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
   }
 
   if (!res.ok) {
+    const body = await res.text().catch(() => '');
     structuredLog('warn', {
       timestamp: new Date().toISOString(),
       event: 'fleet.static.fallback_to_mock',
-      error: { message: `Fleet static API responded with HTTP ${res.status}` },
+      error: { message: `Fleet static API responded with HTTP ${res.status}`, body: body.slice(0, 500) },
     });
     return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: true };
   }
 
   const json = await res.json() as { response?: { body?: { items?: { item?: Array<Record<string, unknown>> } } } };
+
+  // 응답 구조 상세 로깅 (필드 매핑 검증용)
+  structuredLog('info', {
+    timestamp: new Date().toISOString(),
+    event: 'fleet.static.raw_response_structure',
+    topLevelKeys: Object.keys(json),
+    responseBodyKeys: json?.response?.body ? Object.keys(json.response.body) : [],
+  });
+
   const items: Array<Record<string, unknown>> =
     json?.response?.body?.items?.item ?? [];
 
@@ -316,12 +382,23 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
     return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: true };
   }
 
-  // 첫 번째 아이템의 키를 로깅 (필드명 진단용)
+  // 첫 번째 아이템의 키와 샘플 값을 로깅 (필드명 진단용)
   if (items.length > 0) {
     structuredLog('info', {
       timestamp: new Date().toISOString(),
       event: 'fleet.static.field_sample',
       fields: Object.keys(items[0]),
+      sample: {
+        mmsi: items[0]['mmsi'],
+        shipNm: items[0]['shipNm'],
+        shipTp: items[0]['shipTp'],
+        shipTypCd: items[0]['shipTypCd'],
+        gt: items[0]['gt'],
+        grossTon: items[0]['grossTon'],
+        loa: items[0]['loa'],
+        shpLoa: items[0]['shpLoa'],
+      },
+      totalItems: items.length,
     });
   }
 
@@ -344,17 +421,47 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
 
 // --- Route handler ---------------------------------------------------
 
-export async function GET() {
-  // Static export mode: return mock data (no request params available)
-  const fleet = joinFleetData(
-    MOCK_DYNAMIC,
-    new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
-  );
+export async function GET(request: NextRequest) {
+  const t0 = Date.now();
+
+  // 1. Query param 유효성 검사
+  const parsed = parseAndValidateQuery(request.nextUrl.searchParams);
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: parsed.message }, { status: 400 });
+  }
+  const params = parsed.data;
+
+  // 2. Dynamic + Static 데이터 병렬 fetch
+  const [dynamicResult, staticResult] = await Promise.all([
+    fetchDynamic(),
+    fetchStatic(),
+  ]);
+
+  // 3. 조인 + 필터
+  const rawFleet = joinFleetData(dynamicResult.data, staticResult.data);
+  const filters = buildFilters(params);
+  const fleet = applyFilters(rawFleet, filters);
+
+  const duration = Date.now() - t0;
+  const isMock = dynamicResult.fallback || staticResult.fallback;
+
+  structuredLog('info', {
+    timestamp: new Date().toISOString(),
+    event: 'fleet.get.complete',
+    duration,
+    count: fleet.length,
+    rawCount: rawFleet.length,
+    mock: isMock,
+    dynamicFallback: dynamicResult.fallback,
+    staticFallback: staticResult.fallback,
+    params,
+  });
+
   return NextResponse.json({
     ok: true,
     data: fleet,
     count: fleet.length,
     timestamp: new Date().toISOString(),
-    mock: true,
+    mock: isMock,
   });
 }
