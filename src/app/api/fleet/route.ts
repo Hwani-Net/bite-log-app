@@ -481,6 +481,147 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
   return { data: map, fallback: false };
 }
 
+// --- KHOA OceanGrid AIS fallback ------------------------------------
+
+/**
+ * KHOA(국립해양조사원) OceanGrid 실시간 선박위치 API
+ * - 엔드포인트: www.khoa.go.kr/api/oceangrid/tsrtShipPos/search.do
+ * - 키 형식: 64자 hex (NEXT_PUBLIC_KHOA_API_KEY)
+ * - 응답: result.data[] (camelCase 필드)
+ * - 단일 엔드포인트에 동적(위치·속도)과 정적(선명·톤수) 정보 포함
+ * docs: https://www.khoa.go.kr/oceangrid/khoa/takepart/openapi/openApiDeveloperGuide.do
+ */
+const KHOA_VESSEL_POS_URL =
+  'https://www.khoa.go.kr/api/oceangrid/tsrtShipPos/search.do';
+
+interface KhoaVesselItem {
+  mmsi?: string | number;
+  lat?: string | number;
+  lon?: string | number;
+  speed?: string | number;
+  sog?: string | number;
+  course?: string | number;
+  cog?: string | number;
+  recptnDt?: string;
+  recptDt?: string;
+  shipNm?: string;
+  shipName?: string;
+  shipType?: string | number;
+  shipTp?: string | number;
+  gt?: string | number;
+  grossTon?: string | number;
+  loa?: string | number;
+  shipLength?: string | number;
+  [key: string]: unknown;
+}
+
+interface KhoaApiResponse {
+  result?: {
+    meta?: { totalCount?: string | number };
+    data?: KhoaVesselItem[];
+  };
+}
+
+/**
+ * KHOA OceanGrid에서 선박 위치 데이터를 조회하고
+ * dynamic 목록과 static 맵을 반환한다.
+ * 실패 시 null 반환.
+ */
+async function fetchFromKhoa(): Promise<{
+  dynamic: DynamicRecord[];
+  staticMap: Map<string, StaticRecord>;
+} | null> {
+  const khoaKey = process.env.NEXT_PUBLIC_KHOA_API_KEY;
+  if (!khoaKey) return null;
+
+  const url = `${KHOA_VESSEL_POS_URL}?ServiceKey=${khoaKey}&ResultType=json&numOfRows=100&pageNo=1`;
+
+  structuredLog('info', {
+    timestamp: new Date().toISOString(),
+    event: 'fleet.khoa.request',
+    url: url.replace(khoaKey, '[REDACTED]'),
+  });
+
+  let res: Response;
+  try {
+    res = await fetch(url, { cache: 'no-store' });
+  } catch (err) {
+    structuredLog('warn', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.khoa.unreachable',
+      error: String(err),
+    });
+    return null;
+  }
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    structuredLog('warn', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.khoa.http_error',
+      status: res.status,
+      body: body.slice(0, 300),
+    });
+    return null;
+  }
+
+  let json: KhoaApiResponse;
+  try {
+    json = (await res.json()) as KhoaApiResponse;
+  } catch (err) {
+    const rawText = await res.text().catch(() => '');
+    structuredLog('warn', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.khoa.parse_error',
+      preview: rawText.slice(0, 200),
+      error: String(err),
+    });
+    return null;
+  }
+
+  const items: KhoaVesselItem[] = json?.result?.data ?? [];
+  if (items.length === 0) {
+    structuredLog('warn', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.khoa.empty',
+    });
+    return null;
+  }
+
+  structuredLog('info', {
+    timestamp: new Date().toISOString(),
+    event: 'fleet.khoa.field_sample',
+    fields: Object.keys(items[0]),
+    totalItems: items.length,
+  });
+
+  const dynamic: DynamicRecord[] = items
+    .filter((item) => item.mmsi != null)
+    .map((item) => ({
+      mmsi: String(item.mmsi ?? ''),
+      lat: Number(item.lat ?? 0),
+      lon: Number(item.lon ?? 0),
+      speed: Number(item.speed ?? item.sog ?? 0),
+      course: Number(item.course ?? item.cog ?? 0),
+      timestamp: parseRecptnDt(String(item.recptnDt ?? item.recptDt ?? '')),
+    }));
+
+  const staticMap = new Map<string, StaticRecord>();
+  for (const item of items) {
+    const mmsi = String(item.mmsi ?? '');
+    if (!mmsi) continue;
+    staticMap.set(mmsi, {
+      mmsi,
+      shipName: String(item.shipNm ?? item.shipName ?? ''),
+      shipType: String(item.shipType ?? item.shipTp ?? ''),
+      tonnage: Number(item.gt ?? item.grossTon ?? 0),
+      length: Number(item.loa ?? item.shipLength ?? 0),
+    });
+  }
+
+  return { dynamic, staticMap };
+}
+
 // --- Route handler ---------------------------------------------------
 
 export async function GET(request: NextRequest) {
@@ -494,19 +635,41 @@ export async function GET(request: NextRequest) {
     }
     const params = parsed.data;
 
-    // 2. Dynamic + Static 데이터 병렬 fetch
+    // 2. Dynamic + Static 데이터 병렬 fetch (primary: odcloud/data.go.kr)
     const [dynamicResult, staticResult] = await Promise.all([
       fetchDynamic(),
       fetchStatic(),
     ]);
 
-    // 3. 조인 + 필터
-    const rawFleet = joinFleetData(dynamicResult.data, staticResult.data);
+    // 3. 두 primary API 모두 실패 시 KHOA OceanGrid로 fallback
+    let rawFleet: FleetEntry[];
+    let dataSource: 'primary' | 'khoa' | 'mock' = 'primary';
+
+    if (dynamicResult.fallback && staticResult.fallback) {
+      const khoaData = await fetchFromKhoa();
+      if (khoaData && khoaData.dynamic.length > 0) {
+        rawFleet = joinFleetData(khoaData.dynamic, khoaData.staticMap);
+        dataSource = 'khoa';
+        structuredLog('info', {
+          timestamp: new Date().toISOString(),
+          event: 'fleet.khoa.success',
+          count: rawFleet.length,
+        });
+      } else {
+        rawFleet = joinFleetData(dynamicResult.data, staticResult.data);
+        dataSource = 'mock';
+      }
+    } else {
+      rawFleet = joinFleetData(dynamicResult.data, staticResult.data);
+      if (dynamicResult.fallback || staticResult.fallback) dataSource = 'mock';
+    }
+
+    // 4. 필터 적용
     const filters = buildFilters(params);
     const fleet = applyFilters(rawFleet, filters);
 
     const duration = Date.now() - t0;
-    const isMock = dynamicResult.fallback || staticResult.fallback;
+    const isMock = dataSource === 'mock';
 
     structuredLog('info', {
       timestamp: new Date().toISOString(),
@@ -514,9 +677,8 @@ export async function GET(request: NextRequest) {
       duration,
       count: fleet.length,
       rawCount: rawFleet.length,
+      dataSource,
       mock: isMock,
-      dynamicFallback: dynamicResult.fallback,
-      staticFallback: staticResult.fallback,
       params,
     });
 
@@ -526,6 +688,7 @@ export async function GET(request: NextRequest) {
       count: fleet.length,
       timestamp: new Date().toISOString(),
       mock: isMock,
+      dataSource,
     });
   } catch (err) {
     structuredLog('error', {
