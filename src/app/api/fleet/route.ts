@@ -211,25 +211,91 @@ interface FetchResult<T> {
 }
 
 /**
- * apis.data.go.kr serviceKey 빌드 헬퍼.
+ * api.odcloud.kr URL 빌드 헬퍼.
  *
- * data.go.kr은 serviceKey를 이미 URL-encoded 상태(Base64+%2B/%3D)로 발급한다.
- * URLSearchParams.set()을 사용하면 이중 인코딩(%2B → %252B)이 발생해 서버가
- * 키를 인식하지 못하는 문제가 생긴다.
- * → template string으로 직접 URL을 조립해 이중 인코딩을 방지한다.
+ * 공공데이터포털 serviceKey는 이미 URL-encoded 상태(Base64+%2B/%3D)로 발급된다.
+ * URLSearchParams.set()을 사용하면 이중 인코딩(%2B → %252B)이 발생하므로
+ * template string으로 serviceKey를 직접 삽입한다.
  *
- * ⚠️  FLEET_API_KEY 발급: https://www.data.go.kr → 검색 "선박 AIS" → 활용신청 후
- *     발급된 인코딩 키(예: abc%2Bdef%3D)를 그대로 .env.local에 설정한다.
- *     현재 KHOA 64자 hex 키는 data.go.kr AIS 서비스와 무관하므로 동작하지 않는다.
+ * ⚠️  FLEET_API_KEY 발급: https://www.data.go.kr → 검색 "선박 AIS 동적정보" →
+ *     활용신청 후 발급된 인코딩 키를 그대로 .env.local에 설정한다.
+ *
+ * Primary endpoint: api.odcloud.kr/api/15129186/v1 (선박AIS동적정보)
+ *   → apis.data.go.kr/1192000/VesselAisDynamic/getDynamic 은 HTTP 500 반환 확인됨
  */
-function buildAisUrl(
-  path: string,
-  apiKey: string,
-  extra: Record<string, string> = {},
-): string {
-  // serviceKey는 그대로 삽입 (data.go.kr이 이미 URL-encode해서 발급하므로)
-  const params = new URLSearchParams({ resultType: 'json', numOfRows: '100', pageNo: '1', ...extra });
-  return `https://apis.data.go.kr${path}?serviceKey=${apiKey}&${params.toString()}`;
+function buildOdcloudUrl(datasetId: string, apiKey: string, page = 1, perPage = 100): string {
+  return `https://api.odcloud.kr/api/${datasetId}/v1?serviceKey=${apiKey}&page=${page}&perPage=${perPage}`;
+}
+
+/** api.odcloud.kr 응답 형식 */
+interface OdcloudResponse {
+  currentCount?: number;
+  data?: Array<Record<string, unknown>>;
+  matchCount?: number;
+  page?: number;
+  perPage?: number;
+  totalCount?: number;
+}
+
+/**
+ * 응답 JSON에서 item 배열을 추출한다.
+ * - api.odcloud.kr 형식: { data: [...] }
+ * - apis.data.go.kr 형식: { response: { body: { items: { item: [...] } } } }
+ * 두 형식을 모두 처리한다.
+ */
+function extractItems(json: unknown): Array<Record<string, unknown>> {
+  if (json == null || typeof json !== 'object') return [];
+  const obj = json as Record<string, unknown>;
+
+  // odcloud 형식
+  if (Array.isArray(obj['data'])) {
+    return obj['data'] as Array<Record<string, unknown>>;
+  }
+
+  // apis.data.go.kr 형식
+  const resp = obj['response'] as Record<string, unknown> | undefined;
+  const body = resp?.['body'] as Record<string, unknown> | undefined;
+  const items = body?.['items'] as Record<string, unknown> | undefined;
+  const item = items?.['item'];
+  if (Array.isArray(item)) return item as Array<Record<string, unknown>>;
+  if (item != null && typeof item === 'object') return [item as Record<string, unknown>];
+
+  return [];
+}
+
+/** DynamicRecord 매핑: odcloud/data.go.kr 양쪽 필드명 처리 */
+function mapDynamicItem(item: Record<string, unknown>): DynamicRecord {
+  return {
+    mmsi: String(item['mmsi'] ?? item['MMSI'] ?? ''),
+    lat: Number(item['lat'] ?? item['LAT'] ?? item['위도'] ?? item['LATITUDE'] ?? 0),
+    lon: Number(item['lon'] ?? item['LON'] ?? item['경도'] ?? item['LONGITUDE'] ?? 0),
+    speed: Number(item['sog'] ?? item['SOG'] ?? item['대지속력'] ?? item['speed'] ?? item['SPEED'] ?? 0),
+    course: Number(item['cog'] ?? item['COG'] ?? item['대지침로'] ?? item['course'] ?? item['COURSE'] ?? 0),
+    timestamp: parseRecptnDt(
+      String(item['recptnDt'] ?? item['RECPTN_DT'] ?? item['수신일시'] ?? item['수신시각'] ?? ''),
+    ),
+  };
+}
+
+/** StaticRecord 매핑: odcloud/data.go.kr 양쪽 필드명 처리 */
+function mapStaticItem(item: Record<string, unknown>): StaticRecord {
+  const mmsi = String(item['mmsi'] ?? item['MMSI'] ?? '');
+  return {
+    mmsi,
+    shipName: String(item['shipNm'] ?? item['SHIP_NM'] ?? item['선박명'] ?? ''),
+    shipType: String(
+      item['shipTp'] ?? item['SHIP_TP'] ?? item['shipTypCd'] ?? item['SHIP_TYPE'] ??
+      item['SHIP_TYP_CD'] ?? item['선박종류'] ?? '',
+    ),
+    tonnage: Number(
+      item['gt'] ?? item['GT'] ?? item['grossTon'] ?? item['GROSS_TON'] ??
+      item['grossTonnage'] ?? item['GROSS_TONNAGE'] ?? item['총톤수'] ?? 0,
+    ),
+    length: Number(
+      item['loa'] ?? item['LOA'] ?? item['shpLoa'] ?? item['SHP_LOA'] ??
+      item['shipLength'] ?? item['SHIP_LENGTH'] ?? item['선체전장'] ?? 0,
+    ),
+  };
 }
 
 async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
@@ -238,11 +304,13 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
     return { data: MOCK_DYNAMIC, fallback: false };
   }
 
-  const urlStr = buildAisUrl('/1192000/VesselAisDynamic/getDynamic', apiKey);
+  // Primary: api.odcloud.kr/api/15129186/v1 (선박AIS동적정보)
+  const urlStr = buildOdcloudUrl('15129186', apiKey);
 
   structuredLog('info', {
     timestamp: new Date().toISOString(),
     event: 'fleet.dynamic.request',
+    endpoint: 'odcloud/15129186',
     url: urlStr.replace(apiKey, '[REDACTED]'),
   });
 
@@ -268,63 +336,46 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
     return { data: MOCK_DYNAMIC, fallback: true };
   }
 
-  let json: { response?: { body?: { items?: { item?: Array<Record<string, unknown>> } } } };
+  let rawText: string;
   try {
-    json = await res.json() as { response?: { body?: { items?: { item?: Array<Record<string, unknown>> } } } };
+    rawText = await res.text();
   } catch (err) {
-    const rawText = await res.text().catch(() => '');
     structuredLog('warn', {
       timestamp: new Date().toISOString(),
       event: 'fleet.dynamic.fallback_to_mock',
-      error: { message: 'Fleet dynamic API returned non-JSON response', preview: rawText.slice(0, 200), cause: String(err) },
+      error: { message: 'Fleet dynamic API body read failed', cause: String(err) },
     });
     return { data: MOCK_DYNAMIC, fallback: true };
   }
 
-  // 응답 구조 상세 로깅 (필드 매핑 검증용)
-  structuredLog('info', {
-    timestamp: new Date().toISOString(),
-    event: 'fleet.dynamic.raw_response_structure',
-    topLevelKeys: Object.keys(json),
-    responseBodyKeys: json?.response?.body ? Object.keys(json.response.body) : [],
-  });
+  let json: unknown;
+  try {
+    json = JSON.parse(rawText);
+  } catch (err) {
+    structuredLog('warn', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.dynamic.fallback_to_mock',
+      error: { message: 'Fleet dynamic API returned non-JSON', preview: rawText.slice(0, 200), cause: String(err) },
+    });
+    return { data: MOCK_DYNAMIC, fallback: true };
+  }
 
-  const items: Array<Record<string, unknown>> =
-    json?.response?.body?.items?.item ?? [];
+  const items = extractItems(json);
 
-  // 첫 번째 아이템의 키와 샘플 값을 로깅 (필드명 진단용)
   if (items.length > 0) {
     structuredLog('info', {
       timestamp: new Date().toISOString(),
       event: 'fleet.dynamic.field_sample',
       fields: Object.keys(items[0]),
-      sample: {
-        // lowercase (일부 엔드포인트) 및 UPPERCASE_SNAKE (대부분 공공데이터포털 AIS 표준) 모두 로깅
-        mmsi: items[0]['mmsi'] ?? items[0]['MMSI'],
-        lat: items[0]['lat'] ?? items[0]['LAT'] ?? items[0]['LATITUDE'],
-        lon: items[0]['lon'] ?? items[0]['LON'] ?? items[0]['LONGITUDE'],
-        sog: items[0]['sog'] ?? items[0]['SOG'],
-        cog: items[0]['cog'] ?? items[0]['COG'],
-        recptnDt: items[0]['recptnDt'] ?? items[0]['RECPTN_DT'],
-        speed: items[0]['speed'] ?? items[0]['SPEED'],
-        course: items[0]['course'] ?? items[0]['COURSE'],
-      },
-      totalItems: items.length,
+      sample: items[0],
+      totalItems: (json as OdcloudResponse).totalCount ?? items.length,
     });
   }
 
-  const data = items.map((item) => ({
-    // 공공데이터포털 AIS API: 일부 엔드포인트는 대문자 스네이크케이스 사용 (PITFALLS.md 참조)
-    mmsi: String(item['mmsi'] ?? item['MMSI'] ?? ''),
-    lat: Number(item['lat'] ?? item['LAT'] ?? item['LATITUDE'] ?? 0),
-    lon: Number(item['lon'] ?? item['LON'] ?? item['LONGITUDE'] ?? 0),
-    // AIS 표준: sog = Speed Over Ground (대지속력), cog = Course Over Ground (대지침로)
-    speed: Number(item['sog'] ?? item['SOG'] ?? item['speed'] ?? item['SPEED'] ?? 0),
-    course: Number(item['cog'] ?? item['COG'] ?? item['course'] ?? item['COURSE'] ?? 0),
-    timestamp: parseRecptnDt(String(item['recptnDt'] ?? item['RECPTN_DT'] ?? '')),
-  }));
+  const data = items
+    .map(mapDynamicItem)
+    .filter((d) => d.mmsi !== '');
 
-  // API 응답이 비어 있으면 mock으로 fallback
   if (data.length === 0) {
     structuredLog('warn', {
       timestamp: new Date().toISOString(),
@@ -343,11 +394,15 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
     return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: false };
   }
 
-  const urlStr = buildAisUrl('/1192000/VesselAisStatic/getStatic', apiKey);
+  // apis.data.go.kr static endpoint (dynamic보다 안정적인 경우가 많음)
+  // serviceKey 이중 인코딩 방지를 위해 template string 직접 사용
+  const extra = new URLSearchParams({ resultType: 'json', numOfRows: '100', pageNo: '1' });
+  const urlStr = `https://apis.data.go.kr/1192000/VesselAisStatic/getStatic?serviceKey=${apiKey}&${extra.toString()}`;
 
   structuredLog('info', {
     timestamp: new Date().toISOString(),
     event: 'fleet.static.request',
+    endpoint: 'data.go.kr/VesselAisStatic',
     url: urlStr.replace(apiKey, '[REDACTED]'),
   });
 
@@ -373,31 +428,32 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
     return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: true };
   }
 
-  let json: { response?: { body?: { items?: { item?: Array<Record<string, unknown>> } } } };
+  let rawText: string;
   try {
-    json = await res.json() as { response?: { body?: { items?: { item?: Array<Record<string, unknown>> } } } };
+    rawText = await res.text();
   } catch (err) {
-    const rawText = await res.text().catch(() => '');
     structuredLog('warn', {
       timestamp: new Date().toISOString(),
       event: 'fleet.static.fallback_to_mock',
-      error: { message: 'Fleet static API returned non-JSON response', preview: rawText.slice(0, 200), cause: String(err) },
+      error: { message: 'Fleet static API body read failed', cause: String(err) },
     });
     return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: true };
   }
 
-  // 응답 구조 상세 로깅 (필드 매핑 검증용)
-  structuredLog('info', {
-    timestamp: new Date().toISOString(),
-    event: 'fleet.static.raw_response_structure',
-    topLevelKeys: Object.keys(json),
-    responseBodyKeys: json?.response?.body ? Object.keys(json.response.body) : [],
-  });
+  let json: unknown;
+  try {
+    json = JSON.parse(rawText);
+  } catch (err) {
+    structuredLog('warn', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.static.fallback_to_mock',
+      error: { message: 'Fleet static API returned non-JSON', preview: rawText.slice(0, 200), cause: String(err) },
+    });
+    return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: true };
+  }
 
-  const items: Array<Record<string, unknown>> =
-    json?.response?.body?.items?.item ?? [];
+  const items = extractItems(json);
 
-  // API 응답이 비어 있으면 mock으로 fallback
   if (items.length === 0) {
     structuredLog('warn', {
       timestamp: new Date().toISOString(),
@@ -407,38 +463,20 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
     return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: true };
   }
 
-  // 첫 번째 아이템의 키와 샘플 값을 로깅 (필드명 진단용)
   if (items.length > 0) {
     structuredLog('info', {
       timestamp: new Date().toISOString(),
       event: 'fleet.static.field_sample',
       fields: Object.keys(items[0]),
-      sample: {
-        // lowercase 및 UPPERCASE_SNAKE 모두 로깅
-        mmsi: items[0]['mmsi'] ?? items[0]['MMSI'],
-        shipNm: items[0]['shipNm'] ?? items[0]['SHIP_NM'],
-        shipTp: items[0]['shipTp'] ?? items[0]['SHIP_TP'] ?? items[0]['shipTypCd'] ?? items[0]['SHIP_TYPE'],
-        gt: items[0]['gt'] ?? items[0]['GT'] ?? items[0]['grossTon'] ?? items[0]['GROSS_TON'],
-        loa: items[0]['loa'] ?? items[0]['LOA'] ?? items[0]['shpLoa'] ?? items[0]['SHP_LOA'],
-      },
+      sample: items[0],
       totalItems: items.length,
     });
   }
 
   const map = new Map<string, StaticRecord>();
   for (const item of items) {
-    // 공공데이터포털 AIS API: 일부 엔드포인트는 대문자 스네이크케이스 사용 (PITFALLS.md 참조)
-    const mmsi = String(item['mmsi'] ?? item['MMSI'] ?? '');
-    map.set(mmsi, {
-      mmsi,
-      shipName: String(item['shipNm'] ?? item['SHIP_NM'] ?? ''),
-      // 선박종류코드 (AIS Type 11: 낚시선 등)
-      shipType: String(item['shipTp'] ?? item['SHIP_TP'] ?? item['shipTypCd'] ?? item['SHIP_TYPE'] ?? item['SHIP_TYP_CD'] ?? ''),
-      // 총톤수: gt(공공데이터포털 표준) → UPPERCASE 순서로 fallback
-      tonnage: Number(item['gt'] ?? item['GT'] ?? item['grossTon'] ?? item['GROSS_TON'] ?? item['grossTonnage'] ?? item['GROSS_TONNAGE'] ?? 0),
-      // 선체전장: loa(Length Overall, AIS 표준) → UPPERCASE 순서로 fallback
-      length: Number(item['loa'] ?? item['LOA'] ?? item['shpLoa'] ?? item['SHP_LOA'] ?? item['shipLength'] ?? item['SHIP_LENGTH'] ?? 0),
-    });
+    const record = mapStaticItem(item);
+    if (record.mmsi) map.set(record.mmsi, record);
   }
   return { data: map, fallback: false };
 }
@@ -448,44 +486,57 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
 export async function GET(request: NextRequest) {
   const t0 = Date.now();
 
-  // 1. Query param 유효성 검사
-  const parsed = parseAndValidateQuery(request.nextUrl.searchParams);
-  if (!parsed.success) {
-    return NextResponse.json({ ok: false, error: parsed.message }, { status: 400 });
+  try {
+    // 1. Query param 유효성 검사
+    const parsed = parseAndValidateQuery(request.nextUrl.searchParams);
+    if (!parsed.success) {
+      return NextResponse.json({ ok: false, error: parsed.message }, { status: 400 });
+    }
+    const params = parsed.data;
+
+    // 2. Dynamic + Static 데이터 병렬 fetch
+    const [dynamicResult, staticResult] = await Promise.all([
+      fetchDynamic(),
+      fetchStatic(),
+    ]);
+
+    // 3. 조인 + 필터
+    const rawFleet = joinFleetData(dynamicResult.data, staticResult.data);
+    const filters = buildFilters(params);
+    const fleet = applyFilters(rawFleet, filters);
+
+    const duration = Date.now() - t0;
+    const isMock = dynamicResult.fallback || staticResult.fallback;
+
+    structuredLog('info', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.get.complete',
+      duration,
+      count: fleet.length,
+      rawCount: rawFleet.length,
+      mock: isMock,
+      dynamicFallback: dynamicResult.fallback,
+      staticFallback: staticResult.fallback,
+      params,
+    });
+
+    return NextResponse.json({
+      ok: true,
+      data: fleet,
+      count: fleet.length,
+      timestamp: new Date().toISOString(),
+      mock: isMock,
+    });
+  } catch (err) {
+    structuredLog('error', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.get.unhandled_error',
+      error: String(err),
+      duration: Date.now() - t0,
+    });
+    return NextResponse.json(
+      { ok: false, error: 'Internal server error', mock: true, data: MOCK_DYNAMIC, count: MOCK_DYNAMIC.length },
+      { status: 500 },
+    );
   }
-  const params = parsed.data;
-
-  // 2. Dynamic + Static 데이터 병렬 fetch
-  const [dynamicResult, staticResult] = await Promise.all([
-    fetchDynamic(),
-    fetchStatic(),
-  ]);
-
-  // 3. 조인 + 필터
-  const rawFleet = joinFleetData(dynamicResult.data, staticResult.data);
-  const filters = buildFilters(params);
-  const fleet = applyFilters(rawFleet, filters);
-
-  const duration = Date.now() - t0;
-  const isMock = dynamicResult.fallback || staticResult.fallback;
-
-  structuredLog('info', {
-    timestamp: new Date().toISOString(),
-    event: 'fleet.get.complete',
-    duration,
-    count: fleet.length,
-    rawCount: rawFleet.length,
-    mock: isMock,
-    dynamicFallback: dynamicResult.fallback,
-    staticFallback: staticResult.fallback,
-    params,
-  });
-
-  return NextResponse.json({
-    ok: true,
-    data: fleet,
-    count: fleet.length,
-    timestamp: new Date().toISOString(),
-    mock: isMock,
-  });
 }
