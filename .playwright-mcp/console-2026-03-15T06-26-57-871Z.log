@@ -1,0 +1,246 @@
+[ -328444ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://adsense.google.com/favicon.ico:0
+[  -57341ms] [WARNING] <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes"> @ http://localhost:3013/:0
+[  -57232ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://www.googleapis.com/youtube/v3/search?part=snippet&q=%EC%8B%A4%EC%8B%9C%EA%B0%84%20%20%EB%82%9A%EC%8B%9C%20%EC%A1%B0%EA%B3%BC&type=video&maxResults=8&order=date&relevanceLanguage=ko&key=AIzaSyBU6IJpzRYutQCdanQOi0ZEy_sgtTeaAlY:0
+[  -55204ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:3013/api/naver?type=blog&query=%EB%82%9A%EC%8B%9C%20%EC%A1%B0%ED%96%89%EA%B8%B0&display=15&sort=date:0
+[  -55188ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:3013/api/naver?type=news&query=%EB%82%9A%EC%8B%9C%20%EC%A1%B0%ED%96%89%EA%B8%B0&display=15&sort=date:0
+[  -55095ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  -55095ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/sessions:0
+[  -54960ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:3013/api/tide?pageNo=1&numOfRows=10&obs_post_id=DT_0018&date=20260315:0
+[  -53513ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  -48798ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  -45056ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  -44678ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  -39586ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  -36203ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  -34226ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  -30097ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  -24235ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  -21948ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  -14240ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  -13893ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[   -5076ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[   -4880ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  -57232ms] [WARNING] YouTube API returned 403, using mock data @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:67
+[  -55095ms] [WARNING] [Agentation] Failed to initialize session, using local storage: TypeError: Failed to fetch
+    at createSession (http://localhost:3013/_next/static/chunks/node_modules_agentation_dist_index_mjs_a4d7dd5f._.js:2389:28)
+    at PageFeedbackToolbarCSS.useEffect2.initSession (http://localhost:3013/_next/static/chunks/node_modules_agentation_dist_index_mjs_a4d7dd5f._.js:3624:51)
+    at PageFeedbackToolbarCSS.useEffect2 (http://localhost:3013/_next/static/chunks/node_modules_agentation_dist_index_mjs_a4d7dd5f._.js:3690:13)
+    at Object.react_stack_bottom_frame (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:14876:22)
+    at runWithFiberInDEV (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:965:74)
+    at commitHookEffectListMount (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:7266:167)
+    at commitHookPassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:7301:60)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8696:33)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17) @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:67
+[  -54959ms] [WARNING] Tide API proxy failed. @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:67
+[    4951ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[    5463ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[   14337ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[   14914ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[   21688ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[   24923ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[   29424ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[   29654ms] [WARNING] <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes"> @ http://localhost:3013/:0
+[   29659ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://www.googleapis.com/youtube/v3/search?part=snippet&q=%EC%8B%A4%EC%8B%9C%EA%B0%84%20%20%EB%82%9A%EC%8B%9C%20%EC%A1%B0%EA%B3%BC&type=video&maxResults=8&order=date&relevanceLanguage=ko&key=AIzaSyBU6IJpzRYutQCdanQOi0ZEy_sgtTeaAlY:0
+[   29659ms] [WARNING] YouTube API returned 403, using mock data @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:67
+[   30665ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/sessions:0
+[   30665ms] [WARNING] [Agentation] Failed to initialize session, using local storage: TypeError: Failed to fetch
+    at createSession (http://localhost:3013/_next/static/chunks/node_modules_agentation_dist_index_mjs_a4d7dd5f._.js:2389:28)
+    at PageFeedbackToolbarCSS.useEffect2.initSession (http://localhost:3013/_next/static/chunks/node_modules_agentation_dist_index_mjs_a4d7dd5f._.js:3624:51)
+    at PageFeedbackToolbarCSS.useEffect2 (http://localhost:3013/_next/static/chunks/node_modules_agentation_dist_index_mjs_a4d7dd5f._.js:3690:13)
+    at Object.react_stack_bottom_frame (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:14876:22)
+    at runWithFiberInDEV (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:965:74)
+    at commitHookEffectListMount (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:7266:167)
+    at commitHookPassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:7301:60)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8696:33)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17) @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:67
+[   31815ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:3013/api/naver?type=blog&query=%EB%82%9A%EC%8B%9C%20%EC%A1%B0%ED%96%89%EA%B8%B0&display=15&sort=date:0
+[   31816ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:3013/api/naver?type=news&query=%EB%82%9A%EC%8B%9C%20%EC%A1%B0%ED%96%89%EA%B8%B0&display=15&sort=date:0
+[   31835ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:3013/api/tide?pageNo=1&numOfRows=10&obs_post_id=DT_0018&date=20260315:0
+[   31835ms] [WARNING] Tide API proxy failed. @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:67
+[   31871ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[   31906ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[   35968ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[   40058ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[   40676ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[   44145ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[   47505ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[   50646ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[   53647ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[   60657ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[   61019ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[   68415ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[   70681ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[   77281ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[   80325ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[   86438ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[   90322ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[   95919ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  101920ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  104084ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  111901ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  113762ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  114001ms] [WARNING] <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes"> @ http://localhost:3013/:0
+[  114003ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://www.googleapis.com/youtube/v3/search?part=snippet&q=%EC%8B%A4%EC%8B%9C%EA%B0%84%20%20%EB%82%9A%EC%8B%9C%20%EC%A1%B0%EA%B3%BC&type=video&maxResults=8&order=date&relevanceLanguage=ko&key=AIzaSyBU6IJpzRYutQCdanQOi0ZEy_sgtTeaAlY:0
+[  114003ms] [WARNING] YouTube API returned 403, using mock data @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:67
+[  116141ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:3013/api/naver?type=blog&query=%EB%82%9A%EC%8B%9C%20%EC%A1%B0%ED%96%89%EA%B8%B0&display=15&sort=date:0
+[  116142ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:3013/api/naver?type=news&query=%EB%82%9A%EC%8B%9C%20%EC%A1%B0%ED%96%89%EA%B8%B0&display=15&sort=date:0
+[  116156ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:3013/api/tide?pageNo=1&numOfRows=10&obs_post_id=DT_0018&date=20260315:0
+[  116156ms] [WARNING] Tide API proxy failed. @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:67
+[  116277ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/sessions:0
+[  116278ms] [WARNING] [Agentation] Failed to initialize session, using local storage: TypeError: Failed to fetch
+    at createSession (http://localhost:3013/_next/static/chunks/node_modules_agentation_dist_index_mjs_a4d7dd5f._.js:2389:28)
+    at PageFeedbackToolbarCSS.useEffect2.initSession (http://localhost:3013/_next/static/chunks/node_modules_agentation_dist_index_mjs_a4d7dd5f._.js:3624:51)
+    at PageFeedbackToolbarCSS.useEffect2 (http://localhost:3013/_next/static/chunks/node_modules_agentation_dist_index_mjs_a4d7dd5f._.js:3690:13)
+    at Object.react_stack_bottom_frame (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:14876:22)
+    at runWithFiberInDEV (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:965:74)
+    at commitHookEffectListMount (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:7266:167)
+    at commitHookPassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:7301:60)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8696:33)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17) @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:67
+[  116295ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  119358ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  126263ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  128315ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  136274ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  139531ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  144846ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  146276ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  152442ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  156286ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  159479ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  164507ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  170644ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  174553ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  179937ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  184526ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  191157ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  196592ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  204713ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  206610ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  216597ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  217676ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  226624ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  227111ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=JuP4a-qq2eAwBJOcqhDEX' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90

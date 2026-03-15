@@ -1,0 +1,2 @@
+[    2618ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ https://www.data.go.kr/tps/itm/getServiceApplyList.do:0
+[    6160ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ https://www.data.go.kr/mypage/myDataPage.do:0

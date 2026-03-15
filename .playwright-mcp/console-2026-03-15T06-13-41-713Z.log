@@ -1,0 +1,28 @@
+[   16066ms] [WARNING] network error TypeError: Failed to fetch
+    at https://accounts.kakaocdn.net/_next/static/chunks/pages/_app-15ec7f4278d23a22.js:1:395720
+    at m (https://accounts.kakaocdn.net/_next/static/chunks/pages/_app-15ec7f4278d23a22.js:1:278409)
+    at t.value (https://accounts.kakaocdn.net/_next/static/chunks/pages/_app-15ec7f4278d23a22.js:1:278062)
+    at https://accounts.kakaocdn.net/_next/static/chunks/pages/_app-15ec7f4278d23a22.js:1:277463
+    at i (https://accounts.kakaocdn.net/_next/static/chunks/pages/_app-15ec7f4278d23a22.js:1:277262)
+    at t.value (https://accounts.kakaocdn.net/_next/static/chunks/pages/_app-15ec7f4278d23a22.js:1:277338)
+    at n.<anonymous> (https://accounts.kakaocdn.net/_next/static/chunks/84963-42461bc914441c75.js:1:3101)
+    at p (https://accounts.kakaocdn.net/_next/static/chunks/main-a7d45bce11193232.js:1:1428)
+    at Generator._invoke (https://accounts.kakaocdn.net/_next/static/chunks/main-a7d45bce11193232.js:1:1181)
+    at Generator.next (https://accounts.kakaocdn.net/_next/static/chunks/main-a7d45bce11193232.js:1:1791)
+    at r (https://accounts.kakaocdn.net/_next/static/chunks/pages/_app-15ec7f4278d23a22.js:1:507393)
+    at s (https://accounts.kakaocdn.net/_next/static/chunks/pages/_app-15ec7f4278d23a22.js:1:507596)
+    at https://accounts.kakaocdn.net/_next/static/chunks/pages/_app-15ec7f4278d23a22.js:1:507655
+    at new Promise (<anonymous>)
+    at n.<anonymous> (https://accounts.kakaocdn.net/_next/static/chunks/pages/_app-15ec7f4278d23a22.js:1:507536)
+    at push.56906.k.value (https://accounts.kakaocdn.net/_next/static/chunks/84963-42461bc914441c75.js:1:3726)
+    at Object.pollingApi (https://accounts.kakaocdn.net/_next/static/chunks/84963-42461bc914441c75.js:1:2710)
+    at https://accounts.kakaocdn.net/_next/static/chunks/84963-42461bc914441c75.js:1:6810
+    at p (https://accounts.kakaocdn.net/_next/static/chunks/main-a7d45bce11193232.js:1:1428)
+    at Generator._invoke (https://accounts.kakaocdn.net/_next/static/chunks/main-a7d45bce11193232.js:1:1181)
+    at Generator.next (https://accounts.kakaocdn.net/_next/static/chunks/main-a7d45bce11193232.js:1:1791)
+    at r (https://accounts.kakaocdn.net/_next/static/chunks/pages/_app-15ec7f4278d23a22.js:1:507393)
+    at s (https://accounts.kakaocdn.net/_next/static/chunks/pages/_app-15ec7f4278d23a22.js:1:507596)
+    at https://accounts.kakaocdn.net/_next/static/chunks/pages/_app-15ec7f4278d23a22.js:1:507655
+    at new Promise (<anonymous>)
+    at https://accounts.kakaocdn.net/_next/static/chunks/pages/_app-15ec7f4278d23a22.js:1:507536
+    at o (https://accounts.kakaocdn.net/_next/static/chunks/pages/_app-15ec7f4278d23a22.js:1:428798) @ https://accounts.kakaocdn.net/_next/static/chunks/pages/_app-15ec7f4278d23a22.js:0

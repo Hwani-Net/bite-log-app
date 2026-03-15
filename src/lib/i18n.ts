@@ -1,7 +1,7 @@
 const translations = {
   ko: {
     app: { title: 'BITE Log', greeting: '바이트로그' },
-    nav: { home: '홈', feed: '피드', record: '기록', stats: '통계', settings: '설정', ai: 'AI' },
+    nav: { home: '홈', feed: '피드', fleet: '레이더', record: '기록', stats: '통계', settings: '설정', ai: 'AI' },
     home: {
       totalCatch: '총 조과',
       thisMonth: '이번 달',
@@ -164,7 +164,7 @@ const translations = {
   },
   en: {
     app: { title: 'BITE Log', greeting: 'BITE Log' },
-    nav: { home: 'Home', feed: 'Feed', record: 'Record', stats: 'Stats', settings: 'Settings', ai: 'AI' },
+    nav: { home: 'Home', feed: 'Feed', fleet: 'Radar', record: 'Record', stats: 'Stats', settings: 'Settings', ai: 'AI' },
     home: {
       totalCatch: 'Total Catch',
       thisMonth: 'This Month',

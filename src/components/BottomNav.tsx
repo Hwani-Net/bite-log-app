@@ -8,7 +8,7 @@ import { useAppStore } from '@/store/appStore';
 
 const NAV_ITEMS = [
   { href: '/', icon: 'home', labelKey: 'nav.home' },
-  { href: '/feed', icon: 'public', labelKey: 'nav.feed' },
+  { href: '/fleet-radar', icon: 'radar', labelKey: 'nav.fleet' },
   { href: '/concierge', icon: 'auto_awesome', labelKey: 'nav.ai' },
   { href: '/ranking', icon: 'emoji_events', labelKey: 'ranking.title' },
   { href: '/settings', icon: 'settings', labelKey: 'nav.settings' },

@@ -1,0 +1,98 @@
+[ -775762ms] [ERROR] Executing inline script violates the following Content Security Policy directive 'script-src 'self' a-cdn.claude.ai assets.claude.ai assets-proxy.anthropic.com a-cdn.anthropic.com s-cdn.anthropic.com https://js.intercomcdn.com https://widget.intercom.io https://snippet.maze.co https://www.googletagmanager.com https://js.hs-scripts.com https://js.stripe.com https://accounts.google.com/gsi/client https://maps.googleapis.com https://maps.gstatic.com 'sha256-b4iGKa1gRzQRuhyXmsPfZZ/42P+G4RH9lRD3FgMjSTw=' 'sha256-nZ7LmkxxiOzWDppvgAZ5j+1BqmvXzwveHNjkOR3s9BQ=' 'sha256-IoI9DMl3oJ5dLKooWtrM8kjGyW7xA57KfxjgV0wmwSE=' 'wasm-unsafe-eval''. Either the 'unsafe-inline' keyword, a hash ('sha256-CSg1edeaXGw+dX52Maky1lXpVjO4aMTGbd0CTDkBebs='), or a nonce ('nonce-...') is required to enable inline execution. The action has been blocked. @ https://claude.ai/settings/connectors:23
+[  -96906ms] [WARNING] <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes"> @ http://localhost:3013/fleet-radar:0
+[ -768351ms] [ERROR] Loading the script 'https://googleads.g.doubleclick.net/pagead/viewthroughconversion/16632748715/?random=1773555709009&cv=11&fst=1773555709009&bg=ffffff&guid=ON&async=1&en=gtag.config&gtm=45be63b1v9196940227za200zd9196940227xec&gcd=13l3l3l3l1l1&dma=0&tag_exp=103116026~103200004~115616985~115938465~115938468~116024733~117484252&u_w=5120&u_h=1440&url=https%3A%2F%2Fclaude.ai%2Fsettings%2Fconnectors&frm=0&tiba=Claude&hn=www.googleadservices.com&npa=0&pscdl=noapi&auid=1701501115.1773370286&data=event%3Dgtag.config&rfmt=3&fmt=4' violates the following Content Security Policy directive: "script-src 'self' a-cdn.claude.ai assets.claude.ai assets-proxy.anthropic.com a-cdn.anthropic.com s-cdn.anthropic.com https://js.intercomcdn.com https://widget.intercom.io https://snippet.maze.co https://www.googletagmanager.com https://js.hs-scripts.com https://js.stripe.com https://accounts.google.com/gsi/client https://maps.googleapis.com https://maps.gstatic.com 'sha256-b4iGKa1gRzQRuhyXmsPfZZ/42P+G4RH9lRD3FgMjSTw=' 'sha256-nZ7LmkxxiOzWDppvgAZ5j+1BqmvXzwveHNjkOR3s9BQ=' 'sha256-IoI9DMl3oJ5dLKooWtrM8kjGyW7xA57KfxjgV0wmwSE=' 'wasm-unsafe-eval'". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked. @ https://www.googletagmanager.com/gtag/js?id=AW-16632748715:164
+[  -94606ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[ -767741ms] [WARNING] <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes"> @ https://claude.ai/settings/connectors:0
+[  -94606ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/sessions:0
+[ -686145ms] [ERROR] Connecting to 'https://a-api.anthropic.com/v1/m' violates the following Content Security Policy directive: "connect-src 'self' https://api.segment.io https://*.segment.io https://*.segment.com https://a-cdn.anthropic.com https://*.google.com https://*.facebook.com https://*.facebook.net https://*.doubleclick.net". The action has been blocked. @ https://a-cdn.anthropic.com/analytics.js/v1/LKJN8LsLERHEOXkw487o7qCTFOrGPimI/analytics.min.js:0
+[  -93414ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3013/__nextjs_original-stack-frames:0
+[ -686145ms] [ERROR] Fetch API cannot load https://a-api.anthropic.com/v1/m. Refused to connect because it violates the document's Content Security Policy. @ https://a-cdn.anthropic.com/analytics.js/v1/LKJN8LsLERHEOXkw487o7qCTFOrGPimI/analytics.min.js:0
+[  -88879ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=QXZE0Uty9m2NCDdplECCx' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[ -686144ms] [ERROR] Error sending segment performance metrics TypeError: Failed to fetch
+    at o (https://a-cdn.anthropic.com/analytics.js/v1/LKJN8LsLERHEOXkw487o7qCTFOrGPimI/analytics.min.js:1:23763)
+    at t.<anonymous> (https://a-cdn.anthropic.com/analytics.js/v1/LKJN8LsLERHEOXkw487o7qCTFOrGPimI/analytics.min.js:1:22238)
+    at https://a-cdn.anthropic.com/analytics.js/v1/LKJN8LsLERHEOXkw487o7qCTFOrGPimI/analytics.min.js:1:33689
+    at Object.next (https://a-cdn.anthropic.com/analytics.js/v1/LKJN8LsLERHEOXkw487o7qCTFOrGPimI/analytics.min.js:1:33794)
+    at https://a-cdn.anthropic.com/analytics.js/v1/LKJN8LsLERHEOXkw487o7qCTFOrGPimI/analytics.min.js:1:32710
+    at new Promise (<anonymous>)
+    at u (https://a-cdn.anthropic.com/analytics.js/v1/LKJN8LsLERHEOXkw487o7qCTFOrGPimI/analytics.min.js:1:32455)
+    at t.send (https://a-cdn.anthropic.com/analytics.js/v1/LKJN8LsLERHEOXkw487o7qCTFOrGPimI/analytics.min.js:1:22021)
+    at t.<anonymous> (https://a-cdn.anthropic.com/analytics.js/v1/LKJN8LsLERHEOXkw487o7qCTFOrGPimI/analytics.min.js:1:21894)
+    at https://a-cdn.anthropic.com/analytics.js/v1/LKJN8LsLERHEOXkw487o7qCTFOrGPimI/analytics.min.js:1:33689 @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:60
+[  -84575ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  -82522ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=QXZE0Uty9m2NCDdplECCx' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  -75613ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=QXZE0Uty9m2NCDdplECCx' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  -74599ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  -69463ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=QXZE0Uty9m2NCDdplECCx' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  -64578ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  -62418ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=QXZE0Uty9m2NCDdplECCx' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  -55253ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=QXZE0Uty9m2NCDdplECCx' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  -54570ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  -46461ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  -43309ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=QXZE0Uty9m2NCDdplECCx' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  -36488ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  -31407ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=QXZE0Uty9m2NCDdplECCx' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  -26473ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  -21154ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=QXZE0Uty9m2NCDdplECCx' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[  -16440ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[   -9055ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=QXZE0Uty9m2NCDdplECCx' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[   -6459ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0
+[  -94606ms] [WARNING] [Agentation] Failed to initialize session, using local storage: TypeError: Failed to fetch
+    at createSession (http://localhost:3013/_next/static/chunks/node_modules_agentation_dist_index_mjs_a4d7dd5f._.js:2389:28)
+    at PageFeedbackToolbarCSS.useEffect2.initSession (http://localhost:3013/_next/static/chunks/node_modules_agentation_dist_index_mjs_a4d7dd5f._.js:3624:51)
+    at PageFeedbackToolbarCSS.useEffect2 (http://localhost:3013/_next/static/chunks/node_modules_agentation_dist_index_mjs_a4d7dd5f._.js:3690:13)
+    at Object.react_stack_bottom_frame (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:14876:22)
+    at runWithFiberInDEV (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:965:74)
+    at commitHookEffectListMount (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:7266:167)
+    at commitHookPassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:7301:60)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8696:33)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)
+    at commitPassiveMountOnFiber (http://localhost:3013/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17) @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:67
+[      24ms] Error: Map container is already initialized.
+    at NewClass._initContainer (http://localhost:3013/_next/static/chunks/node_modules_leaflet_dist_leaflet-src_8608e1e4.js:3445:23)
+    at NewClass.initialize (http://localhost:3013/_next/static/chunks/node_modules_leaflet_dist_leaflet-src_8608e1e4.js:2675:18)
+    at new NewClass (http://localhost:3013/_next/static/chunks/node_modules_leaflet_dist_leaflet-src_8608e1e4.js:260:33)
+    at Module.createMap (http://localhost:3013/_next/static/chunks/node_modules_leaflet_dist_leaflet-src_8608e1e4.js:3979:16)
+    at FleetRadar.useEffect (http://localhost:3013/_next/static/chunks/src_d75f95b6._.js:226:29)
+[     681ms] [ERROR] WebSocket connection to 'ws://localhost:3013/_next/webpack-hmr?id=QXZE0Uty9m2NCDdplECCx' failed:  @ chrome-extension://gipfclelhppmafdlajajjkfepiiccnfd/content/console-capture.js:90
+[    3512ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4747/health:0

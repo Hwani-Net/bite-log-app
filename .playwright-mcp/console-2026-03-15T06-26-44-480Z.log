@@ -1,0 +1,11 @@
+[      39ms] ReferenceError: require is not defined
+    at <anonymous>:13:12
+    at m (https://code.claude.com/docs/_next/static/chunks/37756-55f740a65628ec60.js?dpl=dpl_8RWgcz7Rom6ER8ccMBrKbfmFJwvb:27:1517)
+    at https://code.claude.com/docs/_next/static/chunks/37756-55f740a65628ec60.js?dpl=dpl_8RWgcz7Rom6ER8ccMBrKbfmFJwvb:27:2331
+    at o1 (https://code.claude.com/docs/_next/static/chunks/87c73c54-dd8d81ac9604067c.js?dpl=dpl_8RWgcz7Rom6ER8ccMBrKbfmFJwvb:1:88955)
+    at uE (https://code.claude.com/docs/_next/static/chunks/87c73c54-dd8d81ac9604067c.js?dpl=dpl_8RWgcz7Rom6ER8ccMBrKbfmFJwvb:1:104847)
+    at ux (https://code.claude.com/docs/_next/static/chunks/87c73c54-dd8d81ac9604067c.js?dpl=dpl_8RWgcz7Rom6ER8ccMBrKbfmFJwvb:1:104731)
+    at uE (https://code.claude.com/docs/_next/static/chunks/87c73c54-dd8d81ac9604067c.js?dpl=dpl_8RWgcz7Rom6ER8ccMBrKbfmFJwvb:1:104827)
+    at ux (https://code.claude.com/docs/_next/static/chunks/87c73c54-dd8d81ac9604067c.js?dpl=dpl_8RWgcz7Rom6ER8ccMBrKbfmFJwvb:1:104731)
+    at uE (https://code.claude.com/docs/_next/static/chunks/87c73c54-dd8d81ac9604067c.js?dpl=dpl_8RWgcz7Rom6ER8ccMBrKbfmFJwvb:1:104892)
+    at ux (https://code.claude.com/docs/_next/static/chunks/87c73c54-dd8d81ac9604067c.js?dpl=dpl_8RWgcz7Rom6ER8ccMBrKbfmFJwvb:1:104731)
