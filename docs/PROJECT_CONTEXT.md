@@ -59,7 +59,7 @@
 
 ---
 
-## 📊 현재 진행률: 92% (Phase 9 진행 중)
+## 📊 현재 진행률: 100% (Phase 9 완료)
 
 | Phase | 내용 | 상태 |
 |-------|------|------|
@@ -75,94 +75,12 @@
 
 ---
 
-## ✅ TODO
+## ✅ TODO (미완료 항목만)
 
-### Phase 3A: 조과 등록 고도화 (`/record`)
-- [x] 사진 촬영 → AI 어종 자동 인식 (4-Step Wizard 구현, Mock 펴백)
-- [x] 위치 자동 탐지 (GPS)
-- [x] 입력 UX 개선 (스텝 폼)
-
-### Phase 3B: Firebase Auth 완성 ✅
-- [x] Google 로그인 실제 연동 (signInWithPopup + onAuthStateChanged)
-- [x] Local→Firebase 데이터 마이그레이션 (migrateLocalToFirestore 자동)
-- [x] 유저 프로필 동기화 (설정 페이지에서 프로필 표시 + 로그아웃)
-
-### Phase 3C: 랭킹 실데이터 ✅
-- [x] Firebase publicFeed 기반 리더보드 (getFirebaseRanking)
-- [x] LIVE/DEMO 뱃지 표시
-- [x] 빈 시즌 empty state
-- [x] 내 순위 플로팅 패널 (로그인 시 실제 프로필 사진)
-- [x] publishToFeed 실명/프로필 사진 dual-write 수정
-
-### Phase 4: PWA 배포 ✅
-- [x] next.config static export
-- [x] Service Worker (오프라인)
-- [x] TWA → APK → Play Store
-
-### Phase 5: LLM 킬러 피처 ✅
-- [x] #1 자연어 공지 파서 (완료 - /tools/notice-parser)
-- [x] #2 치어 방류 시즌 예측 (완료 - /season-forecast, 시군 단위 30개 사이트, 해역 탭 리디자인)
-- [x] #3 SNS 바이럴 모니터링 (풀버전) — /viral-gear + 홈 위젯
-- [x] #4 맞춤 오픈런 알림 — /alerts (구독 CRUD + 규칙 매칭 + 시뮬레이션)
-- [x] #9 어종별 전문가 챗봇 — /concierge 하단 통합 (어종칩+Quick Reply+자유입력)
-
-### Phase 5+: 추가 개선 (Phase 5 이후 완료)
-- [x] 뉴스 관련성 필터 (50+ 낚시 키워드 기반)
-- [x] 뉴스 소스 필터 (blog/news/youtube 분리)
-- [x] 시즌 예측 페이지 전면 리디자인 (카드 시트 + 방류 테이블)
-- [x] Windy 날씨 7일 예보 탭
-- [x] 뉴스 이미지 중복 수정 (그라디언트 배경 분화)
-
-### Phase 8: PRO 페이월 테스트 (수익화 가설 검증) ✅ 완료 (2026-03-14)
-- [x] Zustand 전역 상태에 `isPro` 및 무료 체험 횟수(`chatbotCredits`) 추가 — `src/store/subscriptionStore.ts`
-- [x] 프리미엄 페이월(Paywall) 바텀시트 UI 컴포넌트 생성 (`PaywallBottomSheet.tsx`) — dark: 클래스 제거(라이트 전용) 완료
-- [x] 컨시어지(전문가 챗봇) 일일 3회 제한 로직 및 페이월 연동 — `concierge/page.tsx` + `AIChatTab.tsx`
-- [x] 시크릿 포인트 조회 시 페이월 연동 — `OverviewTab.tsx` 및 `bite-forecast/page.tsx` 연동 완료
-- [x] 페이월 CTA 클릭 시 Firebase Analytics 이벤트 로깅 — `paywall_impression`, `paywall_cta_click`, `paywall_dismiss` 로깅 완료
-
-### Phase 7: UX 폴리시 (2026-03-10~11)
-- [x] AI 탭 채팅창 높이 최적화 — flex-1 + calc(100dvh) 동적 높이 (2026-03-10)
-- [x] AI 마스터 탭 헤더 잘림 버그 — requestAnimationFrame scroll-to-top (2026-03-10)
-- [x] AI 마스터 탭 FAB 겹침 해결 — chat 탭 FAB 숨김 (2026-03-10)
-- [x] FAB 버튼 데드링크 수정 — 포인트추천→/bite-forecast, 조황리포트→/stats (2026-03-10)
-- [x] 24시간 피크 타임라인 (C안) — getPeakFishingWindows() + PeakTimeline 컴포넌트 (2026-03-11)
-- [x] 어종별 피크타임 반영 — 어종 시간 선호도 배열 + 피크 타임라인 필터 칩 (2026-03-11)
-- [x] **피크타임 v2 알고리즘** — A안(Split Independent) 채택. 환경/조석/어종 독립 채널 가중합. 10어종 계절별 seasonalActivity 데이터 (2026-03-11)
-- [x] 피크 카드 터치 드래그 스크롤 — useDragScroll + data-peak-cards webkit 스크롤바 숨김 (2026-03-11)
-- [x] NLM 리서치 적재 — `peaktime` 노트북 (ce527c4c), 7개 소스 (2026-03-11)
-- [x] 피크카드 버그 수정 — 골든타임 존재 시 peak+good 카드 숨김 문제 해결 (2026-03-11)
-- [x] 프로덕션 빌드 재검증 — `next build` 0 errors, 25페이지 정적 생성, pentagonal-audit 92/100 PASS (2026-03-11)
-- [x] 프로젝트 감사 (`/감사 프로젝트`) — 8항목 중 4 PASS / 1 FAIL(SEO og태그) / 3 SKIP → **등급 B** (2026-03-12)
-- [x] SEO og 태그 추가 — layout.tsx openGraph/Twitter/metadataBase + og-image.png 생성 (2026-03-12)
-- [x] **실시간 뉴스 링크 수리 및 배포** — 네이버 검색결과 데드링크를 실제 유튜브/블로그 링크로 전면 교체 및 Firebase 호스팅 배포 완료 (2026-03-14)
-- [x] **Play Store 업데이트 배포** — versionCode 11, internal 트랙, Firebase 호스팅 최신화 및 실시간 링크 반영 (2026-03-14)
-- [x] **KHOA/Naver API 프록시 구축** — `/api/tide`, `/api/naver` 내부 Route Handler 생성, CORS 우회 + 서버 사이드 키 보호 (2026-03-14)
-- [x] **빌드 에러 해결 (static export 제거)** — `output: 'export'`가 `force-dynamic` API 라우트와 충돌 → `next.config.ts`에서 제거 (2026-03-14)
-- [x] **PRO 시크릿 포인트 기본값 표시 수정** — `isPro`이지만 `secretSpot` 데이터 없을 때 빈 화면 대신 기본 안내 표시, persist key v3으로 stale 캐시 강제 초기화 (2026-03-14)
-- [x] **Hydration 불일치 수정 (SplashWrapper)** — `useState` 초기값에서 `sessionStorage` 직접 참조 제거 → `useEffect`로 지연, SSR/CSR 첫 렌더 불일치 해소 (2026-03-14)
-
-### 🔴 남은 TODO (우선순위 순)
-- [x] Gemini API 403 해결 (AI Studio 전용 키 발급, .next 캐시 클리어)
-- [x] 프로덕션 빌드 (2026-03-03 성공, 에러 0, 24페이지)
-- [x] Play Store 업데이트 — 자동 배포 파이프라인 완성 (`scripts/deploy-to-play.mjs`, 2026-03-14)
-- [x] 이용약관 보강 (7조→13조, 이메일 수정, 개인정보방침 연계) -> `terms/page.tsx`
-- [x] 홈 시즌 예측 위젯 업데이트 (fishSeasonDB 동적 데이터 + 어종 칩) -> `page.tsx`
-- [x] 물때+날씨 상세 예측 페이지 (/bite-forecast — 점수 링, 4요소 분석, 조석 타임라인, 팁) -> `PeakTimeline` 추가 완료
-- [x] **실시간 조황 전야제 대시보드 (킬러 피처 MVP)** — 금어기 해제 등 이벤트 시 타 지역 조황을 실시간 중계. (무료 미끼 기능)
-- [ ] **실시간 함대 레이더 (Fleet Radar) 개발** — AIS/V-PASS 데이터를 활용하여 현재 배들이 어디에 밀집해 있는지 히트맵 제공. (PRO 핵심 기능)
-- [ ] 음성 기록 (Tier 3 #11) — Web Speech API, 음성 파싱, 리뷰 패널, 폼 자동채움 (2026-03-04)
-- [ ] 낚시 DNA 분석 — /stats DNA 탭, 아키타입 히어로 카드, 2x2 통계, 개선 포인트 (2026-03-04)
-- [ ] 금어기 법규 QA (Tier 3 #10) — /regulations 페이지, 14어종 규정 DB, 적법성 체크 위젯 (2026-03-04)
-- [x] 🚀 프로덕션 최종 검증 (랄프 테스트 E2E) 완료 — 전 라우트 에러 0건 (2026-03-10)
-- [x] 어종별 피크타임 — 어종 시간 선호도 × 조석 피크 (2026-03-11)
-- [x] 피크타임 v2 데이터 고도화 — 부족 5종 리서치 + NLM 교차검증 완료. 광어 해질녘 미세보정 (2026-03-11)
-- [x] **Drift Guard 도입** — `drift-guard init`으로 디자인 수호 자동화 시스템 구축 (2026-03-14)
-### Phase 9: 실시간 함대 레이더 (Fleet Radar) ✅ 완료 (2026-03-15)
-- [x] **백엔드 프록시 매퍼 (Mapper)** — AIS 동적 위치 + 정적 톤수 데이터 MMSI 조인 API (`/api/fleet`) 구현 완료 (2026-03-15)
-- [x] **레이더 UI 구현** — `stitch-radar.html` 기반 Heatmap & Tonnage Marker 시각화 및 프리미엄 상세 시트 (Lucide-react, 2x2 그리드, 스피드 게이지) 완료
-- [x] **안전 구역 알고리즘** — 대형선 반경 500m 회피 소형선 밀집지 추출 로직 적용 완료
-- [x] **접근 알림** — 사용자 GPS 기반 대형선 근접 푸시 알림 (프론트엔드 목업 완료)
-- [x] **PRO 기능 고도화: 시크릿 포인트 2.0+** — 실시간 조황(Free) + **함대 밀집도 레이더** + 수중 지형도(KIGAM) 연합. 내 배가 '죽은 포인트'에 있는지 '집단 학살지'에 있는지 즉시 판독 가능.
+### 🔴 남은 TODO (Tier 3 — 우선순위 순)
+- [ ] 음성 기록 (Tier 3 #11) — Web Speech API, 음성 파싱, 리뷰 패널, 폼 자동채움
+- [ ] 낚시 DNA 분석 — /stats DNA 탭, 아키타입 히어로 카드, 2x2 통계, 개선 포인트
+- [ ] 금어기 법규 QA (Tier 3 #10) — /regulations 페이지, 14어종 규정 DB, 적법성 체크 위젯
 
 ---
 
@@ -218,7 +136,7 @@
 <details>
 <summary>📦 완료된 항목 (아카이브)</summary>
 
-### Phase 1: 기반 (완료)
+### Phase 1: 기반
 - [x] FishLog → BITE Log 리브랜딩
 - [x] 매거진 라이트 스타일 홈 디자인
 - [x] 전체 페이지 라이트 스타일 통일 (13개 파일, dark: 408개 제거)
@@ -228,7 +146,7 @@
 - [x] 다국어 지원 (ko/en) + 테마 설정
 - [x] Hydration 깜빡임 해결 (스켈레톤)
 
-### Phase 2: API 연동 (완료)
+### Phase 2: API 연동
 - [x] 날씨 API (OpenWeather)
 - [x] 조류 API (KHOA, CORS 프록시)
 - [x] 낚시 뉴스 (네이버 + YouTube mock)
@@ -237,5 +155,54 @@
 - [x] 입질 시간 예측 (HeroCard)
 - [x] Firebase 프로젝트 셋업
 - [x] YouTube API graceful 폴백
+
+### Phase 3: 핵심 기능
+- [x] 사진 촬영 → AI 어종 자동 인식 (4-Step Wizard, 2026-02)
+- [x] Google 로그인 실제 연동 (signInWithPopup + onAuthStateChanged)
+- [x] Local→Firebase 데이터 마이그레이션 (migrateLocalToFirestore 자동)
+- [x] 유저 프로필 동기화 (설정 페이지 + 로그아웃)
+- [x] Firebase publicFeed 기반 리더보드 (getFirebaseRanking)
+- [x] LIVE/DEMO 뱃지, 빈 시즌 empty state, 내 순위 플로팅 패널
+
+### Phase 4: PWA 배포
+- [x] next.config static export (→ 이후 서버 모드로 전환, ADR)
+- [x] Service Worker (오프라인)
+- [x] TWA → APK → Play Store
+
+### Phase 5: LLM 킬러 피처
+- [x] #1 자연어 공지 파서 (/tools/notice-parser)
+- [x] #2 치어 방류 시즌 예측 (/season-forecast, 시군 단위 30개 사이트)
+- [x] #3 SNS 바이럴 모니터링 (/viral-gear + 홈 위젯)
+- [x] #4 맞춤 오픈런 알림 (/alerts, 구독 CRUD + 규칙 매칭)
+- [x] #9 어종별 전문가 챗봇 (/concierge 어종칩+Quick Reply+자유입력)
+- [x] 뉴스 관련성 필터 (50+ 낚시 키워드), 소스 필터 (blog/news/youtube)
+- [x] 시즌 예측 페이지 리디자인 (카드 시트 + 방류 테이블)
+- [x] Windy 날씨 7일 예보 탭
+
+### Phase 7: UX 폴리시
+- [x] AI 탭 채팅창 높이 최적화 (flex-1 + calc(100dvh))
+- [x] 24시간 피크 타임라인 — getPeakFishingWindows() + PeakTimeline
+- [x] 피크타임 v2 알고리즘 (Split Independent) — 환경/조석/어종 독립 가중합
+- [x] 피크 카드 터치 드래그 스크롤 (useDragScroll)
+- [x] SEO og 태그 — layout.tsx openGraph/Twitter/metadataBase + og-image.png
+- [x] 실시간 뉴스 링크 수리 — 네이버 데드링크 → 실제 유튜브/블로그 링크
+- [x] Play Store versionCode 11, internal 트랙 배포
+- [x] KHOA/Naver CORS → 내부 Route Handler 프록시 (/api/tide, /api/naver)
+- [x] `output: 'export'` 제거 → Next.js 서버 모드 (ADR)
+- [x] Hydration 불일치 수정 (SplashWrapper useEffect 지연)
+- [x] Drift Guard 도입 (drift-guard init)
+
+### Phase 8: PRO 페이월 (2026-03-14)
+- [x] Zustand `isPro` + `chatbotCredits` 전역 상태 (subscriptionStore.ts)
+- [x] PaywallBottomSheet.tsx — 라이트 전용 바텀시트 UI
+- [x] 컨시어지 일일 3회 제한 + 페이월 연동
+- [x] 시크릿 포인트 조회 시 페이월 연동
+- [x] Firebase Analytics 이벤트 로깅 (paywall_impression, cta_click, dismiss)
+
+### Phase 9: 실시간 함대 레이더 (2026-03-15)
+- [x] AIS 동적 위치 + 정적 톤수 MMSI 조인 API (/api/fleet)
+- [x] Heatmap & Tonnage Marker 시각화 + 프리미엄 상세 시트 (2x2 그리드, 스피드 게이지)
+- [x] 대형선 반경 500m 회피 소형선 밀집지 추출 알고리즘
+- [x] GPS 기반 대형선 근접 푸시 알림 (프론트엔드 목업)
 
 </details>

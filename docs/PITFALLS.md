@@ -106,6 +106,20 @@
 - **해결**: `useState(false)` (SSR 동일값) + `useEffect(() => { setShowSplash(!sessionStorage.getItem(...)) }, [])` 로 sessionStorage 접근을 마운트 이후로 지연
 - **🚫 금지**: `useState` 초기값 함수 안에서 `sessionStorage`, `localStorage`, `window.*` 등 브라우저 전용 API 직접 참조 금지. 반드시 `useEffect`로 분리할 것.
 
+## ❌ AIS API `/api/fleet` 500 에러 — 필드명 매핑 불일치 (2026-03-15)
+- **증상**: Fleet Radar UI 로드 시 `/api/fleet` 엔드포인트에서 500 Internal Server Error 발생. 선박 데이터 전혀 표시 안 됨.
+- **원인**: AIS 공공 데이터 포털 API 응답의 실제 필드명(`SHIP_NM`, `LATITUDE`, `LONGITUDE` 등)과 코드에서 참조하는 필드명(`shipName`, `lat`, `lng`)이 불일치. API 응답 구조를 직접 확인하지 않고 추측으로 매핑함.
+- **해결**: AIS API 실제 응답을 `console.log`로 확인 → 실제 필드명(`LAT`, `LON`, `SHIP_TYPE` 등)으로 매핑 코드 수정 → `/api/fleet` Route Handler의 응답 변환 로직 정정
+- **🚫 금지**: 외부 API 응답 필드명을 문서 기반 추측으로 매핑하지 말 것. 실제 응답을 먼저 로깅하여 확인한 후 매핑할 것.
+- **추가 주의**: AIS 공공데이터포털 API는 영문 대문자 스네이크케이스(`SHIP_NM`, `LATITUDE`)를 사용하나, 일부 엔드포인트는 다른 스키마를 씀. 엔드포인트별로 별도 확인 필수.
+
+## ❌ data.go.kr serviceKey 이중 인코딩 — `URLSearchParams.set()` 사용 금지 (2026-03-15)
+- **증상**: `/api/fleet` → AIS API `Unexpected errors` 500 반환 (serviceKey 인식 불가)
+- **원인**: data.go.kr은 serviceKey를 Base64+URL-encoded 형태(`abc%2Bdef%3D%3D`)로 발급. `URLSearchParams.set(key, decoded_value)` 사용 시 `+` → `%2B`, `=` → `%3D`로 이중 인코딩 발생 → 서버 키 불인식.
+- **해결**: template string으로 URL 직접 조립 → `?serviceKey=${apiKey}&...`. serviceKey 이후 파라미터만 URLSearchParams로 처리. `buildAisUrl()` 헬퍼 함수 도입.
+- **🚫 금지**: data.go.kr API 호출 시 `new URL().searchParams.set('serviceKey', ...)` 패턴 사용 금지. 반드시 `?serviceKey=${apiKey}` template string 방식 사용.
+- **추가 주의**: KHOA hex 키(`ccb9d17949...`)는 data.go.kr AIS 서비스(1192000)와 무관. 별도로 data.go.kr 포털(https://www.data.go.kr)에서 AIS 서비스 활용신청 후 발급된 키를 `FLEET_API_KEY`에 설정해야 함. 현재 키가 없으면 mock 데이터로 자동 fallback.
+
 ## ❌ 환경/인증 창 (NLM 등) 대표님께 수동 입력 요구 (2026-03-14)
 - **증상**: NLM 인증 만료 시 "터미널에서 nlm login을 입력해 주세요"라고 대표님께 지시하며 떠넘김.
 - **원인**: 해당 쉘 명령어(UI 인증창 팝업)가 구동 시스템 브라우저를 띄우는 특성을 오해하여 에이전트가 백그라운드 명령어(`run_command`)로 실행할 수 없다고 착각함.

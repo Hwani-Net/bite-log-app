@@ -211,16 +211,25 @@ interface FetchResult<T> {
 }
 
 /**
- * apis.data.go.kr의 serviceKey는 이미 URL-encoded 상태로 발급된다.
- * URL 객체 + URLSearchParams를 사용하면 이중 인코딩이 발생하므로
- * 먼저 decodeURIComponent로 원문 복원 후 URLSearchParams에 전달한다.
+ * apis.data.go.kr serviceKey 빌드 헬퍼.
+ *
+ * data.go.kr은 serviceKey를 이미 URL-encoded 상태(Base64+%2B/%3D)로 발급한다.
+ * URLSearchParams.set()을 사용하면 이중 인코딩(%2B → %252B)이 발생해 서버가
+ * 키를 인식하지 못하는 문제가 생긴다.
+ * → template string으로 직접 URL을 조립해 이중 인코딩을 방지한다.
+ *
+ * ⚠️  FLEET_API_KEY 발급: https://www.data.go.kr → 검색 "선박 AIS" → 활용신청 후
+ *     발급된 인코딩 키(예: abc%2Bdef%3D)를 그대로 .env.local에 설정한다.
+ *     현재 KHOA 64자 hex 키는 data.go.kr AIS 서비스와 무관하므로 동작하지 않는다.
  */
-function safeDecodeApiKey(raw: string): string {
-  try {
-    return decodeURIComponent(raw);
-  } catch {
-    return raw;
-  }
+function buildAisUrl(
+  path: string,
+  apiKey: string,
+  extra: Record<string, string> = {},
+): string {
+  // serviceKey는 그대로 삽입 (data.go.kr이 이미 URL-encode해서 발급하므로)
+  const params = new URLSearchParams({ resultType: 'json', numOfRows: '100', pageNo: '1', ...extra });
+  return `https://apis.data.go.kr${path}?serviceKey=${apiKey}&${params.toString()}`;
 }
 
 async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
@@ -229,11 +238,7 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
     return { data: MOCK_DYNAMIC, fallback: false };
   }
 
-  const endpoint = new URL('https://apis.data.go.kr/1192000/VesselAisDynamic/getDynamic');
-  endpoint.searchParams.set('serviceKey', safeDecodeApiKey(apiKey));
-  endpoint.searchParams.set('resultType', 'json');
-  endpoint.searchParams.set('numOfRows', '100');
-  const urlStr = endpoint.toString();
+  const urlStr = buildAisUrl('/1192000/VesselAisDynamic/getDynamic', apiKey);
 
   structuredLog('info', {
     timestamp: new Date().toISOString(),
@@ -338,11 +343,7 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
     return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: false };
   }
 
-  const endpoint = new URL('https://apis.data.go.kr/1192000/VesselAisStatic/getStatic');
-  endpoint.searchParams.set('serviceKey', safeDecodeApiKey(apiKey));
-  endpoint.searchParams.set('resultType', 'json');
-  endpoint.searchParams.set('numOfRows', '100');
-  const urlStr = endpoint.toString();
+  const urlStr = buildAisUrl('/1192000/VesselAisStatic/getStatic', apiKey);
 
   structuredLog('info', {
     timestamp: new Date().toISOString(),
