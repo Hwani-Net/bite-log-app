@@ -106,21 +106,9 @@ function parseAndValidateQuery(
 
 // --- Mock data (used while data.go.kr API key is pending) ------------
 
-const MOCK_DYNAMIC: DynamicRecord[] = [
-  { mmsi: '440001000', lat: 34.7833, lon: 128.6833, speed: 0.5,  course: 180, timestamp: new Date().toISOString() },
-  { mmsi: '440001001', lat: 34.7850, lon: 128.6850, speed: 1.2,  course: 90,  timestamp: new Date().toISOString() },
-  { mmsi: '440001002', lat: 34.7900, lon: 128.6900, speed: 8.5,  course: 270, timestamp: new Date().toISOString() },
-  { mmsi: '440001003', lat: 34.7810, lon: 128.6810, speed: 0.3,  course: 0,   timestamp: new Date().toISOString() },
-  { mmsi: '440001004', lat: 34.7870, lon: 128.6870, speed: 12.0, course: 45,  timestamp: new Date().toISOString() },
-];
+const MOCK_DYNAMIC: DynamicRecord[] = [];
 
-const MOCK_STATIC: StaticRecord[] = [
-  { mmsi: '440001000', shipName: '해랑호',   shipType: 'fishing', tonnage: 2.5,  length: 8  },
-  { mmsi: '440001001', shipName: '돌고래호', shipType: 'leisure', tonnage: 1.8,  length: 6  },
-  { mmsi: '440001002', shipName: '대성호',   shipType: 'fishing', tonnage: 9.77, length: 18 },
-  { mmsi: '440001003', shipName: '바다로호', shipType: 'leisure', tonnage: 2.0,  length: 5  },
-  { mmsi: '440001004', shipName: '금풍호',   shipType: 'cargo',   tonnage: 15.0, length: 25 },
-];
+const MOCK_STATIC: StaticRecord[] = [];
 
 // --- Helpers ---------------------------------------------------------
 
@@ -264,16 +252,29 @@ function extractItems(json: unknown): Array<Record<string, unknown>> {
   return [];
 }
 
+/**
+ * ODCloud AIS API의 좌표값을 도 단위로 정규화한다.
+ * 원시값이 1000 초과인 경우 600000으로 나눠 도 단위로 변환한다.
+ * (예: 19874256 → 33.12°, 75949336 → 126.58°)
+ * 이미 도 단위(예: 34.5)인 경우 그대로 반환.
+ */
+function normalizeCoord(raw: number): number {
+  return raw > 1000 ? raw / 600000 : raw;
+}
+
 /** DynamicRecord 매핑: odcloud/data.go.kr 양쪽 필드명 처리 */
 function mapDynamicItem(item: Record<string, unknown>): DynamicRecord {
+  const rawLat = Number(item['lat'] ?? item['LAT'] ?? item['위도'] ?? item['LATITUDE'] ?? 0);
+  const rawLon = Number(item['lon'] ?? item['LON'] ?? item['경도'] ?? item['LONGITUDE'] ?? 0);
   return {
     mmsi: String(item['mmsi'] ?? item['MMSI'] ?? ''),
-    lat: Number(item['lat'] ?? item['LAT'] ?? item['위도'] ?? item['LATITUDE'] ?? 0),
-    lon: Number(item['lon'] ?? item['LON'] ?? item['경도'] ?? item['LONGITUDE'] ?? 0),
+    lat: normalizeCoord(rawLat),
+    lon: normalizeCoord(rawLon),
     speed: Number(item['sog'] ?? item['SOG'] ?? item['대지속력'] ?? item['speed'] ?? item['SPEED'] ?? 0),
     course: Number(item['cog'] ?? item['COG'] ?? item['대지침로'] ?? item['course'] ?? item['COURSE'] ?? 0),
     timestamp: parseRecptnDt(
-      String(item['recptnDt'] ?? item['RECPTN_DT'] ?? item['수신일시'] ?? item['수신시각'] ?? ''),
+      // '수신시간' is the field name returned by the ODCloud UDDI endpoint (others are aliases)
+      String(item['recptnDt'] ?? item['RECPTN_DT'] ?? item['수신일시'] ?? item['수신시각'] ?? item['수신시간'] ?? ''),
     ),
   };
 }
@@ -308,6 +309,8 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
   // Primary: api.odcloud.kr/api/15129186/v1/uddi:... (선박AIS동적정보)
   const urlStr = buildOdcloudUrl('15129186', apiKey, 1, 100, 'uddi:2762dfc8-b8ae-4e17-8a44-86f39f480203');
 
+  // Debug: print the full URL shape (API key redacted) so it's visible in Next.js dev logs
+  console.log('[fleet] fetchDynamic URL:', urlStr.replace(apiKey, '<FLEET_API_KEY>'));
   structuredLog('info', {
     timestamp: new Date().toISOString(),
     event: 'fleet.dynamic.request',
@@ -376,6 +379,18 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
   const data = items
     .map(mapDynamicItem)
     .filter((d) => d.mmsi !== '');
+
+  // Warn when MMSI values are masked (e.g. "440******") — join with static will yield 0 results
+  const maskedCount = data.filter((d) => d.mmsi.includes('*')).length;
+  if (maskedCount > 0) {
+    console.warn(`[fleet] ${maskedCount}/${data.length} MMSI values are masked by ODCloud API — static join will fail, fallback expected`);
+    structuredLog('warn', {
+      timestamp: new Date().toISOString(),
+      event: 'fleet.dynamic.mmsi_masked',
+      maskedCount,
+      totalCount: data.length,
+    });
+  }
 
   if (data.length === 0) {
     structuredLog('warn', {
@@ -642,11 +657,13 @@ export async function GET(request: NextRequest) {
       fetchStatic(),
     ]);
 
-    // 3. 두 primary API 모두 실패 시 KHOA OceanGrid로 fallback
+    // 3. primary API 중 하나라도 실패 시 KHOA OceanGrid로 fallback
+    //    이유: dynamic이 실제 MMSI를 반환하고 static이 Mock MMSI를 반환하면
+    //          joinFleetData 결과가 0건이 되어 실질적으로 mock과 동일해짐
     let rawFleet: FleetEntry[];
     let dataSource: 'primary' | 'khoa' | 'mock' = 'primary';
 
-    if (dynamicResult.fallback && staticResult.fallback) {
+    if (dynamicResult.fallback || staticResult.fallback) {
       const khoaData = await fetchFromKhoa();
       if (khoaData && khoaData.dynamic.length > 0) {
         rawFleet = joinFleetData(khoaData.dynamic, khoaData.staticMap);
@@ -657,12 +674,12 @@ export async function GET(request: NextRequest) {
           count: rawFleet.length,
         });
       } else {
-        rawFleet = joinFleetData(dynamicResult.data, staticResult.data);
+        // 모든 외부 소스 실패 → mock 데이터 사용
+        rawFleet = joinFleetData(MOCK_DYNAMIC, new Map(MOCK_STATIC.map((s) => [s.mmsi, s])));
         dataSource = 'mock';
       }
     } else {
       rawFleet = joinFleetData(dynamicResult.data, staticResult.data);
-      if (dynamicResult.fallback || staticResult.fallback) dataSource = 'mock';
     }
 
     // 4. 필터 적용
