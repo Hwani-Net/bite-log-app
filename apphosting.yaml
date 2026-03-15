@@ -1,0 +1,47 @@
+runConfig:
+  cpu: 1
+  memoryMiB: 512
+  concurrency: 100
+  maxInstances: 4
+  minInstances: 0
+
+env:
+  # Firebase Config (public — baked into client bundle at build time)
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyB1XCqnnf1wc0sGJPXiMf1NM-sSpynNG2I
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: bite-log-app.firebaseapp.com
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: bite-log-app
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: bite-log-app.firebasestorage.app
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "933182805658"
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: 1:933182805658:web:c40cd5a078e95fee06b123
+
+  # Fleet mock flag (non-sensitive)
+  - variable: FLEET_USE_MOCK
+    value: "false"
+
+  # Secrets — injected from Secret Manager at build & runtime
+  - variable: NEXT_PUBLIC_KHOA_API_KEY
+    secret: NEXT_PUBLIC_KHOA_API_KEY
+
+  - variable: NEXT_PUBLIC_GEMINI_API_KEY
+    secret: NEXT_PUBLIC_GEMINI_API_KEY
+
+  - variable: NEXT_PUBLIC_NAVER_CLIENT_ID
+    secret: NEXT_PUBLIC_NAVER_CLIENT_ID
+
+  - variable: NEXT_PUBLIC_NAVER_CLIENT_SECRET
+    secret: NEXT_PUBLIC_NAVER_CLIENT_SECRET
+
+  - variable: NEXT_PUBLIC_YOUTUBE_API_KEY
+    secret: NEXT_PUBLIC_YOUTUBE_API_KEY
+
+  - variable: NEXT_PUBLIC_FISHING_VESSEL_API_KEY
+    secret: NEXT_PUBLIC_FISHING_VESSEL_API_KEY
+
+  - variable: FLEET_API_KEY
+    secret: FLEET_API_KEY
