@@ -223,8 +223,9 @@ interface FetchResult<T> {
  * Primary endpoint: api.odcloud.kr/api/15129186/v1 (선박AIS동적정보)
  *   → apis.data.go.kr/1192000/VesselAisDynamic/getDynamic 은 HTTP 500 반환 확인됨
  */
-function buildOdcloudUrl(datasetId: string, apiKey: string, page = 1, perPage = 100): string {
-  return `https://api.odcloud.kr/api/${datasetId}/v1?serviceKey=${apiKey}&page=${page}&perPage=${perPage}`;
+function buildOdcloudUrl(datasetId: string, apiKey: string, page = 1, perPage = 100, uddiPath?: string): string {
+  const suffix = uddiPath ? `/${uddiPath}` : '';
+  return `https://api.odcloud.kr/api/${datasetId}/v1${suffix}?serviceKey=${apiKey}&page=${page}&perPage=${perPage}`;
 }
 
 /** api.odcloud.kr 응답 형식 */
@@ -304,8 +305,8 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
     return { data: MOCK_DYNAMIC, fallback: false };
   }
 
-  // Primary: api.odcloud.kr/api/15129186/v1 (선박AIS동적정보)
-  const urlStr = buildOdcloudUrl('15129186', apiKey);
+  // Primary: api.odcloud.kr/api/15129186/v1/uddi:... (선박AIS동적정보)
+  const urlStr = buildOdcloudUrl('15129186', apiKey, 1, 100, 'uddi:2762dfc8-b8ae-4e17-8a44-86f39f480203');
 
   structuredLog('info', {
     timestamp: new Date().toISOString(),
