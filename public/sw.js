@@ -1,64 +1,149 @@
-const CACHE_NAME = 'fishlog-v2';
-const STATIC_ASSETS = [
-  '/',
-  '/feed',
-  '/ranking',
-  '/record',
-  '/records',
-  '/stats',
-  '/settings',
-  '/manifest.json',
+/**
+ * BiteLog Service Worker v3
+ * Strategy: Stale-While-Revalidate for pages, Cache-First for assets, Network-First for API
+ */
+
+const CACHE_NAME = "bitelog-v3";
+const API_CACHE = "bitelog-api-v1";
+
+const STATIC_PAGES = [
+  "/",
+  "/feed",
+  "/ranking",
+  "/record",
+  "/records",
+  "/stats",
+  "/settings",
+  "/bite-forecast",
+  "/concierge",
+  "/fleet-radar",
+  "/news",
+  "/regulations",
+  "/season-forecast",
+  "/manifest.json",
 ];
 
-// Install — cache static assets
-self.addEventListener('install', (event) => {
+// Install — pre-cache critical pages
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_PAGES)),
   );
   self.skipWaiting();
 });
 
 // Activate — clean old caches
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
+  const keepCaches = [CACHE_NAME, API_CACHE];
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter((k) => !keepCaches.includes(k))
+            .map((k) => caches.delete(k)),
+        ),
+      ),
   );
   self.clients.claim();
 });
 
-// Fetch — Network First for API, Cache First for static
-self.addEventListener('fetch', (event) => {
+// Fetch handler
+self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET and external requests
-  if (request.method !== 'GET' || !url.origin.includes(self.location.origin)) return;
+  // Skip non-GET, cross-origin, and Firebase internals
+  if (request.method !== "GET") return;
+  if (!url.origin.includes(self.location.origin)) return;
+  if (url.hostname.includes("firestore") || url.hostname.includes("googleapis"))
+    return;
 
-  // Firebase/API requests — network only
-  if (url.hostname.includes('firestore') || url.hostname.includes('googleapis')) return;
+  // API routes (/api/*) — Network First with 5s timeout, fallback to cache
+  if (url.pathname.startsWith("/api/")) {
+    event.respondWith(networkFirstWithTimeout(request, API_CACHE, 5000));
+    return;
+  }
 
-  event.respondWith(
-    caches.match(request).then((cached) => {
-      const networkFetch = fetch(request)
-        .then((response) => {
-          if (response && response.status === 200) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          }
-          return response;
-        })
-        .catch(() => cached);
+  // Static assets (JS, CSS, images) — Cache First
+  if (isStaticAsset(url.pathname)) {
+    event.respondWith(cacheFirst(request, CACHE_NAME));
+    return;
+  }
 
-      return cached || networkFetch;
-    })
-  );
+  // Pages — Stale While Revalidate
+  event.respondWith(staleWhileRevalidate(request, CACHE_NAME));
 });
 
-// Listen for offline queue sync
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+// === Strategies ===
+
+async function networkFirstWithTimeout(request, cacheName, timeout) {
+  const cache = await caches.open(cacheName);
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    const response = await fetch(request, { signal: controller.signal });
+    clearTimeout(timer);
+    if (response.ok) {
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    const cached = await cache.match(request);
+    return (
+      cached ||
+      new Response(JSON.stringify({ error: "offline", items: [], data: [] }), {
+        headers: { "Content-Type": "application/json" },
+      })
+    );
+  }
+}
+
+async function cacheFirst(request, cacheName) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(cacheName);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    return new Response("", { status: 504, statusText: "Offline" });
+  }
+}
+
+async function staleWhileRevalidate(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+
+  const networkFetch = fetch(request)
+    .then((response) => {
+      if (response && response.ok) {
+        cache.put(request, response.clone());
+      }
+      return response;
+    })
+    .catch(() => cached);
+
+  return cached || networkFetch;
+}
+
+// === Helpers ===
+
+function isStaticAsset(pathname) {
+  return (
+    /\.(js|css|png|jpg|jpeg|webp|svg|ico|woff2?|ttf|eot)(\?.*)?$/.test(
+      pathname,
+    ) || pathname.startsWith("/_next/static/")
+  );
+}
+
+// Listen for skip-waiting message
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 });
