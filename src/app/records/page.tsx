@@ -1,18 +1,29 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useMemo } from 'react';
-import Link from 'next/link';
-import { useAppStore } from '@/store/appStore';
-import { getDataService } from '@/services/dataServiceFactory';
-import { CatchRecord } from '@/types';
+import { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
+import { useAppStore } from "@/store/appStore";
+import { getDataService } from "@/services/dataServiceFactory";
+import { CatchRecord } from "@/types";
+import {
+  ArrowLeft,
+  Search,
+  Filter,
+  ChevronRight,
+  MapPin,
+  SortAsc,
+  Fish,
+  X,
+} from "lucide-react";
+import { DynamicIcon } from "@/lib/iconMap";
 
-type SortBy = 'date' | 'size' | 'count';
+type SortBy = "date" | "size" | "count";
 
 export default function RecordsPage() {
   const { t, locale } = useAppStore();
   const [records, setRecords] = useState<CatchRecord[]>([]);
-  const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState<SortBy>('date');
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<SortBy>("date");
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
@@ -22,7 +33,7 @@ export default function RecordsPage() {
   async function handleDelete(e: React.MouseEvent, id: string) {
     e.preventDefault();
     e.stopPropagation();
-    if (!confirm(locale === 'ko' ? '삭제할까요?' : 'Delete?')) return;
+    if (!confirm(locale === "ko" ? "삭제할까요?" : "Delete?")) return;
     await getDataService().deleteCatchRecord(id);
     setRecords((prev) => prev.filter((r) => r.id !== id));
   }
@@ -33,22 +44,23 @@ export default function RecordsPage() {
     // Search by species, location, memo
     if (search.trim()) {
       const q = search.toLowerCase();
-      result = result.filter((r) =>
-        r.species.toLowerCase().includes(q) ||
-        r.location.name.toLowerCase().includes(q) ||
-        r.memo?.toLowerCase().includes(q)
+      result = result.filter(
+        (r) =>
+          r.species.toLowerCase().includes(q) ||
+          r.location.name.toLowerCase().includes(q) ||
+          r.memo?.toLowerCase().includes(q),
       );
     }
 
     // Sort
     switch (sortBy) {
-      case 'date':
+      case "date":
         result = [...result].sort((a, b) => b.date.localeCompare(a.date));
         break;
-      case 'size':
+      case "size":
         result = [...result].sort((a, b) => (b.sizeCm ?? 0) - (a.sizeCm ?? 0));
         break;
-      case 'count':
+      case "count":
         result = [...result].sort((a, b) => b.count - a.count);
         break;
     }
@@ -63,37 +75,64 @@ export default function RecordsPage() {
   }, [records]);
 
   const sortOptions: { value: SortBy; label: string; icon: string }[] = [
-    { value: 'date', label: locale === 'ko' ? '최신순' : 'Newest', icon: 'calendar_today' },
-    { value: 'size', label: locale === 'ko' ? '크기순' : 'Size', icon: 'straighten' },
-    { value: 'count', label: locale === 'ko' ? '마릿수순' : 'Count', icon: 'tag' },
+    {
+      value: "date",
+      label: locale === "ko" ? "최신순" : "Newest",
+      icon: "calendar_today",
+    },
+    {
+      value: "size",
+      label: locale === "ko" ? "크기순" : "Size",
+      icon: "straighten",
+    },
+    {
+      value: "count",
+      label: locale === "ko" ? "마릿수순" : "Count",
+      icon: "tag",
+    },
   ];
 
   return (
     <div className="page-enter relative z-10 px-4 pt-4 pb-24">
       {/* Header */}
       <header className="flex items-center gap-3 mb-4">
-        <Link href="/" className="p-2 -ml-2 rounded-xl hover:bg-slate-100:bg-slate-800 transition-colors">
-          <span className="material-symbols-outlined">arrow_back</span>
+        <Link
+          href="/"
+          className="p-2 -ml-2 rounded-xl hover:bg-slate-100:bg-slate-800 transition-colors"
+        >
+          <ArrowLeft size={20} />
         </Link>
-        <h1 className="text-lg font-semibold text-slate-900">{t('home.recentCatch')}</h1>
-        <span className="text-sm text-slate-400 ml-auto">{filtered.length}{locale === 'ko' ? '건' : ''}</span>
+        <h1 className="text-lg font-semibold text-slate-900">
+          {t("home.recentCatch")}
+        </h1>
+        <span className="text-sm text-slate-400 ml-auto">
+          {filtered.length}
+          {locale === "ko" ? "건" : ""}
+        </span>
       </header>
 
       {/* Search bar */}
       <div className="relative mb-3">
-        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+        <Search
+          size={20}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+        />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder={locale === 'ko' ? '어종, 장소, 메모 검색...' : 'Search species, location, memo...'}
+          placeholder={
+            locale === "ko"
+              ? "어종, 장소, 메모 검색..."
+              : "Search species, location, memo..."
+          }
           className="w-full pl-10 pr-12 py-3 rounded-2xl bg-white border border-slate-200 text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all text-slate-900"
         />
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`absolute right-2 top-1/2 -translate-y-1/2 size-8 flex items-center justify-center rounded-xl transition-colors ${showFilters ? 'bg-primary text-white' : 'text-slate-400 hover:bg-slate-100:bg-slate-700'}`}
+          className={`absolute right-2 top-1/2 -translate-y-1/2 size-8 flex items-center justify-center rounded-xl transition-colors ${showFilters ? "bg-primary text-white" : "text-slate-400 hover:bg-slate-100:bg-slate-700"}`}
         >
-          <span className="material-symbols-outlined text-lg">tune</span>
+          <Filter size={18} />
         </button>
       </div>
 
@@ -108,11 +147,11 @@ export default function RecordsPage() {
                 onClick={() => setSortBy(value)}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                   sortBy === value
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'bg-white text-slate-500 border border-slate-200'
+                    ? "bg-primary text-white shadow-sm"
+                    : "bg-white text-slate-500 border border-slate-200"
                 }`}
               >
-                <span className="material-symbols-outlined text-sm">{icon}</span>
+                <DynamicIcon name={icon} size={14} />
                 {label}
               </button>
             ))}
@@ -122,19 +161,23 @@ export default function RecordsPage() {
           {speciesList.length > 1 && (
             <div className="flex gap-2 flex-wrap">
               <button
-                onClick={() => setSearch('')}
+                onClick={() => setSearch("")}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                  !search ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-500'
+                  !search
+                    ? "bg-primary/10 text-primary"
+                    : "bg-slate-100 text-slate-500"
                 }`}
               >
-                {locale === 'ko' ? '전체' : 'All'}
+                {locale === "ko" ? "전체" : "All"}
               </button>
               {speciesList.map((s) => (
                 <button
                   key={s}
-                  onClick={() => setSearch(search === s ? '' : s)}
+                  onClick={() => setSearch(search === s ? "" : s)}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                    search === s ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-500'
+                    search === s
+                      ? "bg-primary/10 text-primary"
+                      : "bg-slate-100 text-slate-500"
                   }`}
                 >
                   {s}
@@ -148,13 +191,17 @@ export default function RecordsPage() {
       {/* Empty state */}
       {filtered.length === 0 ? (
         <div className="text-center py-16">
-          <span className="material-symbols-outlined text-5xl text-slate-300 mb-3 block">
-            {search ? 'search_off' : 'set_meal'}
-          </span>
+          <DynamicIcon
+            name={search ? "search" : "set_meal"}
+            size={48}
+            className="text-slate-300 mb-3 block"
+          />
           <p className="text-slate-400">
             {search
-              ? (locale === 'ko' ? '검색 결과가 없습니다' : 'No results found')
-              : t('home.noCatches')}
+              ? locale === "ko"
+                ? "검색 결과가 없습니다"
+                : "No results found"
+              : t("home.noCatches")}
           </p>
         </div>
       ) : (
@@ -169,16 +216,23 @@ export default function RecordsPage() {
               <div className="w-14 h-14 rounded-xl bg-gradient-to-tr from-primary to-cyan-400 flex items-center justify-center shrink-0 overflow-hidden">
                 {record.photos.length > 0 ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={record.photos[0]} alt={record.species} className="w-full h-full object-cover" />
+                  <img
+                    src={record.photos[0]}
+                    alt={record.species}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
-                  <span className="material-symbols-outlined text-white text-xl">set_meal</span>
+                  <Fish size={20} className="text-white" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-sm text-slate-900">{record.species}</h3>
+                  <h3 className="font-semibold text-sm text-slate-900">
+                    {record.species}
+                  </h3>
                   <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-primary/10 text-primary">
-                    {record.count}{t('home.unit.fish')}
+                    {record.count}
+                    {t("home.unit.fish")}
                   </span>
                   {record.sizeCm && (
                     <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-blue-50 text-blue-500">
@@ -187,11 +241,11 @@ export default function RecordsPage() {
                   )}
                 </div>
                 <div className="flex items-center gap-1 mt-1 text-xs text-slate-400">
-                  <span className="material-symbols-outlined text-[14px]">location_on</span>
+                  <MapPin size={14} />
                   <span className="truncate">{record.location.name}</span>
                 </div>
                 <div className="flex items-center gap-1 mt-0.5 text-xs text-slate-400">
-                  <span className="material-symbols-outlined text-[14px]">calendar_today</span>
+                  <DynamicIcon name="calendar_today" size={14} />
                   <span>{record.date}</span>
                 </div>
               </div>
@@ -199,11 +253,11 @@ export default function RecordsPage() {
                 <button
                   onClick={(e) => handleDelete(e, record.id)}
                   className="p-2 rounded-lg hover:bg-red-50:bg-red-900/20 text-slate-400 hover:text-red-500 transition-colors"
-                  aria-label={t('common.delete')}
+                  aria-label={t("common.delete")}
                 >
-                  <span className="material-symbols-outlined text-lg">delete</span>
+                  <DynamicIcon name="delete" size={18} />
                 </button>
-                <span className="material-symbols-outlined text-slate-300 text-sm">chevron_right</span>
+                <ChevronRight size={14} className="text-slate-300" />
               </div>
             </Link>
           ))}

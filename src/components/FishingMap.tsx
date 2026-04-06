@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import { CatchRecord } from '@/types';
+import { useEffect, useRef } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { CatchRecord } from "@/types";
+import { DynamicIcon } from "@/lib/iconMap";
 
 interface FishingMapProps {
   records: CatchRecord[];
@@ -14,7 +15,7 @@ interface FishingMapProps {
 // Custom fish marker icon
 function createFishIcon() {
   return L.divIcon({
-    className: 'fish-marker',
+    className: "fish-marker",
     html: `<div style="
       width: 32px; height: 32px;
       background: linear-gradient(135deg, #1392ec, #2dd4bf);
@@ -30,7 +31,11 @@ function createFishIcon() {
   });
 }
 
-export default function FishingMap({ records, locale, height = '300px' }: FishingMapProps) {
+export default function FishingMap({
+  records,
+  locale,
+  height = "300px",
+}: FishingMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
 
@@ -48,9 +53,10 @@ export default function FishingMap({ records, locale, height = '300px' }: Fishin
 
     // Default center: Korea
     const defaultCenter: [number, number] = [35.9, 128.0];
-    const center: [number, number] = geoRecords.length > 0
-      ? [geoRecords[0].location.lat!, geoRecords[0].location.lng!]
-      : defaultCenter;
+    const center: [number, number] =
+      geoRecords.length > 0
+        ? [geoRecords[0].location.lat!, geoRecords[0].location.lng!]
+        : defaultCenter;
 
     const map = L.map(mapRef.current, {
       zoomControl: false,
@@ -58,15 +64,16 @@ export default function FishingMap({ records, locale, height = '300px' }: Fishin
     }).setView(center, 8);
 
     // OpenStreetMap tiles (free, no API key)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 18,
     }).addTo(map);
 
     // Add zoom control to bottom-right
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    L.control.zoom({ position: "bottomright" }).addTo(map);
 
     // Add attribution
-    L.control.attribution({ position: 'bottomleft', prefix: '' })
+    L.control
+      .attribution({ position: "bottomleft", prefix: "" })
       .addAttribution('© <a href="https://openstreetmap.org">OSM</a>')
       .addTo(map);
 
@@ -93,24 +100,30 @@ export default function FishingMap({ records, locale, height = '300px' }: Fishin
             📍 ${first.location.name}
           </div>
           <div style="font-size: 11px; color: #64748b; margin-bottom: 6px;">
-            ${locale === 'ko' ? '방문' : 'Visits'}: ${recs.length}${locale === 'ko' ? '회' : ''} · 
-            ${locale === 'ko' ? '총' : 'Total'}: ${totalCatch}${locale === 'ko' ? '마리' : ' fish'}
+            ${locale === "ko" ? "방문" : "Visits"}: ${recs.length}${locale === "ko" ? "회" : ""} · 
+            ${locale === "ko" ? "총" : "Total"}: ${totalCatch}${locale === "ko" ? "마리" : " fish"}
           </div>
           <div style="font-size: 11px; color: #1392ec;">
-            ${speciesList.join(', ')}
+            ${speciesList.join(", ")}
           </div>
-          ${recs[0].weather ? `
+          ${
+            recs[0].weather
+              ? `
             <div style="font-size: 10px; color: #94a3b8; margin-top: 4px; border-top: 1px solid #e2e8f0; padding-top: 4px;">
               ${recs[0].weather.condition} ${recs[0].weather.tempC}°C
             </div>
-          ` : ''}
+          `
+              : ""
+          }
         </div>
       `;
 
-      const marker = L.marker([first.location.lat!, first.location.lng!], { icon })
+      const marker = L.marker([first.location.lat!, first.location.lng!], {
+        icon,
+      })
         .bindPopup(popupContent, {
           closeButton: false,
-          className: 'fish-popup',
+          className: "fish-popup",
         })
         .addTo(map);
       markers.push(marker);
@@ -138,11 +151,15 @@ export default function FishingMap({ records, locale, height = '300px' }: Fishin
   if (geoRecords.length === 0) {
     return (
       <div className="glass-card rounded-xl p-6 text-center" style={{ height }}>
-        <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">map</span>
+        <DynamicIcon
+          name="location_on"
+          size={36}
+          className="text-slate-300 mb-2"
+        />
         <p className="text-sm text-slate-400">
-          {locale === 'ko'
-            ? 'GPS가 포함된 기록이 없습니다.\n기록 시 위치 감지를 허용하면 지도에 표시됩니다.'
-            : 'No GPS records yet.\nAllow location detection when recording to see your spots on the map.'}
+          {locale === "ko"
+            ? "GPS가 포함된 기록이 없습니다.\n기록 시 위치 감지를 허용하면 지도에 표시됩니다."
+            : "No GPS records yet.\nAllow location detection when recording to see your spots on the map."}
         </p>
       </div>
     );
@@ -150,13 +167,17 @@ export default function FishingMap({ records, locale, height = '300px' }: Fishin
 
   return (
     <div className="glass-card rounded-xl overflow-hidden border border-primary/10">
-      <div ref={mapRef} style={{ height, width: '100%' }} />
+      <div ref={mapRef} style={{ height, width: "100%" }} />
       <div className="px-3 py-2 flex items-center justify-between bg-white/80 dark:bg-slate-900/80">
         <span className="text-[10px] text-slate-400">
-          {locale === 'ko' ? `📍 ${geoRecords.length}개 포인트` : `📍 ${geoRecords.length} spots`}
+          {locale === "ko"
+            ? `📍 ${geoRecords.length}개 포인트`
+            : `📍 ${geoRecords.length} spots`}
         </span>
         <span className="text-[10px] text-slate-400">
-          {locale === 'ko' ? `🐟 ${geoRecords.reduce((s, r) => s + r.count, 0)}마리` : `🐟 ${geoRecords.reduce((s, r) => s + r.count, 0)} fish`}
+          {locale === "ko"
+            ? `🐟 ${geoRecords.reduce((s, r) => s + r.count, 0)}마리`
+            : `🐟 ${geoRecords.reduce((s, r) => s + r.count, 0)} fish`}
         </span>
       </div>
     </div>

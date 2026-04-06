@@ -1,13 +1,30 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
-import Link from 'next/link';
-import dynamic from 'next/dynamic';
-import { useAppStore } from '@/store/appStore';
-import { getDataService } from '@/services/dataServiceFactory';
-import { CatchRecord, UserStats, PeriodFilter } from '@/types';
-import { computeBadges, AchievementBadge } from '@/services/badgeService';
-import { analyzeFishingDna, FishingDna } from '@/services/fishingDnaService';
+import { useEffect, useState, useCallback, useMemo } from "react";
+import Link from "next/link";
+import dynamic from "next/dynamic";
+import { useAppStore } from "@/store/appStore";
+import { getDataService } from "@/services/dataServiceFactory";
+import { CatchRecord, UserStats, PeriodFilter } from "@/types";
+import { computeBadges, AchievementBadge } from "@/services/badgeService";
+import { analyzeFishingDna, FishingDna } from "@/services/fishingDnaService";
+import {
+  ArrowLeft,
+  Fish,
+  MapPin,
+  Calendar,
+  TrendingUp,
+  Award,
+  Target,
+  ChevronRight,
+  BarChart3,
+  Loader2,
+  Trophy,
+  Dna,
+  Compass,
+  Clock,
+} from "lucide-react";
+import { DynamicIcon } from "@/lib/iconMap";
 import {
   BarChart,
   Bar,
@@ -20,35 +37,62 @@ import {
   Pie,
   Cell,
   Legend,
-} from 'recharts';
+} from "recharts";
 
-const CHART_COLORS = ['#1392ec', '#2dd4bf', '#22c55e', '#a855f7', '#f59e0b', '#ec4899'];
-
-// Dynamic import for Leaflet (SSR not supported)
-const FishingMap = dynamic(() => import('@/components/FishingMap'), { ssr: false });
-
-const PERIOD_TABS: { value: PeriodFilter; ko: string; en: string }[] = [
-  { value: 'week', ko: '1주', en: '1W' },
-  { value: 'month', ko: '1개월', en: '1M' },
-  { value: '3months', ko: '3개월', en: '3M' },
-  { value: 'all', ko: '전체', en: 'All' },
+const CHART_COLORS = [
+  "#1392ec",
+  "#2dd4bf",
+  "#22c55e",
+  "#a855f7",
+  "#f59e0b",
+  "#ec4899",
 ];
 
-function MiniStatCard({ icon, label, value, unit }: { icon: string; label: string; value: number | string; unit: string }) {
+// Dynamic import for Leaflet (SSR not supported)
+const FishingMap = dynamic(() => import("@/components/FishingMap"), {
+  ssr: false,
+});
+
+const PERIOD_TABS: { value: PeriodFilter; ko: string; en: string }[] = [
+  { value: "week", ko: "1주", en: "1W" },
+  { value: "month", ko: "1개월", en: "1M" },
+  { value: "3months", ko: "3개월", en: "3M" },
+  { value: "all", ko: "전체", en: "All" },
+];
+
+function MiniStatCard({
+  icon,
+  label,
+  value,
+  unit,
+}: {
+  icon: string;
+  label: string;
+  value: number | string;
+  unit: string;
+}) {
   return (
-    <div className="bg-white border border-slate-100 shadow-sm flex flex-col gap-1 rounded-xl p-4 shadow-sm border border-primary/5">
+    <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm flex flex-col gap-1 rounded-xl p-4 shadow-sm border border-primary/5">
       <p className="text-slate-500 text-xs font-medium">{label}</p>
       <p className="text-slate-900 text-xl font-bold">
         {value}
-        <span className="text-sm ml-0.5 font-normal text-slate-500">{unit}</span>
+        <span className="text-sm ml-0.5 font-normal text-slate-500">
+          {unit}
+        </span>
       </p>
-      <span className="material-symbols-outlined text-primary text-base">{icon}</span>
+      <DynamicIcon name={icon} size={16} className="text-primary" />
     </div>
   );
 }
 
 // ===== Calendar Component =====
-function CalendarView({ records, locale }: { records: CatchRecord[]; locale: string }) {
+function CalendarView({
+  records,
+  locale,
+}: {
+  records: CatchRecord[];
+  locale: string;
+}) {
   const [monthOffset, setMonthOffset] = useState(0);
 
   const { year, month, days, firstDay, dateMap } = useMemo(() => {
@@ -75,33 +119,54 @@ function CalendarView({ records, locale }: { records: CatchRecord[]; locale: str
     };
   }, [records, monthOffset]);
 
-  const dayLabels = locale === 'ko'
-    ? ['일', '월', '화', '수', '목', '금', '토']
-    : ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  const dayLabels =
+    locale === "ko"
+      ? ["일", "월", "화", "수", "목", "금", "토"]
+      : ["S", "M", "T", "W", "T", "F", "S"];
 
-  const monthLabel = locale === 'ko'
-    ? `${year}년 ${month + 1}월`
-    : new Date(year, month).toLocaleDateString('en', { year: 'numeric', month: 'long' });
+  const monthLabel =
+    locale === "ko"
+      ? `${year}년 ${month + 1}월`
+      : new Date(year, month).toLocaleDateString("en", {
+          year: "numeric",
+          month: "long",
+        });
 
   const today = new Date().toISOString().slice(0, 10);
 
   return (
-    <div className="bg-white border border-slate-100 shadow-sm rounded-xl p-4 border border-primary/5">
+    <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-4 border border-primary/5">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <button onClick={() => setMonthOffset((p) => p - 1)} className="size-8 flex items-center justify-center rounded-lg hover:bg-slate-100:bg-slate-700 transition-colors">
-          <span className="material-symbols-outlined text-lg text-slate-500">chevron_left</span>
+        <button
+          onClick={() => setMonthOffset((p) => p - 1)}
+          className="size-8 flex items-center justify-center rounded-lg hover:bg-slate-100:bg-slate-700 transition-colors"
+        >
+          <DynamicIcon
+            name="chevron_left"
+            size={18}
+            className="text-slate-500"
+          />
         </button>
-        <h4 className="text-sm font-bold text-slate-900">{monthLabel}</h4>
-        <button onClick={() => setMonthOffset((p) => Math.min(p + 1, 0))} disabled={monthOffset >= 0} className="size-8 flex items-center justify-center rounded-lg hover:bg-slate-100:bg-slate-700 transition-colors disabled:opacity-30">
-          <span className="material-symbols-outlined text-lg text-slate-500">chevron_right</span>
+        <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+          {monthLabel}
+        </h4>
+        <button
+          onClick={() => setMonthOffset((p) => Math.min(p + 1, 0))}
+          disabled={monthOffset >= 0}
+          className="size-8 flex items-center justify-center rounded-lg hover:bg-slate-100:bg-slate-700 transition-colors disabled:opacity-30"
+        >
+          <ChevronRight size={18} className="text-slate-500" />
         </button>
       </div>
 
       {/* Day labels */}
       <div className="grid grid-cols-7 gap-1 mb-1">
         {dayLabels.map((d, i) => (
-          <div key={i} className={`text-center text-[10px] font-medium py-1 ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-slate-400'}`}>
+          <div
+            key={i}
+            className={`text-center text-[10px] font-medium py-1 ${i === 0 ? "text-red-400" : i === 6 ? "text-blue-400" : "text-slate-400"}`}
+          >
             {d}
           </div>
         ))}
@@ -115,7 +180,7 @@ function CalendarView({ records, locale }: { records: CatchRecord[]; locale: str
         ))}
         {Array.from({ length: days }).map((_, i) => {
           const day = i + 1;
-          const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
           const catchCount = dateMap.get(dateStr) ?? 0;
           const isToday = dateStr === today;
 
@@ -123,15 +188,21 @@ function CalendarView({ records, locale }: { records: CatchRecord[]; locale: str
             <div
               key={day}
               className={`aspect-square rounded-lg flex flex-col items-center justify-center text-xs relative transition-all ${
-                isToday ? 'ring-2 ring-primary' : ''
-              } ${catchCount > 0 ? 'bg-primary/10' : ''}`}
+                isToday ? "ring-2 ring-primary" : ""
+              } ${catchCount > 0 ? "bg-primary/10" : ""}`}
             >
-              <span className={`font-medium ${isToday ? 'text-primary font-bold' : 'text-slate-700'}`}>{day}</span>
+              <span
+                className={`font-medium ${isToday ? "text-primary font-bold" : "text-slate-700"}`}
+              >
+                {day}
+              </span>
               {catchCount > 0 && (
                 <div className="absolute bottom-0.5 flex gap-0.5">
-                  {Array.from({ length: Math.min(catchCount, 3) }).map((_, j) => (
-                    <div key={j} className="size-1 rounded-full bg-primary" />
-                  ))}
+                  {Array.from({ length: Math.min(catchCount, 3) }).map(
+                    (_, j) => (
+                      <div key={j} className="size-1 rounded-full bg-primary" />
+                    ),
+                  )}
                 </div>
               )}
             </div>
@@ -141,39 +212,60 @@ function CalendarView({ records, locale }: { records: CatchRecord[]; locale: str
 
       {/* Legend */}
       <div className="flex items-center justify-center gap-4 mt-3 text-[10px] text-slate-400">
-        <span className="flex items-center gap-1"><div className="size-2 rounded-full bg-primary" /> {locale === 'ko' ? '출조일' : 'Fishing day'}</span>
-        <span className="flex items-center gap-1"><div className="size-2 rounded-full ring-2 ring-primary" /> {locale === 'ko' ? '오늘' : 'Today'}</span>
+        <span className="flex items-center gap-1">
+          <div className="size-2 rounded-full bg-primary" />{" "}
+          {locale === "ko" ? "출조일" : "Fishing day"}
+        </span>
+        <span className="flex items-center gap-1">
+          <div className="size-2 rounded-full ring-2 ring-primary" />{" "}
+          {locale === "ko" ? "오늘" : "Today"}
+        </span>
       </div>
     </div>
   );
 }
 
 // ===== Badge Component =====
-function BadgeCard({ badge, locale }: { badge: AchievementBadge; locale: string }) {
+function BadgeCard({
+  badge,
+  locale,
+}: {
+  badge: AchievementBadge;
+  locale: string;
+}) {
   return (
-    <div className={`bg-white border border-slate-100 shadow-sm rounded-xl p-3 border transition-all ${badge.earned ? 'border-primary/20 shadow-sm' : 'border-slate-200 opacity-60'}`}>
+    <div
+      className={`bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-3 border transition-all ${badge.earned ? "border-primary/20 shadow-sm" : "border-slate-200 opacity-60"}`}
+    >
       <div className="flex items-center gap-3">
-        <div className={`size-10 rounded-lg flex items-center justify-center ${badge.earned ? 'bg-gradient-to-tr from-primary to-cyan-400 text-white' : 'bg-slate-100 text-slate-400'}`}>
-          <span className="material-symbols-outlined text-lg">{badge.icon}</span>
+        <div
+          className={`size-10 rounded-lg flex items-center justify-center ${badge.earned ? "bg-gradient-to-tr from-primary to-cyan-400 text-white" : "bg-slate-100 text-slate-400"}`}
+        >
+          <DynamicIcon name={badge.icon} size={18} />
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-xs font-bold text-slate-900 truncate">
-            {locale === 'ko' ? badge.name.ko : badge.name.en}
+          <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
+            {locale === "ko" ? badge.name.ko : badge.name.en}
           </h4>
           <p className="text-[10px] text-slate-400 truncate">
-            {locale === 'ko' ? badge.description.ko : badge.description.en}
+            {locale === "ko" ? badge.description.ko : badge.description.en}
           </p>
         </div>
         {badge.earned ? (
-          <span className="material-symbols-outlined text-primary text-xl">verified</span>
+          <Award size={20} className="text-primary" />
         ) : (
-          <span className="text-[10px] font-bold text-slate-400">{Math.round(badge.progress * 100)}%</span>
+          <span className="text-[10px] font-bold text-slate-400">
+            {Math.round(badge.progress * 100)}%
+          </span>
         )}
       </div>
       {/* Progress bar */}
       {!badge.earned && (
         <div className="mt-2 h-1 rounded-full bg-slate-100 overflow-hidden">
-          <div className="h-full rounded-full bg-gradient-to-r from-primary to-cyan-400 transition-all" style={{ width: `${badge.progress * 100}%` }} />
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-primary to-cyan-400 transition-all"
+            style={{ width: `${badge.progress * 100}%` }}
+          />
         </div>
       )}
     </div>
@@ -183,12 +275,14 @@ function BadgeCard({ badge, locale }: { badge: AchievementBadge; locale: string 
 export default function StatsPage() {
   const t = useAppStore((s) => s.t);
   const locale = useAppStore((s) => s.locale);
-  const [period, setPeriod] = useState<PeriodFilter>('all');
+  const [period, setPeriod] = useState<PeriodFilter>("all");
   const [stats, setStats] = useState<UserStats | null>(null);
   const [records, setRecords] = useState<CatchRecord[]>([]);
   const [badges, setBadges] = useState<AchievementBadge[]>([]);
   const [dna, setDna] = useState<FishingDna | null>(null);
-  const [activeTab, setActiveTab] = useState<'stats' | 'calendar' | 'map' | 'badges' | 'dna'>('stats');
+  const [activeTab, setActiveTab] = useState<
+    "stats" | "calendar" | "map" | "badges" | "dna"
+  >("stats");
 
   const loadStats = useCallback(async (p: PeriodFilter) => {
     const s = await getDataService().getUserStats(p);
@@ -198,16 +292,23 @@ export default function StatsPage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadStats(period);
-    getDataService().getCatchRecords().then((r) => {
-      setRecords(r);
-      setBadges(computeBadges(r));
-      setDna(analyzeFishingDna(r));
-    });
+    getDataService()
+      .getCatchRecords()
+      .then((r) => {
+        setRecords(r);
+        setBadges(computeBadges(r));
+        setDna(analyzeFishingDna(r));
+      });
 
     // Handle tab routing (e.g., from home AI insight /stats?tab=dna)
     const params = new URLSearchParams(window.location.search);
-    const tabParam = params.get('tab');
-    if (tabParam === 'dna' || tabParam === 'badges' || tabParam === 'map' || tabParam === 'calendar') {
+    const tabParam = params.get("tab");
+    if (
+      tabParam === "dna" ||
+      tabParam === "badges" ||
+      tabParam === "map" ||
+      tabParam === "calendar"
+    ) {
       setActiveTab(tabParam);
     }
   }, [period, loadStats]);
@@ -215,11 +316,34 @@ export default function StatsPage() {
   const earnedCount = badges.filter((b) => b.earned).length;
 
   const tabs = [
-    { key: 'stats' as const, icon: 'bar_chart', label: locale === 'ko' ? '통계' : 'Stats' },
-    { key: 'dna' as const, icon: 'genetics', label: locale === 'ko' ? 'DNA' : 'DNA' },
-    { key: 'map' as const, icon: 'map', label: locale === 'ko' ? '지도' : 'Map' },
-    { key: 'calendar' as const, icon: 'calendar_month', label: locale === 'ko' ? '캘린더' : 'Calendar' },
-    { key: 'badges' as const, icon: 'military_tech', label: locale === 'ko' ? `배지 ${earnedCount}/${badges.length}` : `Badges ${earnedCount}/${badges.length}` },
+    {
+      key: "stats" as const,
+      icon: "bar_chart",
+      label: locale === "ko" ? "통계" : "Stats",
+    },
+    {
+      key: "dna" as const,
+      icon: "genetics",
+      label: locale === "ko" ? "DNA" : "DNA",
+    },
+    {
+      key: "map" as const,
+      icon: "map",
+      label: locale === "ko" ? "지도" : "Map",
+    },
+    {
+      key: "calendar" as const,
+      icon: "calendar_month",
+      label: locale === "ko" ? "캘린더" : "Calendar",
+    },
+    {
+      key: "badges" as const,
+      icon: "military_tech",
+      label:
+        locale === "ko"
+          ? `배지 ${earnedCount}/${badges.length}`
+          : `Badges ${earnedCount}/${badges.length}`,
+    },
   ];
 
   if (!stats) return null;
@@ -227,11 +351,14 @@ export default function StatsPage() {
   return (
     <div className="page-enter relative z-10 pb-24">
       {/* Header */}
-      <header className="sticky top-0 z-50 flex items-center bg-slate-50/80 backdrop-blur-md p-4 pb-2 justify-between border-b border-primary/10">
+      <header className="sticky top-0 z-50 flex items-center bg-bg/80 dark:bg-bg-dark/90 backdrop-blur-md p-4 pb-2 justify-between border-b border-primary/10">
         <div className="text-primary flex size-10 shrink-0 items-center justify-center rounded-full" />
         <h1 className="text-slate-900 text-lg font-bold leading-tight tracking-tight flex-1 text-center">
-          {t('stats.title')}
-          <span className="material-symbols-outlined text-primary ml-1 align-middle text-base">bar_chart</span>
+          {t("stats.title")}
+          <BarChart3
+            size={16}
+            className="text-primary ml-1 inline align-middle"
+          />
         </h1>
         <div className="flex w-10 items-center justify-end" />
       </header>
@@ -245,11 +372,11 @@ export default function StatsPage() {
               onClick={() => setActiveTab(tab.key)}
               className={`flex cursor-pointer h-full grow items-center justify-center gap-1.5 overflow-hidden rounded-lg px-2 text-xs font-semibold transition-all ${
                 activeTab === tab.key
-                  ? 'bg-white shadow-sm text-primary'
-                  : 'text-slate-500'
+                  ? "bg-white shadow-sm text-primary"
+                  : "text-slate-500"
               }`}
             >
-              <span className="material-symbols-outlined text-sm">{tab.icon}</span>
+              <DynamicIcon name={tab.icon} size={14} />
               {tab.label}
             </button>
           ))}
@@ -257,19 +384,31 @@ export default function StatsPage() {
       </div>
 
       <main className="flex-1 overflow-y-auto">
-        {activeTab === 'stats' && (
+        {activeTab === "stats" && (
           <>
             {/* Period filter */}
             <div className="px-4 py-3">
               <div className="flex h-9 items-center justify-center rounded-xl bg-slate-200/50 p-1">
                 {PERIOD_TABS.map((tab) => (
-                  <label key={tab.value} className={`flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 text-xs font-semibold transition-all ${
-                    period === tab.value
-                      ? 'bg-white shadow-sm text-primary'
-                      : 'text-slate-500'
-                  }`}>
-                    <span className="truncate">{locale === 'ko' ? tab.ko : tab.en}</span>
-                    <input className="hidden" name="period" type="radio" value={tab.value} checked={period === tab.value} onChange={() => setPeriod(tab.value)} />
+                  <label
+                    key={tab.value}
+                    className={`flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 text-xs font-semibold transition-all ${
+                      period === tab.value
+                        ? "bg-white shadow-sm text-primary"
+                        : "text-slate-500"
+                    }`}
+                  >
+                    <span className="truncate">
+                      {locale === "ko" ? tab.ko : tab.en}
+                    </span>
+                    <input
+                      className="hidden"
+                      name="period"
+                      type="radio"
+                      value={tab.value}
+                      checked={period === tab.value}
+                      onChange={() => setPeriod(tab.value)}
+                    />
                   </label>
                 ))}
               </div>
@@ -277,33 +416,76 @@ export default function StatsPage() {
 
             {/* 2x2 stat grid */}
             <section className="grid grid-cols-2 gap-3 px-4 py-2">
-              <MiniStatCard icon="calendar_month" label={t('stats.totalTrips')} value={stats.totalTrips} unit={t('stats.unit.trips')} />
-              <MiniStatCard icon="set_meal" label={t('stats.totalCatch')} value={stats.totalCatch} unit={t('stats.unit.fish')} />
-              <MiniStatCard icon="bar_chart" label={t('stats.avgCatch')} value={stats.avgCatchPerTrip} unit={t('stats.unit.fishPerTrip')} />
-              <MiniStatCard icon="straighten" label={t('stats.maxSize')} value={stats.maxSizeCm} unit={t('stats.unit.cm')} />
+              <MiniStatCard
+                icon="calendar_month"
+                label={t("stats.totalTrips")}
+                value={stats.totalTrips}
+                unit={t("stats.unit.trips")}
+              />
+              <MiniStatCard
+                icon="set_meal"
+                label={t("stats.totalCatch")}
+                value={stats.totalCatch}
+                unit={t("stats.unit.fish")}
+              />
+              <MiniStatCard
+                icon="bar_chart"
+                label={t("stats.avgCatch")}
+                value={stats.avgCatchPerTrip}
+                unit={t("stats.unit.fishPerTrip")}
+              />
+              <MiniStatCard
+                icon="straighten"
+                label={t("stats.maxSize")}
+                value={stats.maxSizeCm}
+                unit={t("stats.unit.cm")}
+              />
             </section>
 
             {/* Monthly trend chart */}
             <section className="mt-6 px-4">
               <h3 className="text-slate-900 text-base font-bold mb-3 flex items-center gap-2">
-                {t('stats.monthlyTrend')}
-                <span className="material-symbols-outlined text-primary text-base">trending_up</span>
+                {t("stats.monthlyTrend")}
+                <TrendingUp size={16} className="text-primary" />
               </h3>
-              <div className="bg-white border border-slate-100 shadow-sm p-4 rounded-xl border border-primary/5 h-48">
+              <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm p-4 rounded-xl border border-primary/5 h-48">
                 {stats.monthlyTrend.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={stats.monthlyTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#94a3b8' }} />
-                      <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} />
-                      <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '12px' }} />
-                      <Bar dataKey="count" name={locale === 'ko' ? '마릿수' : 'Count'} radius={[6, 6, 0, 0]}>
+                      <XAxis
+                        dataKey="label"
+                        tick={{ fontSize: 11, fill: "#94a3b8" }}
+                      />
+                      <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} />
+                      <Tooltip
+                        contentStyle={{
+                          background: "#ffffff",
+                          border: "1px solid #e2e8f0",
+                          borderRadius: "12px",
+                          fontSize: "12px",
+                        }}
+                      />
+                      <Bar
+                        dataKey="count"
+                        name={locale === "ko" ? "마릿수" : "Count"}
+                        radius={[6, 6, 0, 0]}
+                      >
                         {stats.monthlyTrend.map((_, index) => (
-                          <Cell key={`cell-${index}`} fill="url(#barGradient)" />
+                          <Cell
+                            key={`cell-${index}`}
+                            fill="url(#barGradient)"
+                          />
                         ))}
                       </Bar>
                       <defs>
-                        <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                        <linearGradient
+                          id="barGradient"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
                           <stop offset="0%" stopColor="#1392ec" />
                           <stop offset="100%" stopColor="#2dd4bf" />
                         </linearGradient>
@@ -311,7 +493,9 @@ export default function StatsPage() {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <p className="text-center text-slate-400 py-8">{t('stats.noData')}</p>
+                  <p className="text-center text-slate-400 py-8">
+                    {t("stats.noData")}
+                  </p>
                 )}
               </div>
             </section>
@@ -319,28 +503,57 @@ export default function StatsPage() {
             {/* Species donut */}
             <section className="mt-8 px-4">
               <h3 className="text-slate-900 text-base font-bold mb-3 flex items-center gap-2">
-                {t('stats.speciesRatio')}
-                <span className="material-symbols-outlined text-primary text-base">donut_large</span>
+                {t("stats.speciesRatio")}
+                <Target size={16} className="text-primary" />
               </h3>
-              <div className="bg-white border border-slate-100 shadow-sm p-4 rounded-xl border border-primary/5">
+              <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm p-4 rounded-xl border border-primary/5">
                 {stats.speciesBreakdown.length > 0 ? (
                   <ResponsiveContainer width="100%" height={250}>
                     <PieChart>
-                      <Pie data={stats.speciesBreakdown} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="count" nameKey="species" paddingAngle={3} strokeWidth={0}>
+                      <Pie
+                        data={stats.speciesBreakdown}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={80}
+                        dataKey="count"
+                        nameKey="species"
+                        paddingAngle={3}
+                        strokeWidth={0}
+                      >
                         {stats.speciesBreakdown.map((_, index) => (
-                          <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={CHART_COLORS[index % CHART_COLORS.length]}
+                          />
                         ))}
                       </Pie>
-                      <Legend formatter={(value: string) => <span style={{ fontSize: '12px', color: '#64748b' }}>{value}</span>} />
+                      <Legend
+                        formatter={(value: string) => (
+                          <span style={{ fontSize: "12px", color: "#64748b" }}>
+                            {value}
+                          </span>
+                        )}
+                      />
                       <Tooltip
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        formatter={(value: any, name: any) => [`${value}${locale === 'ko' ? '마리' : ''}`, name]}
-                        contentStyle={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '12px' }}
+                        formatter={(value: any, name: any) => [
+                          `${value}${locale === "ko" ? "마리" : ""}`,
+                          name,
+                        ]}
+                        contentStyle={{
+                          background: "#ffffff",
+                          border: "1px solid #e2e8f0",
+                          borderRadius: "12px",
+                          fontSize: "12px",
+                        }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <p className="text-center text-slate-400 py-8">{t('stats.noData')}</p>
+                  <p className="text-center text-slate-400 py-8">
+                    {t("stats.noData")}
+                  </p>
                 )}
               </div>
             </section>
@@ -348,55 +561,75 @@ export default function StatsPage() {
             {/* Top spots */}
             <section className="mt-8 px-4 mb-8">
               <h3 className="text-slate-900 text-base font-bold mb-3 flex items-center gap-2">
-                {t('stats.topSpots')}
-                <span className="material-symbols-outlined text-primary text-base">location_on</span>
+                {t("stats.topSpots")}
+                <MapPin size={16} className="text-primary" />
               </h3>
               <div className="space-y-3">
                 {stats.topSpots.length > 0 ? (
                   stats.topSpots.map((spot, i) => (
-                    <div key={spot.spot.name} className="bg-white border border-slate-100 shadow-sm rounded-xl p-3 border border-primary/5 flex items-center gap-3">
+                    <div
+                      key={spot.spot.name}
+                      className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-3 border border-primary/5 flex items-center gap-3"
+                    >
                       <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center font-bold text-primary">
-                        {i === 0 ? <span className="material-symbols-outlined">emoji_events</span> : i + 1}
+                        {i === 0 ? <Trophy size={16} /> : i + 1}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-1">
-                          <span className="material-symbols-outlined text-primary text-sm">location_on</span>
-                          <h4 className="text-sm font-bold">{spot.spot.name}</h4>
+                          <MapPin size={14} className="text-primary" />
+                          <h4 className="text-sm font-bold">
+                            {spot.spot.name}
+                          </h4>
                         </div>
                         <p className="text-[10px] text-slate-400">
-                          {spot.visits}{t('stats.visits')} · {spot.totalCatch}{t('stats.caught')}
+                          {spot.visits}
+                          {t("stats.visits")} · {spot.totalCatch}
+                          {t("stats.caught")}
                         </p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-center text-slate-400 py-4">{t('stats.noData')}</p>
+                  <p className="text-center text-slate-400 py-4">
+                    {t("stats.noData")}
+                  </p>
                 )}
               </div>
             </section>
           </>
         )}
 
-        {activeTab === 'calendar' && (
+        {activeTab === "calendar" && (
           <section className="px-4 py-4">
             <CalendarView records={records} locale={locale} />
             {/* Recent trips from calendar */}
             <div className="mt-4">
-              <h3 className="text-sm font-bold text-slate-900 mb-2 flex items-center gap-1">
-                <span className="material-symbols-outlined text-primary text-sm">history</span>
-                {locale === 'ko' ? '최근 출조' : 'Recent Trips'}
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-1">
+                <Clock size={14} className="text-primary" />
+                {locale === "ko" ? "최근 출조" : "Recent Trips"}
               </h3>
               <div className="space-y-2">
                 {records.slice(0, 5).map((r) => (
-                  <Link key={r.id} href={`/records/detail?id=${r.id}`} className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50:bg-slate-800 transition-colors">
+                  <Link
+                    key={r.id}
+                    href={`/records/detail?id=${r.id}`}
+                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50:bg-slate-800 transition-colors"
+                  >
                     <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <span className="material-symbols-outlined text-primary text-sm">set_meal</span>
+                      <Fish size={14} className="text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-slate-900 truncate">{r.species} {r.sizeCm ? `${r.sizeCm}cm` : `${r.count}${locale === 'ko' ? '마리' : ''}`}</p>
-                      <p className="text-[10px] text-slate-400">{r.date} · {r.location.name}</p>
+                      <p className="text-xs font-semibold text-slate-900 truncate">
+                        {r.species}{" "}
+                        {r.sizeCm
+                          ? `${r.sizeCm}cm`
+                          : `${r.count}${locale === "ko" ? "마리" : ""}`}
+                      </p>
+                      <p className="text-[10px] text-slate-400">
+                        {r.date} · {r.location.name}
+                      </p>
                     </div>
-                    <span className="material-symbols-outlined text-slate-300 text-sm">chevron_right</span>
+                    <ChevronRight size={14} className="text-slate-300" />
                   </Link>
                 ))}
               </div>
@@ -404,18 +637,23 @@ export default function StatsPage() {
           </section>
         )}
 
-        {activeTab === 'map' && (
+        {activeTab === "map" && (
           <section className="px-4 py-4">
             <FishingMap records={records} locale={locale} height="400px" />
           </section>
         )}
 
-        {activeTab === 'badges' && (
+        {activeTab === "badges" && (
           <section className="px-4 py-4">
             {/* Summary */}
-            <div className="bg-white border border-slate-100 shadow-sm rounded-xl p-4 border border-primary/5 mb-4 text-center">
-              <div className="text-3xl font-black text-primary">{earnedCount}<span className="text-lg text-slate-400">/{badges.length}</span></div>
-              <p className="text-xs text-slate-500 mt-1">{locale === 'ko' ? '달성한 배지' : 'Badges Earned'}</p>
+            <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-4 border border-primary/5 mb-4 text-center">
+              <div className="text-3xl font-black text-primary">
+                {earnedCount}
+                <span className="text-lg text-slate-400">/{badges.length}</span>
+              </div>
+              <p className="text-xs text-slate-500 mt-1">
+                {locale === "ko" ? "달성한 배지" : "Badges Earned"}
+              </p>
             </div>
             {/* Badge grid */}
             <div className="space-y-3">
@@ -426,85 +664,148 @@ export default function StatsPage() {
           </section>
         )}
 
-        {activeTab === 'dna' && (
+        {activeTab === "dna" && (
           <section className="px-4 py-4">
             {dna ? (
               <div className="space-y-4">
                 {/* Archetype hero card */}
                 <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 p-6 text-white shadow-xl">
-                  <div className="absolute -right-6 -top-6 text-[120px] opacity-10">🧬</div>
-                  <p className="text-xs font-medium text-violet-200 mb-1">{locale === 'ko' ? '나의 낚시 DNA' : 'My Fishing DNA'}</p>
-                  <h2 className="text-2xl font-black mb-1">{locale === 'ko' ? dna.archetypeKo : dna.archetypeEn}</h2>
-                  <p className="text-xs text-violet-200">{dna.totalRecords}{locale === 'ko' ? '개 조과 기반 분석 결과' : ' records analyzed'}</p>
+                  <div className="absolute -right-6 -top-6 text-[120px] opacity-10">
+                    🧬
+                  </div>
+                  <p className="text-xs font-medium text-violet-200 mb-1">
+                    {locale === "ko" ? "나의 낚시 DNA" : "My Fishing DNA"}
+                  </p>
+                  <h2 className="text-2xl font-black mb-1">
+                    {locale === "ko" ? dna.archetypeKo : dna.archetypeEn}
+                  </h2>
+                  <p className="text-xs text-violet-200">
+                    {dna.totalRecords}
+                    {locale === "ko"
+                      ? "개 조과 기반 분석 결과"
+                      : " records analyzed"}
+                  </p>
                 </div>
 
                 {/* DNA stats grid */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white border border-slate-100 shadow-sm rounded-xl p-4">
+                  <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="material-symbols-outlined text-amber-500 text-base">schedule</span>
-                      <span className="text-xs font-semibold text-slate-500">{locale === 'ko' ? '최고 시간대' : 'Best Time'}</span>
+                      <Clock size={16} className="text-amber-500" />
+                      <span className="text-xs font-semibold text-slate-500">
+                        {locale === "ko" ? "최고 시간대" : "Best Time"}
+                      </span>
                     </div>
-                    <p className="text-sm font-bold text-slate-900">{dna.bestTimeSlot}</p>
-                    <p className="text-xs text-primary font-semibold">{dna.bestTimePercent}%</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">
+                      {dna.bestTimeSlot}
+                    </p>
+                    <p className="text-xs text-primary font-semibold">
+                      {dna.bestTimePercent}%
+                    </p>
                   </div>
-                  <div className="bg-white border border-slate-100 shadow-sm rounded-xl p-4">
+                  <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="material-symbols-outlined text-emerald-500 text-base">set_meal</span>
-                      <span className="text-xs font-semibold text-slate-500">{locale === 'ko' ? '최다 어종' : 'Top Species'}</span>
+                      <Fish size={16} className="text-emerald-500" />
+                      <span className="text-xs font-semibold text-slate-500">
+                        {locale === "ko" ? "최다 어종" : "Top Species"}
+                      </span>
                     </div>
-                    <p className="text-sm font-bold text-slate-900">{dna.topSpecies}</p>
-                    <p className="text-xs text-emerald-500 font-semibold">{dna.topSpeciesCount}{locale === 'ko' ? '마리' : ''}</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">
+                      {dna.topSpecies}
+                    </p>
+                    <p className="text-xs text-emerald-500 font-semibold">
+                      {dna.topSpeciesCount}
+                      {locale === "ko" ? "마리" : ""}
+                    </p>
                   </div>
-                  <div className="bg-white border border-slate-100 shadow-sm rounded-xl p-4">
+                  <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="material-symbols-outlined text-blue-500 text-base">location_on</span>
-                      <span className="text-xs font-semibold text-slate-500">{locale === 'ko' ? '단골 포인트' : 'Top Spot'}</span>
+                      <MapPin size={16} className="text-blue-500" />
+                      <span className="text-xs font-semibold text-slate-500">
+                        {locale === "ko" ? "단골 포인트" : "Top Spot"}
+                      </span>
                     </div>
-                    <p className="text-sm font-bold text-slate-900 truncate">{dna.topLocation}</p>
-                    <p className="text-xs text-blue-500 font-semibold">{dna.topLocationVisits}{locale === 'ko' ? '회 방문' : ' visits'}</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                      {dna.topLocation}
+                    </p>
+                    <p className="text-xs text-blue-500 font-semibold">
+                      {dna.topLocationVisits}
+                      {locale === "ko" ? "회 방문" : " visits"}
+                    </p>
                   </div>
-                  <div className="bg-white border border-slate-100 shadow-sm rounded-xl p-4">
+                  <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="material-symbols-outlined text-orange-500 text-base">calendar_month</span>
-                      <span className="text-xs font-semibold text-slate-500">{locale === 'ko' ? '최고의 달' : 'Best Month'}</span>
+                      <Calendar size={16} className="text-orange-500" />
+                      <span className="text-xs font-semibold text-slate-500">
+                        {locale === "ko" ? "최고의 달" : "Best Month"}
+                      </span>
                     </div>
-                    <p className="text-sm font-bold text-slate-900">{dna.bestMonth}{locale === 'ko' ? '월' : ''}</p>
-                    <p className="text-xs text-orange-500 font-semibold">{dna.bestMonthCount}{locale === 'ko' ? '마리' : ''}</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">
+                      {dna.bestMonth}
+                      {locale === "ko" ? "월" : ""}
+                    </p>
+                    <p className="text-xs text-orange-500 font-semibold">
+                      {dna.bestMonthCount}
+                      {locale === "ko" ? "마리" : ""}
+                    </p>
                   </div>
                 </div>
 
                 {/* Extra insights */}
                 <div className="space-y-3">
                   {dna.bestTide && (
-                    <div className="bg-white border border-slate-100 shadow-sm rounded-xl p-4 flex items-center gap-3">
+                    <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-4 flex items-center gap-3">
                       <div className="size-10 rounded-lg bg-cyan-100 flex items-center justify-center">
-                        <span className="material-symbols-outlined text-cyan-600">water</span>
+                        <DynamicIcon
+                          name="waves"
+                          size={16}
+                          className="text-cyan-600"
+                        />
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-slate-500">{locale === 'ko' ? '황금 물때' : 'Golden Tide'}</p>
-                        <p className="text-sm font-bold text-slate-900">{dna.bestTide}</p>
+                        <p className="text-xs font-semibold text-slate-500">
+                          {locale === "ko" ? "황금 물때" : "Golden Tide"}
+                        </p>
+                        <p className="text-sm font-bold text-slate-900 dark:text-white">
+                          {dna.bestTide}
+                        </p>
                       </div>
                     </div>
                   )}
                   {dna.avgSizeCm && (
-                    <div className="bg-white border border-slate-100 shadow-sm rounded-xl p-4 flex items-center gap-3">
+                    <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-4 flex items-center gap-3">
                       <div className="size-10 rounded-lg bg-violet-100 flex items-center justify-center">
-                        <span className="material-symbols-outlined text-violet-600">straighten</span>
+                        <DynamicIcon
+                          name="straighten"
+                          size={16}
+                          className="text-violet-600"
+                        />
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-slate-500">{locale === 'ko' ? '평균 사이즈' : 'Avg Size'}</p>
-                        <p className="text-sm font-bold text-slate-900">{dna.avgSizeCm}cm</p>
+                        <p className="text-xs font-semibold text-slate-500">
+                          {locale === "ko" ? "평균 사이즈" : "Avg Size"}
+                        </p>
+                        <p className="text-sm font-bold text-slate-900 dark:text-white">
+                          {dna.avgSizeCm}cm
+                        </p>
                       </div>
                     </div>
                   )}
                   <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
                     <div className="size-10 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-amber-600">lightbulb</span>
+                      <DynamicIcon
+                        name="lightbulb"
+                        size={16}
+                        className="text-amber-600"
+                      />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-amber-700">{locale === 'ko' ? '개선 포인트' : 'Improvement Tip'}</p>
-                      <p className="text-sm text-amber-800">{locale === 'ko' ? dna.weaknessKo : dna.weaknessEn}</p>
+                      <p className="text-xs font-semibold text-amber-700">
+                        {locale === "ko" ? "개선 포인트" : "Improvement Tip"}
+                      </p>
+                      <p className="text-sm text-amber-800">
+                        {locale === "ko" ? dna.weaknessKo : dna.weaknessEn}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -512,11 +813,23 @@ export default function StatsPage() {
             ) : (
               <div className="text-center py-16">
                 <div className="inline-flex items-center justify-center size-20 rounded-full bg-violet-100 mb-4">
-                  <span className="material-symbols-outlined text-4xl text-violet-400">genetics</span>
+                  <Dna size={36} className="text-violet-400" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">{locale === 'ko' ? '조과 5개 이상 등록하면' : 'Record 5+ catches to'}</h3>
-                <p className="text-sm text-slate-400">{locale === 'ko' ? '나만의 낚시 DNA를 분석해 드려요 🧬' : 'unlock your Fishing DNA 🧬'}</p>
-                <p className="text-xs text-slate-300 mt-2">{locale === 'ko' ? `현재 ${records.length}개` : `Current: ${records.length}`}</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                  {locale === "ko"
+                    ? "조과 5개 이상 등록하면"
+                    : "Record 5+ catches to"}
+                </h3>
+                <p className="text-sm text-slate-400">
+                  {locale === "ko"
+                    ? "나만의 낚시 DNA를 분석해 드려요 🧬"
+                    : "unlock your Fishing DNA 🧬"}
+                </p>
+                <p className="text-xs text-slate-300 mt-2">
+                  {locale === "ko"
+                    ? `현재 ${records.length}개`
+                    : `Current: ${records.length}`}
+                </p>
               </div>
             )}
           </section>
