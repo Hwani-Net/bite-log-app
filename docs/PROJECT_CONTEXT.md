@@ -1,7 +1,7 @@
 # BITE Log — Project Context
 
 > **최종 갱신**: 2026-03-15 (현재)
-> **경로**: `e:/AI_Programing/Fishing/fish-log`
+> **경로**: `e:/AI_Programing/BiteLog/fish-log`
 > **서버**: `npm run dev -- -p 3013`
 > **Firebase**: `bite-log-app` (hwanizero01@gmail.com, admin@gpt-korea.com) → https://bite-log-app.web.app
 > **NLM**: `ce527c4c-a5bd-4215-a349-ee9ac92fa655` (BITE Log 피크타임 리서치, 15소스)

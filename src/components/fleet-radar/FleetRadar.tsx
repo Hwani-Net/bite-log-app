@@ -95,6 +95,7 @@ export default function FleetRadar() {
   const [mapReady, setMapReady] = useState(false);
 
   // Leaflet refs
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef = useRef<any>(null);
   const leafletRef = useRef<typeof import('leaflet') | null>(null);
 
@@ -139,12 +140,14 @@ export default function FleetRadar() {
 
   // ── Leaflet initialization ───────────────────────────────────────────────
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let mapInstance: any;
 
     import('leaflet').then((L) => {
       leafletRef.current = L;
 
       // Fix icon paths
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (L.Icon.Default.prototype as any)._getIconUrl;
       L.Icon.Default.mergeOptions({
         iconRetinaUrl: '/leaflet/marker-icon-2x.png',
@@ -182,6 +185,7 @@ export default function FleetRadar() {
 
   // ── Global window helper for popup buttons ──
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).openShipDetail = (mmsi: string) => {
       const ship = fleet.find(s => s.mmsi === mmsi);
       if (ship) setSelectedShip(ship);
@@ -194,6 +198,7 @@ export default function FleetRadar() {
     const map = mapRef.current;
     if (!L || !map || !mapReady) return;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     map.eachLayer((layer: any) => {
       if (layer instanceof L.Marker || layer instanceof L.Circle) map.removeLayer(layer);
     });
