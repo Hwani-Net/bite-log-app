@@ -49,9 +49,13 @@
 - 배포 후 검증 없이 보고 금지
 
 ## 디자인 규칙
-- AGENTS.md의 Design Token 절대 변경 금지 (drift-guard 보호)
-- 색상: `--color-primary: #1392ec`, `--color-ranking-primary: #25d1f4`
-- 다크모드: `--color-background-dark: #101a22`
+- AGENTS.md의 Design Token 절대 변경 금지 (drift-guard 보호, 2436 토큰 잠금)
+- 디자인 시스템 v2.0: DESIGN.md 참조
+- 아이콘: Lucide React 전용 (Material Symbols 사용 금지 — 100% 마이그레이션 완료)
+- 다크모드: `.dark` class, bg-bg/bg-bg-dark 토큰 사용
+- 공유 UI: `src/components/ui/` (Card, Badge, Button, Skeleton 등 10개)
+- Mock 데이터: `// @mock-data — [설명]` 태그 필수 (grep @mock-data로 검색)
+- 에러 처리: `src/lib/apiError.ts` + `apiClient.ts` (apiFetch 래퍼 사용)
 
 ## 앱 구조
 ```
