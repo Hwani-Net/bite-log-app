@@ -288,8 +288,11 @@ export default function FleetRadar() {
       className="bg-[#080d14] text-white min-h-dvh"
       style={{
         position: "fixed",
-        inset: 0,
-        zIndex: 1000,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 64,
+        zIndex: 40,
         background: "#0a1118",
         display: "flex",
         flexDirection: "column",
