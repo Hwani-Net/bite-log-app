@@ -407,7 +407,9 @@ export default function RecordPage() {
           {/* AI result badge (shows while still on photo step) */}
           {aiResult && aiResult.confidence > 0 && !aiAnalyzing && (
             <div className="flex items-center gap-3 bg-[#7dd3fc]/5 border border-[#7dd3fc]/20 rounded-xl p-3">
-              <span className="text-2xl">🐟</span>
+              <span className="text-xs font-bold text-[#7dd3fc] w-8 text-center">
+                {aiResult.koreanName.slice(0, 2)}
+              </span>
               <div className="flex-1">
                 <p className="text-sm font-bold text-[#7dd3fc]">
                   {aiResult.koreanName}{" "}
@@ -418,7 +420,6 @@ export default function RecordPage() {
                 <p className="text-xs text-white/60">{aiResult.description}</p>
                 {(aiResult.estimatedSizeCm || aiResult.estimatedWeightKg) && (
                   <p className="text-xs text-[#7dd3fc]/70 mt-0.5">
-                    📏{" "}
                     {aiResult.estimatedSizeCm
                       ? `약 ${aiResult.estimatedSizeCm}cm`
                       : ""}
@@ -432,7 +433,7 @@ export default function RecordPage() {
                 )}
                 {aiResult.fishingTip && (
                   <p className="text-xs text-[#c9a84c]/80 mt-0.5">
-                    💡 {aiResult.fishingTip}
+                    {aiResult.fishingTip}
                   </p>
                 )}
               </div>
@@ -446,7 +447,7 @@ export default function RecordPage() {
               {voiceState === "review" && voiceParsed && (
                 <div className="bg-[#c9a84c]/5 border border-[#c9a84c]/20 rounded-2xl p-4 mb-1">
                   <p className="text-xs text-[#c9a84c] font-semibold mb-1">
-                    🎤 인식된 내용
+                    인식된 내용
                   </p>
                   <p className="text-sm text-white/70 mb-2">
                     &quot;{voiceTranscript}&quot;
@@ -454,7 +455,7 @@ export default function RecordPage() {
                   <div className="flex flex-wrap gap-1.5 mb-3">
                     {voiceParsed.species && (
                       <span className="text-xs px-2 py-1 bg-[#c9a84c]/10 text-[#c9a84c] rounded-full font-medium">
-                        🐟 {voiceParsed.species}
+                        {voiceParsed.species}
                       </span>
                     )}
                     {voiceParsed.count && (
@@ -464,12 +465,12 @@ export default function RecordPage() {
                     )}
                     {voiceParsed.sizeCm && (
                       <span className="text-xs px-2 py-1 bg-[#c9a84c]/10 text-[#c9a84c] rounded-full font-medium">
-                        📏 {voiceParsed.sizeCm}cm
+                        {voiceParsed.sizeCm}cm
                       </span>
                     )}
                     {voiceParsed.locationHint && (
                       <span className="text-xs px-2 py-1 bg-[#c9a84c]/10 text-[#c9a84c] rounded-full font-medium">
-                        📍 {voiceParsed.locationHint}
+                        {voiceParsed.locationHint}
                       </span>
                     )}
                   </div>
@@ -604,7 +605,7 @@ export default function RecordPage() {
                 )}
                 {aiResult && aiResult.confidence > 0 && !aiAnalyzing && (
                   <p className="text-xs font-medium text-[#c9a84c]">
-                    🤖 AI: {aiResult.koreanName} ({aiResult.confidence}%)
+                    AI: {aiResult.koreanName} ({aiResult.confidence}%)
                   </p>
                 )}
               </div>
@@ -619,7 +620,7 @@ export default function RecordPage() {
                 {t("record.species")}
                 {aiResult && aiResult.confidence > 0 && !aiAnalyzing && (
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a84c]/10 text-[#c9a84c] font-medium">
-                    🤖 AI {locale === "ko" ? "추천" : "suggested"}
+                    AI {locale === "ko" ? "추천" : "suggested"}
                   </span>
                 )}
               </span>
@@ -831,7 +832,7 @@ export default function RecordPage() {
               {!tideLoading && tide ? (
                 <div>
                   <div className="text-[10px] text-white/30 mb-1">
-                    📍 {tide.stationName}
+                    {tide.stationName}
                   </div>
                   <div className="flex flex-wrap gap-2 text-xs">
                     {tide.tides.map((t, i) => (

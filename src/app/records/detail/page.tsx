@@ -390,7 +390,7 @@ function RecordDetailContent() {
               </p>
               {record.location.lat && record.location.lng && (
                 <p className="text-[10px] text-white/30 mt-0.5">
-                  📍 {record.location.lat.toFixed(4)},{" "}
+                  {record.location.lat.toFixed(4)},{" "}
                   {record.location.lng.toFixed(4)}
                 </p>
               )}
@@ -448,7 +448,7 @@ function RecordDetailContent() {
                 />
                 {locale === "ko" ? "물때 정보" : "Tide"}
                 <span className="text-[10px] text-white/30 ml-auto">
-                  📍 {record.tide.stationName} 관측소
+                  {record.tide.stationName} 관측소
                 </span>
               </div>
               <div className="flex flex-wrap gap-2 text-xs">

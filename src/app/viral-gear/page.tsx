@@ -9,6 +9,7 @@ import {
 } from "@/services/viralGearService";
 import { useAppStore } from "@/store/appStore";
 import BottomNav from "@/components/BottomNav";
+import { ShoppingCart } from "lucide-react";
 
 const LABELS = {
   ko: {
@@ -93,7 +94,7 @@ function GearCard({ item, locale }: { item: ViralGearItem; locale: string }) {
               {item.category}
             </span>
             <span className="text-xs text-sky-600 font-medium">
-              🎣 {item.species}
+              {item.species}
             </span>
           </div>
         </div>
@@ -123,7 +124,7 @@ function GearCard({ item, locale }: { item: ViralGearItem; locale: string }) {
           rel="noopener noreferrer sponsored"
           className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-amber-100 transition-colors"
         >
-          <span>🛒</span>
+          <ShoppingCart size={14} />
           {L.buy}
         </a>
       </div>
@@ -216,11 +217,11 @@ export default function ViralGearPage() {
             <div className="flex items-center gap-2 mb-2">
               {report.isAI ? (
                 <span className="text-xs font-bold bg-white/20 px-2 py-0.5 rounded-full">
-                  🤖 {L.aiTag}
+                  {L.aiTag}
                 </span>
               ) : (
                 <span className="text-xs font-bold bg-white/20 px-2 py-0.5 rounded-full">
-                  📋 {L.mockTag}
+                  {L.mockTag}
                 </span>
               )}
               <span className="text-xs text-white/70">
@@ -231,12 +232,12 @@ export default function ViralGearPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <p className="text-[10px] text-white/70">{L.topSpecies}</p>
-                <p className="text-base font-bold">🎣 {report.topSpecies}</p>
+                <p className="text-base font-bold">{report.topSpecies}</p>
               </div>
               {report.hotKeyword && (
                 <div>
                   <p className="text-[10px] text-white/70">{L.hotKeyword}</p>
-                  <p className="text-base font-bold">🔥 {report.hotKeyword}</p>
+                  <p className="text-base font-bold">{report.hotKeyword}</p>
                 </div>
               )}
             </div>

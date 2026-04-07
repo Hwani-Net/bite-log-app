@@ -4,6 +4,15 @@ import { useAppStore } from "@/store/appStore";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { DynamicIcon } from "@/lib/iconMap";
+import {
+  Anchor,
+  Flame,
+  Scale,
+  Fish,
+  Newspaper,
+  Trophy,
+  Trash2,
+} from "lucide-react";
 
 export default function SettingsPage() {
   const { t, theme, setTheme, locale, setLocale } = useAppStore();
@@ -66,7 +75,9 @@ export default function SettingsPage() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-2xl text-white">🎣</span>
+                  <span className="text-xs font-bold text-white">
+                    {user.displayName?.charAt(0) ?? "?"}
+                  </span>
                 )}
               </div>
               <div className="flex-1 min-w-0">
@@ -87,7 +98,7 @@ export default function SettingsPage() {
           ) : (
             <div className="flex flex-col items-center gap-4 py-2">
               <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#c9a84c] to-[#7dd3fc] flex items-center justify-center shadow-lg">
-                <span className="text-2xl">🎣</span>
+                <span className="text-xs font-bold text-white">?</span>
               </div>
               <div className="text-center">
                 <h3 className="font-bold text-white">
@@ -217,18 +228,18 @@ export default function SettingsPage() {
         <div className="bg-white/5 backdrop-blur-[12px] border border-white/10 rounded-2xl p-4 space-y-3">
           {[
             {
-              icon: "🐟",
+              Icon: Fish,
               label:
                 locale === "ko" ? "입질 최적 시간 알림" : "Bite Time Alert",
               key: "biteTimeAlert",
             },
             {
-              icon: "📰",
+              Icon: Newspaper,
               label: locale === "ko" ? "조과 뉴스 알림" : "News Alert",
               key: "newsAlert",
             },
             {
-              icon: "🏆",
+              Icon: Trophy,
               label: locale === "ko" ? "배지 획득 알림" : "Badge Alert",
               key: "badgeAlert",
             },
@@ -236,7 +247,7 @@ export default function SettingsPage() {
             <div key={item.key}>
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm text-white/80 flex items-center gap-2">
-                  <span>{item.icon}</span> {item.label}
+                  <item.Icon size={15} className="text-white/50" /> {item.label}
                 </span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <span className="sr-only">{item.label}</span>
@@ -265,7 +276,7 @@ export default function SettingsPage() {
             href="/booking"
             className="bg-white/5 backdrop-blur-[12px] border border-white/10 rounded-2xl p-4 flex flex-col items-center gap-2 hover:border-[#c9a84c]/30 transition-colors"
           >
-            <span className="text-2xl">🎣</span>
+            <Anchor size={22} className="text-white/60" />
             <span className="text-xs font-medium text-white/80">
               {locale === "ko" ? "낚시 예약" : "Booking"}
             </span>
@@ -274,7 +285,7 @@ export default function SettingsPage() {
             href="/news"
             className="bg-white/5 backdrop-blur-[12px] border border-white/10 rounded-2xl p-4 flex flex-col items-center gap-2 hover:border-[#c9a84c]/30 transition-colors"
           >
-            <span className="text-2xl">🔥</span>
+            <Flame size={22} className="text-white/60" />
             <span className="text-xs font-medium text-white/80">
               {locale === "ko" ? "조과 소식" : "News"}
             </span>
@@ -283,7 +294,7 @@ export default function SettingsPage() {
             href="/regulations"
             className="bg-white/5 backdrop-blur-[12px] border border-white/10 rounded-2xl p-4 flex flex-col items-center gap-2 hover:border-[#c9a84c]/30 transition-colors"
           >
-            <span className="text-2xl">⚖️</span>
+            <Scale size={22} className="text-white/60" />
             <span className="text-xs font-medium text-white/80">
               {locale === "ko" ? "금어기·법규" : "Regulations"}
             </span>
@@ -375,7 +386,7 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between py-2">
             <div>
               <span className="text-sm text-white/80 flex items-center gap-2">
-                <span>🗑️</span>{" "}
+                <Trash2 size={15} className="text-white/50" />{" "}
                 {locale === "ko" ? "조과 기록 초기화" : "Reset Catch Records"}
               </span>
               <p className="text-[11px] text-white/60 mt-0.5 ml-7">
@@ -406,7 +417,7 @@ export default function SettingsPage() {
       </section>
 
       <div className="text-center text-xs text-white/30 mt-6">
-        <p>🎣 {locale === "ko" ? "나만의 낚시 일지" : "Your Fishing Diary"}</p>
+        <p>{locale === "ko" ? "나만의 낚시 일지" : "Your Fishing Diary"}</p>
       </div>
     </div>
   );

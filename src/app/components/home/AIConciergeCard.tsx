@@ -53,7 +53,7 @@ export default function AIConciergeCard({ locale }: AIConciergeCardProps) {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider mb-0.5">
-              {isKo ? "AI 컨시어지" : "AI Concierge"} ✨
+              {isKo ? "AI 컨시어지" : "AI Concierge"}
             </p>
             <p className="text-sm font-bold text-white truncate">
               {inSeasonSpecies.length > 0
@@ -78,7 +78,7 @@ export default function AIConciergeCard({ locale }: AIConciergeCardProps) {
         <Link href="/season-forecast" className="block px-4 py-3 group/season">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] font-semibold text-white/60 uppercase tracking-wider">
-              🎣 {isKo ? "지금 잡히는 어종" : "In Season"}
+              {isKo ? "지금 잡히는 어종" : "In Season"}
             </p>
             <span className="text-[9px] text-white/50 flex items-center gap-0.5 group-hover/season:text-white/80 transition-colors">
               {isKo ? "상세" : "Details"}
@@ -101,9 +101,7 @@ export default function AIConciergeCard({ locale }: AIConciergeCardProps) {
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${isGold ? "bg-amber-300" : "bg-green-300"}`}
                     />
-                    <span>
-                      {d.emoji} {d.species}
-                    </span>
+                    <span>{d.species}</span>
                   </span>
                 );
               })}
@@ -115,10 +113,9 @@ export default function AIConciergeCard({ locale }: AIConciergeCardProps) {
           )}
           {closed.length > 0 && (
             <div className="mt-2 flex items-center gap-1.5 text-[10px] text-red-200">
-              <span>⛔</span>
               <span>
                 {isKo ? "금어기" : "Closed"}:{" "}
-                {closed.map((d) => `${d.emoji} ${d.species}`).join(", ")}
+                {closed.map((d) => d.species).join(", ")}
               </span>
             </div>
           )}

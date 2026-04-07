@@ -327,8 +327,8 @@ function CatchGallery({ records }: { records: CatchRecord[] }) {
                   <div
                     className={`w-full h-full bg-gradient-to-br ${fishStyle.gradient} flex items-center justify-center brightness-75`}
                   >
-                    <span className="text-5xl opacity-60">
-                      {fishStyle.emoji}
+                    <span className="text-lg font-bold text-white/40">
+                      {record.species.slice(0, 2)}
                     </span>
                   </div>
                 )}

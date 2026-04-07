@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 interface SplashScreenProps {
   onFinish: () => void;
 }
 
 export default function SplashScreen({ onFinish }: SplashScreenProps) {
-  const [phase, setPhase] = useState<'enter' | 'hold' | 'exit'>('enter');
+  const [phase, setPhase] = useState<"enter" | "hold" | "exit">("enter");
 
   useEffect(() => {
     // Phase 1: enter (logo animates in) 0~800ms
-    const holdTimer = setTimeout(() => setPhase('hold'), 800);
+    const holdTimer = setTimeout(() => setPhase("hold"), 800);
     // Phase 2: hold (sparkles + ripple) 800~2200ms
-    const exitTimer = setTimeout(() => setPhase('exit'), 2200);
+    const exitTimer = setTimeout(() => setPhase("exit"), 2200);
     // Phase 3: exit (fade out) 2200~2800ms → unmount
     const doneTimer = setTimeout(() => onFinish(), 2800);
 
@@ -210,7 +210,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
         }
       `}</style>
 
-      <div className={`splash-root${phase === 'exit' ? ' exit' : ''}`}>
+      <div className={`splash-root${phase === "exit" ? " exit" : ""}`}>
         {/* 물결 배경 */}
         <div className="wave-bg" />
 
@@ -218,22 +218,22 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
         <span className="beta-badge">BETA</span>
 
         {/* 리플 링 3개 */}
-        <div className="ripple-ring" style={{ animationDelay: '0s' }} />
-        <div className="ripple-ring" style={{ animationDelay: '0.8s' }} />
-        <div className="ripple-ring" style={{ animationDelay: '1.6s' }} />
+        <div className="ripple-ring" style={{ animationDelay: "0s" }} />
+        <div className="ripple-ring" style={{ animationDelay: "0.8s" }} />
+        <div className="ripple-ring" style={{ animationDelay: "1.6s" }} />
 
         {/* 스파클 점들 */}
         {[
-          { size: 5, top: '30%', left: '20%', delay: '0s' },
-          { size: 3, top: '25%', left: '75%', delay: '0.4s' },
-          { size: 6, top: '65%', left: '15%', delay: '0.8s', gold: true },
-          { size: 4, top: '60%', left: '80%', delay: '1.2s' },
-          { size: 5, top: '40%', left: '85%', delay: '0.6s', gold: true },
-          { size: 3, top: '72%', left: '55%', delay: '1.0s' },
+          { size: 5, top: "30%", left: "20%", delay: "0s" },
+          { size: 3, top: "25%", left: "75%", delay: "0.4s" },
+          { size: 6, top: "65%", left: "15%", delay: "0.8s", gold: true },
+          { size: 4, top: "60%", left: "80%", delay: "1.2s" },
+          { size: 5, top: "40%", left: "85%", delay: "0.6s", gold: true },
+          { size: 3, top: "72%", left: "55%", delay: "1.0s" },
         ].map((s, i) => (
           <div
             key={i}
-            className={`sparkle${s.gold ? ' gold' : ''}`}
+            className={`sparkle${s.gold ? " gold" : ""}`}
             style={{
               width: s.size,
               height: s.size,
@@ -245,12 +245,13 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
         ))}
 
         {/* 물고기 점프 */}
-        <div className="fish-jump" style={{ bottom: '32%', left: '38%', animationDelay: '0.6s' }}>
-          🐟
-        </div>
+        <div
+          className="fish-jump"
+          style={{ bottom: "32%", left: "38%", animationDelay: "0.6s" }}
+        />
 
         {/* 메인 로고 */}
-        <div className={`logo-wrap${phase !== 'enter' ? ' visible' : ''}`}>
+        <div className={`logo-wrap${phase !== "enter" ? " visible" : ""}`}>
           <div className="logo-text">
             <span className="logo-bite">BITE</span>
             <span className="logo-log"> Log</span>

@@ -25,19 +25,19 @@ const REGION_TABS: { label: string; value: Region | "전국" }[] = [
 
 const STATUS_CONFIG = {
   gold: {
-    label: "🔥 황금 시즌",
+    label: "황금 시즌",
     bg: "bg-[#c9a84c]/10 border-[#c9a84c]/40",
     text: "text-[#c9a84c]",
     badge: "bg-[#c9a84c]",
   },
   peak: {
-    label: "🎣 피크 시즌",
+    label: "피크 시즌",
     bg: "bg-green-500/10 border-green-500/30",
     text: "text-green-400",
     badge: "bg-green-500",
   },
   closed: {
-    label: "🚫 금어기",
+    label: "금어기",
     bg: "bg-red-500/10 border-red-500/30",
     text: "text-red-400",
     badge: "bg-red-500",
@@ -209,22 +209,22 @@ function FishCard({
           {/* Info chips */}
           <div className="flex flex-wrap gap-1.5">
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 border border-white/10 text-white/60">
-              🌊 서식수심 {data.habitatDepth}
+              서식수심 {data.habitatDepth}
             </span>
             {data.closedSeason && (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400">
-                ⛔ 금어기 {data.closedSeason.start}~{data.closedSeason.end}
+                금어기 {data.closedSeason.start}~{data.closedSeason.end}
               </span>
             )}
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 border border-white/10 text-white/60">
-              📊 총 방류 {formatCount(total)}마리
+              총 방류 {formatCount(total)}마리
             </span>
           </div>
 
           {/* Release sites table */}
           <div className="bg-white/5 rounded-xl p-3 border border-white/5">
             <p className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-2">
-              📍 지역별 방류 계획 ({sites[0]?.year || 2025}년 기준)
+              지역별 방류 계획 ({sites[0]?.year || 2025}년 기준)
             </p>
             <div>
               {sites.length > 0 ? (

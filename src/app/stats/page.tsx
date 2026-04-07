@@ -683,8 +683,12 @@ export default function StatsPage() {
               <div className="space-y-4">
                 {/* Archetype hero card */}
                 <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#c9a84c]/20 via-[#0f141b] to-[#7dd3fc]/10 border border-[#c9a84c]/30 p-6 text-white shadow-xl">
-                  <div className="absolute -right-6 -top-6 text-[120px] opacity-10">
-                    🧬
+                  <div className="absolute -right-6 -top-6 opacity-10">
+                    <DynamicIcon
+                      name="biotech"
+                      size={120}
+                      className="text-[#c9a84c]"
+                    />
                   </div>
                   <p className="text-xs font-medium text-[#c9a84c]/70 mb-1 uppercase tracking-[0.2em]">
                     {locale === "ko" ? "나의 낚시 DNA" : "My Fishing DNA"}
@@ -835,8 +839,8 @@ export default function StatsPage() {
                 </h3>
                 <p className="text-sm text-white/60">
                   {locale === "ko"
-                    ? "나만의 낚시 DNA를 분석해 드려요 🧬"
-                    : "unlock your Fishing DNA 🧬"}
+                    ? "나만의 낚시 DNA를 분석해 드려요"
+                    : "unlock your Fishing DNA"}
                 </p>
                 <p className="text-xs text-white/20 mt-2">
                   {locale === "ko"

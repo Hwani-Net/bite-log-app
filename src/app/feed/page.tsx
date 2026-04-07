@@ -156,7 +156,7 @@ export default function FeedPage() {
                 : "bg-white/5 border border-white/10 text-white/50 hover:text-white/70"
             }`}
           >
-            🐟 {locale === "ko" ? "어종별" : "By Species"}
+            {locale === "ko" ? "어종별" : "By Species"}
           </button>
           <button
             onClick={() => handleFilterChange("region")}
@@ -166,7 +166,7 @@ export default function FeedPage() {
                 : "bg-white/5 border border-white/10 text-white/50 hover:text-white/70"
             }`}
           >
-            📍 {locale === "ko" ? "지역별" : "By Region"}
+            {locale === "ko" ? "지역별" : "By Region"}
           </button>
         </div>
 
@@ -320,7 +320,9 @@ export default function FeedPage() {
               {/* Catch info */}
               <div className="px-4 pt-3 pb-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl">🐟</span>
+                  <span className="text-xs font-bold text-[#7dd3fc] w-8 text-center">
+                    {item.species.slice(0, 2)}
+                  </span>
                   <div>
                     <p className="text-base font-bold text-white">
                       {item.species}
@@ -330,21 +332,19 @@ export default function FeedPage() {
                       </span>
                     </p>
                     {item.sizeCm && (
-                      <p className="text-xs text-white/50">
-                        📏 {item.sizeCm}cm
-                      </p>
+                      <p className="text-xs text-white/50">{item.sizeCm}cm</p>
                     )}
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {item.weather && (
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a84c]/10 text-[#c9a84c] font-medium">
-                      🌤️ {item.weather.condition} {item.weather.tempC}°C
+                      {item.weather.condition} {item.weather.tempC}°C
                     </span>
                   )}
                   {item.tide && (
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#7dd3fc]/10 text-[#7dd3fc] font-medium">
-                      🌊 {item.tide.stationName}
+                      {item.tide.stationName}
                     </span>
                   )}
                 </div>

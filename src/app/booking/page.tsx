@@ -1,14 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { Anchor, ArrowLeft, ExternalLink } from "lucide-react";
 
 interface BookingPlatform {
   id: string;
   name: string;
   description: string;
   url: string;
-  icon: string;
   regions: string[];
   features: string[];
   color: string;
@@ -20,7 +19,6 @@ const PLATFORMS: BookingPlatform[] = [
     name: "선상24",
     description: "전국 실시간 선상낚시 예약 플랫폼",
     url: "https://www.sunsang24.com/",
-    icon: "⛵",
     regions: ["전국", "동해", "서해", "남해", "제주"],
     features: ["실시간 예약", "조황 정보", "낚싯배 비교"],
     color: "from-blue-500 to-cyan-500",
@@ -30,7 +28,6 @@ const PLATFORMS: BookingPlatform[] = [
     name: "더피싱",
     description: "배낚시·선상낚시 실시간 예약",
     url: "https://thefishing.kr/",
-    icon: "🎣",
     regions: ["전국", "동해", "서해", "남해"],
     features: ["긴급모집", "출조버스", "낚시대회"],
     color: "from-orange-500 to-red-500",
@@ -40,7 +37,6 @@ const PLATFORMS: BookingPlatform[] = [
     name: "낚시가",
     description: "방파제·갯바위·선상 종합 예약",
     url: "https://www.naksiga.com/",
-    icon: "🐠",
     regions: ["전국", "서해", "남해"],
     features: ["포인트 리뷰", "가격 비교", "초보 가이드"],
     color: "from-emerald-500 to-teal-500",
@@ -50,7 +46,6 @@ const PLATFORMS: BookingPlatform[] = [
     name: "피싱캠프",
     description: "낚시 패키지·체험·캠핑 예약",
     url: "https://www.fishingcamp.co.kr/",
-    icon: "⛺",
     regions: ["전국", "남해", "제주"],
     features: ["패키지 상품", "가족 체험", "장비 렌탈"],
     color: "from-violet-500 to-purple-500",
@@ -92,7 +87,6 @@ export default function BookingPage() {
             <div
               className={`bg-gradient-to-r ${platform.color} p-4 flex items-center gap-3`}
             >
-              <span className="text-3xl">{platform.icon}</span>
               <div>
                 <h3 className="text-lg font-bold text-white">
                   {platform.name}
@@ -123,7 +117,7 @@ export default function BookingPage() {
                     key={feature}
                     className="text-xs px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600"
                   >
-                    ✓ {feature}
+                    {feature}
                   </span>
                 ))}
               </div>
@@ -133,7 +127,7 @@ export default function BookingPage() {
 
         {/* Coming Soon */}
         <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50 p-6 text-center">
-          <span className="text-3xl mb-2 block">🚀</span>
+          <Anchor size={32} className="mx-auto mb-2 text-slate-400" />
           <h3 className="text-sm font-bold text-slate-700 mb-1">
             BITE Log 자체 예약 시스템 준비 중
           </h3>

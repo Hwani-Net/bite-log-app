@@ -65,12 +65,12 @@ function shipTypeLabel(type: string): string {
 
 function shipTypeEmoji(type: string): string {
   const map: Record<string, string> = {
-    fishing: "🎣",
-    cargo: "🚢",
-    leisure: "⛵",
-    passenger: "🛳️",
+    fishing: "어선",
+    cargo: "화물",
+    leisure: "레저",
+    passenger: "여객",
   };
-  return map[type] ?? "🚤";
+  return map[type] ?? "선박";
 }
 
 function courseDirection(deg: number): string {

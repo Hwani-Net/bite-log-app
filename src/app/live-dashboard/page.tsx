@@ -83,17 +83,6 @@ function RegionCard({ stat }: { stat: RegionStat }) {
   return (
     <div className="bg-white/5 backdrop-blur-[12px] rounded-2xl p-3 border border-white/10">
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-lg">
-          {stat.region === "서해"
-            ? "🌅"
-            : stat.region === "남해"
-              ? "🏝️"
-              : stat.region === "동해"
-                ? "🌊"
-                : stat.region === "제주"
-                  ? "🍊"
-                  : "📍"}
-        </span>
         <span className={`text-sm font-bold ${accent}`}>{stat.region}</span>
       </div>
       <div className="flex items-end justify-between">
@@ -103,9 +92,7 @@ function RegionCard({ stat }: { stat: RegionStat }) {
         </div>
         <div className="text-right">
           <p className="text-[10px] text-white/30">인기 어종</p>
-          <p className="text-xs font-bold text-white/70">
-            {stat.emoji} {stat.topSpecies}
-          </p>
+          <p className="text-xs font-bold text-white/70">{stat.topSpecies}</p>
         </div>
       </div>
     </div>
@@ -123,7 +110,9 @@ function SpeciesRow({ stat, rank }: { stat: SpeciesStat; rank: number }) {
       >
         {rank}
       </span>
-      <span className="text-xl">{stat.emoji}</span>
+      <span className="text-xs font-bold text-white/40 w-6 text-center">
+        {stat.species.slice(0, 2)}
+      </span>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-bold text-white">{stat.species}</p>
         <p className="text-[10px] text-white/30 truncate">{stat.topLocation}</p>
@@ -170,7 +159,7 @@ function LiveNewsTicker({ news }: { news: FishingNewsItem[] }) {
                 </span>
                 {item.species && (
                   <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#7dd3fc]/10 text-[#7dd3fc] font-bold">
-                    🐟 {item.species}
+                    {item.species}
                   </span>
                 )}
               </div>
@@ -385,7 +374,6 @@ export default function LiveDashboardPage() {
                           : "bg-[#7dd3fc]/10 border-[#7dd3fc]/30 text-[#7dd3fc]"
                       }`}
                     >
-                      <span className="text-sm">{d.emoji}</span>
                       <span className="text-xs font-bold">{d.species}</span>
                       <span
                         className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
@@ -451,7 +439,11 @@ export default function LiveDashboardPage() {
           {/* ── Empty state ── */}
           {feed.length === 0 && news.length === 0 && (
             <div className="bg-white/5 backdrop-blur-[12px] rounded-2xl border border-white/10 p-8 text-center">
-              <span className="text-4xl">🎣</span>
+              <DynamicIcon
+                name="phishing"
+                size={40}
+                className="text-white/20 mb-1"
+              />
               <p className="text-sm font-bold text-white mt-3">
                 아직 오늘의 조과가 없습니다
               </p>

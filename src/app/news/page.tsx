@@ -30,32 +30,33 @@ function FreshnessBadge({ freshness }: { freshness: string }) {
       bg: "bg-red-500",
       text: "text-white",
       label: "실시간",
-      dot: "🔴",
+      dotCls: "bg-white",
     },
     today: {
       bg: "bg-[#c9a84c]",
       text: "text-[#080d14]",
       label: "오늘",
-      dot: "🟡",
+      dotCls: "bg-[#080d14]",
     },
     week: {
       bg: "bg-white/10",
       text: "text-white/60",
       label: "이번주",
-      dot: "⚪",
+      dotCls: "bg-white/40",
     },
   }[freshness] || {
     bg: "bg-white/10",
     text: "text-white/60",
     label: "기타",
-    dot: "⚪",
+    dotCls: "bg-white/40",
   };
 
   return (
     <span
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${config.bg} ${config.text}`}
     >
-      {config.dot} {config.label}
+      <span className={`w-1.5 h-1.5 rounded-full ${config.dotCls}`} />
+      {config.label}
     </span>
   );
 }
@@ -75,14 +76,18 @@ function ReliabilityBadge({ reliability }: { reliability: string }) {
 }
 
 function SourceIcon({ source }: { source: string }) {
-  const icons: Record<string, string> = {
-    naver_blog: "📝",
-    naver_news: "📰",
-    naver_cafe: "☕",
-    youtube: "▶️",
-    community: "👥",
+  const labels: Record<string, string> = {
+    naver_blog: "블로그",
+    naver_news: "뉴스",
+    naver_cafe: "카페",
+    youtube: "YouTube",
+    community: "커뮤니티",
   };
-  return <span className="text-sm">{icons[source] || "📄"}</span>;
+  return (
+    <span className="text-[10px] font-medium text-white/40">
+      {labels[source] || "미디어"}
+    </span>
+  );
 }
 
 function NewsCard({ item }: { item: FishingNewsItem }) {
@@ -146,7 +151,7 @@ function NewsCard({ item }: { item: FishingNewsItem }) {
             )}
             {item.species && (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#7dd3fc]/10 text-[#7dd3fc] font-medium">
-                🐟 {item.species}
+                {item.species}
               </span>
             )}
             <span className="text-[10px] text-white/30 ml-auto">{timeAgo}</span>
@@ -231,7 +236,7 @@ export default function NewsPage() {
                     : "bg-white/5 text-white/60 hover:bg-white/10"
                 }`}
               >
-                {tab.emoji} {tab.label}
+                {tab.label}
               </button>
             ))}
           </div>
@@ -277,7 +282,6 @@ export default function NewsPage() {
           </div>
         ) : error ? (
           <div className="text-center py-16">
-            <p className="text-4xl mb-3">😢</p>
             <p className="text-white/50">{error}</p>
             <button
               onClick={loadNews}
@@ -288,7 +292,6 @@ export default function NewsPage() {
           </div>
         ) : news.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-4xl mb-3">🎣</p>
             <p className="text-white/50">해당 조건의 뉴스가 없습니다</p>
           </div>
         ) : (
@@ -313,8 +316,9 @@ export default function NewsPage() {
             {/* Today section */}
             {news.filter((n) => n.freshness === "today").length > 0 && (
               <div className="mb-4">
-                <h2 className="text-xs font-bold text-[#c9a84c] mb-2">
-                  🟡 오늘의 조과
+                <h2 className="text-xs font-bold text-[#c9a84c] mb-2 flex items-center gap-1">
+                  <span className="w-2 h-2 bg-[#c9a84c] rounded-full" />
+                  오늘의 조과
                 </h2>
                 <div className="space-y-3">
                   {news
@@ -329,8 +333,9 @@ export default function NewsPage() {
             {/* This week section */}
             {news.filter((n) => n.freshness === "week").length > 0 && (
               <div className="mb-4">
-                <h2 className="text-xs font-bold text-white/30 mb-2">
-                  ⚪ 이번주
+                <h2 className="text-xs font-bold text-white/30 mb-2 flex items-center gap-1">
+                  <span className="w-2 h-2 bg-white/20 rounded-full" />
+                  이번주
                 </h2>
                 <div className="space-y-3">
                   {news

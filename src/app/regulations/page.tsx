@@ -93,7 +93,7 @@ function RegulationCard({
         <div className="flex flex-col items-end gap-1">
           {reg.minSizeCm && (
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a84c]/20 text-[#c9a84c] font-bold">
-              📏 {reg.minSizeCm}cm↑
+              {reg.minSizeCm}cm↑
             </span>
           )}
           <ChevronRight
@@ -201,14 +201,18 @@ function RegulationCard({
               <p className="text-xs font-semibold text-[#c9a84c]">과태료</p>
               <p className="text-xs text-white/70">{reg.penaltyNote}</p>
               <p className="text-[10px] text-[#c9a84c]/60 mt-0.5">
-                📋 {reg.legalRef}
+                {reg.legalRef}
               </p>
             </div>
           </div>
 
           {/* Tip */}
           <div className="flex items-start gap-2 bg-[#7dd3fc]/10 border border-[#7dd3fc]/20 rounded-xl p-3">
-            <span className="text-sm mt-0.5">💡</span>
+            <DynamicIcon
+              name="lightbulb"
+              size={14}
+              className="text-[#7dd3fc] mt-0.5"
+            />
             <p className="text-xs text-[#7dd3fc]/80">{reg.tipKo}</p>
           </div>
         </div>
@@ -282,14 +286,14 @@ function QuickCheckWidget() {
               <span
                 className={`text-sm font-bold ${result.legal ? "text-[#c9a84c]" : "text-red-400"}`}
               >
-                {result.legal ? "✅ 포획 가능합니다" : "❌ 현재 포획 불가"}
+                {result.legal ? "포획 가능합니다" : "현재 포획 불가"}
               </span>
             </div>
             {result.violations.length > 0 && (
               <div className="space-y-0.5 mt-1">
                 {result.violations.map((v, i) => (
                   <p key={i} className="text-xs text-white/70">
-                    ⚠️ {v}
+                    · {v}
                   </p>
                 ))}
               </div>
@@ -465,7 +469,6 @@ export default function RegulationsPage() {
         {/* Empty state */}
         {filteredRegulations.length === 0 && (
           <div className="text-center py-12">
-            <span className="text-4xl">🔍</span>
             <p className="text-sm font-bold text-white/30 mt-3">
               {isKo ? "검색 결과가 없습니다" : "No results found"}
             </p>
@@ -478,7 +481,6 @@ export default function RegulationsPage() {
         {/* Disclaimer */}
         <div className="bg-[#c9a84c]/10 border border-[#c9a84c]/20 rounded-xl p-3 text-center">
           <p className="text-[10px] text-[#c9a84c]/70">
-            ⚠️{" "}
             {isKo
               ? "본 정보는 수산자원관리법 기준 참고용입니다. 정확한 규정은 해양수산부 공식 고시를 확인하세요."
               : "Reference only. Check official regulations from the Ministry of Oceans and Fisheries."}

@@ -306,7 +306,6 @@ export default function RankingPage() {
               </div>
             ) : (
               <div className="px-4 py-8 text-center">
-                <p className="text-4xl mb-3">🎣</p>
                 <p className="text-white/50 font-semibold">
                   {locale === "ko"
                     ? "이번 시즌 첫 번째 조과를 기록하세요!"
@@ -338,8 +337,10 @@ export default function RankingPage() {
                     <span className="w-7 text-center text-sm font-black text-white/30">
                       {entry.rank}
                     </span>
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-white/5 flex items-center justify-center text-xl shrink-0">
-                      {entry.user.photoURL ?? "🎣"}
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-white/5 flex items-center justify-center text-sm font-bold text-white/40 shrink-0">
+                      {entry.user.photoURL ??
+                        entry.user.displayName?.charAt(0) ??
+                        "?"}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p
@@ -397,7 +398,7 @@ export default function RankingPage() {
               <span className="text-2xl font-black">{data.myRank.rank}</span>
             </div>
             <div className="w-[1px] h-10 bg-[#080d14]/20" />
-            <div className="w-11 h-11 rounded-full border-2 border-[#080d14]/20 overflow-hidden bg-[#080d14]/10 flex items-center justify-center text-xl shrink-0">
+            <div className="w-11 h-11 rounded-full border-2 border-[#080d14]/20 overflow-hidden bg-[#080d14]/10 flex items-center justify-center text-sm font-bold text-[#080d14] shrink-0">
               {user.photoURL ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -406,7 +407,7 @@ export default function RankingPage() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                (data.myRank.user.photoURL ?? "🎣")
+                (data.myRank.user.displayName?.charAt(0) ?? "?")
               )}
             </div>
             <div className="flex-1 min-w-0">
@@ -416,8 +417,8 @@ export default function RankingPage() {
               <p className="text-[11px] opacity-70">
                 {data.myRank.rank <= 3
                   ? locale === "ko"
-                    ? "🏆 TOP 3!"
-                    : "🏆 TOP 3!"
+                    ? "TOP 3!"
+                    : "TOP 3!"
                   : locale === "ko"
                     ? `상위 ${Math.ceil((data.myRank.rank / (data.topThree.length + data.rest.length + 1)) * 100)}%`
                     : `Top ${Math.ceil((data.myRank.rank / (data.topThree.length + data.rest.length + 1)) * 100)}%`}

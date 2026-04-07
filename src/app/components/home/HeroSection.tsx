@@ -109,10 +109,10 @@ export default function HeroSection({ biteTime, loading }: HeroSectionProps) {
                   {timeLabel}
                 </span>
                 <span className="bg-white/10 rounded-full px-3 py-1.5 text-xs text-white/60">
-                  🌡 --°C
+                  --°C
                 </span>
                 <span className="bg-white/10 rounded-full px-3 py-1.5 text-xs text-white/60">
-                  🌊 --
+                  --
                 </span>
               </>
             )}
@@ -121,7 +121,7 @@ export default function HeroSection({ biteTime, loading }: HeroSectionProps) {
           {/* Location + Condition */}
           <div className="flex items-center justify-between bg-white/5 rounded-2xl px-4 py-2.5">
             <div className="flex items-center gap-2">
-              <span className="text-red-400 text-sm">📍</span>
+              <span className="text-red-400 text-sm">·</span>
               <span className="text-sm font-medium text-white/80">
                 {biteTime?.currentPhaseLabel
                   ? `${biteTime.currentPhaseLabel}`

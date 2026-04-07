@@ -22,6 +22,7 @@ import {
   ListChecks,
   Backpack,
   ShoppingBag,
+  ShoppingCart,
   ExternalLink,
   Bell,
 } from "lucide-react";
@@ -123,8 +124,8 @@ export default function TripPlanPage() {
     setAlertSet(true);
 
     const notificationPayload = [
-      `🎣 ${briefing.tripPlan.species} 출조 브리핑`,
-      `내일 ${briefing.tripPlan.location} 출조 준비하세요! 🚢`,
+      `${briefing.tripPlan.species} 출조 브리핑`,
+      `내일 ${briefing.tripPlan.location} 출조 준비하세요!`,
       "/icons/icon-192x192.png",
       "trip-briefing",
     ] as const;
@@ -279,7 +280,7 @@ export default function TripPlanPage() {
           {/* 알림 시간 */}
           <div>
             <label className="text-xs font-semibold text-white/50 mb-1.5 flex items-center gap-1 uppercase tracking-[0.2em]">
-              🛒 브리핑 발송 시간
+              브리핑 발송 시간
               <span className="text-[#c9a84c] text-[10px] normal-case tracking-normal">
                 (쿠팡 당일배송 주문 가능)
               </span>
@@ -474,7 +475,7 @@ export default function TripPlanPage() {
                         rel="noopener noreferrer"
                         className="shrink-0 size-7 flex items-center justify-center rounded-lg bg-[#c9a84c]/10 hover:bg-[#c9a84c]/20 transition-colors"
                       >
-                        <span className="text-sm">🛒</span>
+                        <ShoppingCart size={14} className="text-[#c9a84c]" />
                       </a>
                     )}
                   </div>
@@ -568,9 +569,7 @@ export default function TripPlanPage() {
                     : "bg-[#c9a84c] text-[#080d14] hover:opacity-90"
                 }`}
               >
-                {alertSet
-                  ? "✅ 알림이 설정되었습니다"
-                  : "🔔 출조 전날 알림 받기"}
+                {alertSet ? "알림이 설정되었습니다" : "출조 전날 알림 받기"}
               </button>
             </section>
           </>

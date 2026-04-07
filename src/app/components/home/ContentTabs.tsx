@@ -31,7 +31,6 @@ const NEWS_GRADIENTS = [
   "from-slate-700 via-slate-600 to-slate-500",
   "from-amber-600 via-orange-500 to-yellow-400",
 ];
-const NEWS_EMOJIS = ["🎣", "🐟", "🌊"];
 
 interface ContentTabsProps {
   records: CatchRecord[];
@@ -239,11 +238,7 @@ function NewsTab({
             <div className="relative w-full h-36 overflow-hidden">
               <div
                 className={`absolute inset-0 bg-gradient-to-br ${NEWS_GRADIENTS[i % NEWS_GRADIENTS.length]} flex items-center justify-center`}
-              >
-                <span className="text-5xl opacity-30">
-                  {NEWS_EMOJIS[i % NEWS_EMOJIS.length]}
-                </span>
-              </div>
+              ></div>
               {item.thumbnail && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -266,7 +261,7 @@ function NewsTab({
                 </span>
                 {item.species && (
                   <span className="text-[9px] px-2 py-0.5 rounded-full bg-teal-500/80 text-white font-bold">
-                    🐟 {item.species}
+                    {item.species}
                   </span>
                 )}
               </div>
@@ -333,7 +328,9 @@ function ForecastTab({
             key={s.species}
             className="flex items-center gap-3 bg-white dark:bg-slate-800/50 rounded-xl p-3 border border-slate-100 dark:border-slate-700/50"
           >
-            <span className="text-xl w-8 text-center">{s.emoji || "🐟"}</span>
+            <span className="text-xs w-8 text-center font-bold text-slate-400">
+              {s.species.slice(0, 2)}
+            </span>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-bold text-slate-800 dark:text-white">

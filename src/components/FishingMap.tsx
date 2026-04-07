@@ -23,8 +23,8 @@ function createFishIcon() {
       border: 2px solid white;
       box-shadow: 0 2px 8px rgba(19,146,236,0.4);
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-    ">🐟</div>`,
+      font-size: 11px; font-weight: 700; color: white;
+    ">★</div>`,
     iconSize: [32, 32],
     iconAnchor: [16, 16],
     popupAnchor: [0, -16],
@@ -97,7 +97,7 @@ export default function FishingMap({
       const popupContent = `
         <div style="font-family: sans-serif; min-width: 140px;">
           <div style="font-weight: 700; font-size: 13px; margin-bottom: 4px;">
-            📍 ${first.location.name}
+            ${first.location.name}
           </div>
           <div style="font-size: 11px; color: #64748b; margin-bottom: 6px;">
             ${locale === "ko" ? "방문" : "Visits"}: ${recs.length}${locale === "ko" ? "회" : ""} · 
@@ -171,13 +171,13 @@ export default function FishingMap({
       <div className="px-3 py-2 flex items-center justify-between bg-white/80 dark:bg-slate-900/80">
         <span className="text-[10px] text-slate-400">
           {locale === "ko"
-            ? `📍 ${geoRecords.length}개 포인트`
-            : `📍 ${geoRecords.length} spots`}
+            ? `${geoRecords.length}개 포인트`
+            : `${geoRecords.length} spots`}
         </span>
         <span className="text-[10px] text-slate-400">
           {locale === "ko"
-            ? `🐟 ${geoRecords.reduce((s, r) => s + r.count, 0)}마리`
-            : `🐟 ${geoRecords.reduce((s, r) => s + r.count, 0)} fish`}
+            ? `${geoRecords.reduce((s, r) => s + r.count, 0)}마리`
+            : `${geoRecords.reduce((s, r) => s + r.count, 0)} fish`}
         </span>
       </div>
     </div>
