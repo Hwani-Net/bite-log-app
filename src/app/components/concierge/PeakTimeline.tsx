@@ -20,21 +20,21 @@ const GRADE_COLORS: Record<
   { bar: string; bg: string; ring: string }
 > = {
   peak: {
-    bar: "bg-gradient-to-t from-orange-500 to-amber-400",
-    bg: "bg-amber-50",
-    ring: "ring-amber-400",
+    bar: "bg-gradient-to-t from-[#c9a84c] to-amber-400",
+    bg: "bg-[#c9a84c]/10",
+    ring: "ring-[#c9a84c]",
   },
   good: {
-    bar: "bg-gradient-to-t from-blue-500 to-cyan-400",
-    bg: "bg-blue-50",
-    ring: "ring-blue-400",
+    bar: "bg-gradient-to-t from-[#7dd3fc] to-cyan-400",
+    bg: "bg-[#7dd3fc]/10",
+    ring: "ring-[#7dd3fc]",
   },
   fair: {
-    bar: "bg-gradient-to-t from-slate-400 to-slate-300",
-    bg: "bg-slate-50",
-    ring: "ring-slate-300",
+    bar: "bg-gradient-to-t from-white/30 to-white/20",
+    bg: "bg-white/5",
+    ring: "ring-white/20",
   },
-  low: { bar: "bg-slate-200", bg: "bg-slate-50", ring: "ring-slate-200" },
+  low: { bar: "bg-white/10", bg: "bg-white/5", ring: "ring-white/10" },
 };
 
 // Species list for filter chips
@@ -116,8 +116,8 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
               }
               className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all whitespace-nowrap ${
                 selectedSpecies === sp.name
-                  ? "bg-gradient-to-r from-primary to-cyan-500 text-white border-transparent shadow-md shadow-primary/30 scale-105"
-                  : "bg-white/5 text-white/60 border-white/10 hover:border-primary/40"
+                  ? "bg-[#c9a84c] text-[#080d14] border-transparent shadow-md shadow-[#c9a84c]/30 scale-105"
+                  : "bg-white/5 text-white/60 border-white/10 hover:border-[#c9a84c]/40"
               }`}
             >
               {sp.name}
