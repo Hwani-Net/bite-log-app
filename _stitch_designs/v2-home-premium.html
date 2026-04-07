@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#242a38",
+                        "outline-variant": "#45464c",
+                        "primary-fixed-dim": "#efbd8a",
+                        "surface-container-low": "#151b29",
+                        "inverse-primary": "#7c572d",
+                        "surface-container": "#191f2d",
+                        "tertiary": "#c4c7ca",
+                        "secondary": "#7bd1fa",
+                        "on-primary-container": "#9c7346",
+                        "background": "#0d1320",
+                        "on-tertiary": "#2d3134",
+                        "tertiary-fixed-dim": "#c4c7ca",
+                        "surface-tint": "#efbd8a",
+                        "secondary-container": "#00799e",
+                        "surface-dim": "#0d1320",
+                        "secondary-fixed-dim": "#7bd1fa",
+                        "on-primary": "#472a03",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed-variant": "#614018",
+                        "primary": "#efbd8a",
+                        "on-tertiary-fixed-variant": "#44474a",
+                        "surface": "#0d1320",
+                        "on-secondary": "#003547",
+                        "on-surface-variant": "#c6c6cc",
+                        "primary-fixed": "#ffdcbc",
+                        "surface-container-highest": "#2f3543",
+                        "on-surface": "#dde2f5",
+                        "on-tertiary-container": "#787b7f",
+                        "error-container": "#93000a",
+                        "outline": "#909096",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#004d66",
+                        "tertiary-container": "#0a0e11",
+                        "tertiary-fixed": "#e0e2e6",
+                        "on-tertiary-fixed": "#191c1f",
+                        "inverse-surface": "#dde2f5",
+                        "on-secondary-fixed": "#001e2b",
+                        "on-secondary-container": "#e9f6ff",
+                        "surface-container-lowest": "#080e1b",
+                        "on-primary-fixed": "#2c1700",
+                        "on-error": "#690005",
+                        "surface-variant": "#2f3543",
+                        "surface-bright": "#333948",
+                        "primary-container": "#180a00",
+                        "inverse-on-surface": "#2a303f",
+                        "on-background": "#dde2f5",
+                        "secondary-fixed": "#c0e8ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0d1320;
+            color: #dde2f5;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(47, 53, 67, 0.4);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 0.5px solid rgba(255, 255, 255, 0.06);
+        }
+        .ghost-border {
+            border: 0.5px solid rgba(255, 255, 255, 0.06);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased overflow-x-hidden pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full h-16 flex items-center justify-between px-6 bg-[#0d1320]/80 backdrop-blur-md border-b border-white/5 z-50">
+<div class="flex items-center">
+<span class="material-symbols-outlined text-[#efbd8a] text-xl" data-icon="menu">menu</span>
+</div>
+<div class="flex flex-col items-center">
+<h1 class="text-[#efbd8a] font-light tracking-[0.2em] text-sm">BITE LOG</h1>
+<p class="font-['Inter'] uppercase tracking-[0.15em] font-light text-[0.5rem] text-[#c4c7ca]">Maritime Precision</p>
+</div>
+<div class="flex items-center">
+<span class="material-symbols-outlined text-[#efbd8a] text-xl" data-icon="notifications">notifications</span>
+</div>
+</header>
+<main class="mt-16 w-full max-w-[412px] mx-auto">
+<!-- Hero Section -->
+<section class="relative w-full aspect-[4/5] overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Cinematic photo-realistic shot of a lone angler on a dark rocky coast at dawn with misty blue atmosphere and golden highlights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvJkjfhWoNZvne9F9RH62UVqxIcF0GiNxGPttPu0OGdxN8JzZ6RZCqGdmGHqADWBhCUW5rMsv6G0hpY0cgm0spo2vAnFvidOw6iAFJ2s-y00qcEZwkNmkbv6Ng-mOsl0OuTWRlmg_95eq8H9qnmsGJKzMyMWPG7BfdcK1MB97_kqB_PISuVbFt9kHp9w8hUaWzhpXNuqTdb3hi4S921WbU2lvdUPQt0JJMmOWehp1yWmKw-o7zKgPvRUSU7M8yXcqDKfTHWJXlzQF8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-[#0d1320] via-transparent to-transparent"></div>
+<!-- Bite Index Score Ring -->
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="relative flex items-center justify-center w-56 h-56 rounded-full glass-panel shadow-[0_0_40px_rgba(123,209,250,0.1)]">
+<div class="absolute inset-2 border-[0.5px] border-[#7bd1fa]/20 rounded-full"></div>
+<div class="text-center">
+<span class="block text-[#c4c7ca] font-['Inter'] uppercase tracking-[0.2em] text-[0.6rem] mb-1">Bite Probability</span>
+<div class="flex items-baseline justify-center">
+<span class="text-7xl font-bold tracking-tighter text-[#efbd8a]">45</span>
+<span class="text-xl font-light text-[#7bd1fa] ml-1">/100</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Condition Pills -->
+<div class="absolute bottom-10 left-0 w-full px-6 flex flex-wrap gap-2 justify-center">
+<div class="glass-panel px-3 py-1.5 flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+<span class="text-[0.65rem] font-light uppercase tracking-widest">수온 14°C</span>
+</div>
+<div class="glass-panel px-3 py-1.5 flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<span class="text-[0.65rem] font-light uppercase tracking-widest">물세기 강함</span>
+</div>
+<div class="glass-panel px-3 py-1.5 flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+<span class="text-[0.65rem] font-light uppercase tracking-widest">1013hPa</span>
+</div>
+<div class="glass-panel px-3 py-1.5 flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<span class="text-[0.65rem] font-light uppercase tracking-widest">풍속 3m/s</span>
+</div>
+</div>
+</section>
+<!-- Stats Row -->
+<section class="px-8 py-10 bg-surface-container-low">
+<div class="flex justify-between items-center">
+<div class="flex-1 flex flex-col items-center">
+<span class="text-3xl font-bold tracking-tight text-on-surface">128</span>
+<span class="font-['Inter'] uppercase tracking-[0.15em] font-light text-[0.6rem] text-tertiary mt-1">Total Catches</span>
+</div>
+<div class="h-8 w-[0.5px] bg-white/10"></div>
+<div class="flex-1 flex flex-col items-center">
+<span class="text-3xl font-bold tracking-tight text-primary">15</span>
+<span class="font-['Inter'] uppercase tracking-[0.15em] font-light text-[0.6rem] text-tertiary mt-1">Record Species</span>
+</div>
+<div class="h-8 w-[0.5px] bg-white/10"></div>
+<div class="flex-1 flex flex-col items-center">
+<span class="text-3xl font-bold tracking-tight text-secondary">58</span>
+<span class="font-['Inter'] uppercase tracking-[0.15em] font-light text-[0.6rem] text-tertiary mt-1">Expeditions</span>
+</div>
+</div>
+</section>
+<!-- AI Advisor -->
+<section class="px-6 py-6">
+<div class="glass-panel p-5 relative overflow-hidden">
+<div class="absolute -right-10 -top-10 w-32 h-32 bg-secondary/10 blur-3xl"></div>
+<div class="flex items-start gap-4">
+<div class="shrink-0 w-10 h-10 border-[0.5px] border-secondary/40 flex items-center justify-center">
+<div class="w-4 h-4 bg-secondary shadow-[0_0_10px_#7bd1fa]"></div>
+</div>
+<div>
+<span class="font-['Inter'] uppercase tracking-[0.2em] font-light text-[0.6rem] text-secondary">AI Precision Advisor</span>
+<p class="text-sm italic font-light leading-relaxed text-on-surface mt-2">
+                            "현재 기압이 하강하고 있습니다. 수심 15m 지점의 테트라포드 주변을 노리십시오. 골드 루어 사용 시 히트 확률이 22% 상승합니다."
+                        </p>
+</div>
+</div>
+</div>
+</section>
+<!-- Species Ranking -->
+<section class="py-8">
+<div class="px-6 mb-4 flex justify-between items-end">
+<h2 class="font-['Inter'] uppercase tracking-[0.2em] font-light text-[0.7rem] text-tertiary">Species Ranking</h2>
+<span class="text-[0.6rem] font-light text-primary uppercase tracking-widest">View All ↗</span>
+</div>
+<div class="flex overflow-x-auto gap-4 px-6 snap-x">
+<!-- Rank 01 -->
+<div class="snap-start min-w-[200px] bg-surface-container p-6 border-t border-primary/20">
+<span class="text-4xl font-extralight text-white/10 block mb-2 tracking-tighter">01</span>
+<h3 class="text-xl font-light text-on-surface mb-4">감성돔</h3>
+<div class="space-y-1">
+<div class="flex justify-between text-[0.6rem] uppercase tracking-widest text-tertiary">
+<span>Activity</span>
+<span class="text-secondary">88%</span>
+</div>
+<div class="h-[1px] w-full bg-white/5">
+<div class="h-full bg-gradient-to-r from-secondary to-primary w-[88%]"></div>
+</div>
+</div>
+</div>
+<!-- Rank 02 -->
+<div class="snap-start min-w-[200px] bg-surface-container p-6 border-t border-white/5">
+<span class="text-4xl font-extralight text-white/10 block mb-2 tracking-tighter">02</span>
+<h3 class="text-xl font-light text-on-surface mb-4">참돔</h3>
+<div class="space-y-1">
+<div class="flex justify-between text-[0.6rem] uppercase tracking-widest text-tertiary">
+<span>Activity</span>
+<span class="text-secondary">72%</span>
+</div>
+<div class="h-[1px] w-full bg-white/5">
+<div class="h-full bg-gradient-to-r from-secondary to-primary w-[72%]"></div>
+</div>
+</div>
+</div>
+<!-- Rank 03 -->
+<div class="snap-start min-w-[200px] bg-surface-container p-6 border-t border-white/5">
+<span class="text-4xl font-extralight text-white/10 block mb-2 tracking-tighter">03</span>
+<h3 class="text-xl font-light text-on-surface mb-4">방어</h3>
+<div class="space-y-1">
+<div class="flex justify-between text-[0.6rem] uppercase tracking-widest text-tertiary">
+<span>Activity</span>
+<span class="text-secondary">45%</span>
+</div>
+<div class="h-[1px] w-full bg-white/5">
+<div class="h-full bg-gradient-to-r from-secondary to-primary w-[45%]"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Recent Catches -->
+<section class="px-6 py-8">
+<h2 class="font-['Inter'] uppercase tracking-[0.2em] font-light text-[0.7rem] text-tertiary mb-6">Recent Logged Catches</h2>
+<div class="grid grid-cols-1 gap-6">
+<!-- Catch 1 -->
+<div class="relative w-full aspect-video overflow-hidden group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Close-up of a premium fishing lure in the mouth of a large fish with dramatic sunset lighting reflected in the water" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6ruTUygS08LnKn0apX3l4E91waSQdCnCf3BOZNVprwmYpXdKXKyHLeI0HuOgBdIx9xW7Dil3mtdM1O6bM61JnBqP7d0VkXmaXnd9dRDSx9dyX5VHdaZ0WUy6wXPBCDvNLYFTwbhZ497JNN_U2l9YB0pNFGRJ1_ZlRVuKn2bx62_A_bhuJpL1yopO68AF6L2xMJBO1dlHQ5yxUSGqg-JaJ44EOWtaEGYy4hXNgLkOiNQMD2o3goXvWsq9Zpn-2xYFhb5bSyOO3RsRr"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+<div class="absolute bottom-0 left-0 w-full p-4 flex justify-between items-end">
+<div>
+<span class="text-[0.6rem] text-secondary tracking-widest uppercase mb-1 block">Incheon | 2024.05.12</span>
+<h4 class="text-lg font-light text-white">농어 82cm</h4>
+</div>
+<span class="text-[0.6rem] text-primary tracking-widest border border-primary/40 px-2 py-1 uppercase">New Record</span>
+</div>
+</div>
+<!-- Catch 2 -->
+<div class="relative w-full aspect-video overflow-hidden group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Professional fishing rod and reel set against a dark moody sea background with sharp crystalline focus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCu6LO3ePF1aauETmXb4rnywxF-LxvVYEIsA2v7DMO5hvxFyeRZnYyQt71oLAJa77rD_rfKeGgPF_hgMfZ1vQSENpqDEeW0zsMYOSlC3BROpTEvJn6hO6NiCLtM7S74BZfAo6xJkAOs33lik632ZUo1ToQkXKb1wNuqIFDOETEyQdmC6-zS8PA1inSU9Xd4MJX-W_pKWkEzT_by3f8OAyRaiCqaKZoRm0f5I4R9WJJxPJ6J8Viruz3WmK4ENqjr59VGKtyYlE7JX6ii"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+<div class="absolute bottom-0 left-0 w-full p-4 flex justify-between items-end">
+<div>
+<span class="text-[0.6rem] text-secondary tracking-widest uppercase mb-1 block">Jeju | 2024.05.10</span>
+<h4 class="text-lg font-light text-white">무늬오징어 1.2kg</h4>
+</div>
+<span class="text-[0.6rem] text-tertiary tracking-widest border border-white/10 px-2 py-1 uppercase">Standard</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- FAB -->
+<div class="fixed bottom-24 right-6 z-50">
+<button class="glass-panel w-14 h-14 flex items-center justify-center rounded-full shadow-[0_0_20px_rgba(239,189,138,0.2)] active:scale-95 transition-transform">
+<div class="relative w-5 h-5">
+<div class="absolute top-1/2 left-0 w-full h-[0.5px] bg-[#efbd8a]"></div>
+<div class="absolute left-1/2 top-0 h-full w-[0.5px] bg-[#efbd8a]"></div>
+</div>
+</button>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe bg-[#0d1320]/40 backdrop-blur-xl border-t border-white/5 h-20">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center text-[#7bd1fa] border-t-2 border-[#7bd1fa] pt-2 h-full" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-['Inter'] uppercase tracking-[0.15em] font-light text-[0.6rem]">홈</span>
+</a>
+<!-- Radar -->
+<a class="flex flex-col items-center justify-center text-[#c4c7ca] pt-2 h-full hover:bg-white/5 transition-all duration-300" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="explore">explore</span>
+<span class="font-['Inter'] uppercase tracking-[0.15em] font-light text-[0.6rem]">레이더</span>
+</a>
+<!-- AI -->
+<a class="flex flex-col items-center justify-center text-[#c4c7ca] pt-2 h-full hover:bg-white/5 transition-all duration-300" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="psychology">psychology</span>
+<span class="font-['Inter'] uppercase tracking-[0.15em] font-light text-[0.6rem]">AI</span>
+</a>
+<!-- Ranking -->
+<a class="flex flex-col items-center justify-center text-[#c4c7ca] pt-2 h-full hover:bg-white/5 transition-all duration-300" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="military_tech">military_tech</span>
+<span class="font-['Inter'] uppercase tracking-[0.15em] font-light text-[0.6rem]">랭킹</span>
+</a>
+<!-- Settings -->
+<a class="flex flex-col items-center justify-center text-[#c4c7ca] pt-2 h-full hover:bg-white/5 transition-all duration-300" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="settings">settings</span>
+<span class="font-['Inter'] uppercase tracking-[0.15em] font-light text-[0.6rem]">설정</span>
+</a>
+</nav>
+</body></html>

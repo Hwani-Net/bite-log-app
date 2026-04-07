@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "io.bitelog.app",
+  appId: "com.fishlog.diary",
   appName: "BiteLog",
   webDir: "out",
   server: {

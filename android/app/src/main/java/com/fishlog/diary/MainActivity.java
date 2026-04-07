@@ -1,4 +1,4 @@
-package io.bitelog.app;
+package com.fishlog.diary;
 
 import com.getcapacitor.BridgeActivity;
 

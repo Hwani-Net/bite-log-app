@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "io.bitelog.app"
+    namespace = "com.fishlog.diary"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "io.bitelog.app"
+        applicationId "com.fishlog.diary"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

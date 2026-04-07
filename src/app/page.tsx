@@ -425,20 +425,32 @@ function StatBar({
     },
   ];
 
+  const accents = [
+    "from-primary/15 to-accent/10",
+    "from-emerald-500/15 to-teal-400/10",
+    "from-violet-500/15 to-indigo-400/10",
+  ];
+  const iconColors = ["text-primary", "text-emerald-500", "text-violet-500"];
+
   return (
     <section className="px-4 pt-4">
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 flex divide-x divide-slate-100">
+      <div className="grid grid-cols-3 gap-2.5">
         {items.map((item, i) => (
-          <div key={i} className="flex-1 flex flex-col items-center py-3 px-2">
-            <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
+          <div
+            key={i}
+            className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${accents[i]} dark:from-slate-800/80 dark:to-slate-700/40 p-3.5 border border-white/40 dark:border-slate-700/50`}
+          >
+            <p className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
               {item.label}
             </p>
-            <div className="flex items-baseline gap-0.5 mt-0.5">
-              <span className="text-xl font-black text-slate-900">
+            <div className="flex items-baseline gap-1 mt-1.5">
+              <span
+                className={`text-2xl font-black ${iconColors[i]} dark:text-white`}
+              >
                 {item.value}
               </span>
               {item.unit && (
-                <span className="text-[10px] text-slate-400 font-medium">
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">
                   {item.unit}
                 </span>
               )}
@@ -989,36 +1001,43 @@ export default function HomePage() {
   if (!mounted) return null;
 
   return (
-    <div className="relative flex min-h-dvh w-full flex-col bg-bg dark:bg-bg-dark overflow-x-hidden pb-24">
-      {/* ── Header ── */}
-      <header className="flex items-center justify-between px-5 pt-6 pb-2 bg-bg/90 dark:bg-bg-dark/90 sticky top-0 z-30 backdrop-blur-md">
-        <div className="flex items-center gap-2">
-          <div className="bg-primary/10 p-1.5 rounded-lg text-primary">
-            <Fish size={20} />
+    <div className="relative flex min-h-dvh w-full flex-col bg-[#f0f4f8] dark:bg-[#0c1219] overflow-x-hidden pb-24">
+      {/* ── Header — v2 premium ── */}
+      <header className="flex items-center justify-between px-5 pt-5 pb-3 sticky top-0 z-30 bg-[#f0f4f8]/80 dark:bg-[#0c1219]/80 backdrop-blur-xl">
+        <div className="flex items-center gap-2.5">
+          <div className="bg-gradient-to-br from-primary to-accent p-2 rounded-xl shadow-lg shadow-primary/20">
+            <Fish size={18} className="text-white" strokeWidth={2.5} />
           </div>
-          <h1 className="text-xl font-black tracking-tight">
-            <span className="text-primary">BITE</span>
-            <span className="text-slate-900 dark:text-white"> Log</span>
-          </h1>
+          <div>
+            <h1 className="text-lg font-black tracking-tight leading-none">
+              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                BITE
+              </span>
+              <span className="text-slate-800 dark:text-white"> Log</span>
+            </h1>
+            <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">
+              입질의 순간을 기록하다
+            </p>
+          </div>
           {isDemo && (
-            <span className="text-[9px] font-bold bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded-full">
+            <span className="text-[8px] font-black bg-amber-400/20 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full ring-1 ring-amber-400/30">
               DEMO
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <Link
             href="/concierge"
-            className="size-9 flex items-center justify-center rounded-full bg-white dark:bg-surface-dark shadow-sm border border-slate-100 dark:border-slate-700 text-primary"
+            className="size-10 flex items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/10 to-primary/10 dark:from-violet-500/20 dark:to-primary/20 text-primary hover:scale-105 transition-transform"
           >
-            <Sparkles size={18} />
+            <Sparkles size={19} />
           </Link>
           <Link
             href="/alerts"
-            className="size-9 flex items-center justify-center rounded-full bg-white dark:bg-surface-dark shadow-sm border border-slate-100 dark:border-slate-700 hover:bg-sky-50 dark:hover:bg-slate-700 transition-colors"
+            className="size-10 flex items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 hover:scale-105 transition-transform"
             aria-label="알림 설정"
           >
-            <Bell size={18} className="text-slate-500 dark:text-slate-400" />
+            <Bell size={19} />
           </Link>
         </div>
       </header>
@@ -1046,9 +1065,10 @@ export default function HomePage() {
       <AIInsightBanner profile={aiProfile} locale={locale} />
 
       {/* ── 최근 조과 ── */}
-      <section className="px-4 pt-5">
+      <section className="px-4 pt-6">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-bold text-slate-800">
+          <h2 className="text-base font-black text-slate-800 dark:text-white flex items-center gap-2">
+            <span className="w-1 h-5 bg-gradient-to-b from-primary to-accent rounded-full" />
             {locale === "ko" ? "최근 조과" : "Recent Catches"}
           </h2>
           <Link
@@ -1086,7 +1106,8 @@ export default function HomePage() {
       {topNews.length > 0 && (
         <section className="px-4 pt-6">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+            <h2 className="text-base font-black text-slate-800 dark:text-white flex items-center gap-2">
+              <span className="w-1 h-5 bg-gradient-to-b from-red-500 to-orange-400 rounded-full" />
               <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
               {locale === "ko" ? "실시간 조과 소식" : "Live News"}
             </h2>
@@ -1134,13 +1155,14 @@ export default function HomePage() {
       {/* ── Windy 위성 날씨: 바람·파도·해류 (하단 배치 — 스크롤 차단 방지) ── */}
       <WindyWeatherSection locale={locale} />
 
-      {/* ── FAB ── */}
+      {/* ── FAB — v2 floating pill ── */}
       <Link
         href="/record"
-        className="fixed bottom-24 right-5 z-40 size-14 rounded-full bg-gradient-to-tr from-primary to-cyan-400 text-white shadow-xl shadow-primary/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
+        className="fixed bottom-24 right-4 z-40 flex items-center gap-2 px-5 h-12 rounded-full bg-gradient-to-r from-primary via-blue-500 to-accent text-white shadow-2xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all font-bold text-sm"
         aria-label="새 기록 추가"
       >
-        <Plus size={24} strokeWidth={2.5} />
+        <Plus size={18} strokeWidth={3} />
+        기록하기
       </Link>
     </div>
   );

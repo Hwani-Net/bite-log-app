@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;700;800&amp;family=Playfair+Display:ital,wght@0,400;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-[#060a14] text-[#dde2f5] antialiased overflow-x-hidden;
+                font-family: 'Inter', sans-serif;
+            }
+        }
+        @layer components {
+            .glass-effect {
+                background: rgba(255, 255, 255, 0.03);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+            }
+            .ambient-glow {
+                background: radial-gradient(circle at center, rgba(125, 211, 252, 0.08) 0%, transparent 70%);
+            }
+            .gold-glow {
+                text-shadow: 0 0 12px rgba(212, 165, 116, 0.4);
+            }
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "gold": "#d4a574",
+                        "ice": "#7dd3fc",
+                        "deep": "#060a14"
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="pb-24">
+<header class="fixed top-0 left-0 w-full h-20 flex items-center justify-between px-8 z-[100] bg-[#060a14]/60 backdrop-blur-xl">
+<div class="w-10">
+<div class="w-5 h-[1px] bg-gold/60 mb-1.5"></div>
+<div class="w-3 h-[1px] bg-gold/60"></div>
+</div>
+<div class="text-center">
+<h1 class="text-gold font-extralight tracking-[0.4em] text-xs mb-0.5">BITE LOG</h1>
+<p class="uppercase tracking-[0.3em] font-thin text-[0.5rem] opacity-40">Maritime Precision</p>
+</div>
+<div class="w-10 flex justify-end">
+<span class="material-symbols-outlined text-gold/80 text-xl font-thin">notifications</span>
+</div>
+</header>
+<main class="w-full max-w-[412px] mx-auto relative">
+<section class="relative w-full aspect-[3/4] flex items-center justify-center overflow-hidden pt-10">
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover opacity-60 scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvJkjfhWoNZvne9F9RH62UVqxIcF0GiNxGPttPu0OGdxN8JzZ6RZCqGdmGHqADWBhCUW5rMsv6G0hpY0cgm0spo2vAnFvidOw6iAFJ2s-y00qcEZwkNmkbv6Ng-mOsl0OuTWRlmg_95eq8H9qnmsGJKzMyMWPG7BfdcK1MB97_kqB_PISuVbFt9kHp9w8hUaWzhpXNuqTdb3hi4S921WbU2lvdUPQt0JJMmOWehp1yWmKw-o7zKgPvRUSU7M8yXcqDKfTHWJXlzQF8"/>
+<div class="absolute inset-0 bg-gradient-to-b from-deep/80 via-transparent to-deep"></div>
+</div>
+<div class="relative z-10 w-72 h-72 flex items-center justify-center">
+<div class="absolute inset-0 rounded-full border-[0.5px] border-white/5 shadow-2xl"></div>
+<div class="absolute inset-4 rounded-full glass-effect border-[0.5px] border-white/10 flex items-center justify-center">
+<div class="absolute inset-0 opacity-20">
+<div class="absolute top-2 left-1/2 -translate-x-1/2 w-[1px] h-3 bg-gold"></div>
+<div class="absolute bottom-2 left-1/2 -translate-x-1/2 w-[1px] h-3 bg-white"></div>
+<div class="absolute left-2 top-1/2 -translate-y-1/2 h-[1px] w-3 bg-white"></div>
+<div class="absolute right-2 top-1/2 -translate-y-1/2 h-[1px] w-3 bg-white"></div>
+</div>
+<div class="text-center relative">
+<span class="block text-ice font-thin uppercase tracking-[0.3em] text-[0.55rem] mb-2 opacity-60">Bite Probability</span>
+<div class="flex items-baseline justify-center">
+<span class="text-8xl font-extrabold tracking-tighter gold-glow text-gold">45</span>
+<span class="text-2xl font-thin text-white/40 ml-2">/ 100</span>
+</div>
+<div class="mt-4 flex justify-center gap-1">
+<div class="w-1 h-1 rounded-full bg-gold"></div>
+<div class="w-1 h-1 rounded-full bg-white/10"></div>
+<div class="w-1 h-1 rounded-full bg-white/10"></div>
+</div>
+</div>
+</div>
+<div class="absolute inset-8 rounded-full border-[0.5px] border-ice/20 animate-pulse"></div>
+</div>
+<div class="absolute bottom-6 left-0 w-full px-8 flex justify-between">
+<div class="flex flex-col">
+<span class="text-[0.5rem] font-thin uppercase tracking-[0.2em] text-white/40 mb-1">Water Temp</span>
+<span class="text-xs font-light tracking-widest text-ice">14.0°C</span>
+</div>
+<div class="flex flex-col text-right">
+<span class="text-[0.5rem] font-thin uppercase tracking-[0.2em] text-white/40 mb-1">Barometer</span>
+<span class="text-xs font-light tracking-widest text-gold">1013hPa</span>
+</div>
+</div>
+</section>
+<section class="relative px-10 py-16">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 ambient-glow -z-10"></div>
+<div class="grid grid-cols-3 gap-4">
+<div class="text-center group">
+<div class="text-4xl font-[800] tracking-tighter text-white mb-2">128</div>
+<div class="text-[0.55rem] font-[100] uppercase tracking-[0.25em] text-white/40 group-hover:text-gold transition-colors">Total Catches</div>
+</div>
+<div class="text-center group border-x border-white/5">
+<div class="text-4xl font-[800] tracking-tighter text-gold mb-2">15</div>
+<div class="text-[0.55rem] font-[100] uppercase tracking-[0.25em] text-white/40 group-hover:text-gold transition-colors">Species</div>
+</div>
+<div class="text-center group">
+<div class="text-4xl font-[800] tracking-tighter text-ice mb-2">58</div>
+<div class="text-[0.55rem] font-[100] uppercase tracking-[0.25em] text-white/40 group-hover:text-gold transition-colors">Expeditions</div>
+</div>
+</div>
+</section>
+<section class="px-8 pb-16">
+<div class="glass-effect rounded-3xl p-8 relative overflow-hidden">
+<div class="flex items-start gap-6">
+<div class="shrink-0 w-8 h-8 rounded-full border border-ice/30 flex items-center justify-center">
+<div class="w-2 h-2 bg-ice shadow-[0_0_10px_#7dd3fc]"></div>
+</div>
+<div class="space-y-4">
+<h4 class="text-[0.6rem] font-thin tracking-[0.3em] uppercase text-ice/80">AI Maritime Strategy</h4>
+<p class="text-base font-light italic leading-relaxed text-white/90 serif">
+                        "현재 기압이 하강하고 있습니다. 수심 15m 지점의 테트라포드 주변을 노리십시오. 골드 루어 사용 시 히트 확률이 22% 상승합니다."
+                    </p>
+</div>
+</div>
+</div>
+</section>
+<section class="py-12 bg-gradient-to-b from-transparent via-blue-900/5 to-transparent">
+<div class="px-10 mb-10 flex justify-between items-baseline">
+<h2 class="text-[0.65rem] font-thin tracking-[0.4em] uppercase text-white/40">Current Ranking</h2>
+<span class="text-[0.55rem] font-light text-gold tracking-[0.2em] uppercase cursor-pointer">Explore All →</span>
+</div>
+<div class="space-y-0">
+<div class="flex items-center px-10 py-6 border-b border-white/5 group hover:bg-white/[0.02] transition-colors">
+<span class="font-serif italic text-5xl text-gold/20 group-hover:text-gold/50 transition-all mr-12">01</span>
+<div class="flex-1">
+<h3 class="text-xl font-light tracking-wide text-white/90">감성돔</h3>
+<div class="flex items-center gap-4 mt-2">
+<div class="flex-1 h-[0.5px] bg-white/10 relative overflow-hidden">
+<div class="absolute left-0 top-0 h-full bg-gold w-[88%]"></div>
+</div>
+<span class="text-[0.55rem] font-thin text-gold tracking-widest">88%</span>
+</div>
+</div>
+</div>
+<div class="flex items-center px-10 py-6 border-b border-white/5 group hover:bg-white/[0.02] transition-colors">
+<span class="font-serif italic text-5xl text-gold/20 group-hover:text-gold/50 transition-all mr-10">02</span>
+<div class="flex-1">
+<h3 class="text-xl font-light tracking-wide text-white/90">참돔</h3>
+<div class="flex items-center gap-4 mt-2">
+<div class="flex-1 h-[0.5px] bg-white/10 relative overflow-hidden">
+<div class="absolute left-0 top-0 h-full bg-ice w-[72%]"></div>
+</div>
+<span class="text-[0.55rem] font-thin text-ice tracking-widest">72%</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-16">
+<div class="px-10 mb-8">
+<h2 class="text-[0.65rem] font-thin tracking-[0.4em] uppercase text-white/40">Field Journals</h2>
+</div>
+<div class="grid grid-cols-1 gap-[1px] bg-white/5">
+<div class="relative w-full aspect-[16/10] overflow-hidden bg-deep">
+<img class="w-full h-full object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6ruTUygS08LnKn0apX3l4E91waSQdCnCf3BOZNVprwmYpXdKXKyHLeI0HuOgBdIx9xW7Dil3mtdM1O6bM61JnBqP7d0VkXmaXnd9dRDSx9dyX5VHdaZ0WUy6wXPBCDvNLYFTwbhZ497JNN_U2l9YB0pNFGRJ1_ZlRVuKn2bx62_A_bhuJpL1yopO68AF6L2xMJBO1dlHQ5yxUSGqg-JaJ44EOWtaEGYy4hXNgLkOiNQMD2o3goXvWsq9Zpn-2xYFhb5bSyOO3RsRr"/>
+<div class="absolute inset-0 bg-gradient-to-t from-deep/90 via-transparent to-transparent"></div>
+<div class="absolute bottom-8 left-10">
+<p class="text-[0.5rem] text-ice tracking-[0.3em] uppercase mb-1">Incheon • 2024.05.12</p>
+<h4 class="text-2xl font-light text-white tracking-tight">농어 82cm</h4>
+</div>
+</div>
+<div class="relative w-full aspect-[16/10] overflow-hidden bg-deep">
+<img class="w-full h-full object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCu6LO3ePF1aauETmXb4rnywxF-LxvVYEIsA2v7DMO5hvxFyeRZnYyQt71oLAJa77rD_rfKeGgPF_hgMfZ1vQSENpqDEeW0zsMYOSlC3BROpTEvJn6hO6NiCLtM7S74BZfAo6xJkAOs33lik632ZUo1ToQkXKb1wNuqIFDOETEyQdmC6-zS8PA1inSU9Xd4MJX-W_pKWkEzT_by3f8OAyRaiCqaKZoRm0f5I4R9WJJxPJ6J8Viruz3WmK4ENqjr59VGKtyYlE7JX6ii"/>
+<div class="absolute inset-0 bg-gradient-to-t from-deep/90 via-transparent to-transparent"></div>
+<div class="absolute bottom-8 left-10">
+<p class="text-[0.5rem] text-gold tracking-[0.3em] uppercase mb-1">Jeju • 2024.05.10</p>
+<h4 class="text-2xl font-light text-white tracking-tight">무늬오징어 1.2kg</h4>
+</div>
+</div>
+</div>
+</section>
+</main>
+<div class="fixed bottom-28 right-8 z-[100]">
+<button class="glass-effect w-12 h-12 flex items-center justify-center rounded-full border border-white/10 shadow-2xl active:scale-95 transition-transform">
+<div class="relative w-4 h-4">
+<div class="absolute top-1/2 left-0 w-full h-[1px] bg-white/60"></div>
+<div class="absolute left-1/2 top-0 h-full w-[1px] bg-white/60"></div>
+</div>
+</button>
+</div>
+<nav class="fixed bottom-0 left-0 w-full z-[100] flex justify-around items-center px-6 pb-6 bg-deep/80 backdrop-blur-3xl h-24">
+<a class="relative flex flex-col items-center justify-center h-full px-4" href="#">
+<div class="absolute -top-[1px] left-1/2 -translate-x-1/2 w-8 h-[2px] bg-ice shadow-[0_0_8px_#7dd3fc]"></div>
+<span class="material-symbols-outlined text-ice text-xl font-thin mb-1">home</span>
+<span class="font-sans font-thin uppercase tracking-[0.1em] text-[0.5rem] text-ice">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center h-full px-4 text-white/30 hover:text-white/60 transition-colors" href="#">
+<span class="material-symbols-outlined text-xl font-thin mb-1">explore</span>
+<span class="font-sans font-thin uppercase tracking-[0.1em] text-[0.5rem]">Radar</span>
+</a>
+<a class="flex flex-col items-center justify-center h-full px-4 text-white/30 hover:text-white/60 transition-colors" href="#">
+<span class="material-symbols-outlined text-xl font-thin mb-1">hub</span>
+<span class="font-sans font-thin uppercase tracking-[0.1em] text-[0.5rem]">Intelligence</span>
+</a>
+<a class="flex flex-col items-center justify-center h-full px-4 text-white/30 hover:text-white/60 transition-colors" href="#">
+<span class="material-symbols-outlined text-xl font-thin mb-1">military_tech</span>
+<span class="font-sans font-thin uppercase tracking-[0.1em] text-[0.5rem]">Ranks</span>
+</a>
+<a class="flex flex-col items-center justify-center h-full px-4 text-white/30 hover:text-white/60 transition-colors" href="#">
+<span class="material-symbols-outlined text-xl font-thin mb-1">person</span>
+<span class="font-sans font-thin uppercase tracking-[0.1em] text-[0.5rem]">Profile</span>
+</a>
+</nav>
+
+</body></html>

@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">BiteLog</string>
     <string name="title_activity_main">BiteLog</string>
-    <string name="package_name">io.bitelog.app</string>
-    <string name="custom_url_scheme">io.bitelog.app</string>
+    <string name="package_name">com.fishlog.diary</string>
+    <string name="custom_url_scheme">com.fishlog.diary</string>
 </resources>
