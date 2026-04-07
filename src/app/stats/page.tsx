@@ -40,8 +40,8 @@ import {
 } from "recharts";
 
 const CHART_COLORS = [
-  "#1392ec",
-  "#2dd4bf",
+  "#c9a84c",
+  "#7dd3fc",
   "#22c55e",
   "#a855f7",
   "#f59e0b",
@@ -72,15 +72,15 @@ function MiniStatCard({
   unit: string;
 }) {
   return (
-    <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm flex flex-col gap-1 rounded-xl p-4 shadow-sm border border-primary/5">
-      <p className="text-slate-500 text-xs font-medium">{label}</p>
-      <p className="text-slate-900 text-xl font-bold">
-        {value}
-        <span className="text-sm ml-0.5 font-normal text-slate-500">
-          {unit}
-        </span>
+    <div className="glass-morphism border border-white/5 flex flex-col gap-1 rounded-xl p-4">
+      <p className="text-white/50 text-xs font-medium uppercase tracking-[0.2em]">
+        {label}
       </p>
-      <DynamicIcon name={icon} size={16} className="text-primary" />
+      <p className="text-white text-xl font-bold">
+        {value}
+        <span className="text-sm ml-0.5 font-normal text-white/40">{unit}</span>
+      </p>
+      <DynamicIcon name={icon} size={16} className="text-[#c9a84c]" />
     </div>
   );
 }
@@ -135,28 +135,26 @@ function CalendarView({
   const today = new Date().toISOString().slice(0, 10);
 
   return (
-    <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-4 border border-primary/5">
+    <div className="glass-morphism border border-white/5 rounded-xl p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={() => setMonthOffset((p) => p - 1)}
-          className="size-8 flex items-center justify-center rounded-lg hover:bg-slate-100:bg-slate-700 transition-colors"
+          className="size-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors"
         >
           <DynamicIcon
             name="chevron_left"
             size={18}
-            className="text-slate-500"
+            className="text-white/50"
           />
         </button>
-        <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-          {monthLabel}
-        </h4>
+        <h4 className="text-sm font-bold text-white">{monthLabel}</h4>
         <button
           onClick={() => setMonthOffset((p) => Math.min(p + 1, 0))}
           disabled={monthOffset >= 0}
-          className="size-8 flex items-center justify-center rounded-lg hover:bg-slate-100:bg-slate-700 transition-colors disabled:opacity-30"
+          className="size-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors disabled:opacity-30"
         >
-          <ChevronRight size={18} className="text-slate-500" />
+          <ChevronRight size={18} className="text-white/50" />
         </button>
       </div>
 
@@ -165,7 +163,7 @@ function CalendarView({
         {dayLabels.map((d, i) => (
           <div
             key={i}
-            className={`text-center text-[10px] font-medium py-1 ${i === 0 ? "text-red-400" : i === 6 ? "text-blue-400" : "text-slate-400"}`}
+            className={`text-center text-[10px] font-medium py-1 ${i === 0 ? "text-red-400" : i === 6 ? "text-[#7dd3fc]" : "text-white/40"}`}
           >
             {d}
           </div>
@@ -188,11 +186,11 @@ function CalendarView({
             <div
               key={day}
               className={`aspect-square rounded-lg flex flex-col items-center justify-center text-xs relative transition-all ${
-                isToday ? "ring-2 ring-primary" : ""
-              } ${catchCount > 0 ? "bg-primary/10" : ""}`}
+                isToday ? "ring-2 ring-[#c9a84c]" : ""
+              } ${catchCount > 0 ? "bg-[#c9a84c]/10" : ""}`}
             >
               <span
-                className={`font-medium ${isToday ? "text-primary font-bold" : "text-slate-700"}`}
+                className={`font-medium ${isToday ? "text-[#c9a84c] font-bold" : "text-white/60"}`}
               >
                 {day}
               </span>
@@ -200,7 +198,10 @@ function CalendarView({
                 <div className="absolute bottom-0.5 flex gap-0.5">
                   {Array.from({ length: Math.min(catchCount, 3) }).map(
                     (_, j) => (
-                      <div key={j} className="size-1 rounded-full bg-primary" />
+                      <div
+                        key={j}
+                        className="size-1 rounded-full bg-[#c9a84c]"
+                      />
                     ),
                   )}
                 </div>
@@ -211,13 +212,13 @@ function CalendarView({
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-4 mt-3 text-[10px] text-slate-400">
+      <div className="flex items-center justify-center gap-4 mt-3 text-[10px] text-white/40">
         <span className="flex items-center gap-1">
-          <div className="size-2 rounded-full bg-primary" />{" "}
+          <div className="size-2 rounded-full bg-[#c9a84c]" />{" "}
           {locale === "ko" ? "출조일" : "Fishing day"}
         </span>
         <span className="flex items-center gap-1">
-          <div className="size-2 rounded-full ring-2 ring-primary" />{" "}
+          <div className="size-2 rounded-full ring-2 ring-[#c9a84c]" />{" "}
           {locale === "ko" ? "오늘" : "Today"}
         </span>
       </div>
@@ -235,35 +236,35 @@ function BadgeCard({
 }) {
   return (
     <div
-      className={`bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-3 border transition-all ${badge.earned ? "border-primary/20 shadow-sm" : "border-slate-200 opacity-60"}`}
+      className={`glass-morphism rounded-xl p-3 border transition-all ${badge.earned ? "border-[#c9a84c]/30" : "border-white/5 opacity-60"}`}
     >
       <div className="flex items-center gap-3">
         <div
-          className={`size-10 rounded-lg flex items-center justify-center ${badge.earned ? "bg-gradient-to-tr from-primary to-cyan-400 text-white" : "bg-slate-100 text-slate-400"}`}
+          className={`size-10 rounded-lg flex items-center justify-center ${badge.earned ? "bg-gradient-to-tr from-[#c9a84c] to-[#7dd3fc] text-[#080d14]" : "bg-white/5 text-white/30"}`}
         >
           <DynamicIcon name={badge.icon} size={18} />
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
+          <h4 className="text-xs font-bold text-white truncate">
             {locale === "ko" ? badge.name.ko : badge.name.en}
           </h4>
-          <p className="text-[10px] text-slate-400 truncate">
+          <p className="text-[10px] text-white/40 truncate">
             {locale === "ko" ? badge.description.ko : badge.description.en}
           </p>
         </div>
         {badge.earned ? (
-          <Award size={20} className="text-primary" />
+          <Award size={20} className="text-[#c9a84c]" />
         ) : (
-          <span className="text-[10px] font-bold text-slate-400">
+          <span className="text-[10px] font-bold text-white/40">
             {Math.round(badge.progress * 100)}%
           </span>
         )}
       </div>
       {/* Progress bar */}
       {!badge.earned && (
-        <div className="mt-2 h-1 rounded-full bg-slate-100 overflow-hidden">
+        <div className="mt-2 h-1 rounded-full bg-white/10 overflow-hidden">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-primary to-cyan-400 transition-all"
+            className="h-full rounded-full bg-gradient-to-r from-[#c9a84c] to-[#7dd3fc] transition-all"
             style={{ width: `${badge.progress * 100}%` }}
           />
         </div>
@@ -349,15 +350,15 @@ export default function StatsPage() {
   if (!stats) return null;
 
   return (
-    <div className="page-enter relative z-10 pb-24">
+    <div className="page-enter relative z-10 pb-24 min-h-dvh bg-[#080d14] text-white">
       {/* Header */}
-      <header className="sticky top-0 z-50 flex items-center bg-bg/80 dark:bg-bg-dark/90 backdrop-blur-md p-4 pb-2 justify-between border-b border-primary/10">
-        <div className="text-primary flex size-10 shrink-0 items-center justify-center rounded-full" />
-        <h1 className="text-slate-900 text-lg font-bold leading-tight tracking-tight flex-1 text-center">
+      <header className="sticky top-0 z-50 flex items-center bg-[#080d14]/60 backdrop-blur-xl p-4 pb-2 justify-between border-b border-white/5">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-full" />
+        <h1 className="text-white text-lg font-bold leading-tight tracking-[0.1em] uppercase flex-1 text-center">
           {t("stats.title")}
           <BarChart3
             size={16}
-            className="text-primary ml-1 inline align-middle"
+            className="text-[#c9a84c] ml-1 inline align-middle"
           />
         </h1>
         <div className="flex w-10 items-center justify-end" />
@@ -365,15 +366,15 @@ export default function StatsPage() {
 
       {/* Tab bar */}
       <div className="px-4 pt-3">
-        <div className="flex h-10 items-center rounded-xl bg-slate-200/50 p-1">
+        <div className="flex h-10 items-center rounded-xl bg-white/5 border border-white/10 p-1">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`flex cursor-pointer h-full grow items-center justify-center gap-1.5 overflow-hidden rounded-lg px-2 text-xs font-semibold transition-all ${
                 activeTab === tab.key
-                  ? "bg-white shadow-sm text-primary"
-                  : "text-slate-500"
+                  ? "bg-[#c9a84c] text-[#080d14] shadow-sm"
+                  : "text-white/40"
               }`}
             >
               <DynamicIcon name={tab.icon} size={14} />
@@ -388,14 +389,14 @@ export default function StatsPage() {
           <>
             {/* Period filter */}
             <div className="px-4 py-3">
-              <div className="flex h-9 items-center justify-center rounded-xl bg-slate-200/50 p-1">
+              <div className="flex h-9 items-center justify-center rounded-xl bg-white/5 border border-white/10 p-1">
                 {PERIOD_TABS.map((tab) => (
                   <label
                     key={tab.value}
                     className={`flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 text-xs font-semibold transition-all ${
                       period === tab.value
-                        ? "bg-white shadow-sm text-primary"
-                        : "text-slate-500"
+                        ? "bg-[#c9a84c] text-[#080d14] shadow-sm"
+                        : "text-white/40"
                     }`}
                   >
                     <span className="truncate">
@@ -444,26 +445,32 @@ export default function StatsPage() {
 
             {/* Monthly trend chart */}
             <section className="mt-6 px-4">
-              <h3 className="text-slate-900 text-base font-bold mb-3 flex items-center gap-2">
+              <h3 className="text-white/50 text-base font-bold mb-3 flex items-center gap-2 uppercase tracking-[0.2em]">
                 {t("stats.monthlyTrend")}
-                <TrendingUp size={16} className="text-primary" />
+                <TrendingUp size={16} className="text-[#c9a84c]" />
               </h3>
-              <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm p-4 rounded-xl border border-primary/5 h-48">
+              <div className="glass-morphism border border-white/5 p-4 rounded-xl h-48">
                 {stats.monthlyTrend.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={stats.monthlyTrend}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="rgba(255,255,255,0.05)"
+                      />
                       <XAxis
                         dataKey="label"
-                        tick={{ fontSize: 11, fill: "#94a3b8" }}
+                        tick={{ fontSize: 11, fill: "rgba(255,255,255,0.4)" }}
                       />
-                      <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} />
+                      <YAxis
+                        tick={{ fontSize: 11, fill: "rgba(255,255,255,0.4)" }}
+                      />
                       <Tooltip
                         contentStyle={{
-                          background: "#ffffff",
-                          border: "1px solid #e2e8f0",
+                          background: "#0f141b",
+                          border: "1px solid rgba(255,255,255,0.1)",
                           borderRadius: "12px",
                           fontSize: "12px",
+                          color: "#ffffff",
                         }}
                       />
                       <Bar
@@ -486,14 +493,14 @@ export default function StatsPage() {
                           x2="0"
                           y2="1"
                         >
-                          <stop offset="0%" stopColor="#1392ec" />
-                          <stop offset="100%" stopColor="#2dd4bf" />
+                          <stop offset="0%" stopColor="#c9a84c" />
+                          <stop offset="100%" stopColor="#7dd3fc" />
                         </linearGradient>
                       </defs>
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <p className="text-center text-slate-400 py-8">
+                  <p className="text-center text-white/30 py-8">
                     {t("stats.noData")}
                   </p>
                 )}
@@ -502,11 +509,11 @@ export default function StatsPage() {
 
             {/* Species donut */}
             <section className="mt-8 px-4">
-              <h3 className="text-slate-900 text-base font-bold mb-3 flex items-center gap-2">
+              <h3 className="text-white/50 text-base font-bold mb-3 flex items-center gap-2 uppercase tracking-[0.2em]">
                 {t("stats.speciesRatio")}
-                <Target size={16} className="text-primary" />
+                <Target size={16} className="text-[#c9a84c]" />
               </h3>
-              <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm p-4 rounded-xl border border-primary/5">
+              <div className="glass-morphism border border-white/5 p-4 rounded-xl">
                 {stats.speciesBreakdown.length > 0 ? (
                   <ResponsiveContainer width="100%" height={250}>
                     <PieChart>
@@ -530,7 +537,12 @@ export default function StatsPage() {
                       </Pie>
                       <Legend
                         formatter={(value: string) => (
-                          <span style={{ fontSize: "12px", color: "#64748b" }}>
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              color: "rgba(255,255,255,0.5)",
+                            }}
+                          >
                             {value}
                           </span>
                         )}
@@ -542,16 +554,17 @@ export default function StatsPage() {
                           name,
                         ]}
                         contentStyle={{
-                          background: "#ffffff",
-                          border: "1px solid #e2e8f0",
+                          background: "#0f141b",
+                          border: "1px solid rgba(255,255,255,0.1)",
                           borderRadius: "12px",
                           fontSize: "12px",
+                          color: "#ffffff",
                         }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <p className="text-center text-slate-400 py-8">
+                  <p className="text-center text-white/30 py-8">
                     {t("stats.noData")}
                   </p>
                 )}
@@ -560,28 +573,28 @@ export default function StatsPage() {
 
             {/* Top spots */}
             <section className="mt-8 px-4 mb-8">
-              <h3 className="text-slate-900 text-base font-bold mb-3 flex items-center gap-2">
+              <h3 className="text-white/50 text-base font-bold mb-3 flex items-center gap-2 uppercase tracking-[0.2em]">
                 {t("stats.topSpots")}
-                <MapPin size={16} className="text-primary" />
+                <MapPin size={16} className="text-[#c9a84c]" />
               </h3>
               <div className="space-y-3">
                 {stats.topSpots.length > 0 ? (
                   stats.topSpots.map((spot, i) => (
                     <div
                       key={spot.spot.name}
-                      className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-3 border border-primary/5 flex items-center gap-3"
+                      className="glass-morphism border border-white/5 rounded-xl p-3 flex items-center gap-3"
                     >
-                      <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center font-bold text-primary">
+                      <div className="size-10 rounded-lg bg-[#c9a84c]/10 flex items-center justify-center font-bold text-[#c9a84c]">
                         {i === 0 ? <Trophy size={16} /> : i + 1}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-1">
-                          <MapPin size={14} className="text-primary" />
-                          <h4 className="text-sm font-bold">
+                          <MapPin size={14} className="text-[#c9a84c]" />
+                          <h4 className="text-sm font-bold text-white">
                             {spot.spot.name}
                           </h4>
                         </div>
-                        <p className="text-[10px] text-slate-400">
+                        <p className="text-[10px] text-white/40">
                           {spot.visits}
                           {t("stats.visits")} · {spot.totalCatch}
                           {t("stats.caught")}
@@ -590,7 +603,7 @@ export default function StatsPage() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-center text-slate-400 py-4">
+                  <p className="text-center text-white/30 py-4">
                     {t("stats.noData")}
                   </p>
                 )}
@@ -604,8 +617,8 @@ export default function StatsPage() {
             <CalendarView records={records} locale={locale} />
             {/* Recent trips from calendar */}
             <div className="mt-4">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-1">
-                <Clock size={14} className="text-primary" />
+              <h3 className="text-sm font-bold text-white/50 mb-2 flex items-center gap-1 uppercase tracking-[0.2em]">
+                <Clock size={14} className="text-[#c9a84c]" />
                 {locale === "ko" ? "최근 출조" : "Recent Trips"}
               </h3>
               <div className="space-y-2">
@@ -613,23 +626,23 @@ export default function StatsPage() {
                   <Link
                     key={r.id}
                     href={`/records/detail?id=${r.id}`}
-                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50:bg-slate-800 transition-colors"
+                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors"
                   >
-                    <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Fish size={14} className="text-primary" />
+                    <div className="size-8 rounded-lg bg-[#c9a84c]/10 flex items-center justify-center">
+                      <Fish size={14} className="text-[#c9a84c]" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-slate-900 truncate">
+                      <p className="text-xs font-semibold text-white truncate">
                         {r.species}{" "}
                         {r.sizeCm
                           ? `${r.sizeCm}cm`
                           : `${r.count}${locale === "ko" ? "마리" : ""}`}
                       </p>
-                      <p className="text-[10px] text-slate-400">
+                      <p className="text-[10px] text-white/40">
                         {r.date} · {r.location.name}
                       </p>
                     </div>
-                    <ChevronRight size={14} className="text-slate-300" />
+                    <ChevronRight size={14} className="text-white/20" />
                   </Link>
                 ))}
               </div>
@@ -646,12 +659,12 @@ export default function StatsPage() {
         {activeTab === "badges" && (
           <section className="px-4 py-4">
             {/* Summary */}
-            <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-4 border border-primary/5 mb-4 text-center">
-              <div className="text-3xl font-black text-primary">
+            <div className="glass-morphism border border-white/5 rounded-xl p-4 mb-4 text-center">
+              <div className="text-3xl font-black text-[#c9a84c] gold-glow">
                 {earnedCount}
-                <span className="text-lg text-slate-400">/{badges.length}</span>
+                <span className="text-lg text-white/40">/{badges.length}</span>
               </div>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-white/40 mt-1">
                 {locale === "ko" ? "달성한 배지" : "Badges Earned"}
               </p>
             </div>
@@ -669,17 +682,17 @@ export default function StatsPage() {
             {dna ? (
               <div className="space-y-4">
                 {/* Archetype hero card */}
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 p-6 text-white shadow-xl">
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#c9a84c]/20 via-[#0f141b] to-[#7dd3fc]/10 border border-[#c9a84c]/30 p-6 text-white shadow-xl">
                   <div className="absolute -right-6 -top-6 text-[120px] opacity-10">
                     🧬
                   </div>
-                  <p className="text-xs font-medium text-violet-200 mb-1">
+                  <p className="text-xs font-medium text-[#c9a84c]/70 mb-1 uppercase tracking-[0.2em]">
                     {locale === "ko" ? "나의 낚시 DNA" : "My Fishing DNA"}
                   </p>
-                  <h2 className="text-2xl font-black mb-1">
+                  <h2 className="text-2xl font-black mb-1 text-[#c9a84c] gold-glow">
                     {locale === "ko" ? dna.archetypeKo : dna.archetypeEn}
                   </h2>
-                  <p className="text-xs text-violet-200">
+                  <p className="text-xs text-white/40">
                     {dna.totalRecords}
                     {locale === "ko"
                       ? "개 조과 기반 분석 결과"
@@ -689,62 +702,62 @@ export default function StatsPage() {
 
                 {/* DNA stats grid */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-4">
+                  <div className="glass-morphism border border-white/5 rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Clock size={16} className="text-amber-500" />
-                      <span className="text-xs font-semibold text-slate-500">
+                      <Clock size={16} className="text-[#c9a84c]" />
+                      <span className="text-xs font-semibold text-white/50 uppercase tracking-[0.1em]">
                         {locale === "ko" ? "최고 시간대" : "Best Time"}
                       </span>
                     </div>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white">
+                    <p className="text-sm font-bold text-white">
                       {dna.bestTimeSlot}
                     </p>
-                    <p className="text-xs text-primary font-semibold">
+                    <p className="text-xs text-[#c9a84c] font-semibold">
                       {dna.bestTimePercent}%
                     </p>
                   </div>
-                  <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-4">
+                  <div className="glass-morphism border border-white/5 rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Fish size={16} className="text-emerald-500" />
-                      <span className="text-xs font-semibold text-slate-500">
+                      <Fish size={16} className="text-[#7dd3fc]" />
+                      <span className="text-xs font-semibold text-white/50 uppercase tracking-[0.1em]">
                         {locale === "ko" ? "최다 어종" : "Top Species"}
                       </span>
                     </div>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white">
+                    <p className="text-sm font-bold text-white">
                       {dna.topSpecies}
                     </p>
-                    <p className="text-xs text-emerald-500 font-semibold">
+                    <p className="text-xs text-[#7dd3fc] font-semibold">
                       {dna.topSpeciesCount}
                       {locale === "ko" ? "마리" : ""}
                     </p>
                   </div>
-                  <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-4">
+                  <div className="glass-morphism border border-white/5 rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <MapPin size={16} className="text-blue-500" />
-                      <span className="text-xs font-semibold text-slate-500">
+                      <MapPin size={16} className="text-[#7dd3fc]" />
+                      <span className="text-xs font-semibold text-white/50 uppercase tracking-[0.1em]">
                         {locale === "ko" ? "단골 포인트" : "Top Spot"}
                       </span>
                     </div>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                    <p className="text-sm font-bold text-white truncate">
                       {dna.topLocation}
                     </p>
-                    <p className="text-xs text-blue-500 font-semibold">
+                    <p className="text-xs text-[#7dd3fc] font-semibold">
                       {dna.topLocationVisits}
                       {locale === "ko" ? "회 방문" : " visits"}
                     </p>
                   </div>
-                  <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-4">
+                  <div className="glass-morphism border border-white/5 rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Calendar size={16} className="text-orange-500" />
-                      <span className="text-xs font-semibold text-slate-500">
+                      <Calendar size={16} className="text-[#c9a84c]" />
+                      <span className="text-xs font-semibold text-white/50 uppercase tracking-[0.1em]">
                         {locale === "ko" ? "최고의 달" : "Best Month"}
                       </span>
                     </div>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white">
+                    <p className="text-sm font-bold text-white">
                       {dna.bestMonth}
                       {locale === "ko" ? "월" : ""}
                     </p>
-                    <p className="text-xs text-orange-500 font-semibold">
+                    <p className="text-xs text-[#c9a84c] font-semibold">
                       {dna.bestMonthCount}
                       {locale === "ko" ? "마리" : ""}
                     </p>
@@ -754,56 +767,56 @@ export default function StatsPage() {
                 {/* Extra insights */}
                 <div className="space-y-3">
                   {dna.bestTide && (
-                    <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-4 flex items-center gap-3">
-                      <div className="size-10 rounded-lg bg-cyan-100 flex items-center justify-center">
+                    <div className="glass-morphism border border-white/5 rounded-xl p-4 flex items-center gap-3">
+                      <div className="size-10 rounded-lg bg-[#7dd3fc]/10 flex items-center justify-center">
                         <DynamicIcon
                           name="waves"
                           size={16}
-                          className="text-cyan-600"
+                          className="text-[#7dd3fc]"
                         />
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-slate-500">
+                        <p className="text-xs font-semibold text-white/50 uppercase tracking-[0.1em]">
                           {locale === "ko" ? "황금 물때" : "Golden Tide"}
                         </p>
-                        <p className="text-sm font-bold text-slate-900 dark:text-white">
+                        <p className="text-sm font-bold text-white">
                           {dna.bestTide}
                         </p>
                       </div>
                     </div>
                   )}
                   {dna.avgSizeCm && (
-                    <div className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-xl p-4 flex items-center gap-3">
-                      <div className="size-10 rounded-lg bg-violet-100 flex items-center justify-center">
+                    <div className="glass-morphism border border-white/5 rounded-xl p-4 flex items-center gap-3">
+                      <div className="size-10 rounded-lg bg-[#c9a84c]/10 flex items-center justify-center">
                         <DynamicIcon
                           name="straighten"
                           size={16}
-                          className="text-violet-600"
+                          className="text-[#c9a84c]"
                         />
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-slate-500">
+                        <p className="text-xs font-semibold text-white/50 uppercase tracking-[0.1em]">
                           {locale === "ko" ? "평균 사이즈" : "Avg Size"}
                         </p>
-                        <p className="text-sm font-bold text-slate-900 dark:text-white">
+                        <p className="text-sm font-bold text-white">
                           {dna.avgSizeCm}cm
                         </p>
                       </div>
                     </div>
                   )}
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-                    <div className="size-10 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                  <div className="bg-[#c9a84c]/10 border border-[#c9a84c]/20 rounded-xl p-4 flex items-start gap-3">
+                    <div className="size-10 rounded-lg bg-[#c9a84c]/20 flex items-center justify-center shrink-0">
                       <DynamicIcon
                         name="lightbulb"
                         size={16}
-                        className="text-amber-600"
+                        className="text-[#c9a84c]"
                       />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-amber-700">
+                      <p className="text-xs font-semibold text-[#c9a84c] uppercase tracking-[0.1em]">
                         {locale === "ko" ? "개선 포인트" : "Improvement Tip"}
                       </p>
-                      <p className="text-sm text-amber-800">
+                      <p className="text-sm text-white/70">
                         {locale === "ko" ? dna.weaknessKo : dna.weaknessEn}
                       </p>
                     </div>
@@ -812,20 +825,20 @@ export default function StatsPage() {
               </div>
             ) : (
               <div className="text-center py-16">
-                <div className="inline-flex items-center justify-center size-20 rounded-full bg-violet-100 mb-4">
-                  <Dna size={36} className="text-violet-400" />
+                <div className="inline-flex items-center justify-center size-20 rounded-full bg-[#c9a84c]/10 border border-[#c9a84c]/20 mb-4">
+                  <Dna size={36} className="text-[#c9a84c]" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                <h3 className="text-lg font-bold text-white mb-2">
                   {locale === "ko"
                     ? "조과 5개 이상 등록하면"
                     : "Record 5+ catches to"}
                 </h3>
-                <p className="text-sm text-slate-400">
+                <p className="text-sm text-white/40">
                   {locale === "ko"
                     ? "나만의 낚시 DNA를 분석해 드려요 🧬"
                     : "unlock your Fishing DNA 🧬"}
                 </p>
-                <p className="text-xs text-slate-300 mt-2">
+                <p className="text-xs text-white/20 mt-2">
                   {locale === "ko"
                     ? `현재 ${records.length}개`
                     : `Current: ${records.length}`}

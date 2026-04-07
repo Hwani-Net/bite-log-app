@@ -59,7 +59,7 @@ const PLATFORMS: BookingPlatform[] = [
 
 export default function BookingPage() {
   return (
-    <div className="min-h-screen bg-bg dark:bg-bg-dark page-enter">
+    <div className="bg-[#080d14] text-white min-h-dvh min-h-screen bg-bg dark:bg-bg-dark page-enter">
       {/* Header */}
       <div className="bg-gradient-to-br from-primary/10 via-cyan-500/5 to-transparent px-5 pt-6 pb-8">
         <Link

@@ -150,27 +150,30 @@ export default function ConciergePage() {
   };
 
   return (
-    <div className="relative flex min-h-dvh w-full flex-col overflow-x-hidden page-enter bg-bg dark:bg-bg-dark md:bg-white md:dark:bg-bg-dark">
+    <div className="relative flex min-h-dvh w-full flex-col overflow-x-hidden page-enter bg-[#080d14]">
       {/* Header */}
-      <header className="flex flex-col px-5 pt-[max(1.5rem,env(safe-area-inset-top))] pb-3 sticky top-0 z-30 bg-gradient-to-r from-blue-600 to-cyan-500 backdrop-blur-xl shadow-lg shadow-blue-600/10">
+      <header className="flex flex-col px-5 pt-[max(1.5rem,env(safe-area-inset-top))] pb-3 sticky top-0 z-30 bg-[#080d14]/60 backdrop-blur-xl border-b border-white/5 shadow-lg shadow-black/20">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Sparkles size={24} className="text-white/90 drop-shadow-sm" />
-            <h1 className="text-xl font-bold tracking-tight text-white">
+            <Sparkles size={24} className="text-[#c9a84c] drop-shadow-sm" />
+            <h1
+              className="text-xl font-bold tracking-tight text-white"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            >
               {locale === "ko" ? "AI 컨시어지" : "AI Concierge"}
             </h1>
           </div>
-          <button className="size-10 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/30 hover:bg-white/30 transition-colors">
+          <button className="size-10 flex items-center justify-center rounded-full bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors">
             <DynamicIcon
               name="notifications"
               size={20}
-              className="text-white"
+              className="text-white/70"
             />
           </button>
         </div>
 
         {/* Segmented Tab Control */}
-        <div className="flex p-1 bg-white/20 backdrop-blur-md rounded-xl shadow-inner border border-white/10">
+        <div className="flex p-1 bg-white/5 backdrop-blur-md rounded-xl border border-white/10">
           <button
             onClick={() => {
               setActiveTab("overview");
@@ -178,8 +181,8 @@ export default function ConciergePage() {
             }}
             className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
               activeTab === "overview"
-                ? "bg-white text-blue-600 shadow-md scale-100"
-                : "text-white/80 hover:bg-white/10 scale-95"
+                ? "bg-[#c9a84c] text-[#080d14] shadow-md scale-100"
+                : "text-white/60 hover:bg-white/10 scale-95"
             }`}
           >
             {locale === "ko" ? "오늘의 조황" : "Overview"}
@@ -191,8 +194,8 @@ export default function ConciergePage() {
             }}
             className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
               activeTab === "chat"
-                ? "bg-white text-blue-600 shadow-md scale-100"
-                : "text-white/80 hover:bg-white/10 scale-95"
+                ? "bg-[#c9a84c] text-[#080d14] shadow-md scale-100"
+                : "text-white/60 hover:bg-white/10 scale-95"
             }`}
           >
             {locale === "ko" ? "AI 마스터" : "AI Master"}
@@ -204,8 +207,8 @@ export default function ConciergePage() {
             }}
             className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
               activeTab === "gear"
-                ? "bg-white text-blue-600 shadow-md scale-100"
-                : "text-white/80 hover:bg-white/10 scale-95"
+                ? "bg-[#c9a84c] text-[#080d14] shadow-md scale-100"
+                : "text-white/60 hover:bg-white/10 scale-95"
             }`}
           >
             {locale === "ko" ? "추천 장비" : "Gear"}
@@ -253,7 +256,7 @@ export default function ConciergePage() {
         <div className="fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-md px-4 flex gap-2 justify-center pointer-events-none z-30">
           <button
             onClick={() => router.push("/bite-forecast")}
-            className="pointer-events-auto bg-primary text-white px-4 py-2.5 rounded-full text-xs font-bold shadow-xl shadow-primary/40 flex items-center gap-1 hover:scale-105 transition-transform active:scale-95"
+            className="pointer-events-auto bg-[#c9a84c] text-[#080d14] px-4 py-2.5 rounded-full text-xs font-bold shadow-xl shadow-[#c9a84c]/30 flex items-center gap-1 hover:scale-105 transition-transform active:scale-95"
           >
             <DynamicIcon name="explore" size={14} />
             {locale === "ko" ? "포인트 추천" : "Spot Finder"}
@@ -263,7 +266,7 @@ export default function ConciergePage() {
             onClick={() => {
               if (activeTab !== "gear") setActiveTab("gear");
             }}
-            className="pointer-events-auto bg-orange-500 text-white px-4 py-2.5 rounded-full text-xs font-bold shadow-xl shadow-orange-500/40 flex items-center gap-1 hover:scale-105 transition-transform active:scale-95"
+            className="pointer-events-auto bg-[#7dd3fc]/20 border border-[#7dd3fc]/30 text-[#7dd3fc] px-4 py-2.5 rounded-full text-xs font-bold shadow-xl shadow-[#7dd3fc]/10 flex items-center gap-1 hover:scale-105 transition-transform active:scale-95"
           >
             <DynamicIcon name="check" size={14} />
             {locale === "ko" ? "출조 준비" : "Prep"}
@@ -271,7 +274,7 @@ export default function ConciergePage() {
 
           <button
             onClick={() => router.push("/stats")}
-            className="pointer-events-auto bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-full text-xs font-bold shadow-lg flex items-center gap-1 hover:scale-105 transition-transform active:scale-95"
+            className="pointer-events-auto bg-white/5 border border-white/10 text-white/70 px-4 py-2.5 rounded-full text-xs font-bold shadow-lg flex items-center gap-1 hover:scale-105 transition-transform active:scale-95"
           >
             <DynamicIcon name="info" size={14} />
             {locale === "ko" ? "조황 리포트" : "Report"}

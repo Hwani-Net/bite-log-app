@@ -84,13 +84,13 @@ export default function RankingPage() {
 
   if (loading && !data) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 bg-[#080d14]">
         <DynamicIcon
           name="refresh"
           size={36}
-          className="text-primary animate-spin"
+          className="text-[#c9a84c] animate-spin"
         />
-        <p className="text-slate-500 text-sm">
+        <p className="text-white/50 text-sm">
           {locale === "ko" ? "랭킹 불러오는 중..." : "Loading rankings..."}
         </p>
       </div>
@@ -104,27 +104,27 @@ export default function RankingPage() {
   const third = data.topThree[2];
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col font-display page-enter bg-bg dark:bg-bg-dark">
+    <div className="relative flex min-h-screen w-full flex-col font-display page-enter bg-[#080d14]">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/90 dark:bg-bg-dark/90 backdrop-blur-md px-4 py-3 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-[#080d14]/60 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between">
         <button
-          className="size-10 flex items-center justify-center text-slate-700 hover:bg-slate-100 rounded-full transition-colors"
+          className="size-10 flex items-center justify-center text-white/50 hover:bg-white/5 rounded-full transition-colors"
           onClick={() => window.history.back()}
         >
           <DynamicIcon name="arrow_back" size={20} />
         </button>
         <div className="flex items-center gap-2">
-          <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-lg font-bold tracking-tight text-white">
             🏆 {locale === "ko" ? "낚시 랭킹" : "Fishing Ranking"}
           </h1>
           {/* Real/Mock badge */}
           {data.isRealData ? (
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a84c]/20 text-[#c9a84c] font-bold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c9a84c] animate-pulse inline-block" />
               LIVE
             </span>
           ) : (
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-medium">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/30 font-medium">
               DEMO
             </span>
           )}
@@ -135,13 +135,13 @@ export default function RankingPage() {
       <main className="flex-1 pb-40">
         {/* Season Countdown Banner */}
         <div className="px-4 py-5">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 to-teal-400/10 border border-primary/15 p-5">
+          <div className="relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-[12px] border border-white/10 p-5">
             <div className="absolute top-3 right-4 text-5xl opacity-10">🏆</div>
             <div className="flex flex-col gap-0.5 mb-4">
-              <span className="text-primary text-xs font-bold uppercase tracking-wider">
+              <span className="text-[#c9a84c] text-xs font-bold uppercase tracking-[0.2em]">
                 {locale === "ko" ? "시즌 종료까지" : "Season ends in"}
               </span>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+              <h2 className="text-lg font-bold text-white">
                 {data.seasonLabel}
               </h2>
             </div>
@@ -154,12 +154,12 @@ export default function RankingPage() {
               ].map((item, i) => (
                 <div
                   key={i}
-                  className="flex-1 flex flex-col items-center bg-white/70 rounded-xl py-2.5 px-1 border border-primary/10 shadow-sm"
+                  className="flex-1 flex flex-col items-center bg-white/5 rounded-xl py-2.5 px-1 border border-white/10"
                 >
-                  <span className="text-xl font-black text-primary tabular-nums">
+                  <span className="text-xl font-black text-[#c9a84c] tabular-nums">
                     {item.val}
                   </span>
-                  <span className="text-[10px] text-slate-500 font-medium">
+                  <span className="text-[10px] text-white/30 font-medium">
                     {item.label}
                   </span>
                 </div>
@@ -170,15 +170,15 @@ export default function RankingPage() {
 
         {/* Segmented Tab */}
         <div className="px-4 mb-6">
-          <div className="flex p-1 bg-slate-100 rounded-2xl gap-1">
+          <div className="flex p-1 bg-white/5 border border-white/10 rounded-2xl gap-1">
             {CATEGORY_KEYS.map((c) => (
               <button
                 key={c.value}
                 onClick={() => setCategory(c.value)}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm rounded-xl transition-all ${
                   category === c.value
-                    ? "font-bold bg-gradient-to-r from-primary to-teal-400 text-white shadow-md shadow-primary/20"
-                    : "font-medium text-slate-500 hover:text-slate-700"
+                    ? "font-bold bg-[#c9a84c] text-[#080d14]"
+                    : "font-medium text-white/50 hover:text-white/70"
                 }`}
               >
                 <DynamicIcon name={c.icon} size={16} />
@@ -194,7 +194,7 @@ export default function RankingPage() {
             <DynamicIcon
               name="refresh"
               size={20}
-              className="text-primary animate-spin"
+              className="text-[#c9a84c] animate-spin"
             />
           </div>
         )}
@@ -208,21 +208,21 @@ export default function RankingPage() {
                 {second ? (
                   <div className="flex-1 flex flex-col items-center">
                     <div className="relative mb-3">
-                      <div className="w-16 h-16 rounded-full border-2 border-slate-300 overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-2xl shadow-md">
+                      <div className="w-16 h-16 rounded-full border-2 border-white/20 overflow-hidden bg-white/5 flex items-center justify-center text-2xl">
                         {second.user.photoURL ?? "🎣"}
                       </div>
-                      <div className="absolute -bottom-1 -right-1 bg-slate-400 text-white text-[10px] font-black w-5 h-5 rounded-full border-2 border-white flex items-center justify-center">
+                      <div className="absolute -bottom-1 -right-1 bg-white/20 text-white text-[10px] font-black w-5 h-5 rounded-full border-2 border-[#080d14] flex items-center justify-center">
                         2
                       </div>
                     </div>
                     <div
-                      className="w-full bg-gradient-to-b from-slate-100 to-slate-50 border border-slate-200 rounded-t-xl flex flex-col items-center justify-end p-2 pb-3 text-center"
+                      className="w-full bg-white/5 border border-white/10 rounded-t-xl flex flex-col items-center justify-end p-2 pb-3 text-center"
                       style={{ height: "70px" }}
                     >
-                      <p className="text-xs font-bold text-slate-800 truncate w-full">
+                      <p className="text-xs font-bold text-white truncate w-full">
                         {second.user.displayName}
                       </p>
-                      <p className="text-sm font-black text-primary">
+                      <p className="text-sm font-black text-[#7dd3fc]">
                         {second.label}
                       </p>
                     </div>
@@ -239,24 +239,24 @@ export default function RankingPage() {
                         <DynamicIcon
                           name="emoji_events"
                           size={36}
-                          className="text-yellow-400 drop-shadow-sm"
+                          className="text-[#c9a84c] drop-shadow-sm"
                         />
                       </div>
-                      <div className="w-20 h-20 rounded-full border-4 border-primary overflow-hidden bg-gradient-to-br from-primary/20 to-teal-400/20 flex items-center justify-center text-3xl shadow-xl shadow-primary/30">
+                      <div className="w-20 h-20 rounded-full border-4 border-[#c9a84c] overflow-hidden bg-[#c9a84c]/10 flex items-center justify-center text-3xl">
                         {first.user.photoURL ?? "🎣"}
                       </div>
-                      <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-primary to-teal-400 text-white text-xs font-black w-6 h-6 rounded-full border-2 border-white flex items-center justify-center">
+                      <div className="absolute -bottom-1 -right-1 bg-[#c9a84c] text-[#080d14] text-xs font-black w-6 h-6 rounded-full border-2 border-[#080d14] flex items-center justify-center">
                         1
                       </div>
                     </div>
                     <div
-                      className="w-full bg-gradient-to-b from-primary/10 to-primary/5 border border-primary/20 rounded-t-xl flex flex-col items-center justify-end p-2 pb-3 text-center"
+                      className="w-full bg-[#c9a84c]/10 border border-[#c9a84c]/20 rounded-t-xl flex flex-col items-center justify-end p-2 pb-3 text-center"
                       style={{ height: "90px" }}
                     >
-                      <p className="text-sm font-bold text-slate-900 dark:text-white truncate w-full">
+                      <p className="text-sm font-bold text-white truncate w-full">
                         {first.user.displayName}
                       </p>
-                      <p className="text-lg font-black text-primary">
+                      <p className="text-lg font-black text-[#c9a84c]">
                         {first.label}
                       </p>
                     </div>
@@ -269,21 +269,21 @@ export default function RankingPage() {
                 {third ? (
                   <div className="flex-1 flex flex-col items-center">
                     <div className="relative mb-3">
-                      <div className="w-16 h-16 rounded-full border-2 border-orange-400 overflow-hidden bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center text-2xl shadow-md">
+                      <div className="w-16 h-16 rounded-full border-2 border-[#c9a84c]/40 overflow-hidden bg-[#c9a84c]/5 flex items-center justify-center text-2xl">
                         {third.user.photoURL ?? "🎣"}
                       </div>
-                      <div className="absolute -bottom-1 -right-1 bg-orange-400 text-white text-[10px] font-black w-5 h-5 rounded-full border-2 border-white flex items-center justify-center">
+                      <div className="absolute -bottom-1 -right-1 bg-[#c9a84c]/60 text-[#080d14] text-[10px] font-black w-5 h-5 rounded-full border-2 border-[#080d14] flex items-center justify-center">
                         3
                       </div>
                     </div>
                     <div
-                      className="w-full bg-gradient-to-b from-orange-50 to-white border border-orange-100 rounded-t-xl flex flex-col items-center justify-end p-2 pb-3 text-center"
+                      className="w-full bg-white/5 border border-white/10 rounded-t-xl flex flex-col items-center justify-end p-2 pb-3 text-center"
                       style={{ height: "55px" }}
                     >
-                      <p className="text-xs font-bold text-slate-800 truncate w-full">
+                      <p className="text-xs font-bold text-white truncate w-full">
                         {third.user.displayName}
                       </p>
-                      <p className="text-sm font-black text-orange-500">
+                      <p className="text-sm font-black text-[#c9a84c]/70">
                         {third.label}
                       </p>
                     </div>
@@ -295,12 +295,12 @@ export default function RankingPage() {
             ) : (
               <div className="px-4 py-8 text-center">
                 <p className="text-4xl mb-3">🎣</p>
-                <p className="text-slate-600 font-semibold">
+                <p className="text-white/50 font-semibold">
                   {locale === "ko"
                     ? "이번 시즌 첫 번째 조과를 기록하세요!"
                     : "Be the first to log a catch this season!"}
                 </p>
-                <p className="text-slate-400 text-sm mt-1">
+                <p className="text-white/30 text-sm mt-1">
                   {locale === "ko"
                     ? "공개로 올린 조과가 랭킹에 반영됩니다"
                     : "Public catches appear in the ranking"}
@@ -311,38 +311,38 @@ export default function RankingPage() {
             {/* Leaderboard List (4th~) */}
             {data.rest.length > 0 && (
               <div className="px-4 space-y-2 mb-4">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+                <h3 className="text-xs font-bold text-white/30 uppercase tracking-[0.2em] mb-3">
                   {locale === "ko" ? "4위 이하" : "Others"}
                 </h3>
                 {data.rest.map((entry) => (
                   <div
                     key={entry.user.uid}
-                    className={`flex items-center gap-3 p-3.5 rounded-2xl border shadow-sm transition-colors ${
+                    className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-colors ${
                       entry.user.uid === user?.uid
-                        ? "bg-primary/5 border-primary/20"
-                        : "bg-white dark:bg-surface-dark border-slate-100 dark:border-slate-700/50"
+                        ? "bg-[#c9a84c]/5 border-[#c9a84c]/20"
+                        : "bg-white/5 border-white/10"
                     }`}
                   >
-                    <span className="w-7 text-center text-sm font-black text-slate-400">
+                    <span className="w-7 text-center text-sm font-black text-white/30">
                       {entry.rank}
                     </span>
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 flex items-center justify-center text-xl shrink-0">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-white/5 flex items-center justify-center text-xl shrink-0">
                       {entry.user.photoURL ?? "🎣"}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p
-                        className={`text-sm font-bold truncate ${entry.user.uid === user?.uid ? "text-primary" : "text-slate-800 dark:text-slate-200"}`}
+                        className={`text-sm font-bold truncate ${entry.user.uid === user?.uid ? "text-[#c9a84c]" : "text-white"}`}
                       >
                         {entry.user.displayName}
                         {entry.user.uid === user?.uid && (
-                          <span className="ml-1.5 text-[10px] font-normal bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
+                          <span className="ml-1.5 text-[10px] font-normal bg-[#c9a84c]/10 text-[#c9a84c] px-1.5 py-0.5 rounded-full">
                             나
                           </span>
                         )}
                       </p>
                     </div>
                     <span
-                      className={`text-sm font-black ${entry.user.uid === user?.uid ? "text-primary" : "text-slate-700"}`}
+                      className={`text-sm font-black ${entry.user.uid === user?.uid ? "text-[#c9a84c]" : "text-white/70"}`}
                     >
                       {entry.label}
                     </span>
@@ -353,7 +353,7 @@ export default function RankingPage() {
 
             {/* Empty state for real data with no entries beyond top 3 */}
             {data.isRealData && data.topThree.length === 0 && (
-              <div className="px-4 py-4 text-center text-xs text-slate-400">
+              <div className="px-4 py-4 text-center text-xs text-white/30">
                 {locale === "ko"
                   ? "아직 랭킹에 올라온 조과가 없습니다. 조과를 공개로 올려보세요!"
                   : "No public catches yet. Share yours!"}
@@ -362,8 +362,8 @@ export default function RankingPage() {
 
             {/* Not logged in prompt */}
             {!user && (
-              <div className="mx-4 mt-2 p-4 rounded-2xl bg-slate-50 border border-slate-100 text-center">
-                <p className="text-sm text-slate-600">
+              <div className="mx-4 mt-2 p-4 rounded-2xl bg-white/5 border border-white/10 text-center">
+                <p className="text-sm text-white/50">
                   {locale === "ko"
                     ? "로그인하면 내 순위를 확인할 수 있어요"
                     : "Sign in to see your rank"}
@@ -377,15 +377,15 @@ export default function RankingPage() {
       {/* Floating My Rank Panel */}
       {data.myRank && user && (
         <div className="fixed bottom-[84px] left-0 right-0 z-40 flex justify-center px-4">
-          <div className="w-full max-w-lg bg-gradient-to-r from-primary to-teal-400 rounded-2xl p-4 shadow-2xl shadow-primary/30 flex items-center gap-4 text-white">
+          <div className="w-full max-w-lg bg-gradient-to-r from-[#c9a84c] to-[#7dd3fc] rounded-2xl p-4 shadow-2xl flex items-center gap-4 text-[#080d14]">
             <div className="flex flex-col items-center min-w-[40px]">
               <span className="text-[10px] font-bold uppercase opacity-70 leading-none mb-1">
                 {locale === "ko" ? "내 순위" : "My Rank"}
               </span>
               <span className="text-2xl font-black">{data.myRank.rank}</span>
             </div>
-            <div className="w-[1px] h-10 bg-white/30" />
-            <div className="w-11 h-11 rounded-full border-2 border-white/40 overflow-hidden bg-primary/50 flex items-center justify-center text-white text-xl shrink-0">
+            <div className="w-[1px] h-10 bg-[#080d14]/20" />
+            <div className="w-11 h-11 rounded-full border-2 border-[#080d14]/20 overflow-hidden bg-[#080d14]/10 flex items-center justify-center text-xl shrink-0">
               {user.photoURL ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img

@@ -69,54 +69,41 @@ const SPECIES_EMOJIS: Record<string, string> = {
 };
 
 // ─── Region Card ──────────────────────────────────────────────────────────────
-const REGION_COLORS: Record<
-  string,
-  { bg: string; gradient: string; icon: string }
-> = {
-  서해: {
-    bg: "bg-amber-50",
-    gradient: "from-amber-500 to-orange-400",
-    icon: "🌅",
-  },
-  남해: { bg: "bg-cyan-50", gradient: "from-cyan-500 to-blue-400", icon: "🏝️" },
-  동해: {
-    bg: "bg-indigo-50",
-    gradient: "from-indigo-500 to-blue-500",
-    icon: "🌊",
-  },
-  제주: {
-    bg: "bg-emerald-50",
-    gradient: "from-emerald-500 to-teal-400",
-    icon: "🍊",
-  },
-  기타: {
-    bg: "bg-slate-50",
-    gradient: "from-slate-500 to-slate-400",
-    icon: "📍",
-  },
+const REGION_ACCENT: Record<string, string> = {
+  서해: "text-[#c9a84c]",
+  남해: "text-[#7dd3fc]",
+  동해: "text-blue-400",
+  제주: "text-emerald-400",
+  기타: "text-white/50",
 };
 
 function RegionCard({ stat }: { stat: RegionStat }) {
-  const color = REGION_COLORS[stat.region] || REGION_COLORS["기타"];
+  const accent = REGION_ACCENT[stat.region] || REGION_ACCENT["기타"];
 
   return (
-    <div className={`rounded-2xl p-3 border border-slate-100 ${color.bg}`}>
+    <div className="bg-white/5 backdrop-blur-[12px] rounded-2xl p-3 border border-white/10">
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-lg">{color.icon}</span>
-        <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
-          {stat.region}
+        <span className="text-lg">
+          {stat.region === "서해"
+            ? "🌅"
+            : stat.region === "남해"
+              ? "🏝️"
+              : stat.region === "동해"
+                ? "🌊"
+                : stat.region === "제주"
+                  ? "🍊"
+                  : "📍"}
         </span>
+        <span className={`text-sm font-bold ${accent}`}>{stat.region}</span>
       </div>
       <div className="flex items-end justify-between">
         <div>
-          <span className="text-2xl font-black text-slate-900">
-            {stat.count}
-          </span>
-          <span className="text-[10px] text-slate-500 ml-1">마리</span>
+          <span className="text-2xl font-black text-white">{stat.count}</span>
+          <span className="text-[10px] text-white/30 ml-1">마리</span>
         </div>
         <div className="text-right">
-          <p className="text-[10px] text-slate-400">인기 어종</p>
-          <p className="text-xs font-bold text-slate-700">
+          <p className="text-[10px] text-white/30">인기 어종</p>
+          <p className="text-xs font-bold text-white/70">
             {stat.emoji} {stat.topSpecies}
           </p>
         </div>
@@ -127,30 +114,24 @@ function RegionCard({ stat }: { stat: RegionStat }) {
 
 // ─── Species Row ──────────────────────────────────────────────────────────────
 function SpeciesRow({ stat, rank }: { stat: SpeciesStat; rank: number }) {
-  const rankColors = ["text-amber-500", "text-slate-400", "text-amber-700"];
+  const rankColors = ["text-[#c9a84c]", "text-white/40", "text-[#c9a84c]/60"];
 
   return (
-    <div className="flex items-center gap-3 bg-white dark:bg-surface-dark rounded-xl px-3 py-2.5 border border-slate-100 dark:border-slate-700/50">
+    <div className="flex items-center gap-3 bg-white/5 backdrop-blur-[12px] rounded-xl px-3 py-2.5 border border-white/10">
       <span
-        className={`text-lg font-black ${rankColors[rank - 1] || "text-slate-400"} w-6 text-center`}
+        className={`text-lg font-black ${rankColors[rank - 1] || "text-white/30"} w-6 text-center`}
       >
         {rank}
       </span>
       <span className="text-xl">{stat.emoji}</span>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
-          {stat.species}
-        </p>
-        <p className="text-[10px] text-slate-500 truncate">
-          {stat.topLocation}
-        </p>
+        <p className="text-sm font-bold text-white">{stat.species}</p>
+        <p className="text-[10px] text-white/30 truncate">{stat.topLocation}</p>
       </div>
       <div className="text-right flex-shrink-0">
-        <p className="text-sm font-bold text-slate-900 dark:text-white">
-          {stat.count}마리
-        </p>
+        <p className="text-sm font-bold text-white">{stat.count}마리</p>
         {stat.avgSize > 0 && (
-          <p className="text-[10px] text-slate-400">평균 {stat.avgSize}cm</p>
+          <p className="text-[10px] text-white/30">평균 {stat.avgSize}cm</p>
         )}
       </div>
     </div>
@@ -162,35 +143,33 @@ function LiveNewsTicker({ news }: { news: FishingNewsItem[] }) {
   if (news.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-50">
+    <div className="bg-white/5 backdrop-blur-[12px] rounded-2xl border border-white/10 overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
         <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-        <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">
+        <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">
           LIVE
         </span>
-        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-          실시간 조과 소식
-        </span>
+        <span className="text-xs font-bold text-white">실시간 조과 소식</span>
       </div>
-      <div className="divide-y divide-slate-50">
+      <div className="divide-y divide-white/5">
         {news.slice(0, 5).map((item) => (
           <a
             key={item.id}
             href={item.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 transition-colors"
           >
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-slate-800 truncate">
+              <p className="text-xs font-medium text-white/80 truncate">
                 {item.title}
               </p>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-[10px] text-slate-400">
+                <span className="text-[10px] text-white/30">
                   {item.sourceLabel}
                 </span>
                 {item.species && (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-teal-100 text-teal-600 font-bold">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#7dd3fc]/10 text-[#7dd3fc] font-bold">
                     🐟 {item.species}
                   </span>
                 )}
@@ -199,7 +178,7 @@ function LiveNewsTicker({ news }: { news: FishingNewsItem[] }) {
             <DynamicIcon
               name="open_in_new"
               size={14}
-              className="text-slate-300"
+              className="text-white/20"
             />
           </a>
         ))}
@@ -318,75 +297,77 @@ export default function LiveDashboardPage() {
   });
 
   return (
-    <div className="relative flex min-h-dvh w-full flex-col bg-bg dark:bg-bg-dark overflow-x-hidden pb-24">
+    <div className="relative flex min-h-dvh w-full flex-col bg-[#080d14] overflow-x-hidden pb-24">
       {/* Header */}
-      <header className="flex items-center gap-3 px-4 pt-6 pb-2 bg-bg dark:bg-bg-dark sticky top-0 z-30 backdrop-blur-md">
+      <header className="flex items-center gap-3 px-4 pt-6 pb-2 bg-[#080d14]/60 backdrop-blur-xl border-b border-white/5 sticky top-0 z-30">
         <Link
           href="/"
-          className="size-9 flex items-center justify-center rounded-full bg-white shadow-sm border border-slate-100"
+          className="size-9 flex items-center justify-center rounded-full bg-white/5 border border-white/10"
         >
-          <DynamicIcon name="arrow_back" size={20} className="text-slate-500" />
+          <DynamicIcon name="arrow_back" size={20} className="text-white/50" />
         </Link>
         <div className="flex-1">
-          <h1 className="text-base font-bold text-slate-900 dark:text-white">
+          <h1 className="text-base font-bold text-white">
             {isKo ? "실시간 조황" : "Live Dashboard"}
           </h1>
-          <p className="text-[10px] text-slate-400">
+          <p className="text-[10px] text-white/30">
             {isKo ? "전국 낚시 현황 · 업데이트됨" : "Nationwide fishing status"}
           </p>
         </div>
-        <div className="flex items-center gap-1.5 bg-red-50 border border-red-100 rounded-full px-2.5 py-1">
+        <div className="flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 rounded-full px-2.5 py-1">
           <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-          <span className="text-[10px] font-bold text-red-500">LIVE</span>
+          <span className="text-[10px] font-bold text-red-400">LIVE</span>
         </div>
       </header>
 
       {loading ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-            <p className="text-sm text-slate-500">
-              전국 조황 데이터 수집 중...
-            </p>
+            <div className="w-16 h-16 border-4 border-[#c9a84c]/30 border-t-[#c9a84c] rounded-full animate-spin" />
+            <p className="text-sm text-white/50">전국 조황 데이터 수집 중...</p>
           </div>
         </div>
       ) : (
         <div className="space-y-5 px-4 pt-4">
           {/* ── Summary Banner ── */}
-          <div className="bg-gradient-to-r from-primary to-cyan-500 rounded-2xl p-4 shadow-lg shadow-primary/20">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider mb-1">
-                  {isKo ? "오늘 전국 조과" : "Today's Total"}
-                </p>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-3xl font-black text-white">
-                    {feed.reduce((sum, f) => sum + f.count, 0).toLocaleString()}
-                  </span>
-                  <span className="text-sm text-white/70">마리</span>
+          <div className="rounded-2xl p-[1px] bg-gradient-to-r from-[#c9a84c] to-[#7dd3fc]">
+            <div className="rounded-2xl bg-[#0f141b] p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em] mb-1">
+                    {isKo ? "오늘 전국 조과" : "Today's Total"}
+                  </p>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-3xl font-black text-white">
+                      {feed
+                        .reduce((sum, f) => sum + f.count, 0)
+                        .toLocaleString()}
+                    </span>
+                    <span className="text-sm text-white/50">마리</span>
+                  </div>
                 </div>
-              </div>
-              <div className="text-right">
-                <p className="text-[10px] text-white/70 mb-0.5">
-                  {feed.length}건 기록
-                </p>
-                <p className="text-[10px] text-white/70">
-                  {regionStats.length}개 해역
-                </p>
+                <div className="text-right">
+                  <p className="text-[10px] text-white/30 mb-0.5">
+                    {feed.length}건 기록
+                  </p>
+                  <p className="text-[10px] text-white/30">
+                    {regionStats.length}개 해역
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
           {/* ── Season Fish Banner ── */}
           {inSeasonFish.length > 0 && (
-            <div className="bg-white dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm p-4">
+            <div className="bg-white/5 backdrop-blur-[12px] rounded-2xl border border-white/10 p-4">
               <div className="flex items-center gap-2 mb-2.5">
                 <DynamicIcon
                   name="local_fire_department"
                   size={16}
-                  className="text-amber-500"
+                  className="text-[#c9a84c]"
                 />
-                <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                <h2 className="text-sm font-bold text-white">
                   {isKo ? `${month}월 시즌 어종` : `${month} In-Season`}
                 </h2>
               </div>
@@ -400,8 +381,8 @@ export default function LiveDashboardPage() {
                       href="/season-forecast"
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all hover:scale-105 ${
                         isGold
-                          ? "bg-amber-50 border-amber-200 text-amber-700"
-                          : "bg-green-50 border-green-200 text-green-700"
+                          ? "bg-[#c9a84c]/10 border-[#c9a84c]/30 text-[#c9a84c]"
+                          : "bg-[#7dd3fc]/10 border-[#7dd3fc]/30 text-[#7dd3fc]"
                       }`}
                     >
                       <span className="text-sm">{d.emoji}</span>
@@ -409,8 +390,8 @@ export default function LiveDashboardPage() {
                       <span
                         className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
                           isGold
-                            ? "bg-amber-500 text-white"
-                            : "bg-green-500 text-white"
+                            ? "bg-[#c9a84c] text-[#080d14]"
+                            : "bg-[#7dd3fc] text-[#080d14]"
                         }`}
                       >
                         {isGold ? "황금" : "피크"}
@@ -429,9 +410,9 @@ export default function LiveDashboardPage() {
                 <DynamicIcon
                   name="location_on"
                   size={16}
-                  className="text-primary"
+                  className="text-[#c9a84c]"
                 />
-                <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                <h2 className="text-sm font-bold text-white/50 uppercase tracking-[0.2em]">
                   {isKo ? "해역별 현황" : "By Region"}
                 </h2>
               </div>
@@ -450,9 +431,9 @@ export default function LiveDashboardPage() {
                 <DynamicIcon
                   name="emoji_events"
                   size={16}
-                  className="text-amber-500"
+                  className="text-[#c9a84c]"
                 />
-                <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                <h2 className="text-sm font-bold text-white/50 uppercase tracking-[0.2em]">
                   {isKo ? "어종별 랭킹" : "Species Ranking"}
                 </h2>
               </div>
@@ -469,17 +450,17 @@ export default function LiveDashboardPage() {
 
           {/* ── Empty state ── */}
           {feed.length === 0 && news.length === 0 && (
-            <div className="bg-white dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm p-8 text-center">
+            <div className="bg-white/5 backdrop-blur-[12px] rounded-2xl border border-white/10 p-8 text-center">
               <span className="text-4xl">🎣</span>
-              <p className="text-sm font-bold text-slate-700 mt-3">
+              <p className="text-sm font-bold text-white mt-3">
                 아직 오늘의 조과가 없습니다
               </p>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-white/30 mt-1">
                 첫 번째 조과를 기록해보세요!
               </p>
               <Link
                 href="/record"
-                className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 bg-primary text-white rounded-full text-xs font-bold hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 bg-[#c9a84c] text-[#080d14] rounded-full text-xs font-bold hover:opacity-90 transition-opacity"
               >
                 <DynamicIcon name="add" size={14} />
                 기록 추가
@@ -488,7 +469,7 @@ export default function LiveDashboardPage() {
           )}
 
           {/* ── Data source ── */}
-          <p className="text-[10px] text-slate-400 text-center pb-4">
+          <p className="text-[10px] text-white/20 text-center pb-4">
             {isKo
               ? "※ 커뮤니티 피드 + 네이버 뉴스 기반. 실시간 업데이트됩니다."
               : "※ Community feed + Naver news. Updated in real-time."}

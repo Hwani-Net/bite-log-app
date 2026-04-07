@@ -45,14 +45,14 @@ function SecretSpotsSection({
   ];
 
   return (
-    <div className="bg-white dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm p-4 overflow-hidden relative">
+    <div className="glass-morphism rounded-2xl border border-white/5 p-4 overflow-hidden relative">
       <div className="flex items-center gap-2 mb-3">
-        <MapPin size={16} className="text-indigo-500" />
-        <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+        <MapPin size={16} className="text-[#c9a84c]" />
+        <h3 className="text-sm font-bold text-white uppercase tracking-[0.15em]">
           이 지역 시크릿 포인트
         </h3>
         {!isPro && (
-          <span className="text-[10px] bg-indigo-500 text-white px-1.5 py-0.5 rounded font-bold ml-1">
+          <span className="text-[10px] bg-[#c9a84c] text-[#080d14] px-1.5 py-0.5 rounded font-bold ml-1">
             PRO
           </span>
         )}
@@ -64,36 +64,36 @@ function SecretSpotsSection({
         {spots.map((spot, i) => (
           <div
             key={i}
-            className="flex items-center gap-3 bg-slate-50 rounded-xl px-3 py-3"
+            className="flex items-center gap-3 bg-white/5 rounded-xl px-3 py-3"
           >
-            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
-              <MapPin size={16} className="text-indigo-600" />
+            <div className="w-10 h-10 rounded-full bg-[#c9a84c]/10 flex items-center justify-center shrink-0">
+              <MapPin size={16} className="text-[#c9a84c]" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-slate-800 truncate">
+              <p className="text-xs font-bold text-white truncate">
                 {spot.name}
               </p>
-              <p className="text-[10px] text-indigo-600 font-medium">
+              <p className="text-[10px] text-[#c9a84c] font-medium">
                 {spot.species}
               </p>
-              <p className="text-[9px] text-slate-500 mt-0.5">{spot.desc}</p>
+              <p className="text-[9px] text-white/40 mt-0.5">{spot.desc}</p>
             </div>
           </div>
         ))}
       </div>
 
       {!isPro && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-white/30 backdrop-blur-[2px] z-10">
-          <div className="bg-white/90 shadow-xl rounded-2xl p-5 border border-slate-100 flex flex-col items-center text-center max-w-[200px]">
-            <Lock size={28} className="text-indigo-600 mb-2" />
-            <p className="text-[11px] font-bold text-slate-800 leading-tight mb-3">
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-[#080d14]/30 backdrop-blur-[2px] z-10">
+          <div className="glass-morphism shadow-xl rounded-2xl p-5 border border-[#c9a84c]/20 flex flex-col items-center text-center max-w-[200px]">
+            <Lock size={28} className="text-[#c9a84c] mb-2" />
+            <p className="text-[11px] font-bold text-white leading-tight mb-3">
               고수들만 아는
               <br />
               시크릿 포인트 3곳 잠김
             </p>
             <button
               onClick={onOpenPaywall}
-              className="bg-indigo-600 text-white text-[10px] font-bold px-4 py-2 rounded-full shadow-lg shadow-indigo-600/30 active:scale-95 transition-transform"
+              className="bg-[#c9a84c] text-[#080d14] text-[10px] font-bold px-4 py-2 rounded-full shadow-lg shadow-[#c9a84c]/20 active:scale-95 transition-transform"
             >
               포인트 잠금 해제
             </button>
@@ -111,9 +111,9 @@ function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
   const offset = circumference - (score / 100) * circumference;
   const color =
     score >= 75
-      ? "#22c55e"
+      ? "#c9a84c"
       : score >= 55
-        ? "#3b82f6"
+        ? "#7dd3fc"
         : score >= 35
           ? "#f59e0b"
           : "#ef4444";
@@ -129,7 +129,7 @@ function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
           cy={size / 2}
           r={r}
           fill="none"
-          stroke="#e2e8f0"
+          stroke="rgba(255,255,255,0.08)"
           strokeWidth="10"
         />
         <circle
@@ -146,8 +146,8 @@ function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
         />
       </svg>
       <div className="absolute flex flex-col items-center">
-        <span className="text-3xl font-black text-slate-900">{score}</span>
-        <span className="text-[10px] text-slate-400 font-medium">/ 100</span>
+        <span className="text-3xl font-black text-white">{score}</span>
+        <span className="text-[10px] text-white/40 font-medium">/ 100</span>
       </div>
     </div>
   );
@@ -157,21 +157,21 @@ function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
 function FactorCard({ factor }: { factor: BiteFactor }) {
   const statusStyles = {
     positive: {
-      bg: "bg-emerald-50",
-      border: "border-emerald-200",
-      text: "text-emerald-600",
+      bg: "bg-emerald-500/10",
+      border: "border-emerald-500/20",
+      text: "text-emerald-400",
       bar: "bg-emerald-500",
     },
     neutral: {
-      bg: "bg-amber-50",
-      border: "border-amber-200",
-      text: "text-amber-600",
-      bar: "bg-amber-500",
+      bg: "bg-[#c9a84c]/10",
+      border: "border-[#c9a84c]/20",
+      text: "text-[#c9a84c]",
+      bar: "bg-[#c9a84c]",
     },
     negative: {
-      bg: "bg-red-50",
-      border: "border-red-200",
-      text: "text-red-500",
+      bg: "bg-red-500/10",
+      border: "border-red-500/20",
+      text: "text-red-400",
       bar: "bg-red-500",
     },
   };
@@ -186,18 +186,16 @@ function FactorCard({ factor }: { factor: BiteFactor }) {
           <DynamicIcon name={factor.icon} size={18} className={s.text} />
         </div>
         <div className="flex-1">
-          <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
-            {factor.name}
-          </p>
-          <p className="text-[10px] text-slate-500">{factor.description}</p>
+          <p className="text-xs font-bold text-white">{factor.name}</p>
+          <p className="text-[10px] text-white/40">{factor.description}</p>
         </div>
         <div className="text-right">
           <span className={`text-lg font-black ${s.text}`}>{factor.score}</span>
-          <span className="text-[10px] text-slate-400">/20</span>
+          <span className="text-[10px] text-white/30">/20</span>
         </div>
       </div>
       {/* Progress bar */}
-      <div className="h-1.5 bg-white rounded-full overflow-hidden">
+      <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full ${s.bar} transition-all duration-700 ease-out`}
           style={{ width: `${Math.min(100, (factor.score / 20) * 100)}%` }}
@@ -220,35 +218,35 @@ function TideTimeline({
   const totalMinutes = 24 * 60;
 
   return (
-    <div className="bg-white dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm p-4">
+    <div className="glass-morphism rounded-2xl border border-white/5 p-4">
       <div className="flex items-center gap-2 mb-3">
-        <DynamicIcon name="waves" size={16} className="text-cyan-500" />
-        <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+        <DynamicIcon name="waves" size={16} className="text-[#7dd3fc]" />
+        <h3 className="text-sm font-bold text-white uppercase tracking-[0.15em]">
           조석 시간표
         </h3>
-        <span className="text-[10px] text-slate-400 ml-auto">
+        <span className="text-[10px] text-white/40 ml-auto">
           {tideData.stationName}
         </span>
       </div>
 
       {/* Current phase banner */}
       {phase && (
-        <div className="bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl px-3 py-2 mb-3 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-[#7dd3fc]/20 to-[#c9a84c]/20 border border-[#7dd3fc]/20 rounded-xl px-3 py-2 mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-lg">{phase.emoji}</span>
             <div>
               <p className="text-xs font-bold text-white">{phase.label}</p>
-              <p className="text-[10px] text-white/70">{phase.strengthLabel}</p>
+              <p className="text-[10px] text-white/50">{phase.strengthLabel}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-20 h-1.5 bg-white/20 rounded-full overflow-hidden">
+            <div className="w-20 h-1.5 bg-white/10 rounded-full overflow-hidden">
               <div
-                className="h-full bg-white rounded-full transition-all"
+                className="h-full bg-[#7dd3fc] rounded-full transition-all"
                 style={{ width: `${phase.percent}%` }}
               />
             </div>
-            <span className="text-[10px] text-white/80 font-bold">
+            <span className="text-[10px] text-white/60 font-bold">
               {Math.round(phase.percent)}%
             </span>
           </div>
@@ -256,15 +254,15 @@ function TideTimeline({
       )}
 
       {/* Timeline visual */}
-      <div className="relative h-16 bg-slate-50 rounded-xl overflow-hidden mb-3">
+      <div className="relative h-16 bg-white/5 rounded-xl overflow-hidden mb-3">
         {/* Time ruler */}
         {[0, 6, 12, 18].map((h) => (
           <div
             key={h}
-            className="absolute top-0 h-full border-l border-dashed border-slate-200"
+            className="absolute top-0 h-full border-l border-dashed border-white/10"
             style={{ left: `${(h / 24) * 100}%` }}
           >
-            <span className="absolute -top-0.5 -translate-x-1/2 text-[8px] text-slate-400 font-medium bg-slate-50 px-0.5">
+            <span className="absolute -top-0.5 -translate-x-1/2 text-[8px] text-white/30 font-medium bg-transparent px-0.5">
               {h}시
             </span>
           </div>
@@ -284,14 +282,14 @@ function TideTimeline({
               style={{ left: `${leftPercent}%`, bottom: isHigh ? "50%" : "0%" }}
             >
               <div
-                className={`w-3 h-3 rounded-full border-2 ${isHigh ? "bg-cyan-500 border-cyan-300" : "bg-blue-800 border-blue-600"}`}
+                className={`w-3 h-3 rounded-full border-2 ${isHigh ? "bg-[#7dd3fc] border-[#7dd3fc]/50" : "bg-[#c9a84c] border-[#c9a84c]/50"}`}
               />
               <div className="text-center mt-0.5">
-                <p className="text-[8px] font-bold text-slate-700">
+                <p className="text-[8px] font-bold text-white/70">
                   {tide.time}
                 </p>
                 <p
-                  className={`text-[7px] font-bold ${isHigh ? "text-cyan-600" : "text-blue-700"}`}
+                  className={`text-[7px] font-bold ${isHigh ? "text-[#7dd3fc]" : "text-[#c9a84c]"}`}
                 >
                   {isHigh ? "만조" : "간조"}
                 </p>
@@ -302,10 +300,10 @@ function TideTimeline({
 
         {/* Current time indicator */}
         <div
-          className="absolute top-0 h-full w-0.5 bg-red-500 z-10"
+          className="absolute top-0 h-full w-0.5 bg-red-400 z-10"
           style={{ left: `${(currentMinutes / totalMinutes) * 100}%` }}
         >
-          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full" />
+          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-red-400 rounded-full" />
         </div>
       </div>
 
@@ -316,18 +314,18 @@ function TideTimeline({
           return (
             <div
               key={i}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl ${isHigh ? "bg-cyan-50" : "bg-blue-50"}`}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl ${isHigh ? "bg-[#7dd3fc]/10" : "bg-[#c9a84c]/10"}`}
             >
               <span
-                className={`text-sm ${isHigh ? "text-cyan-600" : "text-blue-700"}`}
+                className={`text-sm ${isHigh ? "text-[#7dd3fc]" : "text-[#c9a84c]"}`}
               >
                 {isHigh ? "🔵" : "🔷"}
               </span>
               <div>
-                <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                <p className="text-xs font-bold text-white">
                   {isHigh ? "만조" : "간조"} {tide.time}
                 </p>
-                <p className="text-[10px] text-slate-500">{tide.level}cm</p>
+                <p className="text-[10px] text-white/40">{tide.level}cm</p>
               </div>
             </div>
           );
@@ -346,36 +344,36 @@ function WeatherDetail({ weather }: { weather: WeatherData }) {
       icon: "thermostat",
       color:
         weather.tempC > 20
-          ? "text-orange-500"
+          ? "text-orange-400"
           : weather.tempC < 5
-            ? "text-blue-500"
-            : "text-emerald-500",
+            ? "text-[#7dd3fc]"
+            : "text-emerald-400",
     },
     {
       label: "바람",
       value: `${weather.windSpeed}m/s`,
       icon: "air",
-      color: (weather.windSpeed ?? 0) > 10 ? "text-red-500" : "text-cyan-500",
+      color: (weather.windSpeed ?? 0) > 10 ? "text-red-400" : "text-[#7dd3fc]",
     },
     {
       label: "습도",
       value: `${weather.humidity}%`,
       icon: "humidity_percentage",
-      color: "text-blue-500",
+      color: "text-[#7dd3fc]",
     },
     {
       label: "날씨",
       value: weather.conditionKo,
       icon: weather.icon,
-      color: "text-amber-500",
+      color: "text-[#c9a84c]",
     },
   ];
 
   return (
-    <div className="bg-white dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm p-4">
+    <div className="glass-morphism rounded-2xl border border-white/5 p-4">
       <div className="flex items-center gap-2 mb-3">
-        <DynamicIcon name="cloud" size={16} className="text-amber-500" />
-        <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+        <DynamicIcon name="cloud" size={16} className="text-[#c9a84c]" />
+        <h3 className="text-sm font-bold text-white uppercase tracking-[0.15em]">
           날씨 상세
         </h3>
       </div>
@@ -383,16 +381,14 @@ function WeatherDetail({ weather }: { weather: WeatherData }) {
         {items.map((item) => (
           <div
             key={item.label}
-            className="flex items-center gap-3 bg-slate-50 rounded-xl px-3 py-2.5"
+            className="flex items-center gap-3 bg-white/5 rounded-xl px-3 py-2.5"
           >
             <DynamicIcon name={item.icon} size={20} className={item.color} />
             <div>
-              <p className="text-[10px] text-slate-400 font-medium">
+              <p className="text-[10px] text-white/40 font-medium">
                 {item.label}
               </p>
-              <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                {item.value}
-              </p>
+              <p className="text-sm font-bold text-white">{item.value}</p>
             </div>
           </div>
         ))}
@@ -453,10 +449,10 @@ function FishingTips({ biteTime }: { biteTime: BiteTimePrediction }) {
   }
 
   return (
-    <div className="bg-white dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm p-4">
+    <div className="glass-morphism rounded-2xl border border-white/5 p-4">
       <div className="flex items-center gap-2 mb-3">
-        <DynamicIcon name="lightbulb" size={16} className="text-primary" />
-        <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+        <DynamicIcon name="lightbulb" size={16} className="text-[#c9a84c]" />
+        <h3 className="text-sm font-bold text-white uppercase tracking-[0.15em]">
           오늘의 낚시 팁
         </h3>
       </div>
@@ -464,9 +460,9 @@ function FishingTips({ biteTime }: { biteTime: BiteTimePrediction }) {
         {tips.map((tip, i) => (
           <div
             key={i}
-            className="flex items-start gap-2 bg-blue-50 rounded-xl px-3 py-2.5"
+            className="flex items-start gap-2 bg-[#c9a84c]/5 border border-[#c9a84c]/10 rounded-xl px-3 py-2.5"
           >
-            <p className="text-xs text-slate-700 leading-relaxed">{tip}</p>
+            <p className="text-xs text-white/70 leading-relaxed">{tip}</p>
           </div>
         ))}
       </div>
@@ -540,20 +536,20 @@ export default function BiteForecastPage() {
           : "🌙 밤";
 
   return (
-    <div className="relative flex min-h-dvh w-full flex-col bg-bg dark:bg-bg-dark overflow-x-hidden pb-24">
+    <div className="relative flex min-h-dvh w-full flex-col bg-[#080d14] overflow-x-hidden pb-24">
       {/* Header */}
-      <header className="flex items-center gap-3 px-4 pt-6 pb-2 bg-bg dark:bg-bg-dark sticky top-0 z-30 backdrop-blur-md">
+      <header className="flex items-center gap-3 px-4 pt-6 pb-2 bg-[#080d14]/60 backdrop-blur-xl sticky top-0 z-30 border-b border-white/5">
         <Link
           href="/"
-          className="size-9 flex items-center justify-center rounded-full bg-white shadow-sm border border-slate-100"
+          className="size-9 flex items-center justify-center rounded-full glass-morphism border border-white/10"
         >
-          <ArrowLeft size={20} className="text-slate-500" />
+          <ArrowLeft size={20} className="text-white/60" />
         </Link>
         <div>
-          <h1 className="text-base font-bold text-slate-900 dark:text-white">
+          <h1 className="text-base font-bold text-white uppercase tracking-[0.1em]">
             {isKo ? "입질 예측 상세" : "Bite Forecast Detail"}
           </h1>
-          <p className="text-[10px] text-slate-400">
+          <p className="text-[10px] text-white/40">
             {locationName} · {timeLabel}
           </p>
         </div>
@@ -563,26 +559,24 @@ export default function BiteForecastPage() {
       {loading ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-            <p className="text-sm text-slate-500">
-              위치 기반 데이터 분석 중...
-            </p>
+            <div className="w-16 h-16 border-4 border-[#c9a84c]/20 border-t-[#c9a84c] rounded-full animate-spin" />
+            <p className="text-sm text-white/40">위치 기반 데이터 분석 중...</p>
           </div>
         </div>
       ) : biteTime ? (
         <div className="space-y-4 px-4 pt-4">
           {/* ── Score Hero ── */}
-          <div className="bg-white dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm p-5">
+          <div className="glass-morphism rounded-2xl border border-white/5 p-5">
             <div className="flex items-center gap-6">
               <ScoreRing score={biteTime.score} />
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-2xl">{biteTime.gradeEmoji}</span>
-                  <span className="text-lg font-bold text-slate-900 dark:text-white">
+                  <span className="text-lg font-bold text-white">
                     {biteTime.gradeLabel}
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 mb-3">
+                <p className="text-xs text-white/40 mb-3">
                   7가지 요소를 종합 분석한 결과입니다
                 </p>
                 {/* Mini factor tags */}
@@ -590,22 +584,22 @@ export default function BiteForecastPage() {
                   {biteTime.factors.map((f) => {
                     const dotColor =
                       f.status === "positive"
-                        ? "bg-emerald-500"
+                        ? "bg-emerald-400"
                         : f.status === "negative"
-                          ? "bg-red-500"
-                          : "bg-amber-500";
+                          ? "bg-red-400"
+                          : "bg-[#c9a84c]";
                     return (
                       <span
                         key={f.name}
-                        className="flex items-center gap-1 bg-slate-100 rounded-full px-2 py-0.5"
+                        className="flex items-center gap-1 bg-white/5 rounded-full px-2 py-0.5"
                       >
                         <span
                           className={`w-1.5 h-1.5 rounded-full ${dotColor}`}
                         />
-                        <span className="text-[10px] font-medium text-slate-600">
+                        <span className="text-[10px] font-medium text-white/50">
                           {f.name}
                         </span>
-                        <span className="text-[10px] font-bold text-slate-800 dark:text-slate-200">
+                        <span className="text-[10px] font-bold text-white/70">
                           {f.score}
                         </span>
                       </span>
@@ -622,9 +616,9 @@ export default function BiteForecastPage() {
               <DynamicIcon
                 name="analytics"
                 size={16}
-                className="text-primary"
+                className="text-[#c9a84c]"
               />
-              <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+              <h2 className="text-sm font-bold text-white/50 uppercase tracking-[0.15em]">
                 {isKo ? "요소별 상세 분석" : "Factor Analysis"}
               </h2>
             </div>
@@ -657,22 +651,22 @@ export default function BiteForecastPage() {
 
           {/* ── Windy Link ── */}
           <Link href="/weather" className="block">
-            <div className="bg-gradient-to-r from-sky-500 to-cyan-400 rounded-2xl p-4 flex items-center gap-3 shadow-md">
+            <div className="bg-gradient-to-r from-[#7dd3fc]/20 to-[#c9a84c]/10 border border-[#7dd3fc]/20 rounded-2xl p-4 flex items-center gap-3">
               <span className="text-2xl">🛰️</span>
               <div className="flex-1">
-                <p className="text-xs font-bold text-white">
+                <p className="text-xs font-bold text-white uppercase tracking-[0.1em]">
                   {isKo ? "위성 날씨 지도 보기" : "View Satellite Weather"}
                 </p>
-                <p className="text-[10px] text-white/70">
+                <p className="text-[10px] text-white/40">
                   7일 출항 날씨 · Windy.com
                 </p>
               </div>
-              <ChevronRight size={20} className="text-white/80" />
+              <ChevronRight size={20} className="text-white/40" />
             </div>
           </Link>
 
           {/* ── Data source ── */}
-          <p className="text-[10px] text-slate-400 text-center pb-4">
+          <p className="text-[10px] text-white/20 text-center pb-4">
             {isKo
               ? "※ 물때: KHOA 바다누리, 날씨: Open-Meteo, 수온·파고: Open-Meteo Marine. 실제 조과는 다를 수 있습니다."
               : "※ Tide: KHOA, Weather: Open-Meteo, SST/Waves: Open-Meteo Marine. Actual results may vary."}
@@ -682,10 +676,10 @@ export default function BiteForecastPage() {
         <div className="flex-1 flex items-center justify-center px-4">
           <div className="text-center">
             <span className="text-4xl">📍</span>
-            <p className="text-sm font-bold text-slate-700 mt-2">
+            <p className="text-sm font-bold text-white mt-2">
               위치 정보가 필요합니다
             </p>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-white/40 mt-1">
               브라우저 위치 권한을 허용해주세요
             </p>
           </div>

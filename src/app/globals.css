@@ -55,9 +55,14 @@
   --color-fleet-large: #ff073a;
   --color-fleet-user: #00d4ff;
 
+  /* Midnight Harbor palette */
+  --color-deep-bg: #080d14;
+  --color-gold: #c9a84c;
+  --color-ice-blue: #7dd3fc;
+
   /* Typography */
   --font-sans: "Inter", "Pretendard", "Noto Sans KR", system-ui, sans-serif;
-  --font-display: "Inter", "Pretendard", sans-serif;
+  --font-display: "Space Grotesk", "Inter", "Pretendard", sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
 
   /* Radius */
@@ -161,6 +166,57 @@
     );
     background-size: 200% 100%;
   }
+}
+
+/* ===== Midnight Harbor ===== */
+@layer utilities {
+  .glass-morphism {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .ambient-glow {
+    background: radial-gradient(
+      circle at center,
+      rgba(201, 168, 76, 0.08) 0%,
+      transparent 70%
+    );
+  }
+  .gold-glow {
+    text-shadow: 0 0 15px rgba(201, 168, 76, 0.4);
+  }
+  .blue-glow {
+    text-shadow: 0 0 15px rgba(125, 211, 252, 0.4);
+  }
+}
+
+@keyframes radar-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes pulse-gold {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.radar-line {
+  animation: radar-sweep 3s linear infinite;
+}
+.pulse-dot {
+  animation: pulse-gold 2s ease-in-out infinite;
 }
 
 /* ===== Scrollbar ===== */

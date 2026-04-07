@@ -93,19 +93,19 @@ export default function RecordsPage() {
   ];
 
   return (
-    <div className="page-enter relative z-10 px-4 pt-4 pb-24">
+    <div className="bg-[#080d14] text-white min-h-dvh page-enter relative z-10 px-4 pt-4 pb-24">
       {/* Header */}
       <header className="flex items-center gap-3 mb-4">
         <Link
           href="/"
-          className="p-2 -ml-2 rounded-xl hover:bg-slate-100:bg-slate-800 transition-colors"
+          className="p-2 -ml-2 rounded-xl hover:bg-white/10 transition-colors"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={20} className="text-white/70" />
         </Link>
-        <h1 className="text-lg font-semibold text-slate-900">
+        <h1 className="text-lg font-bold text-white tracking-[0.1em] uppercase">
           {t("home.recentCatch")}
         </h1>
-        <span className="text-sm text-slate-400 ml-auto">
+        <span className="text-sm text-white/40 ml-auto">
           {filtered.length}
           {locale === "ko" ? "건" : ""}
         </span>
@@ -115,7 +115,7 @@ export default function RecordsPage() {
       <div className="relative mb-3">
         <Search
           size={20}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
         />
         <input
           type="text"
@@ -126,11 +126,11 @@ export default function RecordsPage() {
               ? "어종, 장소, 메모 검색..."
               : "Search species, location, memo..."
           }
-          className="w-full pl-10 pr-12 py-3 rounded-2xl bg-white border border-slate-200 text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all text-slate-900"
+          className="w-full pl-10 pr-12 py-3 rounded-2xl bg-white/5 border border-white/10 text-sm text-white placeholder-white/30 focus:border-[#c9a84c]/50 focus:ring-1 focus:ring-[#c9a84c]/30 transition-all"
         />
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`absolute right-2 top-1/2 -translate-y-1/2 size-8 flex items-center justify-center rounded-xl transition-colors ${showFilters ? "bg-primary text-white" : "text-slate-400 hover:bg-slate-100:bg-slate-700"}`}
+          className={`absolute right-2 top-1/2 -translate-y-1/2 size-8 flex items-center justify-center rounded-xl transition-colors ${showFilters ? "bg-[#c9a84c] text-[#080d14]" : "text-white/40 hover:bg-white/10"}`}
         >
           <Filter size={18} />
         </button>
@@ -147,8 +147,8 @@ export default function RecordsPage() {
                 onClick={() => setSortBy(value)}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                   sortBy === value
-                    ? "bg-primary text-white shadow-sm"
-                    : "bg-white text-slate-500 border border-slate-200"
+                    ? "bg-[#c9a84c] text-[#080d14] shadow-sm"
+                    : "bg-white/5 text-white/50 border border-white/10"
                 }`}
               >
                 <DynamicIcon name={icon} size={14} />
@@ -164,8 +164,8 @@ export default function RecordsPage() {
                 onClick={() => setSearch("")}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                   !search
-                    ? "bg-primary/10 text-primary"
-                    : "bg-slate-100 text-slate-500"
+                    ? "bg-[#c9a84c]/20 text-[#c9a84c]"
+                    : "bg-white/5 text-white/40"
                 }`}
               >
                 {locale === "ko" ? "전체" : "All"}
@@ -176,8 +176,8 @@ export default function RecordsPage() {
                   onClick={() => setSearch(search === s ? "" : s)}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                     search === s
-                      ? "bg-primary/10 text-primary"
-                      : "bg-slate-100 text-slate-500"
+                      ? "bg-[#c9a84c]/20 text-[#c9a84c]"
+                      : "bg-white/5 text-white/40"
                   }`}
                 >
                   {s}
@@ -194,9 +194,9 @@ export default function RecordsPage() {
           <DynamicIcon
             name={search ? "search" : "set_meal"}
             size={48}
-            className="text-slate-300 mb-3 block"
+            className="text-white/20 mb-3 block"
           />
-          <p className="text-slate-400">
+          <p className="text-white/40">
             {search
               ? locale === "ko"
                 ? "검색 결과가 없습니다"
@@ -211,9 +211,9 @@ export default function RecordsPage() {
             <Link
               key={record.id}
               href={`/records/detail?id=${record.id}`}
-              className="flex items-start gap-3 p-3 rounded-2xl bg-white shadow-sm border border-slate-100 hover:shadow-md hover:border-primary/30 transition-all active:scale-[0.98]"
+              className="flex items-start gap-3 p-3 rounded-2xl glass-morphism border border-white/5 hover:border-[#c9a84c]/30 transition-all active:scale-[0.98]"
             >
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-tr from-primary to-cyan-400 flex items-center justify-center shrink-0 overflow-hidden">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-tr from-[#c9a84c]/40 to-[#7dd3fc]/30 flex items-center justify-center shrink-0 overflow-hidden">
                 {record.photos.length > 0 ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -222,29 +222,29 @@ export default function RecordsPage() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <Fish size={20} className="text-white" />
+                  <Fish size={20} className="text-[#c9a84c]" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-sm text-slate-900">
+                  <h3 className="font-semibold text-sm text-white">
                     {record.species}
                   </h3>
-                  <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-primary/10 text-primary">
+                  <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-[#c9a84c]/20 text-[#c9a84c]">
                     {record.count}
                     {t("home.unit.fish")}
                   </span>
                   {record.sizeCm && (
-                    <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-blue-50 text-blue-500">
+                    <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-[#7dd3fc]/10 text-[#7dd3fc]">
                       {record.sizeCm}cm
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-1 mt-1 text-xs text-slate-400">
+                <div className="flex items-center gap-1 mt-1 text-xs text-white/40">
                   <MapPin size={14} />
                   <span className="truncate">{record.location.name}</span>
                 </div>
-                <div className="flex items-center gap-1 mt-0.5 text-xs text-slate-400">
+                <div className="flex items-center gap-1 mt-0.5 text-xs text-white/40">
                   <DynamicIcon name="calendar_today" size={14} />
                   <span>{record.date}</span>
                 </div>
@@ -252,12 +252,12 @@ export default function RecordsPage() {
               <div className="flex flex-col items-center gap-1 shrink-0">
                 <button
                   onClick={(e) => handleDelete(e, record.id)}
-                  className="p-2 rounded-lg hover:bg-red-50:bg-red-900/20 text-slate-400 hover:text-red-500 transition-colors"
+                  className="p-2 rounded-lg hover:bg-red-500/20 text-white/30 hover:text-red-400 transition-colors"
                   aria-label={t("common.delete")}
                 >
                   <DynamicIcon name="delete" size={18} />
                 </button>
-                <ChevronRight size={14} className="text-slate-300" />
+                <ChevronRight size={14} className="text-white/20" />
               </div>
             </Link>
           ))}

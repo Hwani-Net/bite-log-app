@@ -122,15 +122,15 @@ export default function FeedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg dark:bg-bg-dark pb-24">
+    <div className="min-h-screen bg-[#080d14] pb-24">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/80 dark:bg-bg-dark/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/50">
+      <header className="sticky top-0 z-40 bg-[#080d14]/60 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center gap-2">
-          <DynamicIcon name="public" size={20} className="text-primary" />
-          <h1 className="text-lg font-bold text-slate-900 dark:text-white">
+          <DynamicIcon name="public" size={20} className="text-[#c9a84c]" />
+          <h1 className="text-lg font-bold text-white">
             {locale === "ko" ? "낚시인 피드" : "Angler Feed"}
           </h1>
-          <span className="ml-auto text-xs text-slate-400 font-medium">
+          <span className="ml-auto text-xs text-white/30 font-medium">
             {filteredFeed.length}
             {locale === "ko" ? "건" : " posts"}
           </span>
@@ -142,8 +142,8 @@ export default function FeedPage() {
             onClick={() => handleFilterChange("all")}
             className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
               filterType === "all"
-                ? "bg-primary text-white shadow-md shadow-primary/30"
-                : "bg-slate-100 text-slate-500 hover:bg-slate-200:bg-slate-700"
+                ? "bg-[#c9a84c] text-[#080d14]"
+                : "bg-white/5 border border-white/10 text-white/50 hover:text-white/70"
             }`}
           >
             {locale === "ko" ? "전체" : "All"}
@@ -152,8 +152,8 @@ export default function FeedPage() {
             onClick={() => handleFilterChange("species")}
             className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
               filterType === "species"
-                ? "bg-primary text-white shadow-md shadow-primary/30"
-                : "bg-slate-100 text-slate-500 hover:bg-slate-200:bg-slate-700"
+                ? "bg-[#c9a84c] text-[#080d14]"
+                : "bg-white/5 border border-white/10 text-white/50 hover:text-white/70"
             }`}
           >
             🐟 {locale === "ko" ? "어종별" : "By Species"}
@@ -162,8 +162,8 @@ export default function FeedPage() {
             onClick={() => handleFilterChange("region")}
             className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
               filterType === "region"
-                ? "bg-primary text-white shadow-md shadow-primary/30"
-                : "bg-slate-100 text-slate-500 hover:bg-slate-200:bg-slate-700"
+                ? "bg-[#c9a84c] text-[#080d14]"
+                : "bg-white/5 border border-white/10 text-white/50 hover:text-white/70"
             }`}
           >
             📍 {locale === "ko" ? "지역별" : "By Region"}
@@ -182,8 +182,8 @@ export default function FeedPage() {
                   }
                   className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all whitespace-nowrap ${
                     selectedSpecies === sp
-                      ? "bg-teal-500 text-white shadow-sm"
-                      : "bg-teal-50 text-teal-700 hover:bg-teal-100:bg-teal-900/40"
+                      ? "bg-[#7dd3fc] text-[#080d14]"
+                      : "bg-[#7dd3fc]/10 text-[#7dd3fc] border border-[#7dd3fc]/20 hover:bg-[#7dd3fc]/20"
                   }`}
                 >
                   {sp}
@@ -203,8 +203,8 @@ export default function FeedPage() {
                   }
                   className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all whitespace-nowrap ${
                     selectedRegion === rg
-                      ? "bg-blue-500 text-white shadow-sm"
-                      : "bg-blue-50 text-blue-700 hover:bg-blue-100:bg-blue-900/40"
+                      ? "bg-[#c9a84c] text-[#080d14]"
+                      : "bg-[#c9a84c]/10 text-[#c9a84c] border border-[#c9a84c]/20 hover:bg-[#c9a84c]/20"
                   }`}
                 >
                   {rg}
@@ -222,16 +222,16 @@ export default function FeedPage() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-2xl p-4 shadow-sm animate-pulse"
+                className="bg-white/5 border border-white/10 rounded-2xl p-4 animate-pulse"
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-slate-200 rounded-full" />
+                  <div className="w-10 h-10 bg-white/10 rounded-full" />
                   <div className="flex-1 space-y-1">
-                    <div className="h-3 bg-slate-200 rounded w-24" />
-                    <div className="h-2 bg-slate-200 rounded w-16" />
+                    <div className="h-3 bg-white/10 rounded w-24" />
+                    <div className="h-2 bg-white/10 rounded w-16" />
                   </div>
                 </div>
-                <div className="h-40 bg-slate-200 rounded-xl" />
+                <div className="h-40 bg-white/10 rounded-xl" />
               </div>
             ))}
           </div>
@@ -243,9 +243,9 @@ export default function FeedPage() {
             <DynamicIcon
               name={filterType === "all" ? "explore" : "filter_list"}
               size={48}
-              className="text-slate-300 mb-4 block"
+              className="text-white/10 mb-4 block"
             />
-            <h2 className="text-lg font-bold text-slate-400 mb-1">
+            <h2 className="text-lg font-bold text-white/30 mb-1">
               {filterType === "all"
                 ? locale === "ko"
                   ? "아직 공개된 조과가 없어요"
@@ -254,7 +254,7 @@ export default function FeedPage() {
                   ? "필터에 맞는 조과가 없어요"
                   : "No catches match this filter"}
             </h2>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-white/20">
               {filterType === "all"
                 ? locale === "ko"
                   ? "기록 시 공개 설정하면 피드에 표시됩니다"
@@ -266,7 +266,7 @@ export default function FeedPage() {
             {filterType !== "all" && (
               <button
                 onClick={() => handleFilterChange("all")}
-                className="mt-4 px-4 py-2 bg-primary text-white rounded-full text-sm font-medium"
+                className="mt-4 px-4 py-2 bg-[#c9a84c] text-[#080d14] rounded-full text-sm font-medium"
               >
                 {locale === "ko" ? "전체 보기" : "Show All"}
               </button>
@@ -282,24 +282,24 @@ export default function FeedPage() {
           return (
             <article
               key={item.id}
-              className="bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-700/50 shadow-sm rounded-2xl shadow-sm overflow-hidden"
+              className="bg-white/5 backdrop-blur-[12px] border border-white/10 rounded-2xl overflow-hidden"
             >
               {/* User header */}
               <div className="px-4 pt-4 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-teal-accent flex items-center justify-center text-white text-sm font-bold shadow-md">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#c9a84c] to-[#7dd3fc] flex items-center justify-center text-[#080d14] text-sm font-bold">
                   {item.userDisplayName.charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">
+                  <p className="text-sm font-semibold text-white truncate">
                     {item.userDisplayName}
                   </p>
-                  <p className="text-[10px] text-slate-400">
+                  <p className="text-[10px] text-white/30">
                     {item.date} · {item.location.name}
                   </p>
                 </div>
                 {/* Region badge */}
                 {item.location.region && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-medium">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/40 font-medium">
                     {item.location.region}
                   </span>
                 )}
@@ -322,15 +322,15 @@ export default function FeedPage() {
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-2xl">🐟</span>
                   <div>
-                    <p className="text-base font-bold text-slate-900 dark:text-white">
+                    <p className="text-base font-bold text-white">
                       {item.species}
-                      <span className="text-sm font-normal text-primary ml-1.5">
+                      <span className="text-sm font-normal text-[#c9a84c] ml-1.5">
                         {item.count}
                         {locale === "ko" ? "마리" : " fish"}
                       </span>
                     </p>
                     {item.sizeCm && (
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-white/50">
                         📏 {item.sizeCm}cm
                       </p>
                     )}
@@ -338,12 +338,12 @@ export default function FeedPage() {
                 </div>
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {item.weather && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 font-medium">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a84c]/10 text-[#c9a84c] font-medium">
                       🌤️ {item.weather.condition} {item.weather.tempC}°C
                     </span>
                   )}
                   {item.tide && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-medium">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#7dd3fc]/10 text-[#7dd3fc] font-medium">
                       🌊 {item.tide.stationName}
                     </span>
                   )}
@@ -351,15 +351,15 @@ export default function FeedPage() {
               </div>
 
               {/* Action bar */}
-              <div className="border-t border-slate-100 px-4 py-2 flex items-center gap-4">
+              <div className="border-t border-white/5 px-4 py-2 flex items-center gap-4">
                 <button
                   onClick={() => handleLike(item.id)}
-                  className={`flex items-center gap-1.5 text-sm font-medium transition-all ${isLiked ? "text-red-500 scale-110" : "text-slate-400 hover:text-red-400"}`}
+                  className={`flex items-center gap-1.5 text-sm font-medium transition-all ${isLiked ? "text-red-400 scale-110" : "text-white/30 hover:text-red-400"}`}
                 >
                   <Heart
                     size={20}
-                    fill={isLiked ? "#ef4444" : "none"}
-                    color={isLiked ? "#ef4444" : "currentColor"}
+                    fill={isLiked ? "#f87171" : "none"}
+                    color={isLiked ? "#f87171" : "currentColor"}
                   />
                   <span>{item.likeCount > 0 ? item.likeCount : ""}</span>
                 </button>
@@ -367,7 +367,7 @@ export default function FeedPage() {
                   onClick={() =>
                     setCommentInputId(showComments ? null : item.id)
                   }
-                  className="flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-primary transition-colors"
+                  className="flex items-center gap-1.5 text-sm font-medium text-white/30 hover:text-[#7dd3fc] transition-colors"
                 >
                   <MessageCircle size={20} />
                   <span>{item.commentCount > 0 ? item.commentCount : ""}</span>
@@ -380,14 +380,14 @@ export default function FeedPage() {
                 <div className="px-4 pb-3 space-y-2">
                   {item.comments?.map((c) => (
                     <div key={c.id} className="flex items-start gap-2">
-                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary shrink-0 mt-0.5">
+                      <div className="w-6 h-6 rounded-full bg-[#c9a84c]/20 flex items-center justify-center text-[10px] font-bold text-[#c9a84c] shrink-0 mt-0.5">
                         {c.userDisplayName.charAt(0)}
                       </div>
-                      <div className="flex-1 bg-slate-50 rounded-xl px-3 py-2">
-                        <p className="text-[10px] font-semibold text-slate-600">
+                      <div className="flex-1 bg-white/5 rounded-xl px-3 py-2">
+                        <p className="text-[10px] font-semibold text-white/50">
                           {c.userDisplayName}
                         </p>
-                        <p className="text-xs text-slate-700">{c.content}</p>
+                        <p className="text-xs text-white/70">{c.content}</p>
                       </div>
                     </div>
                   ))}
@@ -405,17 +405,17 @@ export default function FeedPage() {
                             ? "댓글을 입력하세요..."
                             : "Add a comment..."
                         }
-                        className="flex-1 bg-slate-100 rounded-full px-4 py-2 text-xs text-slate-900 outline-none focus:ring-2 focus:ring-primary/30"
+                        className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-xs text-white placeholder:text-white/30 outline-none focus:border-[#c9a84c]/50"
                       />
                       <button
                         onClick={() => handleComment(item)}
                         disabled={!commentText.trim()}
-                        className="w-8 h-8 rounded-full bg-primary flex items-center justify-center disabled:opacity-40"
+                        className="w-8 h-8 rounded-full bg-[#c9a84c] flex items-center justify-center disabled:opacity-40"
                       >
                         <DynamicIcon
                           name="send"
                           size={16}
-                          className="text-white"
+                          className="text-[#080d14]"
                         />
                       </button>
                     </div>

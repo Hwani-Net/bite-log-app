@@ -39,11 +39,11 @@ export default function BottomNav() {
 
   if (!mounted)
     return (
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-bg-dark/90 backdrop-blur-xl border-t border-slate-200 dark:border-slate-700/50 h-16 safe-bottom" />
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#080d14]/40 backdrop-blur-2xl border-t border-white/5 h-16 safe-bottom" />
     );
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-bg-dark/90 backdrop-blur-xl border-t border-slate-200 dark:border-slate-700/50 safe-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#080d14]/40 backdrop-blur-2xl border-t border-white/5 safe-bottom">
       <div className="mx-auto max-w-md flex items-center justify-around h-16 px-2 pb-2 pt-1">
         {NAV_ITEMS.map((item) => {
           const isActive =
@@ -57,8 +57,8 @@ export default function BottomNav() {
               href={item.href}
               className={`flex flex-col items-center gap-0.5 px-3 py-1 transition-all ${
                 isActive
-                  ? "text-primary"
-                  : "text-slate-400 dark:text-slate-500 hover:text-primary"
+                  ? "text-[#c9a84c]"
+                  : "text-white/30 hover:text-white/60"
               }`}
             >
               <Icon
@@ -67,11 +67,13 @@ export default function BottomNav() {
                 fill={isActive ? "currentColor" : "none"}
               />
               <span
-                className={`text-[10px] ${isActive ? "font-bold" : "font-medium"} leading-normal`}
+                className={`font-space-grotesk tracking-[0.15em] text-[0.45rem] uppercase ${isActive ? "font-bold" : "font-medium"} leading-normal`}
               >
                 {t(item.labelKey)}
               </span>
-              {isActive && <div className="w-1 h-1 rounded-full bg-primary" />}
+              {isActive && (
+                <div className="w-1 h-1 rounded-full bg-[#c9a84c]" />
+              )}
             </Link>
           );
         })}

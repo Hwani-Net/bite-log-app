@@ -304,23 +304,23 @@ export default function RecordPage() {
   }
 
   const inputCls =
-    "w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 focus:border-primary focus:ring-1 focus:ring-primary transition-all text-slate-900 placeholder:text-slate-400 text-base";
+    "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 focus:border-[#c9a84c]/50 focus:ring-1 focus:ring-[#c9a84c]/30 transition-all text-white placeholder:text-white/30 text-base";
 
   return (
-    <div className="page-enter relative z-10 min-h-screen bg-gradient-to-b from-white to-slate-50">
+    <div className="page-enter relative z-10 min-h-screen bg-[#080d14]">
       {/* Header — #4: 이전 버튼은 여기에 (하단 아님) */}
-      <header className="sticky top-0 z-50 flex items-center bg-white/90 dark:bg-bg-dark/90 backdrop-blur-md px-4 py-3 justify-between border-b border-slate-100 dark:border-slate-700/50">
+      <header className="sticky top-0 z-50 flex items-center bg-[#080d14]/60 backdrop-blur-xl px-4 py-3 justify-between border-b border-white/5">
         <button
           onClick={() =>
             step === "form" && photos.length > 0
               ? setStep("photo")
               : router.back()
           }
-          className="text-slate-900 flex size-11 shrink-0 items-center justify-center hover:bg-slate-100 rounded-full transition-colors"
+          className="text-white/70 flex size-11 shrink-0 items-center justify-center hover:bg-white/10 rounded-full transition-colors"
         >
           <ArrowLeft size={20} />
         </button>
-        <h2 className="text-slate-900 text-lg font-bold leading-tight tracking-tight flex-1 text-center">
+        <h2 className="text-white text-lg font-bold leading-tight tracking-[0.1em] uppercase flex-1 text-center">
           {t("record.title")}
         </h2>
         <div className="w-11" />
@@ -331,7 +331,7 @@ export default function RecordPage() {
         <div className="px-4 pt-6 pb-32 space-y-5 animate-fadeIn">
           <div
             onClick={() => fileRef.current?.click()}
-            className="flex flex-col items-center gap-4 rounded-2xl border-2 border-dashed border-slate-200 bg-white px-6 py-14 transition-all hover:border-primary/50 cursor-pointer shadow-sm"
+            className="flex flex-col items-center gap-4 rounded-2xl border-2 border-dashed border-white/10 bg-white/5 px-6 py-14 transition-all hover:border-[#c9a84c]/40 cursor-pointer"
           >
             {photos.length > 0 ? (
               <div className="flex gap-3 flex-wrap justify-center">
@@ -373,20 +373,20 @@ export default function RecordPage() {
               </div>
             ) : (
               <>
-                <div className="bg-gradient-to-br from-primary/10 to-teal-accent/10 p-6 rounded-full">
-                  <Camera size={48} className="text-primary" />
+                <div className="bg-[#c9a84c]/10 border border-[#c9a84c]/20 p-6 rounded-full">
+                  <Camera size={48} className="text-[#c9a84c]" />
                 </div>
                 <div className="flex flex-col items-center gap-1.5">
-                  <p className="text-slate-900 text-xl font-bold leading-tight">
+                  <p className="text-white text-xl font-bold leading-tight">
                     {t("record.photoGuide")}
                   </p>
-                  <p className="text-slate-400 text-sm font-normal text-center">
+                  <p className="text-white/40 text-sm font-normal text-center">
                     {t("record.photoSubGuide")}
                   </p>
                 </div>
                 <button
                   type="button"
-                  className="mt-3 flex min-w-[160px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-14 px-8 bg-gradient-to-r from-primary to-teal-accent text-white text-base font-bold shadow-lg shadow-primary/20 transition-transform active:scale-95 gap-2"
+                  className="mt-3 flex min-w-[160px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-14 px-8 bg-[#c9a84c] text-[#080d14] text-base font-bold shadow-lg shadow-[#c9a84c]/20 transition-transform active:scale-95 gap-2"
                 >
                   <Camera size={18} />
                   {t("record.addPhoto")}
@@ -406,20 +406,18 @@ export default function RecordPage() {
 
           {/* AI result badge (shows while still on photo step) */}
           {aiResult && aiResult.confidence > 0 && !aiAnalyzing && (
-            <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+            <div className="flex items-center gap-3 bg-[#7dd3fc]/5 border border-[#7dd3fc]/20 rounded-xl p-3">
               <span className="text-2xl">🐟</span>
               <div className="flex-1">
-                <p className="text-sm font-bold text-emerald-700">
+                <p className="text-sm font-bold text-[#7dd3fc]">
                   {aiResult.koreanName}{" "}
-                  <span className="font-normal text-emerald-500">
+                  <span className="font-normal text-[#7dd3fc]/60">
                     ({aiResult.confidence}%)
                   </span>
                 </p>
-                <p className="text-xs text-emerald-600">
-                  {aiResult.description}
-                </p>
+                <p className="text-xs text-white/60">{aiResult.description}</p>
                 {(aiResult.estimatedSizeCm || aiResult.estimatedWeightKg) && (
-                  <p className="text-xs text-emerald-500 mt-0.5">
+                  <p className="text-xs text-[#7dd3fc]/70 mt-0.5">
                     📏{" "}
                     {aiResult.estimatedSizeCm
                       ? `약 ${aiResult.estimatedSizeCm}cm`
@@ -433,7 +431,7 @@ export default function RecordPage() {
                   </p>
                 )}
                 {aiResult.fishingTip && (
-                  <p className="text-xs text-teal-600 mt-0.5">
+                  <p className="text-xs text-[#c9a84c]/80 mt-0.5">
                     💡 {aiResult.fishingTip}
                   </p>
                 )}
@@ -442,35 +440,35 @@ export default function RecordPage() {
           )}
 
           {/* Bottom actions */}
-          <div className="fixed bottom-[84px] left-0 right-0 flex flex-col gap-3 justify-center items-center p-4 bg-white/90 backdrop-blur-md z-50 border-t border-slate-100">
+          <div className="fixed bottom-[84px] left-0 right-0 flex flex-col gap-3 justify-center items-center p-4 bg-[#080d14]/60 backdrop-blur-2xl z-50 border-t border-white/5">
             <div className="w-full max-w-lg flex flex-col gap-2">
               {/* Voice review panel */}
               {voiceState === "review" && voiceParsed && (
-                <div className="bg-violet-50 border border-violet-200 rounded-2xl p-4 mb-1">
-                  <p className="text-xs text-violet-500 font-semibold mb-1">
+                <div className="bg-[#c9a84c]/5 border border-[#c9a84c]/20 rounded-2xl p-4 mb-1">
+                  <p className="text-xs text-[#c9a84c] font-semibold mb-1">
                     🎤 인식된 내용
                   </p>
-                  <p className="text-sm text-slate-700 mb-2">
+                  <p className="text-sm text-white/70 mb-2">
                     &quot;{voiceTranscript}&quot;
                   </p>
                   <div className="flex flex-wrap gap-1.5 mb-3">
                     {voiceParsed.species && (
-                      <span className="text-xs px-2 py-1 bg-violet-100 text-violet-700 rounded-full font-medium">
+                      <span className="text-xs px-2 py-1 bg-[#c9a84c]/10 text-[#c9a84c] rounded-full font-medium">
                         🐟 {voiceParsed.species}
                       </span>
                     )}
                     {voiceParsed.count && (
-                      <span className="text-xs px-2 py-1 bg-violet-100 text-violet-700 rounded-full font-medium">
+                      <span className="text-xs px-2 py-1 bg-[#c9a84c]/10 text-[#c9a84c] rounded-full font-medium">
                         × {voiceParsed.count}마리
                       </span>
                     )}
                     {voiceParsed.sizeCm && (
-                      <span className="text-xs px-2 py-1 bg-violet-100 text-violet-700 rounded-full font-medium">
+                      <span className="text-xs px-2 py-1 bg-[#c9a84c]/10 text-[#c9a84c] rounded-full font-medium">
                         📏 {voiceParsed.sizeCm}cm
                       </span>
                     )}
                     {voiceParsed.locationHint && (
-                      <span className="text-xs px-2 py-1 bg-violet-100 text-violet-700 rounded-full font-medium">
+                      <span className="text-xs px-2 py-1 bg-[#c9a84c]/10 text-[#c9a84c] rounded-full font-medium">
                         📍 {voiceParsed.locationHint}
                       </span>
                     )}
@@ -479,14 +477,14 @@ export default function RecordPage() {
                     <button
                       type="button"
                       onClick={cancelVoice}
-                      className="flex-1 h-11 rounded-xl border border-slate-300 text-slate-600 font-semibold text-sm active:scale-95 transition-transform"
+                      className="flex-1 h-11 rounded-xl border border-white/10 text-white/60 font-semibold text-sm active:scale-95 transition-transform"
                     >
                       다시 말하기
                     </button>
                     <button
                       type="button"
                       onClick={confirmVoice}
-                      className="flex-1 h-11 rounded-xl bg-violet-500 text-white font-bold text-sm active:scale-95 transition-transform shadow-lg shadow-violet-200"
+                      className="flex-1 h-11 rounded-xl bg-[#c9a84c] text-[#080d14] font-bold text-sm active:scale-95 transition-transform shadow-lg shadow-[#c9a84c]/20"
                     >
                       확인 → 기록
                     </button>
@@ -496,17 +494,17 @@ export default function RecordPage() {
 
               {/* Voice listening indicator */}
               {voiceState === "listening" && (
-                <div className="flex items-center justify-between bg-red-50 border border-red-200 rounded-2xl px-4 py-3">
+                <div className="flex items-center justify-between bg-red-500/10 border border-red-500/20 rounded-2xl px-4 py-3">
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
-                    <span className="text-sm font-semibold text-red-600">
+                    <span className="text-sm font-semibold text-red-400">
                       듣는 중... 말씀해 주세요
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={cancelVoice}
-                    className="text-xs text-slate-400 hover:text-red-500 transition-colors"
+                    className="text-xs text-white/30 hover:text-red-400 transition-colors"
                   >
                     취소
                   </button>
@@ -518,7 +516,7 @@ export default function RecordPage() {
                   <button
                     type="button"
                     onClick={proceedToForm}
-                    className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-teal-accent text-white font-bold text-lg shadow-xl shadow-primary/30 flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                    className="w-full h-14 rounded-2xl bg-[#c9a84c] text-[#080d14] font-bold text-lg shadow-xl shadow-[#c9a84c]/20 flex items-center justify-center gap-2 active:scale-95 transition-transform"
                   >
                     {t("record.next")}
                     <ChevronRight size={18} />
@@ -529,7 +527,7 @@ export default function RecordPage() {
                     <button
                       type="button"
                       onClick={startVoiceRecording}
-                      className="flex-1 h-14 rounded-2xl bg-gradient-to-r from-violet-500 to-purple-500 text-white font-bold text-base shadow-xl shadow-violet-200 flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                      className="flex-1 h-14 rounded-2xl glass-morphism border border-[#7dd3fc]/20 text-[#7dd3fc] font-bold text-base flex items-center justify-center gap-2 active:scale-95 transition-transform"
                     >
                       <Mic size={20} />
                       {locale === "ko" ? "음성으로 기록" : "Voice Record"}
@@ -538,7 +536,7 @@ export default function RecordPage() {
                     <button
                       type="button"
                       onClick={skipToForm}
-                      className="h-14 px-4 rounded-2xl bg-slate-100 text-slate-600 font-bold text-sm flex items-center justify-center gap-1.5 active:scale-95 transition-transform"
+                      className="h-14 px-4 rounded-2xl bg-[#c9a84c] text-[#080d14] font-bold text-sm flex items-center justify-center gap-1.5 active:scale-95 transition-transform"
                     >
                       <Zap size={18} />
                       {locale === "ko" ? "직접 입력" : "Manual"}
@@ -552,18 +550,18 @@ export default function RecordPage() {
 
       {/* ===== STEP: FORM (everything in one scroll) ===== */}
       {step === "form" && voiceFilled.length > 0 && (
-        <div className="mx-4 mt-4 flex items-start gap-2 bg-violet-50 border border-violet-200 rounded-xl p-3 animate-fadeIn">
-          <Mic size={16} className="text-violet-500 mt-0.5" />
+        <div className="mx-4 mt-4 flex items-start gap-2 bg-[#c9a84c]/5 border border-[#c9a84c]/20 rounded-xl p-3 animate-fadeIn">
+          <Mic size={16} className="text-[#c9a84c] mt-0.5" />
           <div>
-            <p className="text-xs font-semibold text-violet-700 mb-0.5">
+            <p className="text-xs font-semibold text-[#c9a84c] mb-0.5">
               음성으로 자동 채움
             </p>
-            <p className="text-xs text-violet-500">{voiceFilled.join(" · ")}</p>
+            <p className="text-xs text-white/50">{voiceFilled.join(" · ")}</p>
           </div>
           <button
             type="button"
             onClick={() => setVoiceFilled([])}
-            className="ml-auto text-slate-300 hover:text-slate-500"
+            className="ml-auto text-white/20 hover:text-white/50"
           >
             <X size={14} />
           </button>
@@ -577,12 +575,12 @@ export default function RecordPage() {
         >
           {/* Photo summary (if any) */}
           {photos.length > 0 && (
-            <div className="flex items-center gap-3 bg-slate-50 rounded-2xl p-3">
+            <div className="flex items-center gap-3 glass-morphism border border-white/5 rounded-2xl p-3">
               <div className="flex gap-1.5">
                 {photos.slice(0, 3).map((p, i) => (
                   <div
                     key={i}
-                    className="w-14 h-14 rounded-xl overflow-hidden shrink-0 shadow"
+                    className="w-14 h-14 rounded-xl overflow-hidden shrink-0"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -594,18 +592,18 @@ export default function RecordPage() {
                 ))}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-white/40">
                   {photos.length}
                   {locale === "ko" ? "장 사진" : " photo(s)"}
                 </p>
                 {aiAnalyzing && (
-                  <p className="text-xs text-violet-500 animate-pulse flex items-center gap-1">
+                  <p className="text-xs text-[#7dd3fc] animate-pulse flex items-center gap-1">
                     <Loader2 size={12} className="animate-spin" />
                     {locale === "ko" ? "AI 분석 중..." : "Analyzing..."}
                   </p>
                 )}
                 {aiResult && aiResult.confidence > 0 && !aiAnalyzing && (
-                  <p className="text-xs font-medium text-emerald-600">
+                  <p className="text-xs font-medium text-[#c9a84c]">
                     🤖 AI: {aiResult.koreanName} ({aiResult.confidence}%)
                   </p>
                 )}
@@ -614,13 +612,13 @@ export default function RecordPage() {
           )}
 
           {/* ===== Species — #2: AI result is just a pre-fill, not a separate step ===== */}
-          <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4">
+          <div className="glass-morphism border border-white/5 rounded-2xl p-4">
             <label className="flex flex-col gap-2">
-              <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
-                <Fish size={16} className="text-primary" />
+              <span className="text-white/70 text-sm font-semibold flex items-center gap-2">
+                <Fish size={16} className="text-[#c9a84c]" />
                 {t("record.species")}
                 {aiResult && aiResult.confidence > 0 && !aiAnalyzing && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-medium">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a84c]/10 text-[#c9a84c] font-medium">
                     🤖 AI {locale === "ko" ? "추천" : "suggested"}
                   </span>
                 )}
@@ -645,26 +643,24 @@ export default function RecordPage() {
 
           {/* Count + Size */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 overflow-hidden">
-              <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2 mb-3">
-                <Fish size={16} className="text-primary shrink-0" />
+            <div className="glass-morphism border border-white/5 rounded-2xl p-4 overflow-hidden">
+              <span className="text-white/70 text-sm font-semibold flex items-center gap-2 mb-3">
+                <Fish size={16} className="text-[#c9a84c] shrink-0" />
                 <span className="truncate">{t("record.count")}</span>
               </span>
-              <div className="flex items-center justify-between bg-slate-50 rounded-xl p-1 border border-slate-200">
+              <div className="flex items-center justify-between bg-white/5 rounded-xl p-1 border border-white/10">
                 <button
                   type="button"
                   onClick={() => setCount((c) => Math.max(1, c - 1))}
-                  className="size-11 flex items-center justify-center bg-white rounded-lg shadow-sm text-slate-600 active:scale-95 transition-transform"
+                  className="size-11 flex items-center justify-center bg-white/10 rounded-lg text-white/60 active:scale-95 transition-transform"
                 >
                   <Minus size={20} />
                 </button>
-                <span className="text-2xl font-bold text-slate-900 dark:text-white">
-                  {count}
-                </span>
+                <span className="text-2xl font-bold text-white">{count}</span>
                 <button
                   type="button"
                   onClick={() => setCount((c) => c + 1)}
-                  className="size-11 flex items-center justify-center bg-primary rounded-lg shadow-sm text-white active:scale-95 transition-transform"
+                  className="size-11 flex items-center justify-center bg-[#c9a84c] rounded-lg text-[#080d14] active:scale-95 transition-transform"
                 >
                   <Plus size={20} />
                 </button>
@@ -672,10 +668,10 @@ export default function RecordPage() {
             </div>
 
             {/* #5 김짜증: 사이즈 placeholder "선택사항" */}
-            <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4">
+            <div className="glass-morphism border border-white/5 rounded-2xl p-4">
               <label className="flex flex-col gap-2">
-                <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
-                  <Ruler size={16} className="text-primary" />
+                <span className="text-white/70 text-sm font-semibold flex items-center gap-2">
+                  <Ruler size={16} className="text-[#c9a84c]" />
                   {t("record.size")}
                 </span>
                 <input
@@ -692,10 +688,10 @@ export default function RecordPage() {
           </div>
 
           {/* ===== Location Card — GPS auto in background ===== */}
-          <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4">
+          <div className="glass-morphism border border-white/5 rounded-2xl p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
-                <MapPin size={16} className="text-primary" />
+              <span className="text-white/70 text-sm font-semibold flex items-center gap-2">
+                <MapPin size={16} className="text-[#c9a84c]" />
                 {t("record.location")}
               </span>
               <div className="flex items-center gap-2">
@@ -703,7 +699,7 @@ export default function RecordPage() {
                   <button
                     type="button"
                     onClick={() => setLocationMode("manual")}
-                    className="text-xs text-slate-400 hover:text-primary transition-colors py-1 px-2"
+                    className="text-xs text-white/30 hover:text-[#c9a84c] transition-colors py-1 px-2"
                   >
                     {t("record.manualInput")}
                   </button>
@@ -714,7 +710,7 @@ export default function RecordPage() {
                       setLocationMode("auto");
                       detectLocation();
                     }}
-                    className="text-xs text-primary font-semibold py-1 px-2"
+                    className="text-xs text-[#c9a84c] font-semibold py-1 px-2"
                   >
                     GPS
                   </button>
@@ -726,30 +722,30 @@ export default function RecordPage() {
             {locationMode === "auto" && (
               <div className="mb-2">
                 {geo.loading && (
-                  <div className="flex items-center gap-2 text-xs text-primary animate-pulse">
+                  <div className="flex items-center gap-2 text-xs text-[#7dd3fc] animate-pulse">
                     <Loader2 size={14} className="animate-spin" />
                     {t("record.detectingLocation")}
                   </div>
                 )}
                 {autoDetected && !geo.loading && (
-                  <div className="flex items-center gap-2 text-xs text-emerald-500">
+                  <div className="flex items-center gap-2 text-xs text-emerald-400">
                     <CheckCircle size={14} />
                     {t("record.locationDetected")}
                     {gpsLat && gpsLng && (
-                      <span className="text-slate-400 ml-1">
+                      <span className="text-white/30 ml-1">
                         ({gpsLat.toFixed(4)}, {gpsLng.toFixed(4)})
                       </span>
                     )}
                   </div>
                 )}
                 {geo.error && !geo.loading && (
-                  <div className="flex items-center gap-2 text-xs text-amber-500">
+                  <div className="flex items-center gap-2 text-xs text-amber-400">
                     <AlertTriangle size={14} />
                     {t("record.locationFailed")}
                     <button
                       type="button"
                       onClick={detectLocation}
-                      className="text-primary font-semibold underline ml-1 py-1"
+                      className="text-[#c9a84c] font-semibold underline ml-1 py-1"
                     >
                       {t("record.retryLocation")}
                     </button>
@@ -769,46 +765,46 @@ export default function RecordPage() {
 
           {/* Weather (auto, collapsed) */}
           {(weather || weatherLoading) && (
-            <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4">
-              <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2 mb-3">
-                <Cloud size={16} className="text-primary" />
+            <div className="glass-morphism border border-white/5 rounded-2xl p-4">
+              <span className="text-white/70 text-sm font-semibold flex items-center gap-2 mb-3">
+                <Cloud size={16} className="text-[#7dd3fc]" />
                 {t("record.weather")}
               </span>
               {weatherLoading ? (
-                <div className="flex items-center gap-2 text-xs text-primary animate-pulse py-1">
+                <div className="flex items-center gap-2 text-xs text-[#7dd3fc] animate-pulse py-1">
                   <Loader2 size={14} className="animate-spin" />
                   {t("record.loadingWeather")}
                 </div>
               ) : (
                 weather && (
                   <div className="grid grid-cols-4 gap-2">
-                    <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-primary/5">
+                    <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-[#c9a84c]/10">
                       <DynamicIcon
                         name={weather.icon}
                         size={20}
-                        className="text-primary"
+                        className="text-[#c9a84c]"
                       />
-                      <span className="text-[10px] font-semibold text-slate-600 text-center leading-tight">
+                      <span className="text-[10px] font-semibold text-white/50 text-center leading-tight">
                         {locale === "ko"
                           ? weather.conditionKo
                           : weather.conditionEn}
                       </span>
                     </div>
-                    <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-orange-50">
-                      <Thermometer size={20} className="text-orange-500" />
-                      <span className="text-xs font-bold text-slate-900 dark:text-white">
+                    <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-orange-500/10">
+                      <Thermometer size={20} className="text-orange-400" />
+                      <span className="text-xs font-bold text-white">
                         {weather.tempC}°C
                       </span>
                     </div>
-                    <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-blue-50">
-                      <Wind size={20} className="text-blue-500" />
-                      <span className="text-xs font-bold text-slate-900 dark:text-white">
+                    <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-[#7dd3fc]/10">
+                      <Wind size={20} className="text-[#7dd3fc]" />
+                      <span className="text-xs font-bold text-white">
                         {weather.windSpeed}m/s
                       </span>
                     </div>
-                    <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-teal-50">
-                      <Droplets size={20} className="text-teal-500" />
-                      <span className="text-xs font-bold text-slate-900 dark:text-white">
+                    <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-[#7dd3fc]/10">
+                      <Droplets size={20} className="text-[#7dd3fc]" />
+                      <span className="text-xs font-bold text-white">
                         {weather.humidity}%
                       </span>
                     </div>
@@ -820,28 +816,28 @@ export default function RecordPage() {
 
           {/* Tide (auto, collapsed) */}
           {(tide || tideLoading) && (
-            <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4">
+            <div className="glass-morphism border border-white/5 rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Waves size={14} className="text-primary" />
-                <span className="text-xs font-bold text-slate-700">
+                <Waves size={14} className="text-[#7dd3fc]" />
+                <span className="text-xs font-bold text-white/60">
                   {locale === "ko" ? "물때 정보" : "Tide"}
                 </span>
                 {tideLoading && (
-                  <span className="text-[10px] text-primary animate-pulse ml-auto">
+                  <span className="text-[10px] text-[#7dd3fc] animate-pulse ml-auto">
                     {t("record.detectingLocation")}
                   </span>
                 )}
               </div>
               {!tideLoading && tide ? (
                 <div>
-                  <div className="text-[10px] text-slate-400 mb-1">
+                  <div className="text-[10px] text-white/30 mb-1">
                     📍 {tide.stationName}
                   </div>
                   <div className="flex flex-wrap gap-2 text-xs">
                     {tide.tides.map((t, i) => (
                       <span
                         key={i}
-                        className={`flex items-center gap-1 font-semibold ${t.type === "High" ? "text-blue-500" : "text-cyan-500"}`}
+                        className={`flex items-center gap-1 font-semibold ${t.type === "High" ? "text-[#7dd3fc]" : "text-[#c9a84c]"}`}
                       >
                         {t.type === "High"
                           ? locale === "ko"
@@ -857,17 +853,17 @@ export default function RecordPage() {
                 </div>
               ) : (
                 <div className="h-6 flex items-center">
-                  <div className="w-1/2 h-4 bg-slate-200 rounded animate-pulse" />
+                  <div className="w-1/2 h-4 bg-white/10 rounded animate-pulse" />
                 </div>
               )}
             </div>
           )}
 
           {/* Date */}
-          <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4">
+          <div className="glass-morphism border border-white/5 rounded-2xl p-4">
             <label className="flex flex-col gap-2">
-              <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
-                <Calendar size={16} className="text-primary" />
+              <span className="text-white/70 text-sm font-semibold flex items-center gap-2">
+                <Calendar size={16} className="text-[#c9a84c]" />
                 {t("record.date")}
               </span>
               <input
@@ -880,10 +876,10 @@ export default function RecordPage() {
           </div>
 
           {/* Memo */}
-          <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4">
+          <div className="glass-morphism border border-white/5 rounded-2xl p-4">
             <label className="flex flex-col gap-2">
-              <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center gap-2">
-                <FileEdit size={16} className="text-primary" />
+              <span className="text-white/70 text-sm font-semibold flex items-center gap-2">
+                <FileEdit size={16} className="text-[#c9a84c]" />
                 {t("record.memo")}
               </span>
               <textarea
@@ -897,19 +893,19 @@ export default function RecordPage() {
           </div>
 
           {/* Visibility — #6: 비공개 기본 */}
-          <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4">
+          <div className="glass-morphism border border-white/5 rounded-2xl p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <DynamicIcon
                   name={visibility === "public" ? "public" : "lock"}
                   size={16}
-                  className="text-primary"
+                  className="text-[#c9a84c]"
                 />
                 <div>
-                  <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                  <span className="text-sm font-semibold text-white/70">
                     {locale === "ko" ? "조과 공개" : "Share to Feed"}
                   </span>
-                  <p className="text-[11px] text-slate-400 mt-0.5">
+                  <p className="text-[11px] text-white/30 mt-0.5">
                     {visibility === "public"
                       ? locale === "ko"
                         ? "다른 낚시인들이 내 조과를 볼 수 있어요"
@@ -925,7 +921,7 @@ export default function RecordPage() {
                 onClick={() =>
                   setVisibility((v) => (v === "private" ? "public" : "private"))
                 }
-                className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${visibility === "public" ? "bg-primary" : "bg-slate-300"}`}
+                className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${visibility === "public" ? "bg-[#c9a84c]" : "bg-white/10"}`}
               >
                 <span
                   className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 ${visibility === "public" ? "translate-x-6" : "translate-x-0"}`}
@@ -935,12 +931,12 @@ export default function RecordPage() {
           </div>
 
           {/* #4: 하단은 저장 버튼 하나만 — 풀 와이드 */}
-          <div className="fixed bottom-[84px] left-0 right-0 flex justify-center p-4 bg-white/90 backdrop-blur-md z-50 border-t border-slate-100">
+          <div className="fixed bottom-[84px] left-0 right-0 flex justify-center p-4 bg-[#080d14]/60 backdrop-blur-2xl z-50 border-t border-white/5">
             <div className="w-full max-w-lg">
               <button
                 type="submit"
                 disabled={saving || !species}
-                className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-teal-accent text-white font-bold text-lg shadow-xl shadow-primary/30 flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-40 disabled:shadow-none"
+                className="w-full h-14 rounded-2xl bg-[#c9a84c] text-[#080d14] font-bold text-lg shadow-xl shadow-[#c9a84c]/20 flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-40 disabled:shadow-none"
               >
                 {saving
                   ? locale === "ko"

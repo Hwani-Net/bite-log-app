@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import 'leaflet/dist/leaflet.css';
-import { useEffect, useState, useRef, useCallback } from 'react';
+import "leaflet/dist/leaflet.css";
+import { useEffect, useState, useRef, useCallback } from "react";
 import {
   Anchor,
   Navigation,
@@ -16,18 +16,18 @@ import {
   History,
   Map as MapIcon,
   X,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   FleetEntry,
   SafeHarborZone,
   fetchFleetData,
   computeSafeHarbors,
   checkProximityAlert,
-} from '@/services/fleetRadarService';
+} from "@/services/fleetRadarService";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type SizeFilter = 'all' | 'small' | 'large';
+type SizeFilter = "all" | "small" | "large";
 
 interface UserPosition {
   lat: number;
@@ -40,12 +40,14 @@ const REFRESH_INTERVAL_MS = 30_000;
 const DEFAULT_CENTER: [number, number] = [34.89, 128.62]; // 남해 중심부
 const DEFAULT_ZOOM = 10;
 
-const KOREA_SEA_TILES = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const KOREA_SEA_TILES = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatAge(isoTimestamp: string): string {
-  const diffSec = Math.floor((Date.now() - new Date(isoTimestamp).getTime()) / 1000);
+  const diffSec = Math.floor(
+    (Date.now() - new Date(isoTimestamp).getTime()) / 1000,
+  );
   if (diffSec < 60) return `${diffSec}초 전`;
   if (diffSec < 3600) return `${Math.floor(diffSec / 60)}분 전`;
   return `${Math.floor(diffSec / 3600)}시간 전`;
@@ -53,28 +55,34 @@ function formatAge(isoTimestamp: string): string {
 
 function shipTypeLabel(type: string): string {
   const map: Record<string, string> = {
-    fishing: '어선', cargo: '화물선', leisure: '레저선', passenger: '여객선',
+    fishing: "어선",
+    cargo: "화물선",
+    leisure: "레저선",
+    passenger: "여객선",
   };
   return map[type] ?? type;
 }
 
 function shipTypeEmoji(type: string): string {
   const map: Record<string, string> = {
-    fishing: '🎣', cargo: '🚢', leisure: '⛵', passenger: '🛳️',
+    fishing: "🎣",
+    cargo: "🚢",
+    leisure: "⛵",
+    passenger: "🛳️",
   };
-  return map[type] ?? '🚤';
+  return map[type] ?? "🚤";
 }
 
 function courseDirection(deg: number): string {
-  const dirs = ['N','NE','E','SE','S','SW','W','NW'];
+  const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
   return dirs[Math.round(deg / 45) % 8];
 }
 
 function speedCategory(kt: number): { label: string; color: string } {
-  if (kt <= 1) return { label: '정박/대기', color: '#10b981' }; // Emerald
-  if (kt <= 5) return { label: '저속 운항', color: '#fbbf24' }; // Amber
-  if (kt <= 12) return { label: '정상 운항', color: '#00d4ff' }; // Cyan
-  return { label: '고속 운항', color: '#ef4444' }; // Red
+  if (kt <= 1) return { label: "정박/대기", color: "#10b981" }; // Emerald
+  if (kt <= 5) return { label: "저속 운항", color: "#fbbf24" }; // Amber
+  if (kt <= 12) return { label: "정상 운항", color: "#00d4ff" }; // Cyan
+  return { label: "고속 운항", color: "#ef4444" }; // Red
 }
 
 // ─── Main Component ──────────────────────────────────────────────────────────
@@ -86,10 +94,10 @@ export default function FleetRadar() {
   const [alerts, setAlerts] = useState<FleetEntry[]>([]);
   const [isMock, setIsMock] = useState(false);
   const [isFallback, setIsFallback] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState<string>('');
+  const [lastUpdate, setLastUpdate] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sizeFilter, setSizeFilter] = useState<SizeFilter>('all');
+  const [sizeFilter, setSizeFilter] = useState<SizeFilter>("all");
   const [userPos, setUserPos] = useState<UserPosition | null>(null);
   const [selectedShip, setSelectedShip] = useState<FleetEntry | null>(null);
   const [mapReady, setMapReady] = useState(false);
@@ -97,13 +105,14 @@ export default function FleetRadar() {
   // Leaflet refs
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef = useRef<any>(null);
-  const leafletRef = useRef<typeof import('leaflet') | null>(null);
+  const leafletRef = useRef<typeof import("leaflet") | null>(null);
 
   // ── Geolocation ────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
-      (pos) => setUserPos({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+      (pos) =>
+        setUserPos({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
       () => {},
     );
   }, []);
@@ -111,22 +120,28 @@ export default function FleetRadar() {
   // ── Data Fetching ──────────────────────────────────────────────────────────
   const fetchAndProcess = useCallback(async () => {
     try {
-      const options = sizeFilter !== 'all' ? { size: sizeFilter as 'small' | 'large' } : undefined;
+      const options =
+        sizeFilter !== "all"
+          ? { size: sizeFilter as "small" | "large" }
+          : undefined;
       const res = await fetchFleetData(options);
-      if (!res.ok) { setError(res.error ?? '로드 실패'); return; }
+      if (!res.ok) {
+        setError(res.error ?? "로드 실패");
+        return;
+      }
 
       setFleet(res.data);
       setSafeHarbors(computeSafeHarbors(res.data));
       setIsMock(res.mock);
       setIsFallback(res.fallback ?? false);
-      setLastUpdate(new Date().toLocaleTimeString('ko-KR'));
+      setLastUpdate(new Date().toLocaleTimeString("ko-KR"));
       setError(null);
 
       if (userPos) {
         setAlerts(checkProximityAlert(res.data, userPos.lat, userPos.lon));
       }
     } catch {
-      setError('네트워크 오류');
+      setError("네트워크 오류");
     } finally {
       setLoading(false);
     }
@@ -143,19 +158,19 @@ export default function FleetRadar() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let mapInstance: any;
 
-    import('leaflet').then((L) => {
+    import("leaflet").then((L) => {
       leafletRef.current = L;
 
       // Fix icon paths
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (L.Icon.Default.prototype as any)._getIconUrl;
       L.Icon.Default.mergeOptions({
-        iconRetinaUrl: '/leaflet/marker-icon-2x.png',
-        iconUrl: '/leaflet/marker-icon.png',
-        shadowUrl: '/leaflet/marker-shadow.png',
+        iconRetinaUrl: "/leaflet/marker-icon-2x.png",
+        iconUrl: "/leaflet/marker-icon.png",
+        shadowUrl: "/leaflet/marker-shadow.png",
       });
 
-      const container = document.getElementById('fleet-map');
+      const container = document.getElementById("fleet-map");
       if (!container) return;
 
       mapInstance = L.map(container, {
@@ -165,11 +180,11 @@ export default function FleetRadar() {
       });
 
       L.tileLayer(KOREA_SEA_TILES, {
-        attribution: '© OSM',
-        className: 'map-tiles-dark',
+        attribution: "© OSM",
+        className: "map-tiles-dark",
       }).addTo(mapInstance);
 
-      L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
+      L.control.zoom({ position: "bottomright" }).addTo(mapInstance);
 
       mapRef.current = mapInstance;
       setMapReady(true);
@@ -187,7 +202,7 @@ export default function FleetRadar() {
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).openShipDetail = (mmsi: string) => {
-      const ship = fleet.find(s => s.mmsi === mmsi);
+      const ship = fleet.find((s) => s.mmsi === mmsi);
       if (ship) setSelectedShip(ship);
     };
   }, [fleet]);
@@ -200,24 +215,28 @@ export default function FleetRadar() {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     map.eachLayer((layer: any) => {
-      if (layer instanceof L.Marker || layer instanceof L.Circle) map.removeLayer(layer);
+      if (layer instanceof L.Marker || layer instanceof L.Circle)
+        map.removeLayer(layer);
     });
 
     // Safe Harbors
     for (const zone of safeHarbors) {
       L.circle([zone.centerLat, zone.centerLon], {
-        radius: 500, color: '#39ff14', fillOpacity: 0.1, weight: 1,
+        radius: 500,
+        color: "#39ff14",
+        fillOpacity: 0.1,
+        weight: 1,
       }).addTo(map);
     }
 
     // Ships
     for (const ship of fleet) {
-      const isLarge = ship.sizeClass === 'large';
-      const color = isLarge ? '#ff073a' : '#39ff14';
+      const isLarge = ship.sizeClass === "large";
+      const color = isLarge ? "#ff073a" : "#39ff14";
       const size = isLarge ? 12 : 9;
 
       const icon = L.divIcon({
-        className: '',
+        className: "",
         html: `<div style="width:${size}px;height:${size}px;background:${color};border:1.5px solid white;border-radius:50%;box-shadow:0 0 8px ${color}"></div>`,
         iconSize: [size, size],
         iconAnchor: [size / 2, size / 2],
@@ -227,7 +246,7 @@ export default function FleetRadar() {
         <div style="font-family:sans-serif;min-width:140px;padding:2px">
           <div style="display:flex;justify-content:space-between;margin-bottom:4px">
             <b style="font-size:13px">${ship.shipName}</b>
-            <span style="color:${color};font-size:10px;font-weight:bold">${isLarge ? '대형' : '소형'}</span>
+            <span style="color:${color};font-size:10px;font-weight:bold">${isLarge ? "대형" : "소형"}</span>
           </div>
           <div style="font-size:11px;color:#666;margin-bottom:8px">
             ${shipTypeLabel(ship.shipType)} · ${ship.tonnage}GT · ${ship.speed}kt
@@ -243,14 +262,14 @@ export default function FleetRadar() {
 
       L.marker([ship.lat, ship.lon], { icon })
         .bindPopup(popupHtml)
-        .on('click', () => setSelectedShip(ship))
+        .on("click", () => setSelectedShip(ship))
         .addTo(map);
     }
 
     // User
     if (userPos) {
       const userIcon = L.divIcon({
-        className: '',
+        className: "",
         html: `<div style="width:14px;height:14px;background:#00d4ff;border:2px solid white;border-radius:50%;box-shadow:0 0 12px #00d4ff"></div>`,
         iconSize: [14, 14],
         iconAnchor: [7, 7],
@@ -260,60 +279,81 @@ export default function FleetRadar() {
   }, [fleet, safeHarbors, userPos, mapReady]);
 
   // ── Derived stats ─────────────────────────────────────────────────────────
-  const smallCount = fleet.filter((s) => s.sizeClass === 'small').length;
-  const largeCount = fleet.filter((s) => s.sizeClass === 'large').length;
-  const fishingCount = fleet.filter((s) => s.shipType === 'fishing').length;
+  const smallCount = fleet.filter((s) => s.sizeClass === "small").length;
+  const largeCount = fleet.filter((s) => s.sizeClass === "large").length;
+  const fishingCount = fleet.filter((s) => s.shipType === "fishing").length;
 
   return (
     <div
+      className="bg-[#080d14] text-white min-h-dvh"
       style={{
-        position: 'fixed',
+        position: "fixed",
         inset: 0,
         zIndex: 1000,
-        background: '#0a1118',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        maxWidth: '28rem',
-        margin: '0 auto',
+        background: "#0a1118",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        maxWidth: "28rem",
+        margin: "0 auto",
       }}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 shrink-0 bg-slate-900/90 backdrop-blur-md border-b border-white/5 z-20">
-        <button onClick={() => window.location.href = '/'} className="p-2 text-slate-400 hover:text-white">
+        <button
+          onClick={() => (window.location.href = "/")}
+          className="p-2 text-slate-400 hover:text-white"
+        >
           <X size={20} />
         </button>
         <div className="text-center">
           <h1 className="text-base font-bold text-slate-100 flex items-center gap-1.5 justify-center">
-            Fleet Radar <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400">PRO</span>
+            Fleet Radar{" "}
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400">
+              PRO
+            </span>
           </h1>
           <div className="flex items-center gap-1.5 justify-center mt-0.5">
-            <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isMock ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-            <span className="text-[10px] text-slate-400">{isMock ? 'DEMO' : 'LIVE'} · {lastUpdate || '--:--:--'}</span>
+            <span
+              className={`w-1.5 h-1.5 rounded-full animate-pulse ${isMock ? "bg-amber-500" : "bg-emerald-500"}`}
+            />
+            <span className="text-[10px] text-slate-400">
+              {isMock ? "DEMO" : "LIVE"} · {lastUpdate || "--:--:--"}
+            </span>
           </div>
         </div>
-        <button onClick={() => { setLoading(true); fetchAndProcess(); }} className="p-2 text-cyan-400">
+        <button
+          onClick={() => {
+            setLoading(true);
+            fetchAndProcess();
+          }}
+          className="p-2 text-cyan-400"
+        >
           <Activity size={18} />
         </button>
       </div>
 
       {/* Map Content */}
       <div className="flex-1 relative">
-        <div id="fleet-map" className="absolute inset-0" style={{ zIndex: 0 }} />
-        
+        <div
+          id="fleet-map"
+          className="absolute inset-0"
+          style={{ zIndex: 0 }}
+        />
+
         {/* Filters */}
         <div className="absolute top-4 left-0 right-0 z-10 px-4 flex gap-2 overflow-x-auto scrollbar-hide">
-          {(['all', 'small', 'large'] as SizeFilter[]).map((f) => (
+          {(["all", "small", "large"] as SizeFilter[]).map((f) => (
             <button
               key={f}
               onClick={() => setSizeFilter(f)}
               className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border ${
-                sizeFilter === f 
-                  ? 'bg-cyan-500 border-cyan-400 text-slate-950 shadow-lg shadow-cyan-500/20' 
-                  : 'bg-slate-900/80 border-white/10 text-slate-400 backdrop-blur-md'
+                sizeFilter === f
+                  ? "bg-cyan-500 border-cyan-400 text-slate-950 shadow-lg shadow-cyan-500/20"
+                  : "bg-slate-900/80 border-white/10 text-slate-400 backdrop-blur-md"
               }`}
             >
-              {f === 'all' ? '전체' : f === 'small' ? '소형선' : '대형선'}
+              {f === "all" ? "전체" : f === "small" ? "소형선" : "대형선"}
             </button>
           ))}
         </div>
@@ -339,30 +379,51 @@ export default function FleetRadar() {
       <div className="shrink-0 p-4 bg-slate-900/95 backdrop-blur-xl border-t border-white/5 z-20">
         <div className="grid grid-cols-4 gap-2 mb-3">
           <SimpleStat label="전체" value={fleet.length} />
-          <SimpleStat label="소형" value={smallCount} color="text-emerald-400" />
+          <SimpleStat
+            label="소형"
+            value={smallCount}
+            color="text-emerald-400"
+          />
           <SimpleStat label="대형" value={largeCount} color="text-red-400" />
           <SimpleStat label="어선" value={fishingCount} color="text-cyan-400" />
         </div>
         {safeHarbors.length > 0 ? (
           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
             <ShieldCheck size={14} className="text-emerald-400" />
-            <span className="text-[11px] text-slate-300 font-medium">안전 밀집지 {safeHarbors.length}곳 발견</span>
+            <span className="text-[11px] text-slate-300 font-medium">
+              안전 밀집지 {safeHarbors.length}곳 발견
+            </span>
           </div>
         ) : (
           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800/30 border border-white/5">
             <Info size={14} className="text-slate-500" />
-            <span className="text-[11px] text-slate-500">주변 밀집 정보 없음</span>
+            <span className="text-[11px] text-slate-500">
+              주변 밀집 정보 없음
+            </span>
           </div>
         )}
       </div>
 
       {/* Premium Bottom Sheet */}
-      <ShipDetailOverlay ship={selectedShip} onClose={() => setSelectedShip(null)} />
+      <ShipDetailOverlay
+        ship={selectedShip}
+        onClose={() => setSelectedShip(null)}
+      />
 
       <style jsx global>{`
-        .map-tiles-dark { filter: invert(1) hue-rotate(180deg) brightness(0.7) contrast(1.2); }
-        .leaflet-popup-content-wrapper { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(8px); color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
-        .leaflet-popup-tip { background: rgba(15, 23, 42, 0.95); }
+        .map-tiles-dark {
+          filter: invert(1) hue-rotate(180deg) brightness(0.7) contrast(1.2);
+        }
+        .leaflet-popup-content-wrapper {
+          background: rgba(15, 23, 42, 0.95);
+          backdrop-filter: blur(8px);
+          color: white;
+          border-radius: 12px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .leaflet-popup-tip {
+          background: rgba(15, 23, 42, 0.95);
+        }
       `}</style>
     </div>
   );
@@ -373,13 +434,24 @@ export default function FleetRadar() {
 function LegendItem({ color, label }: { color: string; label: string }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]" style={{ background: color, color }} />
+      <span
+        className="w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]"
+        style={{ background: color, color }}
+      />
       <span className="text-[10px] font-medium text-slate-300">{label}</span>
     </div>
   );
 }
 
-function SimpleStat({ label, value, color = 'text-slate-200' }: { label: string; value: number; color?: string }) {
+function SimpleStat({
+  label,
+  value,
+  color = "text-slate-200",
+}: {
+  label: string;
+  value: number;
+  color?: string;
+}) {
   return (
     <div className="text-center p-2 rounded-lg bg-white/5">
       <div className={`text-sm font-bold ${color}`}>{value}</div>
@@ -388,68 +460,104 @@ function SimpleStat({ label, value, color = 'text-slate-200' }: { label: string;
   );
 }
 
-function ShipDetailOverlay({ ship, onClose }: { ship: FleetEntry | null; onClose: () => void }) {
+function ShipDetailOverlay({
+  ship,
+  onClose,
+}: {
+  ship: FleetEntry | null;
+  onClose: () => void;
+}) {
   const isVisible = !!ship;
-  const isLarge = ship?.sizeClass === 'large';
-  const color = isLarge ? '#ff073a' : '#10b981';
+  const isLarge = ship?.sizeClass === "large";
+  const color = isLarge ? "#ff073a" : "#10b981";
 
   return (
     <>
       {/* Backdrop */}
-      <div 
-        className={`fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[9998] transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+      <div
+        className={`fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[9998] transition-opacity duration-300 ${isVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         onClick={onClose}
       />
 
       {/* Sheet */}
-      <div 
+      <div
         className={`fixed left-0 right-0 bottom-0 z-[9999] bg-slate-900/98 backdrop-blur-2xl rounded-t-[32px] border-t border-white/10 shadow-2xl transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) ${
-          isVisible ? 'translate-y-0' : 'translate-y-full'
+          isVisible ? "translate-y-0" : "translate-y-full"
         }`}
-        style={{ maxHeight: '85vh', maxWidth: '28rem', margin: '0 auto' }}
+        style={{ maxHeight: "85vh", maxWidth: "28rem", margin: "0 auto" }}
       >
         {ship && (
           <div className="px-6 pt-2 pb-10">
             {/* Handle */}
-            <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mt-2 mb-6" onClick={onClose} />
-            
+            <div
+              className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mt-2 mb-6"
+              onClick={onClose}
+            />
+
             {/* Header */}
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl" style={{ background: `${color}15`, border: `1px solid ${color}30` }}>
+                <div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl"
+                  style={{
+                    background: `${color}15`,
+                    border: `1px solid ${color}30`,
+                  }}
+                >
                   {shipTypeEmoji(ship.shipType)}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-bold text-white tracking-tight">{ship.shipName}</h2>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-cyan-500 text-slate-950">PRO</span>
+                    <h2 className="text-xl font-bold text-white tracking-tight">
+                      {ship.shipName}
+                    </h2>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-cyan-500 text-slate-950">
+                      PRO
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs font-semibold" style={{ color }}>{isLarge ? '대형 선박' : '소형 어선'}</span>
-                    <span className="text-xs text-slate-500">· {shipTypeLabel(ship.shipType)}</span>
+                    <span className="text-xs font-semibold" style={{ color }}>
+                      {isLarge ? "대형 선박" : "소형 어선"}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      · {shipTypeLabel(ship.shipType)}
+                    </span>
                   </div>
                 </div>
               </div>
-              <button onClick={onClose} className="p-2 rounded-full bg-white/5 text-slate-400"><X size={24} /></button>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-full bg-white/5 text-slate-400"
+              >
+                <X size={24} />
+              </button>
             </div>
 
             {/* MMSI Stripe */}
             <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 mb-6">
-               <div className="flex items-center gap-2">
-                 <span className="text-[10px] font-bold text-slate-500 tracking-wider">MMSI</span>
-                 <span className="text-xs font-mono text-slate-300">{ship.mmsi}</span>
-               </div>
-               <div className="flex items-center gap-1.5">
-                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
-                 <span className="text-[10px] text-slate-500 font-medium">{formatAge(ship.timestamp)} 수신</span>
-               </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-slate-500 tracking-wider">
+                  MMSI
+                </span>
+                <span className="text-xs font-mono text-slate-300">
+                  {ship.mmsi}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
+                <span className="text-[10px] text-slate-500 font-medium">
+                  {formatAge(ship.timestamp)} 수신
+                </span>
+              </div>
             </div>
 
             {/* Speed Gauge */}
             <div className="mb-6">
               <div className="flex justify-between items-end mb-2">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-black text-white">{ship.speed}</span>
+                  <span className="text-3xl font-black text-white">
+                    {ship.speed}
+                  </span>
                   <span className="text-sm font-bold text-slate-500">kt</span>
                 </div>
                 <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-white/5 text-[10px] font-bold text-slate-300">
@@ -458,28 +566,44 @@ function ShipDetailOverlay({ ship, onClose }: { ship: FleetEntry | null; onClose
                 </div>
               </div>
               <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full rounded-full transition-all duration-1000 ease-out"
-                  style={{ 
-                    width: `${Math.min((ship.speed / 20) * 100, 100)}%`, 
+                  style={{
+                    width: `${Math.min((ship.speed / 20) * 100, 100)}%`,
                     background: `linear-gradient(90deg, ${color}cc, ${color})`,
-                    boxShadow: `0 0 10px ${color}40`
+                    boxShadow: `0 0 10px ${color}40`,
                   }}
                 />
               </div>
               <div className="flex justify-between mt-1 px-0.5">
                 <span className="text-[9px] font-bold text-slate-600">0kt</span>
-                <span className="text-[9px] font-bold text-slate-600">STATIC</span>
-                <span className="text-[9px] font-bold text-slate-600">10kt</span>
-                <span className="text-[9px] font-bold text-slate-600">CRUISE</span>
-                <span className="text-[9px] font-bold text-slate-600">20kt+</span>
+                <span className="text-[9px] font-bold text-slate-600">
+                  STATIC
+                </span>
+                <span className="text-[9px] font-bold text-slate-600">
+                  10kt
+                </span>
+                <span className="text-[9px] font-bold text-slate-600">
+                  CRUISE
+                </span>
+                <span className="text-[9px] font-bold text-slate-600">
+                  20kt+
+                </span>
               </div>
             </div>
 
             {/* Grid Stats */}
             <div className="grid grid-cols-2 gap-3 mb-8">
-              <DetailCell icon={<Anchor size={16} />} label="톤수" value={`${ship.tonnage} GT`} />
-              <DetailCell icon={<Ruler size={16} />} label="선체 전장" value={`${ship.length} m`} />
+              <DetailCell
+                icon={<Anchor size={16} />}
+                label="톤수"
+                value={`${ship.tonnage} GT`}
+              />
+              <DetailCell
+                icon={<Ruler size={16} />}
+                label="선체 전장"
+                value={`${ship.length} m`}
+              />
             </div>
 
             {/* Actions */}
@@ -494,12 +618,19 @@ function ShipDetailOverlay({ ship, onClose }: { ship: FleetEntry | null; onClose
             </div>
 
             {/* Map Link */}
-            <button 
-              onClick={() => window.open(`https://www.google.com/maps?q=${ship.lat},${ship.lon}`, '_blank')}
+            <button
+              onClick={() =>
+                window.open(
+                  `https://www.google.com/maps?q=${ship.lat},${ship.lon}`,
+                  "_blank",
+                )
+              }
               className="w-full mt-4 py-3 rounded-xl flex items-center justify-center gap-2 text-slate-500 hover:text-slate-300 transition-colors"
             >
               <ExternalLink size={14} />
-              <span className="text-xs font-medium underline underline-offset-4">구글 지도로 위치 보기</span>
+              <span className="text-xs font-medium underline underline-offset-4">
+                구글 지도로 위치 보기
+              </span>
             </button>
           </div>
         )}
@@ -508,12 +639,22 @@ function ShipDetailOverlay({ ship, onClose }: { ship: FleetEntry | null; onClose
   );
 }
 
-function DetailCell({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function DetailCell({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
   return (
     <div className="p-4 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-3">
       <div className="text-cyan-400/60">{icon}</div>
       <div>
-        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">{label}</div>
+        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
+          {label}
+        </div>
         <div className="text-sm font-black text-slate-200">{value}</div>
       </div>
     </div>

@@ -40,15 +40,15 @@ function StatusBadge({
 
   if (inClosed) {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-100 text-red-600 text-[11px] font-bold">
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-500/20 text-red-400 text-[11px] font-bold">
         <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
         금어기 중
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-600 text-[11px] font-bold">
-      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#c9a84c]/20 text-[#c9a84c] text-[11px] font-bold">
+      <span className="w-1.5 h-1.5 rounded-full bg-[#c9a84c]" />
       포획 가능
     </span>
   );
@@ -72,50 +72,48 @@ function RegulationCard({
 
   return (
     <div
-      className={`bg-white dark:bg-surface-dark rounded-2xl border shadow-sm overflow-hidden transition-all ${
-        !legal ? "border-red-200" : "border-slate-100"
+      className={`bg-white/5 backdrop-blur-[12px] rounded-2xl border overflow-hidden transition-all ${
+        !legal ? "border-red-500/30" : "border-white/10"
       }`}
     >
       {/* Header (always visible) */}
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center gap-3 p-4 text-left active:bg-slate-50 transition-colors"
+        className="w-full flex items-center gap-3 p-4 text-left hover:bg-white/5 transition-colors"
       >
         <span className="text-2xl">{reg.emoji}</span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-              {reg.species}
-            </h3>
+            <h3 className="text-sm font-bold text-white">{reg.species}</h3>
             <StatusBadge reg={reg} month={month} day={day} />
           </div>
-          <p className="text-[10px] text-slate-400 mt-0.5">{reg.speciesEn}</p>
+          <p className="text-[10px] text-white/30 mt-0.5">{reg.speciesEn}</p>
         </div>
         <div className="flex flex-col items-end gap-1">
           {reg.minSizeCm && (
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-bold">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a84c]/20 text-[#c9a84c] font-bold">
               📏 {reg.minSizeCm}cm↑
             </span>
           )}
           <ChevronRight
             size={14}
-            className={`text-slate-300 transition-transform ${expanded ? "rotate-90" : ""}`}
+            className={`text-white/20 transition-transform ${expanded ? "rotate-90" : ""}`}
           />
         </div>
       </button>
 
       {/* Expanded detail */}
       {expanded && (
-        <div className="px-4 pb-4 pt-0 space-y-3 animate-fadeIn border-t border-slate-50">
+        <div className="px-4 pb-4 pt-0 space-y-3 animate-fadeIn border-t border-white/5">
           {/* Violations warning */}
           {violations.length > 0 && (
-            <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl p-3">
-              <AlertTriangle size={16} className="text-red-500 mt-0.5" />
+            <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
+              <AlertTriangle size={16} className="text-red-400 mt-0.5" />
               <div>
-                <p className="text-xs font-bold text-red-700">현재 위반 사항</p>
+                <p className="text-xs font-bold text-red-400">현재 위반 사항</p>
                 {violations.map((v, i) => (
-                  <p key={i} className="text-xs text-red-600 mt-0.5">
+                  <p key={i} className="text-xs text-red-400/80 mt-0.5">
                     • {v}
                   </p>
                 ))}
@@ -125,19 +123,19 @@ function RegulationCard({
 
           {/* Closed season info */}
           {reg.closedSeason && (
-            <div className="flex items-center gap-2 bg-slate-50 rounded-xl p-3">
+            <div className="flex items-center gap-2 bg-white/5 rounded-xl p-3">
               <DynamicIcon
                 name="calendar_today"
                 size={16}
                 className="text-red-400"
               />
               <div>
-                <p className="text-xs font-semibold text-slate-600">금어기</p>
-                <p className="text-xs text-slate-800 dark:text-slate-200 font-bold">
+                <p className="text-xs font-semibold text-white/50">금어기</p>
+                <p className="text-xs text-white font-bold">
                   {reg.closedSeason.start} ~ {reg.closedSeason.end}
                 </p>
                 {reg.closedSeason.note && (
-                  <p className="text-[10px] text-slate-400 mt-0.5">
+                  <p className="text-[10px] text-white/30 mt-0.5">
                     {reg.closedSeason.note}
                   </p>
                 )}
@@ -147,17 +145,17 @@ function RegulationCard({
 
           {/* Min size */}
           {reg.minSizeCm && (
-            <div className="flex items-center gap-2 bg-slate-50 rounded-xl p-3">
+            <div className="flex items-center gap-2 bg-white/5 rounded-xl p-3">
               <DynamicIcon
                 name="straighten"
                 size={16}
-                className="text-amber-500"
+                className="text-[#c9a84c]"
               />
               <div>
-                <p className="text-xs font-semibold text-slate-600">
+                <p className="text-xs font-semibold text-white/50">
                   포획금지 체장
                 </p>
-                <p className="text-xs text-slate-800 dark:text-slate-200 font-bold">
+                <p className="text-xs text-white font-bold">
                   {reg.minSizeCm}cm 미만 포획 금지
                 </p>
               </div>
@@ -166,13 +164,13 @@ function RegulationCard({
 
           {/* Daily limit */}
           {reg.dailyLimit && (
-            <div className="flex items-center gap-2 bg-slate-50 rounded-xl p-3">
-              <DynamicIcon name="info" size={16} className="text-blue-500" />
+            <div className="flex items-center gap-2 bg-white/5 rounded-xl p-3">
+              <DynamicIcon name="info" size={16} className="text-[#7dd3fc]" />
               <div>
-                <p className="text-xs font-semibold text-slate-600">
+                <p className="text-xs font-semibold text-white/50">
                   일일 포획 제한
                 </p>
-                <p className="text-xs text-slate-800 dark:text-slate-200 font-bold">
+                <p className="text-xs text-white font-bold">
                   {reg.dailyLimit}마리/일
                 </p>
               </div>
@@ -180,38 +178,38 @@ function RegulationCard({
           )}
 
           {/* Regional notes */}
-          <div className="bg-slate-50 rounded-xl p-3">
-            <p className="text-xs font-semibold text-slate-600 mb-1.5 flex items-center gap-1">
-              <DynamicIcon name="info" size={14} className="text-primary" />
+          <div className="bg-white/5 rounded-xl p-3">
+            <p className="text-xs font-semibold text-white/50 mb-1.5 flex items-center gap-1">
+              <DynamicIcon name="info" size={14} className="text-[#c9a84c]" />
               해역별 규정
             </p>
             {reg.regionalNotes.map((note, i) => (
-              <p key={i} className="text-xs text-slate-700 ml-5">
+              <p key={i} className="text-xs text-white/70 ml-5">
                 • {note}
               </p>
             ))}
           </div>
 
           {/* Penalty */}
-          <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3">
+          <div className="flex items-start gap-2 bg-[#c9a84c]/10 border border-[#c9a84c]/20 rounded-xl p-3">
             <DynamicIcon
               name="shield"
               size={16}
-              className="text-amber-500 mt-0.5"
+              className="text-[#c9a84c] mt-0.5"
             />
             <div>
-              <p className="text-xs font-semibold text-amber-700">과태료</p>
-              <p className="text-xs text-amber-800">{reg.penaltyNote}</p>
-              <p className="text-[10px] text-amber-500 mt-0.5">
+              <p className="text-xs font-semibold text-[#c9a84c]">과태료</p>
+              <p className="text-xs text-white/70">{reg.penaltyNote}</p>
+              <p className="text-[10px] text-[#c9a84c]/60 mt-0.5">
                 📋 {reg.legalRef}
               </p>
             </div>
           </div>
 
           {/* Tip */}
-          <div className="flex items-start gap-2 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+          <div className="flex items-start gap-2 bg-[#7dd3fc]/10 border border-[#7dd3fc]/20 rounded-xl p-3">
             <span className="text-sm mt-0.5">💡</span>
-            <p className="text-xs text-emerald-700">{reg.tipKo}</p>
+            <p className="text-xs text-[#7dd3fc]/80">{reg.tipKo}</p>
           </div>
         </div>
       )}
@@ -234,62 +232,71 @@ function QuickCheckWidget() {
   }, [selectedSpecies, inputSize, month, day]);
 
   return (
-    <div className="bg-gradient-to-br from-primary to-cyan-500 rounded-2xl p-5 text-white shadow-xl shadow-primary/20">
-      <h2 className="text-sm font-bold text-white/90 mb-3 flex items-center gap-2">
-        <DynamicIcon name="check" size={16} />
-        빠른 적법성 체크
-      </h2>
-      <div className="flex gap-2 mb-3">
-        <select
-          value={selectedSpecies}
-          onChange={(e) => setSelectedSpecies(e.target.value)}
-          className="flex-1 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-white/60 appearance-none"
-        >
-          <option value="" className="text-slate-900">
-            어종 선택
-          </option>
-          {FISH_REGULATION_DB.map((r) => (
-            <option
-              key={r.species}
-              value={r.species}
-              className="text-slate-900"
-            >
-              {r.emoji} {r.species}
+    <div className="rounded-2xl p-[1px] bg-gradient-to-br from-[#c9a84c] to-[#7dd3fc]">
+      <div className="rounded-2xl bg-[#0f141b] p-5">
+        <h2 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+          <DynamicIcon name="check" size={16} className="text-[#c9a84c]" />
+          빠른 적법성 체크
+        </h2>
+        <div className="flex gap-2 mb-3">
+          <select
+            value={selectedSpecies}
+            onChange={(e) => setSelectedSpecies(e.target.value)}
+            style={{ colorScheme: "dark" }}
+            className="flex-1 bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-sm text-white appearance-none"
+          >
+            <option value="" className="bg-[#0f141b]">
+              어종 선택
             </option>
-          ))}
-        </select>
-        <input
-          type="number"
-          value={inputSize}
-          onChange={(e) => setInputSize(e.target.value)}
-          placeholder="크기(cm)"
-          min={0}
-          max={300}
-          className="w-24 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-white/60 text-center"
-        />
-      </div>
-
-      {result && (
-        <div
-          className={`rounded-xl p-3 ${result.legal ? "bg-emerald-500/30" : "bg-red-500/30"}`}
-        >
-          <div className="flex items-center gap-2 mb-1">
-            <DynamicIcon name={result.legal ? "check" : "close"} size={18} />
-            <span className="text-sm font-bold">
-              {result.legal ? "✅ 포획 가능합니다" : "❌ 현재 포획 불가"}
-            </span>
-          </div>
-          {result.violations.length > 0 && (
-            <div className="space-y-0.5 mt-1">
-              {result.violations.map((v, i) => (
-                <p key={i} className="text-xs text-white/90">
-                  ⚠️ {v}
-                </p>
-              ))}
-            </div>
-          )}
+            {FISH_REGULATION_DB.map((r) => (
+              <option
+                key={r.species}
+                value={r.species}
+                className="bg-[#0f141b]"
+              >
+                {r.emoji} {r.species}
+              </option>
+            ))}
+          </select>
+          <input
+            type="number"
+            value={inputSize}
+            onChange={(e) => setInputSize(e.target.value)}
+            placeholder="크기(cm)"
+            min={0}
+            max={300}
+            className="w-24 bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-white/30 text-center"
+          />
         </div>
-      )}
+
+        {result && (
+          <div
+            className={`rounded-xl p-3 ${result.legal ? "bg-[#c9a84c]/20" : "bg-red-500/20"}`}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <DynamicIcon
+                name={result.legal ? "check" : "close"}
+                size={18}
+                className={result.legal ? "text-[#c9a84c]" : "text-red-400"}
+              />
+              <span
+                className={`text-sm font-bold ${result.legal ? "text-[#c9a84c]" : "text-red-400"}`}
+              >
+                {result.legal ? "✅ 포획 가능합니다" : "❌ 현재 포획 불가"}
+              </span>
+            </div>
+            {result.violations.length > 0 && (
+              <div className="space-y-0.5 mt-1">
+                {result.violations.map((v, i) => (
+                  <p key={i} className="text-xs text-white/70">
+                    ⚠️ {v}
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -339,28 +346,30 @@ export default function RegulationsPage() {
   ];
 
   return (
-    <div className="relative flex min-h-dvh w-full flex-col bg-bg dark:bg-bg-dark overflow-x-hidden pb-24">
+    <div className="relative flex min-h-dvh w-full flex-col bg-[#080d14] overflow-x-hidden pb-24">
       {/* Header */}
-      <header className="flex items-center gap-3 px-4 pt-6 pb-2 bg-bg dark:bg-bg-dark sticky top-0 z-30 backdrop-blur-md">
+      <header className="flex items-center gap-3 px-4 pt-6 pb-2 bg-[#080d14]/60 backdrop-blur-xl border-b border-white/5 sticky top-0 z-30">
         <Link
           href="/"
-          className="size-9 flex items-center justify-center rounded-full bg-white shadow-sm border border-slate-100"
+          className="size-9 flex items-center justify-center rounded-full bg-white/5 border border-white/10"
         >
-          <ArrowLeft size={20} className="text-slate-500" />
+          <ArrowLeft size={20} className="text-white/50" />
         </Link>
         <div className="flex-1">
-          <h1 className="text-base font-bold text-slate-900 dark:text-white">
+          <h1 className="text-base font-bold text-white">
             {isKo ? "금어기·법규 가이드" : "Fishing Regulations"}
           </h1>
-          <p className="text-[10px] text-slate-400">
+          <p className="text-[10px] text-white/30">
             {isKo
               ? "수산자원관리법 기준 · 참고용"
               : "Based on Korean Fisheries Law"}
           </p>
         </div>
-        <div className="flex items-center gap-1.5 bg-primary/10 border border-primary/20 rounded-full px-2.5 py-1">
-          <DynamicIcon name="shield" size={14} className="text-primary" />
-          <span className="text-[10px] font-bold text-primary">{month}월</span>
+        <div className="flex items-center gap-1.5 bg-[#c9a84c]/10 border border-[#c9a84c]/20 rounded-full px-2.5 py-1">
+          <DynamicIcon name="shield" size={14} className="text-[#c9a84c]" />
+          <span className="text-[10px] font-bold text-[#c9a84c]">
+            {month}월
+          </span>
         </div>
       </header>
 
@@ -370,10 +379,10 @@ export default function RegulationsPage() {
 
         {/* Closed season alert */}
         {closedNow.length > 0 && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-xs font-bold text-red-600">
+              <span className="text-xs font-bold text-red-400">
                 현재 금어기 어종 ({closedNow.length}종)
               </span>
             </div>
@@ -381,7 +390,7 @@ export default function RegulationsPage() {
               {closedNow.map((r) => (
                 <span
                   key={r.species}
-                  className="text-xs px-2.5 py-1 bg-red-100 text-red-700 rounded-full font-semibold"
+                  className="text-xs px-2.5 py-1 bg-red-500/20 text-red-300 rounded-full font-semibold"
                 >
                   {r.emoji} {r.species} ({r.closedSeason!.start}~
                   {r.closedSeason!.end})
@@ -395,7 +404,7 @@ export default function RegulationsPage() {
         <div className="relative">
           <Search
             size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30"
           />
           <input
             type="text"
@@ -404,13 +413,13 @@ export default function RegulationsPage() {
             placeholder={
               isKo ? "어종으로 검색 (예: 감성돔, 우럭)" : "Search species..."
             }
-            className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-[#c9a84c]/50 focus:outline-none transition-all"
           />
           {searchQuery && (
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/50"
             >
               <DynamicIcon name="close" size={14} />
             </button>
@@ -418,20 +427,20 @@ export default function RegulationsPage() {
         </div>
 
         {/* Filter tabs */}
-        <div className="flex h-9 items-center rounded-xl bg-slate-200/50 p-1">
+        <div className="flex h-9 items-center rounded-xl bg-white/5 border border-white/5 p-1">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setFilterTab(tab.key)}
               className={`flex cursor-pointer h-full grow items-center justify-center gap-1 rounded-lg px-2 text-xs font-semibold transition-all ${
                 filterTab === tab.key
-                  ? "bg-white shadow-sm text-primary"
-                  : "text-slate-500"
+                  ? "bg-[#c9a84c] text-[#080d14]"
+                  : "text-white/50 hover:text-white/70"
               }`}
             >
               {tab.label}
               <span
-                className={`text-[10px] ${filterTab === tab.key ? "text-primary/60" : "text-slate-400"}`}
+                className={`text-[10px] ${filterTab === tab.key ? "text-[#080d14]/60" : "text-white/30"}`}
               >
                 {tab.count}
               </span>
@@ -457,18 +466,18 @@ export default function RegulationsPage() {
         {filteredRegulations.length === 0 && (
           <div className="text-center py-12">
             <span className="text-4xl">🔍</span>
-            <p className="text-sm font-bold text-slate-600 mt-3">
+            <p className="text-sm font-bold text-white/30 mt-3">
               {isKo ? "검색 결과가 없습니다" : "No results found"}
             </p>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-white/20 mt-1">
               {isKo ? "어종 이름을 확인해 주세요" : "Check the species name"}
             </p>
           </div>
         )}
 
         {/* Disclaimer */}
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
-          <p className="text-[10px] text-amber-600">
+        <div className="bg-[#c9a84c]/10 border border-[#c9a84c]/20 rounded-xl p-3 text-center">
+          <p className="text-[10px] text-[#c9a84c]/70">
             ⚠️{" "}
             {isKo
               ? "본 정보는 수산자원관리법 기준 참고용입니다. 정확한 규정은 해양수산부 공식 고시를 확인하세요."
@@ -477,7 +486,7 @@ export default function RegulationsPage() {
         </div>
 
         {/* Data source */}
-        <p className="text-[10px] text-slate-400 text-center pb-4">
+        <p className="text-[10px] text-white/20 text-center pb-4">
           {isKo
             ? "출처: 수산자원관리법 시행규칙 별표4, 별표30 · 해양수산부 고시"
             : "Source: Korean Fisheries Resource Management Act"}

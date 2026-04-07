@@ -128,10 +128,8 @@ function PermissionBanner({
 
   return (
     <div
-      className={`mx-4 mt-4 rounded-2xl p-4 ${
-        permission === "denied"
-          ? "bg-red-50 border border-red-100"
-          : "bg-amber-50 border border-amber-100"
+      className={`mx-4 mt-4 rounded-2xl p-4 bg-white/5 backdrop-blur-[12px] border ${
+        permission === "denied" ? "border-red-500/30" : "border-[#c9a84c]/30"
       }`}
     >
       <div className="flex items-start gap-3">
@@ -139,17 +137,15 @@ function PermissionBanner({
           {permission === "denied" ? "🚫" : "🔔"}
         </span>
         <div className="flex-1">
-          <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
-            {L.permissionBanner}
-          </p>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-sm font-bold text-white">{L.permissionBanner}</p>
+          <p className="text-xs text-white/50 mt-0.5">
             {permission === "denied" ? L.permissionDenied : L.permissionSub}
           </p>
           {permission !== "denied" && (
             <button
               id="alert-allow-btn"
               onClick={onRequest}
-              className="mt-2 text-xs font-bold bg-amber-500 text-white px-4 py-1.5 rounded-xl hover:bg-amber-600 transition-colors"
+              className="mt-2 text-xs font-bold bg-[#c9a84c] text-[#080d14] px-4 py-1.5 rounded-xl hover:opacity-90 transition-opacity"
             >
               {L.allowBtn}
             </button>
@@ -180,10 +176,8 @@ function AutoDetectChips({
       <div className="flex items-center gap-2 mb-2">
         <span className="text-base">🤖</span>
         <div>
-          <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
-            {L.autoDetect}
-          </p>
-          <p className="text-xs text-slate-400">{L.autoDetectSub}</p>
+          <p className="text-sm font-bold text-white">{L.autoDetect}</p>
+          <p className="text-xs text-white/50">{L.autoDetectSub}</p>
         </div>
       </div>
       <div className="flex flex-wrap gap-2">
@@ -191,10 +185,10 @@ function AutoDetectChips({
           <button
             key={`${p.species}_${p.region}`}
             onClick={() => onSubscribe(p.species, p.region)}
-            className="flex items-center gap-1.5 bg-sky-50 border border-sky-200 text-sky-700 text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-sky-100 transition-colors"
+            className="flex items-center gap-1.5 bg-white/5 border border-[#7dd3fc]/30 text-[#7dd3fc] text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors"
           >
             🎣 {p.species} · {p.region}
-            <span className="text-sky-400">+</span>
+            <span className="text-[#7dd3fc]/60">+</span>
             {L.subscribeChip}
           </button>
         ))}
@@ -249,14 +243,12 @@ function AddForm({
   };
 
   return (
-    <div className="mx-4 mt-4 bg-white dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm p-4 space-y-4">
-      <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-        {L.addTitle}
-      </h3>
+    <div className="mx-4 mt-4 bg-white/5 backdrop-blur-[12px] rounded-2xl border border-white/10 p-4 space-y-4">
+      <h3 className="text-sm font-bold text-white">{L.addTitle}</h3>
 
       {/* 어종 선택 */}
       <div>
-        <p className="text-xs font-semibold text-slate-500 mb-2">
+        <p className="text-xs font-semibold text-white/50 mb-2 uppercase tracking-[0.2em]">
           {L.speciesLabel}
         </p>
         <div className="flex flex-wrap gap-1.5">
@@ -266,8 +258,8 @@ function AddForm({
               onClick={() => toggleSpecies(s)}
               className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
                 selectedSpecies.includes(s)
-                  ? "bg-sky-500 border-sky-500 text-white"
-                  : "bg-white border-slate-200 text-slate-600 hover:border-sky-300"
+                  ? "bg-[#7dd3fc] border-[#7dd3fc] text-[#080d14]"
+                  : "bg-white/5 border-white/10 text-white/70 hover:border-[#7dd3fc]/40"
               }`}
             >
               {s}
@@ -275,13 +267,13 @@ function AddForm({
           ))}
         </div>
         {selectedSpecies.length === 0 && (
-          <p className="text-[10px] text-slate-400 mt-1">{L.speciesAll}</p>
+          <p className="text-[10px] text-white/30 mt-1">{L.speciesAll}</p>
         )}
       </div>
 
       {/* 지역 선택 */}
       <div>
-        <p className="text-xs font-semibold text-slate-500 mb-2">
+        <p className="text-xs font-semibold text-white/50 mb-2 uppercase tracking-[0.2em]">
           {L.regionLabel}
         </p>
         <div className="flex flex-wrap gap-1.5">
@@ -291,8 +283,8 @@ function AddForm({
               onClick={() => setSelectedRegion(r)}
               className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
                 selectedRegion === r
-                  ? "bg-emerald-500 border-emerald-500 text-white"
-                  : "bg-white border-slate-200 text-slate-600 hover:border-emerald-300"
+                  ? "bg-[#c9a84c] border-[#c9a84c] text-[#080d14]"
+                  : "bg-white/5 border-white/10 text-white/70 hover:border-[#c9a84c]/40"
               }`}
             >
               {r}
@@ -303,9 +295,9 @@ function AddForm({
 
       {/* N일 전 알림 */}
       <div>
-        <p className="text-xs font-semibold text-slate-500 mb-2">
+        <p className="text-xs font-semibold text-white/50 mb-2 uppercase tracking-[0.2em]">
           {L.daysLabel}:{" "}
-          <span className="text-sky-600 font-black">{daysAhead}</span>일
+          <span className="text-[#c9a84c] font-black">{daysAhead}</span>일
         </p>
         <input
           id="alert-days-slider"
@@ -314,9 +306,9 @@ function AddForm({
           max={7}
           value={daysAhead}
           onChange={(e) => setDaysAhead(Number(e.target.value))}
-          className="w-full accent-sky-500"
+          className="w-full accent-[#c9a84c]"
         />
-        <div className="flex justify-between text-[10px] text-slate-400 mt-0.5">
+        <div className="flex justify-between text-[10px] text-white/30 mt-0.5">
           <span>1일</span>
           <span>7일</span>
         </div>
@@ -324,7 +316,7 @@ function AddForm({
 
       {/* 키워드 */}
       <div>
-        <p className="text-xs font-semibold text-slate-500 mb-1">
+        <p className="text-xs font-semibold text-white/50 mb-1 uppercase tracking-[0.2em]">
           {L.keywordsLabel}
         </p>
         <input
@@ -333,7 +325,7 @@ function AddForm({
           value={keywords}
           onChange={(e) => setKeywords(e.target.value)}
           placeholder={L.keywordsHint}
-          className="w-full text-xs border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-sky-400"
+          className="w-full text-xs bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white placeholder:text-white/30 focus:outline-none focus:border-[#c9a84c]/50"
         />
       </div>
 
@@ -341,14 +333,14 @@ function AddForm({
       <div className="flex gap-2">
         <button
           onClick={onCancel}
-          className="flex-1 text-xs font-semibold text-slate-500 border border-slate-200 py-2.5 rounded-xl hover:bg-slate-50 transition-colors"
+          className="flex-1 text-xs font-semibold text-white/50 border border-white/10 py-2.5 rounded-xl hover:bg-white/5 transition-colors"
         >
           {L.cancelBtn}
         </button>
         <button
           id="alert-save-btn"
           onClick={handleSave}
-          className="flex-1 text-xs font-bold bg-sky-500 text-white py-2.5 rounded-xl hover:bg-sky-600 transition-colors"
+          className="flex-1 text-xs font-bold bg-[#c9a84c] text-[#080d14] py-2.5 rounded-xl hover:opacity-90 transition-opacity"
         >
           {L.saveBtn}
         </button>
@@ -380,35 +372,35 @@ function SubCard({
 
   return (
     <div
-      className={`bg-white dark:bg-surface-dark rounded-2xl border shadow-sm p-4 space-y-2 ${
+      className={`bg-white/5 backdrop-blur-[12px] rounded-2xl border p-4 space-y-2 ${
         sub.isActive
-          ? "border-slate-100 dark:border-slate-700/50"
-          : "border-dashed border-slate-200 dark:border-slate-700/50 opacity-60"
+          ? "border-white/10"
+          : "border-dashed border-white/5 opacity-60"
       }`}
     >
       {/* 헤더 */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-bold text-slate-900 dark:text-white">
+            <span className="text-sm font-bold text-white">
               🎣 {speciesLabel}
             </span>
             <span
               className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                 sub.isActive
-                  ? "bg-emerald-100 text-emerald-600"
-                  : "bg-slate-100 text-slate-400"
+                  ? "bg-[#c9a84c]/20 text-[#c9a84c]"
+                  : "bg-white/5 text-white/30"
               }`}
             >
               {sub.isActive ? L.activeBadge : L.pausedBadge}
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-white/50 mt-0.5">
             📍 {regionLabel} · ⏰ {sub.notifyDaysAhead}
             {L.daysAhead}
           </p>
           {sub.keywords.length > 0 && (
-            <p className="text-[10px] text-slate-400 mt-0.5">
+            <p className="text-[10px] text-white/30 mt-0.5">
               🔍 {sub.keywords.join(", ")}
             </p>
           )}
@@ -419,13 +411,13 @@ function SubCard({
       <div className="flex gap-2 pt-1">
         <button
           onClick={onSimulate}
-          className="flex-1 text-[10px] font-semibold text-sky-600 bg-sky-50 border border-sky-100 py-1.5 rounded-xl hover:bg-sky-100 transition-colors"
+          className="flex-1 text-[10px] font-semibold text-[#7dd3fc] bg-[#7dd3fc]/10 border border-[#7dd3fc]/20 py-1.5 rounded-xl hover:bg-[#7dd3fc]/20 transition-colors"
         >
           🔔 {L.simulate}
         </button>
         <button
           onClick={onToggle}
-          className="text-[10px] font-semibold text-slate-500 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-colors"
+          className="text-[10px] font-semibold text-white/50 bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl hover:bg-white/10 transition-colors"
         >
           {sub.isActive ? "⏸" : "▶"}
         </button>
@@ -433,7 +425,7 @@ function SubCard({
           onClick={() => {
             if (window.confirm(L.deleteConfirm)) onDelete();
           }}
-          className="text-[10px] font-semibold text-red-400 bg-red-50 border border-red-100 px-3 py-1.5 rounded-xl hover:bg-red-100 transition-colors"
+          className="text-[10px] font-semibold text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-xl hover:bg-red-500/20 transition-colors"
         >
           🗑
         </button>
@@ -496,16 +488,16 @@ export default function AlertsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white dark:from-bg-dark dark:to-bg-dark pb-24">
+    <div className="min-h-screen bg-[#080d14] pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-white/90 dark:bg-bg-dark/90 backdrop-blur-sm border-b border-gray-100 dark:border-slate-700/50">
+      <div className="sticky top-0 z-10 bg-[#080d14]/60 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center gap-3">
           <Link
             href="/"
-            className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-xl hover:bg-white/5 transition-colors"
           >
             <svg
-              className="w-5 h-5 text-gray-600"
+              className="w-5 h-5 text-white/60"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -519,10 +511,8 @@ export default function AlertsPage() {
             </svg>
           </Link>
           <div className="flex-1">
-            <h1 className="text-base font-bold text-gray-900 dark:text-white">
-              {L.title}
-            </h1>
-            <p className="text-xs text-gray-500">{L.subtitle}</p>
+            <h1 className="text-base font-bold text-white">{L.title}</h1>
+            <p className="text-xs text-white/50">{L.subtitle}</p>
           </div>
           <span className="text-2xl">🔔</span>
         </div>
@@ -553,7 +543,7 @@ export default function AlertsPage() {
                 setFormInitRegion(undefined);
                 setShowForm(true);
               }}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-sky-500 to-cyan-400 text-white font-bold text-sm py-3.5 rounded-2xl shadow-md shadow-sky-200 hover:opacity-90 transition-opacity active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-2 bg-[#c9a84c] text-[#080d14] font-bold text-sm py-3.5 rounded-2xl hover:opacity-90 transition-opacity active:scale-[0.98]"
             >
               <span className="text-lg">+</span>
               {L.addBtn}
@@ -575,14 +565,14 @@ export default function AlertsPage() {
 
         {/* 내 구독 목록 */}
         <section className="px-4">
-          <h2 className="text-sm font-bold text-slate-800 mb-3">
+          <h2 className="text-sm font-bold text-white/50 mb-3 uppercase tracking-[0.2em]">
             {L.mySubsTitle}
           </h2>
           {subs.length === 0 ? (
             <div className="text-center py-12 space-y-2">
               <p className="text-4xl">🔕</p>
-              <p className="text-sm font-semibold text-slate-400">{L.noSubs}</p>
-              <p className="text-xs text-slate-300">{L.noSubsSub}</p>
+              <p className="text-sm font-semibold text-white/30">{L.noSubs}</p>
+              <p className="text-xs text-white/20">{L.noSubsSub}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -612,12 +602,12 @@ export default function AlertsPage() {
 
         {/* 작동 원리 안내 */}
         <section className="px-4 pb-4">
-          <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+          <div className="bg-white/5 backdrop-blur-[12px] rounded-2xl p-4 border border-white/10">
             <div className="flex items-start gap-3">
               <span className="text-xl">💡</span>
               <div>
-                <p className="text-xs font-bold text-slate-700">{L.howTitle}</p>
-                <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                <p className="text-xs font-bold text-white">{L.howTitle}</p>
+                <p className="text-[11px] text-white/50 mt-0.5 leading-relaxed">
                   {L.howDesc}
                 </p>
               </div>
