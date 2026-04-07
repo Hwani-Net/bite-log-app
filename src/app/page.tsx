@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { getDataService } from "@/services/dataServiceFactory";
 import { CatchRecord } from "@/types";
 import { fetchTideData } from "@/services/tideService";
@@ -63,11 +64,13 @@ function PrecisionGauge({
     <section className="relative w-full aspect-[4/5] flex items-center justify-center px-6 py-10">
       {/* Background with gradient overlays */}
       <div className="absolute inset-0 z-0">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/hero-bg.png"
+        <Image
+          src="/hero-bg.webp"
           alt="fishing background"
-          className="w-full h-full object-cover grayscale-[0.2] brightness-50"
+          fill
+          priority
+          className="object-cover grayscale-[0.2] brightness-50"
+          sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-[#080d14]/40 via-transparent to-[#080d14]" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#080d14] via-transparent to-transparent" />
