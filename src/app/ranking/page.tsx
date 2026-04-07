@@ -115,7 +115,7 @@ export default function RankingPage() {
         </button>
         <div className="flex items-center gap-2">
           <h1 className="text-lg font-bold tracking-tight text-white">
-            🏆 {locale === "ko" ? "낚시 랭킹" : "Fishing Ranking"}
+            {locale === "ko" ? "낚시 랭킹" : "Fishing Ranking"}
           </h1>
           {/* Real/Mock badge */}
           {data.isRealData ? (
@@ -136,7 +136,13 @@ export default function RankingPage() {
         {/* Season Countdown Banner */}
         <div className="px-4 py-5">
           <div className="relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-[12px] border border-white/10 p-5">
-            <div className="absolute top-3 right-4 text-5xl opacity-10">🏆</div>
+            <div className="absolute top-3 right-4 opacity-10">
+              <DynamicIcon
+                name="emoji_events"
+                size={48}
+                className="text-[#c9a84c]"
+              />
+            </div>
             <div className="flex flex-col gap-0.5 mb-4">
               <span className="text-[#c9a84c] text-xs font-bold uppercase tracking-[0.2em]">
                 {locale === "ko" ? "시즌 종료까지" : "Season ends in"}
@@ -208,8 +214,10 @@ export default function RankingPage() {
                 {second ? (
                   <div className="flex-1 flex flex-col items-center">
                     <div className="relative mb-3">
-                      <div className="w-16 h-16 rounded-full border-2 border-white/20 overflow-hidden bg-white/5 flex items-center justify-center text-2xl">
-                        {second.user.photoURL ?? "🎣"}
+                      <div className="w-16 h-16 rounded-full border-2 border-white/20 overflow-hidden bg-white/5 flex items-center justify-center text-sm font-bold text-white/60">
+                        {second.user.photoURL ??
+                          second.user.displayName?.charAt(0) ??
+                          "?"}
                       </div>
                       <div className="absolute -bottom-1 -right-1 bg-white/20 text-white text-[10px] font-black w-5 h-5 rounded-full border-2 border-[#080d14] flex items-center justify-center">
                         2
@@ -242,8 +250,10 @@ export default function RankingPage() {
                           className="text-[#c9a84c] drop-shadow-sm"
                         />
                       </div>
-                      <div className="w-20 h-20 rounded-full border-4 border-[#c9a84c] overflow-hidden bg-[#c9a84c]/10 flex items-center justify-center text-3xl">
-                        {first.user.photoURL ?? "🎣"}
+                      <div className="w-20 h-20 rounded-full border-4 border-[#c9a84c] overflow-hidden bg-[#c9a84c]/10 flex items-center justify-center text-base font-bold text-[#c9a84c]">
+                        {first.user.photoURL ??
+                          first.user.displayName?.charAt(0) ??
+                          "?"}
                       </div>
                       <div className="absolute -bottom-1 -right-1 bg-[#c9a84c] text-[#080d14] text-xs font-black w-6 h-6 rounded-full border-2 border-[#080d14] flex items-center justify-center">
                         1
@@ -269,8 +279,10 @@ export default function RankingPage() {
                 {third ? (
                   <div className="flex-1 flex flex-col items-center">
                     <div className="relative mb-3">
-                      <div className="w-16 h-16 rounded-full border-2 border-[#c9a84c]/40 overflow-hidden bg-[#c9a84c]/5 flex items-center justify-center text-2xl">
-                        {third.user.photoURL ?? "🎣"}
+                      <div className="w-16 h-16 rounded-full border-2 border-[#c9a84c]/40 overflow-hidden bg-[#c9a84c]/5 flex items-center justify-center text-sm font-bold text-[#c9a84c]/70">
+                        {third.user.photoURL ??
+                          third.user.displayName?.charAt(0) ??
+                          "?"}
                       </div>
                       <div className="absolute -bottom-1 -right-1 bg-[#c9a84c]/60 text-[#080d14] text-[10px] font-black w-5 h-5 rounded-full border-2 border-[#080d14] flex items-center justify-center">
                         3

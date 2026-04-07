@@ -87,7 +87,9 @@ export default function OverviewTab({
                     className="w-5 h-5 rounded-full object-cover"
                   />
                 ) : (
-                  sp.emoji
+                  <span className="text-xs font-bold text-[#c9a84c]">
+                    {sp.name.slice(0, 1)}
+                  </span>
                 )}{" "}
                 {sp.name}
               </span>
@@ -115,8 +117,8 @@ export default function OverviewTab({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-3xl">
-                    {recommendation.species.emoji}
+                  <span className="text-xl font-bold text-[#c9a84c]">
+                    {recommendation.species.name.slice(0, 2)}
                   </span>
                 )}
               </div>
