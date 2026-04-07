@@ -220,7 +220,7 @@ export default function ConciergePage() {
       </header>
 
       <main
-        className={`flex-1 px-5 pt-5 ${activeTab === "chat" ? "pb-4 flex flex-col" : "pb-20"}`}
+        className={`flex-1 px-5 pt-5 ${activeTab === "chat" ? "pb-20 flex flex-col" : "pb-20"}`}
         style={
           activeTab === "chat" ? { height: "calc(100dvh - 175px)" } : undefined
         }

@@ -152,10 +152,10 @@ export default function AIChatTab({
       </div>
 
       {/* Free-form Input */}
-      <div className="flex gap-2 shrink-0 bg-white p-2 rounded-full border border-slate-200 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
+      <div className="flex gap-2 shrink-0 bg-white/5 p-2 rounded-full border border-white/10 shadow-sm focus-within:ring-2 focus-within:ring-[#c9a84c]/20 focus-within:border-[#c9a84c]/50 transition-all">
         <input
           type="text"
-          className="flex-1 bg-transparent px-3 py-1.5 text-sm outline-none placeholder:text-slate-400"
+          className="flex-1 bg-transparent px-3 py-1.5 text-sm outline-none text-white placeholder:text-white/30"
           placeholder={
             locale === "ko"
               ? `${selectedSpecies ? selectedSpecies + " " : ""}질문을 입력하세요...`
