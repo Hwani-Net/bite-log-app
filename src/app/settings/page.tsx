@@ -161,13 +161,13 @@ export default function SettingsPage() {
                   className={`w-10 h-10 rounded-full flex items-center justify-center ${
                     theme === value
                       ? "bg-gradient-to-tr from-[#c9a84c] to-[#7dd3fc] text-[#080d14] shadow-sm"
-                      : "bg-white/10 text-white/40"
+                      : "bg-white/10 text-white/60"
                   }`}
                 >
                   <DynamicIcon name={icon} size={20} />
                 </div>
                 <span
-                  className={`text-xs font-semibold ${theme === value ? "text-[#c9a84c]" : "text-white/40"}`}
+                  className={`text-xs font-semibold ${theme === value ? "text-[#c9a84c]" : "text-white/60"}`}
                 >
                   {label}
                 </span>
@@ -198,7 +198,7 @@ export default function SettingsPage() {
               >
                 <span className="text-sm font-bold">{flag}</span>
                 <span
-                  className={`text-sm font-semibold ${locale === value ? "text-[#c9a84c]" : "text-white/40"}`}
+                  className={`text-sm font-semibold ${locale === value ? "text-[#c9a84c]" : "text-white/60"}`}
                 >
                   {label}
                 </span>
@@ -239,6 +239,7 @@ export default function SettingsPage() {
                   <span>{item.icon}</span> {item.label}
                 </span>
                 <label className="relative inline-flex items-center cursor-pointer">
+                  <span className="sr-only">{item.label}</span>
                   <input
                     type="checkbox"
                     defaultChecked
@@ -377,7 +378,7 @@ export default function SettingsPage() {
                 <span>🗑️</span>{" "}
                 {locale === "ko" ? "조과 기록 초기화" : "Reset Catch Records"}
               </span>
-              <p className="text-[11px] text-white/40 mt-0.5 ml-7">
+              <p className="text-[11px] text-white/60 mt-0.5 ml-7">
                 {locale === "ko"
                   ? "로컬에 저장된 모든 조과 기록을 삭제합니다"
                   : "Delete all locally saved catch records"}

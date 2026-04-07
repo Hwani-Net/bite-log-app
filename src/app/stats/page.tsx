@@ -78,7 +78,7 @@ function MiniStatCard({
       </p>
       <p className="text-white text-xl font-bold">
         {value}
-        <span className="text-sm ml-0.5 font-normal text-white/40">{unit}</span>
+        <span className="text-sm ml-0.5 font-normal text-white/60">{unit}</span>
       </p>
       <DynamicIcon name={icon} size={16} className="text-[#c9a84c]" />
     </div>
@@ -163,7 +163,7 @@ function CalendarView({
         {dayLabels.map((d, i) => (
           <div
             key={i}
-            className={`text-center text-[10px] font-medium py-1 ${i === 0 ? "text-red-400" : i === 6 ? "text-[#7dd3fc]" : "text-white/40"}`}
+            className={`text-center text-[10px] font-medium py-1 ${i === 0 ? "text-red-400" : i === 6 ? "text-[#7dd3fc]" : "text-white/60"}`}
           >
             {d}
           </div>
@@ -212,7 +212,7 @@ function CalendarView({
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-4 mt-3 text-[10px] text-white/40">
+      <div className="flex items-center justify-center gap-4 mt-3 text-[10px] text-white/60">
         <span className="flex items-center gap-1">
           <div className="size-2 rounded-full bg-[#c9a84c]" />{" "}
           {locale === "ko" ? "출조일" : "Fishing day"}
@@ -248,14 +248,14 @@ function BadgeCard({
           <h4 className="text-xs font-bold text-white truncate">
             {locale === "ko" ? badge.name.ko : badge.name.en}
           </h4>
-          <p className="text-[10px] text-white/40 truncate">
+          <p className="text-[10px] text-white/60 truncate">
             {locale === "ko" ? badge.description.ko : badge.description.en}
           </p>
         </div>
         {badge.earned ? (
           <Award size={20} className="text-[#c9a84c]" />
         ) : (
-          <span className="text-[10px] font-bold text-white/40">
+          <span className="text-[10px] font-bold text-white/60">
             {Math.round(badge.progress * 100)}%
           </span>
         )}
@@ -374,7 +374,7 @@ export default function StatsPage() {
               className={`flex cursor-pointer h-full grow items-center justify-center gap-1.5 overflow-hidden rounded-lg px-2 text-xs font-semibold transition-all ${
                 activeTab === tab.key
                   ? "bg-[#c9a84c] text-[#080d14] shadow-sm"
-                  : "text-white/40"
+                  : "text-white/60"
               }`}
             >
               <DynamicIcon name={tab.icon} size={14} />
@@ -396,7 +396,7 @@ export default function StatsPage() {
                     className={`flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 text-xs font-semibold transition-all ${
                       period === tab.value
                         ? "bg-[#c9a84c] text-[#080d14] shadow-sm"
-                        : "text-white/40"
+                        : "text-white/60"
                     }`}
                   >
                     <span className="truncate">
@@ -594,7 +594,7 @@ export default function StatsPage() {
                             {spot.spot.name}
                           </h4>
                         </div>
-                        <p className="text-[10px] text-white/40">
+                        <p className="text-[10px] text-white/60">
                           {spot.visits}
                           {t("stats.visits")} · {spot.totalCatch}
                           {t("stats.caught")}
@@ -638,7 +638,7 @@ export default function StatsPage() {
                           ? `${r.sizeCm}cm`
                           : `${r.count}${locale === "ko" ? "마리" : ""}`}
                       </p>
-                      <p className="text-[10px] text-white/40">
+                      <p className="text-[10px] text-white/60">
                         {r.date} · {r.location.name}
                       </p>
                     </div>
@@ -662,9 +662,9 @@ export default function StatsPage() {
             <div className="glass-morphism border border-white/5 rounded-xl p-4 mb-4 text-center">
               <div className="text-3xl font-black text-[#c9a84c] gold-glow">
                 {earnedCount}
-                <span className="text-lg text-white/40">/{badges.length}</span>
+                <span className="text-lg text-white/60">/{badges.length}</span>
               </div>
-              <p className="text-xs text-white/40 mt-1">
+              <p className="text-xs text-white/60 mt-1">
                 {locale === "ko" ? "달성한 배지" : "Badges Earned"}
               </p>
             </div>
@@ -692,7 +692,7 @@ export default function StatsPage() {
                   <h2 className="text-2xl font-black mb-1 text-[#c9a84c] gold-glow">
                     {locale === "ko" ? dna.archetypeKo : dna.archetypeEn}
                   </h2>
-                  <p className="text-xs text-white/40">
+                  <p className="text-xs text-white/60">
                     {dna.totalRecords}
                     {locale === "ko"
                       ? "개 조과 기반 분석 결과"
@@ -833,7 +833,7 @@ export default function StatsPage() {
                     ? "조과 5개 이상 등록하면"
                     : "Record 5+ catches to"}
                 </h3>
-                <p className="text-sm text-white/40">
+                <p className="text-sm text-white/60">
                   {locale === "ko"
                     ? "나만의 낚시 DNA를 분석해 드려요 🧬"
                     : "unlock your Fishing DNA 🧬"}

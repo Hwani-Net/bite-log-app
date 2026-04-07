@@ -380,7 +380,7 @@ export default function RecordPage() {
                   <p className="text-white text-xl font-bold leading-tight">
                     {t("record.photoGuide")}
                   </p>
-                  <p className="text-white/40 text-sm font-normal text-center">
+                  <p className="text-white/60 text-sm font-normal text-center">
                     {t("record.photoSubGuide")}
                   </p>
                 </div>
@@ -592,7 +592,7 @@ export default function RecordPage() {
                 ))}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-white/40">
+                <p className="text-xs text-white/60">
                   {photos.length}
                   {locale === "ko" ? "장 사진" : " photo(s)"}
                 </p>

@@ -65,7 +65,7 @@ function ReliabilityBadge({ reliability }: { reliability: string }) {
     official: { color: "text-[#7dd3fc]", label: "공식" },
     community: { color: "text-green-400", label: "커뮤니티" },
     sns: { color: "text-purple-400", label: "SNS" },
-  }[reliability] || { color: "text-white/40", label: "기타" };
+  }[reliability] || { color: "text-white/60", label: "기타" };
 
   return (
     <span className={`text-[10px] font-medium ${config.color}`}>

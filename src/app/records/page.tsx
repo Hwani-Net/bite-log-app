@@ -105,7 +105,7 @@ export default function RecordsPage() {
         <h1 className="text-lg font-bold text-white tracking-[0.1em] uppercase">
           {t("home.recentCatch")}
         </h1>
-        <span className="text-sm text-white/40 ml-auto">
+        <span className="text-sm text-white/60 ml-auto">
           {filtered.length}
           {locale === "ko" ? "건" : ""}
         </span>
@@ -115,7 +115,7 @@ export default function RecordsPage() {
       <div className="relative mb-3">
         <Search
           size={20}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60"
         />
         <input
           type="text"
@@ -130,7 +130,7 @@ export default function RecordsPage() {
         />
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`absolute right-2 top-1/2 -translate-y-1/2 size-8 flex items-center justify-center rounded-xl transition-colors ${showFilters ? "bg-[#c9a84c] text-[#080d14]" : "text-white/40 hover:bg-white/10"}`}
+          className={`absolute right-2 top-1/2 -translate-y-1/2 size-8 flex items-center justify-center rounded-xl transition-colors ${showFilters ? "bg-[#c9a84c] text-[#080d14]" : "text-white/60 hover:bg-white/10"}`}
         >
           <Filter size={18} />
         </button>
@@ -165,7 +165,7 @@ export default function RecordsPage() {
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                   !search
                     ? "bg-[#c9a84c]/20 text-[#c9a84c]"
-                    : "bg-white/5 text-white/40"
+                    : "bg-white/5 text-white/60"
                 }`}
               >
                 {locale === "ko" ? "전체" : "All"}
@@ -177,7 +177,7 @@ export default function RecordsPage() {
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                     search === s
                       ? "bg-[#c9a84c]/20 text-[#c9a84c]"
-                      : "bg-white/5 text-white/40"
+                      : "bg-white/5 text-white/60"
                   }`}
                 >
                   {s}
@@ -196,7 +196,7 @@ export default function RecordsPage() {
             size={48}
             className="text-white/20 mb-3 block"
           />
-          <p className="text-white/40">
+          <p className="text-white/60">
             {search
               ? locale === "ko"
                 ? "검색 결과가 없습니다"
@@ -240,11 +240,11 @@ export default function RecordsPage() {
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-1 mt-1 text-xs text-white/40">
+                <div className="flex items-center gap-1 mt-1 text-xs text-white/60">
                   <MapPin size={14} />
                   <span className="truncate">{record.location.name}</span>
                 </div>
-                <div className="flex items-center gap-1 mt-0.5 text-xs text-white/40">
+                <div className="flex items-center gap-1 mt-0.5 text-xs text-white/60">
                   <DynamicIcon name="calendar_today" size={14} />
                   <span>{record.date}</span>
                 </div>

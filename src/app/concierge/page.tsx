@@ -163,7 +163,10 @@ export default function ConciergePage() {
               {locale === "ko" ? "AI 컨시어지" : "AI Concierge"}
             </h1>
           </div>
-          <button className="size-10 flex items-center justify-center rounded-full bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors">
+          <button
+            aria-label={locale === "ko" ? "알림" : "Notifications"}
+            className="size-10 flex items-center justify-center rounded-full bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors"
+          >
             <DynamicIcon
               name="notifications"
               size={20}

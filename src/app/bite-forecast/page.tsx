@@ -76,7 +76,7 @@ function SecretSpotsSection({
               <p className="text-[10px] text-[#c9a84c] font-medium">
                 {spot.species}
               </p>
-              <p className="text-[9px] text-white/40 mt-0.5">{spot.desc}</p>
+              <p className="text-[9px] text-white/60 mt-0.5">{spot.desc}</p>
             </div>
           </div>
         ))}
@@ -147,7 +147,7 @@ function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
       </svg>
       <div className="absolute flex flex-col items-center">
         <span className="text-3xl font-black text-white">{score}</span>
-        <span className="text-[10px] text-white/40 font-medium">/ 100</span>
+        <span className="text-[10px] text-white/60 font-medium">/ 100</span>
       </div>
     </div>
   );
@@ -187,7 +187,7 @@ function FactorCard({ factor }: { factor: BiteFactor }) {
         </div>
         <div className="flex-1">
           <p className="text-xs font-bold text-white">{factor.name}</p>
-          <p className="text-[10px] text-white/40">{factor.description}</p>
+          <p className="text-[10px] text-white/60">{factor.description}</p>
         </div>
         <div className="text-right">
           <span className={`text-lg font-black ${s.text}`}>{factor.score}</span>
@@ -224,7 +224,7 @@ function TideTimeline({
         <h3 className="text-sm font-bold text-white uppercase tracking-[0.15em]">
           조석 시간표
         </h3>
-        <span className="text-[10px] text-white/40 ml-auto">
+        <span className="text-[10px] text-white/60 ml-auto">
           {tideData.stationName}
         </span>
       </div>
@@ -325,7 +325,7 @@ function TideTimeline({
                 <p className="text-xs font-bold text-white">
                   {isHigh ? "만조" : "간조"} {tide.time}
                 </p>
-                <p className="text-[10px] text-white/40">{tide.level}cm</p>
+                <p className="text-[10px] text-white/60">{tide.level}cm</p>
               </div>
             </div>
           );
@@ -385,7 +385,7 @@ function WeatherDetail({ weather }: { weather: WeatherData }) {
           >
             <DynamicIcon name={item.icon} size={20} className={item.color} />
             <div>
-              <p className="text-[10px] text-white/40 font-medium">
+              <p className="text-[10px] text-white/60 font-medium">
                 {item.label}
               </p>
               <p className="text-sm font-bold text-white">{item.value}</p>
@@ -549,7 +549,7 @@ export default function BiteForecastPage() {
           <h1 className="text-base font-bold text-white uppercase tracking-[0.1em]">
             {isKo ? "입질 예측 상세" : "Bite Forecast Detail"}
           </h1>
-          <p className="text-[10px] text-white/40">
+          <p className="text-[10px] text-white/60">
             {locationName} · {timeLabel}
           </p>
         </div>
@@ -560,7 +560,7 @@ export default function BiteForecastPage() {
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
             <div className="w-16 h-16 border-4 border-[#c9a84c]/20 border-t-[#c9a84c] rounded-full animate-spin" />
-            <p className="text-sm text-white/40">위치 기반 데이터 분석 중...</p>
+            <p className="text-sm text-white/60">위치 기반 데이터 분석 중...</p>
           </div>
         </div>
       ) : biteTime ? (
@@ -576,7 +576,7 @@ export default function BiteForecastPage() {
                     {biteTime.gradeLabel}
                   </span>
                 </div>
-                <p className="text-xs text-white/40 mb-3">
+                <p className="text-xs text-white/60 mb-3">
                   7가지 요소를 종합 분석한 결과입니다
                 </p>
                 {/* Mini factor tags */}
@@ -657,11 +657,11 @@ export default function BiteForecastPage() {
                 <p className="text-xs font-bold text-white uppercase tracking-[0.1em]">
                   {isKo ? "위성 날씨 지도 보기" : "View Satellite Weather"}
                 </p>
-                <p className="text-[10px] text-white/40">
+                <p className="text-[10px] text-white/60">
                   7일 출항 날씨 · Windy.com
                 </p>
               </div>
-              <ChevronRight size={20} className="text-white/40" />
+              <ChevronRight size={20} className="text-white/60" />
             </div>
           </Link>
 
@@ -679,7 +679,7 @@ export default function BiteForecastPage() {
             <p className="text-sm font-bold text-white mt-2">
               위치 정보가 필요합니다
             </p>
-            <p className="text-xs text-white/40 mt-1">
+            <p className="text-xs text-white/60 mt-1">
               브라우저 위치 권한을 허용해주세요
             </p>
           </div>

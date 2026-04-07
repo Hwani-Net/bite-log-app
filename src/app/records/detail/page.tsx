@@ -121,7 +121,7 @@ function RecordDetailContent() {
       <div className="page-enter relative z-10 flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <Fish size={48} className="text-white/20 animate-pulse" />
-          <p className="text-white/40 mt-2">
+          <p className="text-white/60 mt-2">
             {locale === "ko" ? "불러오는 중..." : "Loading..."}
           </p>
         </div>
@@ -374,14 +374,14 @@ function RecordDetailContent() {
           {/* Info cards */}
           <div className="grid grid-cols-2 gap-3">
             <div className="glass-morphism border border-white/5 rounded-2xl p-4">
-              <div className="flex items-center gap-2 text-white/40 text-xs mb-1">
+              <div className="flex items-center gap-2 text-white/60 text-xs mb-1">
                 <Calendar size={14} className="text-[#c9a84c]" />
                 {t("record.date")}
               </div>
               <p className="text-sm font-semibold text-white">{record.date}</p>
             </div>
             <div className="glass-morphism border border-white/5 rounded-2xl p-4">
-              <div className="flex items-center gap-2 text-white/40 text-xs mb-1">
+              <div className="flex items-center gap-2 text-white/60 text-xs mb-1">
                 <MapPin size={14} className="text-[#c9a84c]" />
                 {t("record.location")}
               </div>
@@ -400,7 +400,7 @@ function RecordDetailContent() {
           {/* Weather info */}
           {record.weather && (
             <div className="glass-morphism border border-white/5 rounded-2xl p-4">
-              <div className="flex items-center gap-2 text-white/40 text-xs mb-3">
+              <div className="flex items-center gap-2 text-white/60 text-xs mb-3">
                 <Cloud size={14} className="text-[#7dd3fc]" />
                 {t("record.weather")}
               </div>
@@ -440,7 +440,7 @@ function RecordDetailContent() {
           {/* Tide info */}
           {record.tide && (
             <div className="glass-morphism border border-[#7dd3fc]/10 rounded-2xl p-4">
-              <div className="flex items-center gap-2 text-white/40 text-xs mb-3">
+              <div className="flex items-center gap-2 text-white/60 text-xs mb-3">
                 <DynamicIcon
                   name="waves"
                   size={14}
@@ -476,7 +476,7 @@ function RecordDetailContent() {
           {/* Memo */}
           {record.memo && (
             <div className="glass-morphism border border-white/5 rounded-2xl p-4">
-              <div className="flex items-center gap-2 text-white/40 text-xs mb-2">
+              <div className="flex items-center gap-2 text-white/60 text-xs mb-2">
                 <Edit3 size={14} className="text-[#c9a84c]" />
                 {t("record.memo")}
               </div>
@@ -489,7 +489,7 @@ function RecordDetailContent() {
           {/* All photos */}
           {record.photos.length > 1 && (
             <div className="space-y-2">
-              <h4 className="text-sm font-semibold text-white/40 flex items-center gap-1 uppercase tracking-[0.15em]">
+              <h4 className="text-sm font-semibold text-white/60 flex items-center gap-1 uppercase tracking-[0.15em]">
                 <Camera size={14} />
                 {locale === "ko" ? "사진" : "Photos"} ({record.photos.length})
               </h4>
@@ -543,7 +543,7 @@ function RecordDetailContent() {
 export default function RecordDetailPage() {
   return (
     <Suspense
-      fallback={<div className="p-8 text-center text-white/40">Loading...</div>}
+      fallback={<div className="p-8 text-center text-white/60">Loading...</div>}
     >
       <RecordDetailContent />
     </Suspense>

@@ -113,7 +113,7 @@ function PrecisionGauge({
       {/* Weather stat cards */}
       <div className="absolute bottom-4 left-0 w-full px-4 grid grid-cols-2 gap-2">
         <div className="glass-morphism p-3 border-l-2 border-[#c9a84c] flex flex-col">
-          <span className="text-[0.45rem] font-thin uppercase tracking-[0.2em] text-white/40 mb-1">
+          <span className="text-[0.45rem] font-thin uppercase tracking-[0.2em] text-white/60 mb-1">
             수온
           </span>
           <span className="text-lg font-light text-white">
@@ -122,7 +122,7 @@ function PrecisionGauge({
           </span>
         </div>
         <div className="glass-morphism p-3 border-l-2 border-[#c9a84c] flex flex-col">
-          <span className="text-[0.45rem] font-thin uppercase tracking-[0.2em] text-white/40 mb-1">
+          <span className="text-[0.45rem] font-thin uppercase tracking-[0.2em] text-white/60 mb-1">
             풍속
           </span>
           <span className="text-lg font-light text-white">
@@ -151,7 +151,7 @@ function StatBar({
         <span className="text-4xl font-extrabold text-white mb-1">
           {totalCatch}
         </span>
-        <span className="text-[0.5rem] font-thin uppercase tracking-[0.3em] text-white/40">
+        <span className="text-[0.5rem] font-thin uppercase tracking-[0.3em] text-white/60">
           조과
         </span>
       </div>
@@ -159,7 +159,7 @@ function StatBar({
         <span className="text-4xl font-extrabold text-[#c9a84c] mb-1 gold-glow">
           {thisMonth}
         </span>
-        <span className="text-[0.5rem] font-thin uppercase tracking-[0.3em] text-white/40">
+        <span className="text-[0.5rem] font-thin uppercase tracking-[0.3em] text-white/60">
           이번 달
         </span>
       </div>
@@ -167,7 +167,7 @@ function StatBar({
         <span className="text-4xl font-extrabold text-[#7dd3fc] mb-1 blue-glow">
           {maxSize || "--"}
         </span>
-        <span className="text-[0.5rem] font-thin uppercase tracking-[0.3em] text-white/40">
+        <span className="text-[0.5rem] font-thin uppercase tracking-[0.3em] text-white/60">
           최대(cm)
         </span>
       </div>
@@ -252,7 +252,7 @@ function SpeciesBiteRanking({ biteTime }: { biteTime: BiteTimePrediction }) {
                   >
                     {sp.species}
                   </h3>
-                  <p className="text-[0.5rem] font-thin tracking-widest text-white/40 uppercase">
+                  <p className="text-[0.5rem] font-thin tracking-widest text-white/60 uppercase">
                     {sp.reason.split(".")[0]}
                   </p>
                 </div>

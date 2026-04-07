@@ -45,7 +45,7 @@ const STATUS_CONFIG = {
   offseason: {
     label: "⏳ 비수기",
     bg: "bg-white/5 border-white/10",
-    text: "text-white/40",
+    text: "text-white/60",
     badge: "bg-white/20",
   },
 };
@@ -103,13 +103,13 @@ function ReleaseSiteRow({ site }: { site: ReleaseSite }) {
     <div className="flex items-center justify-between py-1.5 border-b border-white/5 last:border-0">
       <div className="flex items-center gap-2">
         <span className="text-xs font-semibold text-white/80">{site.city}</span>
-        <span className="text-[10px] text-white/40">{site.region}</span>
+        <span className="text-[10px] text-white/60">{site.region}</span>
       </div>
       <div className="flex items-center gap-3">
         <span className="text-xs font-bold text-[#c9a84c]">
           {formatCount(site.count)}마리
         </span>
-        <span className="text-[10px] text-white/40">
+        <span className="text-[10px] text-white/60">
           {site.months.map((m) => `${m}월`).join("·")}
         </span>
       </div>
@@ -184,7 +184,7 @@ function FishCard({
         <div className="px-4 pb-4 space-y-3">
           {/* Month bar */}
           <div>
-            <p className="text-[10px] text-white/40 mb-1 flex items-center gap-2">
+            <p className="text-[10px] text-white/60 mb-1 flex items-center gap-2">
               <span>시즌 캘린더</span>
               <span className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-sm bg-[#c9a84c] inline-block" />{" "}
@@ -223,7 +223,7 @@ function FishCard({
 
           {/* Release sites table */}
           <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-            <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-2">
+            <p className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-2">
               📍 지역별 방류 계획 ({sites[0]?.year || 2025}년 기준)
             </p>
             <div>
@@ -234,7 +234,7 @@ function FishCard({
                     <ReleaseSiteRow key={`${site.city}-${i}`} site={site} />
                   ))
               ) : (
-                <p className="text-xs text-white/40 text-center py-2">
+                <p className="text-xs text-white/60 text-center py-2">
                   이 해역의 방류 계획이 없습니다
                 </p>
               )}
@@ -284,7 +284,7 @@ export default function SeasonForecastPage() {
               >
                 {isKo ? "시즌 예측" : "Season Forecast"}
               </h1>
-              <p className="text-[10px] text-white/40">
+              <p className="text-[10px] text-white/60">
                 {isKo
                   ? "치어 방류 계획 기반 · 5개 어종"
                   : "Based on fry release plans · 5 species"}

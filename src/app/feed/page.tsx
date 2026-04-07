@@ -299,7 +299,7 @@ export default function FeedPage() {
                 </div>
                 {/* Region badge */}
                 {item.location.region && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/40 font-medium">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/60 font-medium">
                     {item.location.region}
                   </span>
                 )}
@@ -354,6 +354,7 @@ export default function FeedPage() {
               <div className="border-t border-white/5 px-4 py-2 flex items-center gap-4">
                 <button
                   onClick={() => handleLike(item.id)}
+                  aria-label={`${locale === "ko" ? "좋아요" : "Like"} ${item.likeCount > 0 ? item.likeCount : ""}`}
                   className={`flex items-center gap-1.5 text-sm font-medium transition-all ${isLiked ? "text-red-400 scale-110" : "text-white/30 hover:text-red-400"}`}
                 >
                   <Heart
@@ -367,6 +368,7 @@ export default function FeedPage() {
                   onClick={() =>
                     setCommentInputId(showComments ? null : item.id)
                   }
+                  aria-label={`${locale === "ko" ? "댓글" : "Comment"} ${item.commentCount > 0 ? item.commentCount : ""}`}
                   className="flex items-center gap-1.5 text-sm font-medium text-white/30 hover:text-[#7dd3fc] transition-colors"
                 >
                   <MessageCircle size={20} />

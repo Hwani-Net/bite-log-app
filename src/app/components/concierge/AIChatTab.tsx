@@ -174,6 +174,7 @@ export default function AIChatTab({
           onClick={() => {
             if (chatInput.trim() && !chatLoading) onSend(chatInput.trim());
           }}
+          aria-label={locale === "ko" ? "메시지 전송" : "Send message"}
           className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-blue-600 disabled:from-slate-200 disabled:to-slate-300 text-white flex items-center justify-center transition-all shrink-0 shadow-md shadow-primary/20 hover:shadow-lg disabled:shadow-none"
         >
           <Send size={14} />
