@@ -16,16 +16,16 @@ export default function GearTab({ locale, recommendedGear }: GearTabProps) {
       <section>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-lg font-bold flex items-center gap-2 text-slate-900">
-              🛍️ {locale === "ko" ? "추천 장비" : "Recommended Gear"}
+            <h3 className="text-lg font-bold flex items-center gap-2 text-white">
+              {locale === "ko" ? "추천 장비" : "Recommended Gear"}
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-white/40 mt-0.5">
               {locale === "ko"
                 ? "쿠팡 파트너스 활동의 일환으로 일정액의 수수료를 제공받습니다"
                 : "Affiliate links included"}
             </p>
           </div>
-          <span className="text-[10px] font-bold px-2 py-1 bg-slate-100 text-slate-500 rounded-md">
+          <span className="text-[10px] font-bold px-2 py-1 bg-white/10 text-white/50 rounded-md">
             AD
           </span>
         </div>
@@ -39,11 +39,11 @@ export default function GearTab({ locale, recommendedGear }: GearTabProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackAffiliateClick(gear.id, gear.species)}
-                className="bg-white border border-slate-100 shadow-sm rounded-xl p-3 flex items-center gap-3 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] transition-all duration-200 group"
+                className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-3 hover:bg-white/[0.08] hover:-translate-y-0.5 active:scale-[0.99] transition-all duration-200 group"
               >
                 {gear.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-50 shrink-0 border border-slate-100 relative">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-white/5 shrink-0 border border-white/10 relative">
                     <img
                       src={gear.image}
                       alt={gear.name}
@@ -51,7 +51,7 @@ export default function GearTab({ locale, recommendedGear }: GearTabProps) {
                     />
                   </div>
                 ) : (
-                  <div className="w-16 h-16 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100">
+                  <div className="w-16 h-16 rounded-xl bg-white/5 flex items-center justify-center shrink-0 border border-white/10">
                     <Package
                       size={20}
                       className="text-slate-300 group-hover:scale-110 transition-transform"
@@ -59,10 +59,10 @@ export default function GearTab({ locale, recommendedGear }: GearTabProps) {
                   </div>
                 )}
                 <div className="flex-1 min-w-0 py-0.5">
-                  <p className="font-bold text-sm text-slate-900 truncate group-hover:text-primary transition-colors">
+                  <p className="font-bold text-sm text-white truncate group-hover:text-primary transition-colors">
                     {gear.name}
                   </p>
-                  <p className="text-[10px] text-slate-500 mt-0.5 truncate">
+                  <p className="text-[10px] text-white/50 mt-0.5 truncate">
                     {gear.description}
                   </p>
                 </div>
@@ -70,7 +70,7 @@ export default function GearTab({ locale, recommendedGear }: GearTabProps) {
                   <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">
                     {gear.priceString}
                   </span>
-                  <div className="flex items-center gap-0.5 text-[9px] text-slate-400 font-medium bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
+                  <div className="flex items-center gap-0.5 text-[9px] text-white/40 font-medium bg-white/5 px-1.5 py-0.5 rounded border border-white/10">
                     {locale === "ko" ? "쿠팡에서 보기" : "View on Coupang"}
                     <ExternalLink size={10} />
                   </div>
@@ -78,9 +78,9 @@ export default function GearTab({ locale, recommendedGear }: GearTabProps) {
               </a>
             ))
           ) : (
-            <div className="bg-slate-50 rounded-xl p-8 text-center border-2 border-dashed border-slate-200">
-              <ShoppingBag size={28} className="text-slate-300 mb-2 mx-auto" />
-              <p className="text-sm font-medium text-slate-500">
+            <div className="bg-white/5 rounded-xl p-8 text-center border-2 border-dashed border-white/10">
+              <ShoppingBag size={28} className="text-white/30 mb-2 mx-auto" />
+              <p className="text-sm font-medium text-white/50">
                 {locale === "ko"
                   ? "추천 장비가 없습니다"
                   : "No recommended gear"}

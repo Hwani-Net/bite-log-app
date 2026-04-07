@@ -70,7 +70,7 @@ export default function BookingPage() {
           홈으로
         </Link>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
-          🎣 낚시 예약
+          낚시 예약
         </h1>
         <p className="text-sm text-slate-500">
           검증된 예약 플랫폼으로 바로 연결합니다

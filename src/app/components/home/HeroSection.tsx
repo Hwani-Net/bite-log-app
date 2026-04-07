@@ -25,12 +25,12 @@ export default function HeroSection({ biteTime, loading }: HeroSectionProps) {
   const hour = new Date().getHours();
   const timeLabel =
     hour >= 5 && hour < 9
-      ? "🌅 아침"
+      ? "아침"
       : hour >= 9 && hour < 17
-        ? "☀️ 낮"
+        ? "낮"
         : hour >= 17 && hour < 20
-          ? "🌇 저녁"
-          : "🌙 밤";
+          ? "저녁"
+          : "밤";
 
   return (
     <Link href="/bite-forecast" className="block">

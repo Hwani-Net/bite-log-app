@@ -233,7 +233,6 @@ function TideTimeline({
       {phase && (
         <div className="bg-gradient-to-r from-[#7dd3fc]/20 to-[#c9a84c]/20 border border-[#7dd3fc]/20 rounded-xl px-3 py-2 mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-lg">{phase.emoji}</span>
             <div>
               <p className="text-xs font-bold text-white">{phase.label}</p>
               <p className="text-[10px] text-white/50">{phase.strengthLabel}</p>
@@ -316,11 +315,9 @@ function TideTimeline({
               key={i}
               className={`flex items-center gap-2 px-3 py-2 rounded-xl ${isHigh ? "bg-[#7dd3fc]/10" : "bg-[#c9a84c]/10"}`}
             >
-              <span
-                className={`text-sm ${isHigh ? "text-[#7dd3fc]" : "text-[#c9a84c]"}`}
-              >
-                {isHigh ? "🔵" : "🔷"}
-              </span>
+              <div
+                className={`w-2.5 h-2.5 rounded-full ${isHigh ? "bg-[#7dd3fc]" : "bg-[#c9a84c]"}`}
+              />
               <div>
                 <p className="text-xs font-bold text-white">
                   {isHigh ? "만조" : "간조"} {tide.time}
@@ -404,48 +401,46 @@ function FishingTips({ biteTime }: { biteTime: BiteTimePrediction }) {
   // Generate tips based on factors
   for (const f of biteTime.factors) {
     if (f.name === "시간대" && f.score >= 16) {
-      tips.push("🌅 지금은 매직아워! 톱워터 루어나 생미끼로 공략하세요.");
+      tips.push("지금은 매직아워! 톱워터 루어나 생미끼로 공략하세요.");
     }
     if (f.name.includes("물") && f.status === "positive") {
-      tips.push("🌊 물 세기가 좋습니다. 채비가 자연스럽게 흘러 입질 확률 UP!");
+      tips.push("물 세기가 좋습니다. 채비가 자연스럽게 흘러 입질 확률 UP!");
     }
     if (f.name === "바람" && f.status === "negative") {
       tips.push(
-        "💨 바람이 강합니다. 무거운 채비로 교체하고 안전 장비를 확인하세요.",
+        "바람이 강합니다. 무거운 채비로 교체하고 안전 장비를 확인하세요.",
       );
     }
     if (f.name.includes("수온") && f.status === "negative") {
-      tips.push(
-        "🌡️ 수온이 낮습니다. 바닥층을 공략하고 느린 액션을 추천합니다.",
-      );
+      tips.push("수온이 낮습니다. 바닥층을 공략하고 느린 액션을 추천합니다.");
     }
     if (f.name.includes("수온") && f.score >= 16) {
-      tips.push("☀️ 수온이 적절합니다. 중층~상층까지 폭넓게 공략해보세요.");
+      tips.push("수온이 적절합니다. 중층~상층까지 폭넓게 공략해보세요.");
     }
     if (f.name === "기압" && f.status === "positive" && f.score >= 14) {
       tips.push(
-        "📉 기압이 낮아지는 중! 물고기 활성도가 높아집니다. 적극 공략하세요.",
+        "기압이 낮아지는 중! 물고기 활성도가 높아집니다. 적극 공략하세요.",
       );
     }
     if (f.name === "파고" && f.status === "negative") {
       tips.push(
-        "🌊 파고가 높습니다. 선상낚시는 멀미 주의, 방파제 낚시를 추천합니다.",
+        "파고가 높습니다. 선상낚시는 멀미 주의, 방파제 낚시를 추천합니다.",
       );
     }
     if (
       f.name.includes("사리") ||
       (f.icon === "dark_mode" && f.status === "positive")
     ) {
-      tips.push("🌕 사리 전후입니다. 조류가 강해 먹이활동이 활발합니다!");
+      tips.push("사리 전후입니다. 조류가 강해 먹이활동이 활발합니다!");
     }
   }
 
   if (biteTime.score < 35) {
-    tips.push("⚠️ 전반적으로 어려운 조건입니다. 인내심을 갖고 임하세요.");
+    tips.push("전반적으로 어려운 조건입니다. 인내심을 갖고 임하세요.");
   }
 
   if (tips.length === 0) {
-    tips.push("🎣 보통의 조건입니다. 포인트 선정에 집중하세요!");
+    tips.push("보통의 조건입니다. 포인트 선정에 집중하세요!");
   }
 
   return (
@@ -528,12 +523,12 @@ export default function BiteForecastPage() {
   const hour = now.getHours();
   const timeLabel =
     hour >= 4 && hour < 9
-      ? "🌅 아침"
+      ? "아침"
       : hour >= 9 && hour < 17
-        ? "☀️ 낮"
+        ? "낮"
         : hour >= 17 && hour < 20
-          ? "🌇 저녁"
-          : "🌙 밤";
+          ? "저녁"
+          : "밤";
 
   return (
     <div className="relative flex min-h-dvh w-full flex-col bg-[#080d14] overflow-x-hidden pb-24">
@@ -652,7 +647,11 @@ export default function BiteForecastPage() {
           {/* ── Windy Link ── */}
           <Link href="/weather" className="block">
             <div className="bg-gradient-to-r from-[#7dd3fc]/20 to-[#c9a84c]/10 border border-[#7dd3fc]/20 rounded-2xl p-4 flex items-center gap-3">
-              <span className="text-2xl">🛰️</span>
+              <DynamicIcon
+                name="satellite_alt"
+                size={22}
+                className="text-[#7dd3fc] shrink-0"
+              />
               <div className="flex-1">
                 <p className="text-xs font-bold text-white uppercase tracking-[0.1em]">
                   {isKo ? "위성 날씨 지도 보기" : "View Satellite Weather"}
@@ -675,7 +674,6 @@ export default function BiteForecastPage() {
       ) : (
         <div className="flex-1 flex items-center justify-center px-4">
           <div className="text-center">
-            <span className="text-4xl">📍</span>
             <p className="text-sm font-bold text-white mt-2">
               위치 정보가 필요합니다
             </p>

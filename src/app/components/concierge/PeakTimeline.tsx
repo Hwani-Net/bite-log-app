@@ -85,8 +85,8 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <Clock size={20} className="text-amber-500" />
-        <h3 className="text-base font-bold text-slate-900">
-          {locale === "ko" ? "⏰ 피크 타임 예측" : "⏰ Peak Time Forecast"}
+        <h3 className="text-base font-bold text-white">
+          {locale === "ko" ? "피크 타임 예측" : "Peak Time Forecast"}
         </h3>
       </div>
 
@@ -101,10 +101,10 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
             className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all ${
               selectedSpecies === null
                 ? "bg-gradient-to-r from-primary to-cyan-500 text-white border-transparent shadow-md shadow-primary/30 scale-105"
-                : "bg-white text-slate-500 border-slate-200 hover:border-primary/40"
+                : "bg-white/5 text-white/60 border-white/10 hover:border-primary/40"
             }`}
           >
-            {locale === "ko" ? "🎣 전체" : "🎣 All"}
+            {locale === "ko" ? "전체" : "All"}
           </button>
           {SPECIES_LIST.map((sp) => (
             <button
@@ -117,22 +117,21 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
               className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all whitespace-nowrap ${
                 selectedSpecies === sp.name
                   ? "bg-gradient-to-r from-primary to-cyan-500 text-white border-transparent shadow-md shadow-primary/30 scale-105"
-                  : "bg-white text-slate-500 border-slate-200 hover:border-primary/40"
+                  : "bg-white/5 text-white/60 border-white/10 hover:border-primary/40"
               }`}
             >
-              {sp.emoji} {sp.name}
+              {sp.name}
             </button>
           ))}
         </div>
         {/* Right fade overlay — scroll hint */}
-        <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-[#080d14] to-transparent pointer-events-none" />
       </div>
 
       {/* Species badge */}
       {selectedSpecies && (
         <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-gradient-to-r from-primary/5 to-cyan-400/5 rounded-xl border border-primary/10">
           <span className="text-xs text-primary font-bold">
-            {SPECIES_LIST.find((s) => s.name === selectedSpecies)?.emoji}{" "}
             {selectedSpecies}
           </span>
           <span className="text-[10px] text-slate-400">
@@ -164,14 +163,13 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
                   key={i}
                   className={`flex-shrink-0 px-3 py-2 rounded-xl border ${
                     isGolden
-                      ? "bg-gradient-to-r from-amber-50 to-orange-50 border-amber-300 shadow-sm shadow-amber-200/50"
-                      : "bg-gradient-to-r from-blue-50 to-orange-50 border-blue-200"
+                      ? "bg-amber-500/10 border-amber-400/30"
+                      : "bg-[#7dd3fc]/10 border-[#7dd3fc]/20"
                   }`}
                 >
                   <div className="flex items-center gap-1.5 mb-0.5">
-                    {isGolden && <span className="text-sm">⭐</span>}
                     <span
-                      className={`text-xs font-bold ${isGolden ? "text-amber-700" : "text-blue-700"}`}
+                      className={`text-xs font-bold ${isGolden ? "text-amber-400" : "text-[#7dd3fc]"}`}
                     >
                       {isGolden
                         ? locale === "ko"
@@ -183,7 +181,7 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
                     </span>
                   </div>
                   <p
-                    className={`text-sm font-bold ${isGolden ? "text-amber-900" : "text-blue-900"}`}
+                    className={`text-sm font-bold ${isGolden ? "text-amber-300" : "text-[#7dd3fc]"}`}
                   >
                     {`${String(range.start).padStart(2, "0")}:00 ~ ${String(range.end + 1).padStart(2, "0")}:00`}
                   </p>
@@ -202,10 +200,10 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
             })}
           </div>
           {/* Right fade overlay — scroll hint */}
-          <div className="absolute right-0 top-0 bottom-1 w-6 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-1 w-6 bg-gradient-to-l from-[#080d14] to-transparent pointer-events-none" />
         </div>
       ) : (
-        <div className="bg-slate-50 rounded-xl px-4 py-3 mb-4 text-center border border-dashed border-slate-200">
+        <div className="bg-white/5 rounded-xl px-4 py-3 mb-4 text-center border border-dashed border-white/10">
           <p className="text-[11px] text-slate-400 font-medium whitespace-pre-wrap">
             {locale === "ko"
               ? "선택한 어종의 현재 피크 타임 예측 정보가 없습니다.\n물때와 시간대를 고려하여 다른 어종을 탐색해보세요."
@@ -215,7 +213,7 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
       )}
 
       {/* 24h Timeline Bar Chart */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-3 shadow-sm">
+      <div className="bg-white/5 rounded-2xl border border-white/10 p-3">
         <div className="flex items-end gap-[2px] h-28">
           {slots.map((slot) => {
             const height = Math.max(15, (slot.score / maxScore) * 100);
@@ -264,7 +262,7 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
         </div>
 
         {/* Hour Labels */}
-        <div className="flex gap-[2px] mt-1.5 border-t border-slate-100 pt-1">
+        <div className="flex gap-[2px] mt-1.5 border-t border-white/10 pt-1">
           {slots.map((slot) => (
             <div
               key={slot.hour}
@@ -272,7 +270,7 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
                 slot.hour === currentHour
                   ? "text-primary font-bold"
                   : slot.hour % 3 === 0
-                    ? "text-slate-500"
+                    ? "text-white/50"
                     : "text-transparent"
               }`}
             >
@@ -282,7 +280,7 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
         </div>
 
         {/* Legend */}
-        <div className="flex items-center justify-center gap-3 mt-2 text-[9px] text-slate-400">
+        <div className="flex items-center justify-center gap-3 mt-2 text-[9px] text-white/40">
           <span className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-400" />
             {locale === "ko" ? "피크" : "Peak"}
@@ -292,11 +290,11 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
             {locale === "ko" ? "좋음" : "Good"}
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-slate-300" />
+            <span className="w-2 h-2 rounded-full bg-white/30" />
             {locale === "ko" ? "보통" : "Fair"}
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-slate-200" />
+            <span className="w-2 h-2 rounded-full bg-white/20" />
             {locale === "ko" ? "낮음" : "Low"}
           </span>
           <span className="flex items-center gap-0.5 text-primary font-bold">

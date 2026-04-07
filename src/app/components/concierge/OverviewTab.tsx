@@ -39,7 +39,7 @@ export default function OverviewTab({
     <div className="space-y-6 pb-24">
       {/* AI Greeting Card */}
       <section>
-        <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 p-5 flex items-start gap-4 border border-blue-100/50 shadow-sm transition-transform duration-300 hover:shadow-md">
+        <div className="rounded-2xl bg-white/5 backdrop-blur-[12px] p-5 flex items-start gap-4 border border-white/10 transition-transform duration-300 hover:bg-white/[0.07]">
           <div className="bg-gradient-to-br from-primary to-cyan-400 p-3 rounded-xl shrink-0 shadow-lg shadow-primary/25">
             <DynamicIcon
               name="auto_awesome"
@@ -48,10 +48,10 @@ export default function OverviewTab({
             />
           </div>
           <div className="flex-1">
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-white">
               {locale === "ko" ? "안녕하세요, 대표님!" : "Hello!"}
             </h2>
-            <p className="text-slate-600 text-sm mt-1 leading-relaxed">
+            <p className="text-white/60 text-sm mt-1 leading-relaxed">
               {loading
                 ? locale === "ko"
                   ? "낚시 컨디션 분석 중..."
@@ -65,10 +65,10 @@ export default function OverviewTab({
       {/* In-Season Species Chips */}
       {inSeasonSpecies.length > 0 && (
         <section>
-          <p className="text-xs font-semibold text-slate-400 mb-2">
+          <p className="text-xs font-semibold text-white/40 mb-2">
             {locale === "ko"
-              ? `📅 ${new Date().getMonth() + 1}월 시즌 어종`
-              : `📅 ${new Date().toLocaleString("en", { month: "long" })} Season`}
+              ? `${new Date().getMonth() + 1}월 시즌 어종`
+              : `${new Date().toLocaleString("en", { month: "long" })} Season`}
           </p>
           <div
             ref={seasonChipsRef}
@@ -77,7 +77,7 @@ export default function OverviewTab({
             {inSeasonSpecies.map((sp) => (
               <span
                 key={sp.name}
-                className="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-white text-primary border border-primary/20 shadow-sm flex items-center gap-1.5"
+                className="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-white/5 text-[#c9a84c] border border-[#c9a84c]/20 flex items-center gap-1.5"
               >
                 {sp.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -98,13 +98,13 @@ export default function OverviewTab({
 
       {/* Today's Recommendation */}
       <section>
-        <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900">
-          🎯 {locale === "ko" ? "오늘의 추천" : "Today's Pick"}
+        <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-white">
+          {locale === "ko" ? "오늘의 추천" : "Today's Pick"}
         </h3>
         {loading ? (
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 animate-pulse h-32" />
+          <div className="bg-white/5 rounded-2xl p-4 border border-white/10 animate-pulse h-32" />
         ) : recommendation ? (
-          <div className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 transition-all duration-300 hover:bg-white/[0.07] hover:-translate-y-1">
             <div className="flex gap-4">
               <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary/10 to-cyan-400/10 flex items-center justify-center overflow-hidden shrink-0 border border-primary/10">
                 {recommendation.species.image ? (
@@ -128,13 +128,12 @@ export default function OverviewTab({
                       {recommendation.spot.name}
                     </span>
                   </div>
-                  <p className="font-bold text-base text-slate-900">
+                  <p className="font-bold text-base text-white">
                     {recommendation.species.name}{" "}
-                    {locale === "ko" ? "히트 포인트" : "Hot Spot"}{" "}
-                    {recommendation.species.emoji}
+                    {locale === "ko" ? "히트 포인트" : "Hot Spot"}
                   </p>
                 </div>
-                <div className="flex gap-3 text-[10px] text-slate-500 font-medium mt-2">
+                <div className="flex gap-3 text-[10px] text-white/50 font-medium mt-2">
                   <div className="flex items-center gap-1">
                     <DynamicIcon name="schedule" size={14} />
                     <span>{recommendation.departureTime}</span>
@@ -150,10 +149,10 @@ export default function OverviewTab({
                   <span
                     className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
                       recommendation.species.difficulty === "beginner"
-                        ? "bg-emerald-100 text-emerald-600"
+                        ? "bg-emerald-500/20 text-emerald-400"
                         : recommendation.species.difficulty === "intermediate"
-                          ? "bg-amber-100 text-amber-600"
-                          : "bg-red-100 text-red-600"
+                          ? "bg-amber-500/20 text-amber-400"
+                          : "bg-red-500/20 text-red-400"
                     }`}
                   >
                     {recommendation.species.difficulty === "beginner"
@@ -174,11 +173,11 @@ export default function OverviewTab({
 
             {/* Tips */}
             {recommendation.tips.length > 0 && (
-              <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5">
+              <div className="mt-4 pt-3 border-t border-white/10 space-y-1.5">
                 {recommendation.tips.map((tip, i) => (
                   <p
                     key={i}
-                    className="text-xs text-slate-500 leading-relaxed flex items-start gap-1"
+                    className="text-xs text-white/50 leading-relaxed flex items-start gap-1"
                   >
                     <span className="text-primary mt-0.5">•</span>
                     {tip}
@@ -192,18 +191,15 @@ export default function OverviewTab({
 
       {/* Secret Hotspot Section */}
       <section>
-        <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900">
-          {isPro ? "💎" : "🔒"}{" "}
+        <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-white">
           {locale === "ko" ? "시크릿 포인트" : "Secret Hotspot"}
         </h3>
         <button
           onClick={() => {
             if (!isPro) openPaywall("secret_point");
           }}
-          className={`w-full border rounded-2xl p-4 shadow-sm text-left transition-all hover:shadow-md active:scale-[0.99] ${
-            isPro
-              ? "bg-gradient-to-br from-indigo-50/50 to-emerald-50/50 border-emerald-100"
-              : "bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-100"
+          className={`w-full border rounded-2xl p-4 text-left transition-all hover:bg-white/[0.07] active:scale-[0.99] ${
+            isPro ? "bg-white/5 border-white/10" : "bg-white/5 border-white/10"
           }`}
         >
           <div className="flex items-center gap-4">
@@ -221,7 +217,7 @@ export default function OverviewTab({
               />
             </div>
             <div className="flex-1">
-              <p className="font-bold text-slate-900 text-sm">
+              <p className="font-bold text-white text-sm">
                 {isPro
                   ? (recommendation?.secretSpot?.name ??
                     (locale === "ko"
@@ -231,7 +227,7 @@ export default function OverviewTab({
                     ? "현지인 시크릿 포인트 공개"
                     : "Local Secret Spots"}
               </p>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+              <p className="text-xs text-white/50 mt-1 leading-relaxed">
                 {isPro
                   ? (recommendation?.secretSpot?.description ??
                     (locale === "ko"
@@ -261,7 +257,7 @@ export default function OverviewTab({
               <DynamicIcon
                 name="chevron_right"
                 size={20}
-                className="text-indigo-400"
+                className="text-white/40"
               />
             )}
           </div>
@@ -271,19 +267,19 @@ export default function OverviewTab({
       {/* Weather & Tide Analysis */}
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold flex items-center gap-2 text-slate-900">
-            🌊 {locale === "ko" ? "날씨 & 조수 분석" : "Weather & Tide"}
+          <h3 className="text-lg font-bold flex items-center gap-2 text-white">
+            {locale === "ko" ? "날씨 & 조수 분석" : "Weather & Tide"}
           </h3>
           {biteTime && (
             <span
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
                 biteScore >= 75
-                  ? "bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-700"
+                  ? "bg-emerald-500/20 text-emerald-400"
                   : biteScore >= 55
-                    ? "bg-gradient-to-r from-blue-100 to-blue-50 text-blue-700"
+                    ? "bg-[#7dd3fc]/20 text-[#7dd3fc]"
                     : biteScore >= 35
-                      ? "bg-gradient-to-r from-amber-100 to-amber-50 text-amber-700"
-                      : "bg-gradient-to-r from-red-100 to-red-50 text-red-600"
+                      ? "bg-amber-500/20 text-amber-400"
+                      : "bg-red-500/20 text-red-400"
               }`}
             >
               {locale === "ko"
@@ -295,7 +291,7 @@ export default function OverviewTab({
 
         {/* Stat boxes */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white p-3 rounded-xl text-center border border-slate-100 shadow-sm">
+          <div className="bg-white/5 p-3 rounded-xl text-center border border-white/10">
             <div className="bg-gradient-to-br from-primary/10 to-cyan-400/10 rounded-full w-8 h-8 mx-auto flex items-center justify-center mb-1">
               <DynamicIcon
                 name="thermostat"
@@ -303,10 +299,10 @@ export default function OverviewTab({
                 className="text-primary"
               />
             </div>
-            <p className="text-[10px] text-slate-400">
+            <p className="text-[10px] text-white/40">
               {locale === "ko" ? "기온" : "Temp"}
             </p>
-            <p className="font-bold text-sm text-slate-900">
+            <p className="font-bold text-sm text-white">
               {loading
                 ? "—"
                 : weather?.tempC != null
@@ -314,14 +310,14 @@ export default function OverviewTab({
                   : "—"}
             </p>
           </div>
-          <div className="bg-white p-3 rounded-xl text-center border border-slate-100 shadow-sm">
+          <div className="bg-white/5 p-3 rounded-xl text-center border border-white/10">
             <div className="bg-gradient-to-br from-primary/10 to-cyan-400/10 rounded-full w-8 h-8 mx-auto flex items-center justify-center mb-1">
               <DynamicIcon name="air" size={14} className="text-primary" />
             </div>
-            <p className="text-[10px] text-slate-400">
+            <p className="text-[10px] text-white/40">
               {locale === "ko" ? "풍속" : "Wind"}
             </p>
-            <p className="font-bold text-sm text-slate-900">
+            <p className="font-bold text-sm text-white">
               {loading
                 ? "—"
                 : weather?.windSpeed != null
@@ -329,7 +325,7 @@ export default function OverviewTab({
                   : "—"}
             </p>
           </div>
-          <div className="bg-white p-3 rounded-xl text-center border border-slate-100 shadow-sm">
+          <div className="bg-white/5 p-3 rounded-xl text-center border border-white/10">
             <div className="bg-gradient-to-br from-primary/10 to-cyan-400/10 rounded-full w-8 h-8 mx-auto flex items-center justify-center mb-1">
               <DynamicIcon
                 name={weather?.icon ?? "cloud"}
@@ -337,12 +333,12 @@ export default function OverviewTab({
                 className="text-primary"
               />
             </div>
-            <p className="text-[10px] text-slate-400">
+            <p className="text-[10px] text-white/40">
               {locale === "ko"
                 ? (weather?.conditionKo ?? "날씨")
                 : (weather?.conditionEn ?? "Weather")}
             </p>
-            <p className="font-bold text-sm text-slate-900">
+            <p className="font-bold text-sm text-white">
               {loading
                 ? "—"
                 : weather?.humidity != null
@@ -354,9 +350,9 @@ export default function OverviewTab({
 
         {/* Tide bar chart */}
         {tideData && tideData.tides.length > 0 && (
-          <div className="mt-4 bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+          <div className="mt-4 bg-white/5 rounded-xl p-4 border border-white/10">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-[10px] font-semibold text-slate-400 flex items-center gap-1">
+              <p className="text-[10px] font-semibold text-white/40 flex items-center gap-1">
                 <DynamicIcon
                   name="location_on"
                   size={10}
@@ -377,7 +373,7 @@ export default function OverviewTab({
                     className="flex-1 flex flex-col items-center gap-1"
                   >
                     <span
-                      className={`text-[9px] font-bold ${tide.type === "High" ? "text-primary" : "text-slate-400"}`}
+                      className={`text-[9px] font-bold ${tide.type === "High" ? "text-primary" : "text-white/40"}`}
                     >
                       {tide.type === "High" ? "만" : "간"}
                     </span>
@@ -385,11 +381,11 @@ export default function OverviewTab({
                       className={`w-full rounded-t-md transition-all ${
                         tide.type === "High"
                           ? "bg-gradient-to-t from-primary/50 to-primary/90"
-                          : "bg-slate-200"
+                          : "bg-white/20"
                       }`}
                       style={{ height: `${pct}%`, minHeight: "8px" }}
                     />
-                    <span className="text-[9px] text-slate-500 font-medium">
+                    <span className="text-[9px] text-white/50 font-medium">
                       {tide.time}
                     </span>
                   </div>
@@ -404,24 +400,24 @@ export default function OverviewTab({
 
         {/* Bite factors */}
         {biteTime && (
-          <div className="mt-5 space-y-3 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+          <div className="mt-5 space-y-3 bg-white/5 p-4 rounded-xl border border-white/10">
             {biteTime.factors.map((f) => (
               <div key={f.name} className="flex items-center gap-3 text-xs">
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
                     f.status === "positive"
-                      ? "bg-emerald-50 text-emerald-500"
+                      ? "bg-emerald-500/20 text-emerald-400"
                       : f.status === "negative"
-                        ? "bg-red-50 text-red-500"
-                        : "bg-slate-50 text-slate-400"
+                        ? "bg-red-500/20 text-red-400"
+                        : "bg-white/10 text-white/40"
                   }`}
                 >
                   <DynamicIcon name={f.icon} size={12} />
                 </div>
-                <span className="text-slate-600 font-medium w-12 shrink-0">
+                <span className="text-white/60 font-medium w-12 shrink-0">
                   {f.name}
                 </span>
-                <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-700 ${
                       f.status === "positive"
@@ -433,24 +429,24 @@ export default function OverviewTab({
                     style={{ width: `${Math.min(100, (f.score / 20) * 100)}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-slate-400 w-6 text-right font-medium">
+                <span className="text-[10px] text-white/40 w-6 text-right font-medium">
                   {f.score}/20
                 </span>
               </div>
             ))}
-            <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-100">
+            <div className="flex items-center gap-2 mt-4 pt-3 border-t border-white/10">
               <span className="text-2xl drop-shadow-sm">
                 {biteTime.gradeEmoji}
               </span>
               <span
                 className={`text-sm font-black ${
                   biteTime.grade === "excellent"
-                    ? "text-emerald-600"
+                    ? "text-emerald-400"
                     : biteTime.grade === "good"
-                      ? "text-blue-600"
+                      ? "text-[#7dd3fc]"
                       : biteTime.grade === "fair"
-                        ? "text-amber-600"
-                        : "text-red-500"
+                        ? "text-amber-400"
+                        : "text-red-400"
                 }`}
               >
                 {biteTime.gradeLabel}

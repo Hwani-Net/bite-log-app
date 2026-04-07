@@ -60,7 +60,7 @@ const LABELS = {
     mySubsTitle: "내 구독 목록",
     noSubs: "구독 중인 알림이 없습니다",
     noSubsSub: "위에서 추가해보세요!",
-    simulate: "🔔 테스트 알림 발송",
+    simulate: "테스트 알림 발송",
     deleteBtn: "삭제",
     activeBadge: "활성",
     pausedBadge: "일시정지",
@@ -97,7 +97,7 @@ const LABELS = {
     mySubsTitle: "My Subscriptions",
     noSubs: "No active subscriptions",
     noSubsSub: "Add one above!",
-    simulate: "🔔 Send Test Alert",
+    simulate: "Send Test Alert",
     deleteBtn: "Delete",
     activeBadge: "Active",
     pausedBadge: "Paused",
@@ -134,7 +134,7 @@ function PermissionBanner({
     >
       <div className="flex items-start gap-3">
         <span className="text-2xl flex-shrink-0">
-          {permission === "denied" ? "🚫" : "🔔"}
+          {permission === "denied" ? "✕" : "●"}
         </span>
         <div className="flex-1">
           <p className="text-sm font-bold text-white">{L.permissionBanner}</p>
@@ -174,7 +174,7 @@ function AutoDetectChips({
   return (
     <section className="px-4 pt-4">
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-base">🤖</span>
+        <span className="text-base text-[#7dd3fc]">AI</span>
         <div>
           <p className="text-sm font-bold text-white">{L.autoDetect}</p>
           <p className="text-xs text-white/50">{L.autoDetectSub}</p>
@@ -187,7 +187,7 @@ function AutoDetectChips({
             onClick={() => onSubscribe(p.species, p.region)}
             className="flex items-center gap-1.5 bg-white/5 border border-[#7dd3fc]/30 text-[#7dd3fc] text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors"
           >
-            🎣 {p.species} · {p.region}
+            {p.species} · {p.region}
             <span className="text-[#7dd3fc]/60">+</span>
             {L.subscribeChip}
           </button>
@@ -382,9 +382,7 @@ function SubCard({
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-bold text-white">
-              🎣 {speciesLabel}
-            </span>
+            <span className="text-sm font-bold text-white">{speciesLabel}</span>
             <span
               className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                 sub.isActive
@@ -396,12 +394,12 @@ function SubCard({
             </span>
           </div>
           <p className="text-xs text-white/50 mt-0.5">
-            📍 {regionLabel} · ⏰ {sub.notifyDaysAhead}
+            {regionLabel} · {sub.notifyDaysAhead}
             {L.daysAhead}
           </p>
           {sub.keywords.length > 0 && (
             <p className="text-[10px] text-white/30 mt-0.5">
-              🔍 {sub.keywords.join(", ")}
+              {sub.keywords.join(", ")}
             </p>
           )}
         </div>
@@ -413,7 +411,7 @@ function SubCard({
           onClick={onSimulate}
           className="flex-1 text-[10px] font-semibold text-[#7dd3fc] bg-[#7dd3fc]/10 border border-[#7dd3fc]/20 py-1.5 rounded-xl hover:bg-[#7dd3fc]/20 transition-colors"
         >
-          🔔 {L.simulate}
+          {L.simulate}
         </button>
         <button
           onClick={onToggle}
@@ -427,7 +425,7 @@ function SubCard({
           }}
           className="text-[10px] font-semibold text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-xl hover:bg-red-500/20 transition-colors"
         >
-          🗑
+          삭제
         </button>
       </div>
     </div>
@@ -514,7 +512,9 @@ export default function AlertsPage() {
             <h1 className="text-base font-bold text-white">{L.title}</h1>
             <p className="text-xs text-white/50">{L.subtitle}</p>
           </div>
-          <span className="text-2xl">🔔</span>
+          <span className="text-sm font-bold text-[#c9a84c] uppercase tracking-wider">
+            ALERT
+          </span>
         </div>
       </div>
 
@@ -570,7 +570,9 @@ export default function AlertsPage() {
           </h2>
           {subs.length === 0 ? (
             <div className="text-center py-12 space-y-2">
-              <p className="text-4xl">🔕</p>
+              <p className="text-sm font-semibold text-white/20 uppercase tracking-widest">
+                NO ALERTS
+              </p>
               <p className="text-sm font-semibold text-white/30">{L.noSubs}</p>
               <p className="text-xs text-white/20">{L.noSubsSub}</p>
             </div>
@@ -604,7 +606,7 @@ export default function AlertsPage() {
         <section className="px-4 pb-4">
           <div className="bg-white/5 backdrop-blur-[12px] rounded-2xl p-4 border border-white/10">
             <div className="flex items-start gap-3">
-              <span className="text-xl">💡</span>
+              <span className="text-xl text-[#c9a84c] font-bold">?</span>
               <div>
                 <p className="text-xs font-bold text-white">{L.howTitle}</p>
                 <p className="text-[11px] text-white/50 mt-0.5 leading-relaxed">

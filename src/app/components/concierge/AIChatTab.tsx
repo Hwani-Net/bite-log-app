@@ -46,7 +46,7 @@ export default function AIChatTab({
       <div className="mb-3 flex justify-between items-start gap-2">
         <div>
           <h3 className="text-lg font-bold flex items-center gap-2 text-white">
-            🤖 {locale === "ko" ? "AI 낚시 마스터" : "AI Fishing Master"}
+            {locale === "ko" ? "AI 낚시 마스터" : "AI Fishing Master"}
           </h3>
           <p className="text-xs text-white/50 mt-1">
             {locale === "ko"
@@ -91,7 +91,7 @@ export default function AIChatTab({
             disabled={chatLoading}
             className="shrink-0 text-[11px] font-medium px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[#c9a84c] hover:bg-white/10 transition-all whitespace-nowrap disabled:opacity-50"
           >
-            💡 {q}
+            {q}
           </button>
         ))}
       </div>
@@ -102,9 +102,7 @@ export default function AIChatTab({
           <div className="flex-1 flex flex-col items-center justify-center text-white/40 py-4">
             <Sparkles size={28} className="text-[#c9a84c]/40 mb-2" />
             <p className="text-xs font-semibold">
-              {locale === "ko"
-                ? "낚시에 대해 물어보세요 🎣"
-                : "Ask about fishing 🎣"}
+              {locale === "ko" ? "낚시에 대해 물어보세요" : "Ask about fishing"}
             </p>
             <p className="text-xs mt-1 text-center px-4 text-white/30">
               {locale === "ko"
