@@ -25,7 +25,85 @@ import {
   ShoppingCart,
   ExternalLink,
   Bell,
+  Anchor,
+  Scissors,
+  Flashlight,
+  Phone,
+  Droplets,
+  Package,
+  Bug,
+  Armchair,
+  Shirt,
+  Flame,
+  Hand,
+  Snowflake,
+  Sun,
+  Glasses,
+  CloudRain,
+  Footprints,
+  AlertTriangle,
+  Pill,
+  Thermometer,
+  BatteryCharging,
+  Stethoscope,
+  CreditCard,
+  Shield,
+  Settings2,
+  Circle,
+  Fish,
+  FishOff,
+  Dumbbell,
+  Link,
+  Worm,
+  Zap,
+  Briefcase,
+  LifeBuoy,
+  type LucideProps,
 } from "lucide-react";
+import type { ComponentType } from "react";
+
+const ICON_MAP: Record<string, ComponentType<LucideProps>> = {
+  Anchor,
+  Scissors,
+  Flashlight,
+  Phone,
+  Droplets,
+  Package,
+  Bug,
+  Armchair,
+  Shirt,
+  Flame,
+  Hand,
+  Snowflake,
+  Sun,
+  Glasses,
+  CloudRain,
+  Footprints,
+  AlertTriangle,
+  Pill,
+  Thermometer,
+  BatteryCharging,
+  Stethoscope,
+  CreditCard,
+  Shield,
+  Settings2,
+  Circle,
+  Fish,
+  FishOff,
+  Dumbbell,
+  Link,
+  Worm,
+  Zap,
+  Briefcase,
+  LifeBuoy,
+  Waves,
+};
+
+function ItemIcon({ name, size = 16 }: { name: string; size?: number }) {
+  const Icon = ICON_MAP[name];
+  if (!Icon) return null;
+  return <Icon size={size} />;
+}
 
 // 어종 목록
 const SPECIES_LIST = [
@@ -455,8 +533,8 @@ export default function TripPlanPage() {
               <div className="space-y-3">
                 {briefing.weatherChecklist.slice(0, 8).map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
-                    <span className="text-base shrink-0 mt-0.5">
-                      {item.icon}
+                    <span className="shrink-0 mt-0.5 text-white/60">
+                      <ItemIcon name={item.icon} size={16} />
                     </span>
                     <div className="flex-1 min-w-0">
                       <p
@@ -492,8 +570,8 @@ export default function TripPlanPage() {
               <div className="space-y-2.5">
                 {briefing.basicChecklist.map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <div className="size-8 flex items-center justify-center bg-white/5 rounded-xl shrink-0">
-                      <span className="text-base">{item.icon}</span>
+                    <div className="size-8 flex items-center justify-center bg-white/5 rounded-xl shrink-0 text-white/60">
+                      <ItemIcon name={item.icon} size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-white">
@@ -522,8 +600,8 @@ export default function TripPlanPage() {
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 bg-white/5 rounded-xl p-3 hover:bg-white/10 transition-colors"
                     >
-                      <div className="size-10 flex items-center justify-center bg-white/5 rounded-xl shrink-0">
-                        <span className="text-xl">{g.icon}</span>
+                      <div className="size-10 flex items-center justify-center bg-white/5 rounded-xl shrink-0 text-white/60">
+                        <ItemIcon name={g.icon} size={20} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-semibold text-white truncate">
