@@ -92,7 +92,7 @@ export default function FleetRadar() {
   const [fleet, setFleet] = useState<FleetEntry[]>([]);
   const [safeHarbors, setSafeHarbors] = useState<SafeHarborZone[]>([]);
   const [alerts, setAlerts] = useState<FleetEntry[]>([]);
-  const [isMock, setIsMock] = useState(false);
+  const [isMock, setIsMock] = useState(true);
   const [isFallback, setIsFallback] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -132,7 +132,7 @@ export default function FleetRadar() {
 
       setFleet(res.data);
       setSafeHarbors(computeSafeHarbors(res.data));
-      setIsMock(res.mock);
+      setIsMock(res.dataSource !== "aisstream");
       setIsFallback(res.fallback ?? false);
       setLastUpdate(new Date().toLocaleTimeString("ko-KR"));
       setError(null);

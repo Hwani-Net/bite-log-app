@@ -11,7 +11,7 @@ export interface FleetEntry {
   shipType: string;
   tonnage: number;
   length: number;
-  sizeClass: 'small' | 'large';
+  sizeClass: "small" | "large";
 }
 
 export interface FleetResponse {
@@ -20,6 +20,7 @@ export interface FleetResponse {
   count: number;
   timestamp: string;
   mock: boolean;
+  dataSource?: "aisstream" | "primary" | "khoa" | "mock";
   fallback?: boolean;
   error?: string;
 }
@@ -33,7 +34,7 @@ export interface SafeHarborZone {
 }
 
 interface FetchFleetOptions {
-  size?: 'small' | 'large';
+  size?: "small" | "large";
   minTonnage?: number;
   maxTonnage?: number;
 }
@@ -41,18 +42,29 @@ interface FetchFleetOptions {
 /**
  * Fetch fleet data from the proxy API route
  */
-export async function fetchFleetData(options?: FetchFleetOptions): Promise<FleetResponse> {
+export async function fetchFleetData(
+  options?: FetchFleetOptions,
+): Promise<FleetResponse> {
   const params = new URLSearchParams();
-  if (options?.size) params.set('size', options.size);
-  if (options?.minTonnage != null) params.set('minTonnage', String(options.minTonnage));
-  if (options?.maxTonnage != null) params.set('maxTonnage', String(options.maxTonnage));
+  if (options?.size) params.set("size", options.size);
+  if (options?.minTonnage != null)
+    params.set("minTonnage", String(options.minTonnage));
+  if (options?.maxTonnage != null)
+    params.set("maxTonnage", String(options.maxTonnage));
 
   const qs = params.toString();
-  const url = `/api/fleet${qs ? `?${qs}` : ''}`;
+  const url = `/api/fleet${qs ? `?${qs}` : ""}`;
 
-  const res = await fetch(url, { cache: 'no-store' });
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) {
-    return { ok: false, data: [], count: 0, timestamp: new Date().toISOString(), mock: false, error: `HTTP ${res.status}` };
+    return {
+      ok: false,
+      data: [],
+      count: 0,
+      timestamp: new Date().toISOString(),
+      mock: false,
+      error: `HTTP ${res.status}`,
+    };
   }
   return res.json();
 }
@@ -62,7 +74,12 @@ export async function fetchFleetData(options?: FetchFleetOptions): Promise<Fleet
 const EARTH_RADIUS_KM = 6371;
 
 /** Haversine distance in km */
-export function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+export function haversineKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
   const toRad = (deg: number) => (deg * Math.PI) / 180;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
@@ -81,7 +98,9 @@ export function haversineKm(lat1: number, lon1: number, lat2: number, lon2: numb
  */
 export function computeSafeHarbors(fleet: FleetEntry[]): SafeHarborZone[] {
   const largeShips = fleet.filter((s) => s.tonnage >= 5);
-  const fishingSmall = fleet.filter((s) => s.sizeClass === 'small' && s.speed <= 2);
+  const fishingSmall = fleet.filter(
+    (s) => s.sizeClass === "small" && s.speed <= 2,
+  );
 
   if (fishingSmall.length < 3) return [];
 
