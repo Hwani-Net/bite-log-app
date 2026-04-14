@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import WebSocket from "ws";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 // --- Constants -------------------------------------------------------
 
@@ -15,17 +16,17 @@ interface DynamicRecord {
   mmsi: string;
   lat: number;
   lon: number;
-  speed: number;   // knots
-  course: number;  // degrees
+  speed: number; // knots
+  course: number; // degrees
   timestamp: string; // ISO-8601
 }
 
 interface StaticRecord {
   mmsi: string;
   shipName: string;
-  shipType: string;  // e.g. "fishing", "cargo", "leisure"
-  tonnage: number;   // gross tonnage
-  length: number;    // metres
+  shipType: string; // e.g. "fishing", "cargo", "leisure"
+  tonnage: number; // gross tonnage
+  length: number; // metres
 }
 
 interface FleetEntry {
@@ -39,7 +40,7 @@ interface FleetEntry {
   shipType: string;
   tonnage: number;
   length: number;
-  sizeClass: 'small' | 'large'; // < TONNAGE_THRESHOLD → small, ≥ TONNAGE_THRESHOLD → large
+  sizeClass: "small" | "large"; // < TONNAGE_THRESHOLD → small, ≥ TONNAGE_THRESHOLD → large
 }
 
 // --- Structured Logging ----------------------------------------------
@@ -53,11 +54,14 @@ interface LogPayload {
   [key: string]: unknown;
 }
 
-function structuredLog(level: 'info' | 'warn' | 'error', payload: LogPayload): void {
+function structuredLog(
+  level: "info" | "warn" | "error",
+  payload: LogPayload,
+): void {
   const entry = JSON.stringify(payload);
-  if (level === 'info')  console.info(entry);
-  if (level === 'warn')  console.warn(entry);
-  if (level === 'error') console.error(entry);
+  if (level === "info") console.info(entry);
+  if (level === "warn") console.warn(entry);
+  if (level === "error") console.error(entry);
 }
 
 // --- Zod schema & type guard -----------------------------------------
@@ -65,7 +69,7 @@ function structuredLog(level: 'info' | 'warn' | 'error', payload: LogPayload): v
 /** GET /api/fleet 쿼리 파라미터 Zod 스키마 (유효성 검사 + 타입 추론 일원화) */
 const FleetQuerySchema = z.object({
   size: z
-    .enum(['small', 'large'])
+    .enum(["small", "large"])
     .nullable()
     .optional()
     .transform((v) => v ?? null),
@@ -89,16 +93,18 @@ type FleetQueryParams = z.output<typeof FleetQuerySchema>;
 /** URLSearchParams → FleetQueryParams 변환 + 유효성 검사 (타입 가드 통합) */
 function parseAndValidateQuery(
   searchParams: URLSearchParams,
-): { success: true; data: FleetQueryParams } | { success: false; message: string } {
+):
+  | { success: true; data: FleetQueryParams }
+  | { success: false; message: string } {
   const raw = {
-    size: searchParams.get('size') ?? undefined,
-    minTonnage: searchParams.get('minTonnage') ?? undefined,
-    maxTonnage: searchParams.get('maxTonnage') ?? undefined,
+    size: searchParams.get("size") ?? undefined,
+    minTonnage: searchParams.get("minTonnage") ?? undefined,
+    maxTonnage: searchParams.get("maxTonnage") ?? undefined,
   };
 
   const result = FleetQuerySchema.safeParse(raw);
   if (!result.success) {
-    const message = result.error.issues.map((i) => i.message).join('; ');
+    const message = result.error.issues.map((i) => i.message).join("; ");
     return { success: false, message };
   }
   return { success: true, data: result.data };
@@ -107,19 +113,84 @@ function parseAndValidateQuery(
 // --- Mock data (used while data.go.kr API key is pending) ------------
 
 const MOCK_DYNAMIC: DynamicRecord[] = [
-  { mmsi: '111111111', lat: 34.89, lon: 128.62, speed: 10, course: 90, timestamp: new Date().toISOString() },
-  { mmsi: '222222222', lat: 34.86, lon: 128.65, speed: 0, course: 0, timestamp: new Date().toISOString() },
-  { mmsi: '333333333', lat: 34.92, lon: 128.58, speed: 15, course: 180, timestamp: new Date().toISOString() },
-  { mmsi: '444444444', lat: 34.91, lon: 128.68, speed: 5, course: 270, timestamp: new Date().toISOString() },
-  { mmsi: '555555555', lat: 34.85, lon: 128.60, speed: 2, course: 45, timestamp: new Date().toISOString() },
+  {
+    mmsi: "111111111",
+    lat: 34.89,
+    lon: 128.62,
+    speed: 10,
+    course: 90,
+    timestamp: new Date().toISOString(),
+  },
+  {
+    mmsi: "222222222",
+    lat: 34.86,
+    lon: 128.65,
+    speed: 0,
+    course: 0,
+    timestamp: new Date().toISOString(),
+  },
+  {
+    mmsi: "333333333",
+    lat: 34.92,
+    lon: 128.58,
+    speed: 15,
+    course: 180,
+    timestamp: new Date().toISOString(),
+  },
+  {
+    mmsi: "444444444",
+    lat: 34.91,
+    lon: 128.68,
+    speed: 5,
+    course: 270,
+    timestamp: new Date().toISOString(),
+  },
+  {
+    mmsi: "555555555",
+    lat: 34.85,
+    lon: 128.6,
+    speed: 2,
+    course: 45,
+    timestamp: new Date().toISOString(),
+  },
 ];
 
 const MOCK_STATIC: StaticRecord[] = [
-  { mmsi: '111111111', shipName: '풍어호', shipType: 'fishing', tonnage: 5, length: 12 },
-  { mmsi: '222222222', shipName: '만선호', shipType: 'fishing', tonnage: 2, length: 8 },
-  { mmsi: '333333333', shipName: '오션스타', shipType: 'passenger', tonnage: 50, length: 35 },
-  { mmsi: '444444444', shipName: '바다의왕자', shipType: 'leisure', tonnage: 1, length: 6 },
-  { mmsi: '555555555', shipName: '갈매기호', shipType: 'fishing', tonnage: 9, length: 15 },
+  {
+    mmsi: "111111111",
+    shipName: "풍어호",
+    shipType: "fishing",
+    tonnage: 5,
+    length: 12,
+  },
+  {
+    mmsi: "222222222",
+    shipName: "만선호",
+    shipType: "fishing",
+    tonnage: 2,
+    length: 8,
+  },
+  {
+    mmsi: "333333333",
+    shipName: "오션스타",
+    shipType: "passenger",
+    tonnage: 50,
+    length: 35,
+  },
+  {
+    mmsi: "444444444",
+    shipName: "바다의왕자",
+    shipType: "leisure",
+    tonnage: 1,
+    length: 6,
+  },
+  {
+    mmsi: "555555555",
+    shipName: "갈매기호",
+    shipType: "fishing",
+    tonnage: 9,
+    length: 15,
+  },
 ];
 
 // --- Helpers ---------------------------------------------------------
@@ -131,7 +202,7 @@ const MOCK_STATIC: StaticRecord[] = [
 function parseRecptnDt(raw: string): string {
   if (!raw) return new Date().toISOString();
   // ISO 형식이면 그대로 반환
-  if (raw.includes('T') || raw.includes('-')) return raw;
+  if (raw.includes("T") || raw.includes("-")) return raw;
   // "YYYYMMDDHHmmss" → "YYYY-MM-DDTHH:mm:ssZ"
   if (raw.length === 14) {
     return `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}T${raw.slice(8, 10)}:${raw.slice(10, 12)}:${raw.slice(12, 14)}Z`;
@@ -139,8 +210,8 @@ function parseRecptnDt(raw: string): string {
   return new Date().toISOString();
 }
 
-function classifySize(tonnage: number): 'small' | 'large' {
-  return tonnage < TONNAGE_THRESHOLD ? 'small' : 'large';
+function classifySize(tonnage: number): "small" | "large" {
+  return tonnage < TONNAGE_THRESHOLD ? "small" : "large";
 }
 
 function joinFleetData(
@@ -195,7 +266,10 @@ function buildFilters(params: FleetQueryParams): FleetFilter[] {
   return filters;
 }
 
-function applyFilters(fleet: FleetEntry[], filters: FleetFilter[]): FleetEntry[] {
+function applyFilters(
+  fleet: FleetEntry[],
+  filters: FleetFilter[],
+): FleetEntry[] {
   return filters.reduce<FleetEntry[]>(
     (acc, filter) => acc.filter(filter),
     fleet,
@@ -223,8 +297,14 @@ interface FetchResult<T> {
  * Primary endpoint: api.odcloud.kr/api/15129186/v1 (선박AIS동적정보)
  *   → apis.data.go.kr/1192000/VesselAisDynamic/getDynamic 은 HTTP 500 반환 확인됨
  */
-function buildOdcloudUrl(datasetId: string, apiKey: string, page = 1, perPage = 100, uddiPath?: string): string {
-  const suffix = uddiPath ? `/${uddiPath}` : '';
+function buildOdcloudUrl(
+  datasetId: string,
+  apiKey: string,
+  page = 1,
+  perPage = 100,
+  uddiPath?: string,
+): string {
+  const suffix = uddiPath ? `/${uddiPath}` : "";
   return `https://api.odcloud.kr/api/${datasetId}/v1${suffix}?serviceKey=${apiKey}&page=${page}&perPage=${perPage}`;
 }
 
@@ -245,21 +325,22 @@ interface OdcloudResponse {
  * 두 형식을 모두 처리한다.
  */
 function extractItems(json: unknown): Array<Record<string, unknown>> {
-  if (json == null || typeof json !== 'object') return [];
+  if (json == null || typeof json !== "object") return [];
   const obj = json as Record<string, unknown>;
 
   // odcloud 형식
-  if (Array.isArray(obj['data'])) {
-    return obj['data'] as Array<Record<string, unknown>>;
+  if (Array.isArray(obj["data"])) {
+    return obj["data"] as Array<Record<string, unknown>>;
   }
 
   // apis.data.go.kr 형식
-  const resp = obj['response'] as Record<string, unknown> | undefined;
-  const body = resp?.['body'] as Record<string, unknown> | undefined;
-  const items = body?.['items'] as Record<string, unknown> | undefined;
-  const item = items?.['item'];
+  const resp = obj["response"] as Record<string, unknown> | undefined;
+  const body = resp?.["body"] as Record<string, unknown> | undefined;
+  const items = body?.["items"] as Record<string, unknown> | undefined;
+  const item = items?.["item"];
   if (Array.isArray(item)) return item as Array<Record<string, unknown>>;
-  if (item != null && typeof item === 'object') return [item as Record<string, unknown>];
+  if (item != null && typeof item === "object")
+    return [item as Record<string, unknown>];
 
   return [];
 }
@@ -276,78 +357,132 @@ function normalizeCoord(raw: number): number {
 
 /** DynamicRecord 매핑: odcloud/data.go.kr 양쪽 필드명 처리 */
 function mapDynamicItem(item: Record<string, unknown>): DynamicRecord {
-  const rawLat = Number(item['lat'] ?? item['LAT'] ?? item['위도'] ?? item['LATITUDE'] ?? 0);
-  const rawLon = Number(item['lon'] ?? item['LON'] ?? item['경도'] ?? item['LONGITUDE'] ?? 0);
+  const rawLat = Number(
+    item["lat"] ?? item["LAT"] ?? item["위도"] ?? item["LATITUDE"] ?? 0,
+  );
+  const rawLon = Number(
+    item["lon"] ?? item["LON"] ?? item["경도"] ?? item["LONGITUDE"] ?? 0,
+  );
   return {
-    mmsi: String(item['mmsi'] ?? item['MMSI'] ?? ''),
+    mmsi: String(item["mmsi"] ?? item["MMSI"] ?? ""),
     lat: normalizeCoord(rawLat),
     lon: normalizeCoord(rawLon),
-    speed: Number(item['sog'] ?? item['SOG'] ?? item['대지속력'] ?? item['speed'] ?? item['SPEED'] ?? 0),
-    course: Number(item['cog'] ?? item['COG'] ?? item['대지침로'] ?? item['course'] ?? item['COURSE'] ?? 0),
+    speed: Number(
+      item["sog"] ??
+        item["SOG"] ??
+        item["대지속력"] ??
+        item["speed"] ??
+        item["SPEED"] ??
+        0,
+    ),
+    course: Number(
+      item["cog"] ??
+        item["COG"] ??
+        item["대지침로"] ??
+        item["course"] ??
+        item["COURSE"] ??
+        0,
+    ),
     timestamp: parseRecptnDt(
       // '수신시간' is the field name returned by the ODCloud UDDI endpoint (others are aliases)
-      String(item['recptnDt'] ?? item['RECPTN_DT'] ?? item['수신일시'] ?? item['수신시각'] ?? item['수신시간'] ?? ''),
+      String(
+        item["recptnDt"] ??
+          item["RECPTN_DT"] ??
+          item["수신일시"] ??
+          item["수신시각"] ??
+          item["수신시간"] ??
+          "",
+      ),
     ),
   };
 }
 
 /** StaticRecord 매핑: odcloud/data.go.kr 양쪽 필드명 처리 */
 function mapStaticItem(item: Record<string, unknown>): StaticRecord {
-  const mmsi = String(item['mmsi'] ?? item['MMSI'] ?? '');
+  const mmsi = String(item["mmsi"] ?? item["MMSI"] ?? "");
   return {
     mmsi,
-    shipName: String(item['shipNm'] ?? item['SHIP_NM'] ?? item['선박명'] ?? ''),
+    shipName: String(item["shipNm"] ?? item["SHIP_NM"] ?? item["선박명"] ?? ""),
     shipType: String(
-      item['shipTp'] ?? item['SHIP_TP'] ?? item['shipTypCd'] ?? item['SHIP_TYPE'] ??
-      item['SHIP_TYP_CD'] ?? item['선박종류'] ?? '',
+      item["shipTp"] ??
+        item["SHIP_TP"] ??
+        item["shipTypCd"] ??
+        item["SHIP_TYPE"] ??
+        item["SHIP_TYP_CD"] ??
+        item["선박종류"] ??
+        "",
     ),
     tonnage: Number(
-      item['gt'] ?? item['GT'] ?? item['grossTon'] ?? item['GROSS_TON'] ??
-      item['grossTonnage'] ?? item['GROSS_TONNAGE'] ?? item['총톤수'] ?? 0,
+      item["gt"] ??
+        item["GT"] ??
+        item["grossTon"] ??
+        item["GROSS_TON"] ??
+        item["grossTonnage"] ??
+        item["GROSS_TONNAGE"] ??
+        item["총톤수"] ??
+        0,
     ),
     length: Number(
-      item['loa'] ?? item['LOA'] ?? item['shpLoa'] ?? item['SHP_LOA'] ??
-      item['shipLength'] ?? item['SHIP_LENGTH'] ?? item['선체전장'] ?? 0,
+      item["loa"] ??
+        item["LOA"] ??
+        item["shpLoa"] ??
+        item["SHP_LOA"] ??
+        item["shipLength"] ??
+        item["SHIP_LENGTH"] ??
+        item["선체전장"] ??
+        0,
     ),
   };
 }
 
 async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
   const apiKey = process.env.FLEET_API_KEY;
-  if (!apiKey || process.env.FLEET_USE_MOCK === 'true') {
+  if (!apiKey || process.env.FLEET_USE_MOCK === "true") {
     return { data: MOCK_DYNAMIC, fallback: false };
   }
 
   // Primary: api.odcloud.kr/api/15129186/v1/uddi:... (선박AIS동적정보)
-  const urlStr = buildOdcloudUrl('15129186', apiKey, 1, 100, 'uddi:2762dfc8-b8ae-4e17-8a44-86f39f480203');
+  const urlStr = buildOdcloudUrl(
+    "15129186",
+    apiKey,
+    1,
+    100,
+    "uddi:2762dfc8-b8ae-4e17-8a44-86f39f480203",
+  );
 
   // Debug: print the full URL shape (API key redacted) so it's visible in Next.js dev logs
-  console.log('[fleet] fetchDynamic URL:', urlStr.replace(apiKey, '<FLEET_API_KEY>'));
-  structuredLog('info', {
+  console.log(
+    "[fleet] fetchDynamic URL:",
+    urlStr.replace(apiKey, "<FLEET_API_KEY>"),
+  );
+  structuredLog("info", {
     timestamp: new Date().toISOString(),
-    event: 'fleet.dynamic.request',
-    endpoint: 'odcloud/15129186',
-    url: urlStr.replace(apiKey, '[REDACTED]'),
+    event: "fleet.dynamic.request",
+    endpoint: "odcloud/15129186",
+    url: urlStr.replace(apiKey, "[REDACTED]"),
   });
 
   let res: Response;
   try {
-    res = await fetch(urlStr, { cache: 'no-store' });
+    res = await fetch(urlStr, { cache: "no-store" });
   } catch (err) {
-    structuredLog('warn', {
+    structuredLog("warn", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.dynamic.fallback_to_mock',
-      error: { message: 'Fleet dynamic API unreachable', cause: String(err) },
+      event: "fleet.dynamic.fallback_to_mock",
+      error: { message: "Fleet dynamic API unreachable", cause: String(err) },
     });
     return { data: MOCK_DYNAMIC, fallback: true };
   }
 
   if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    structuredLog('warn', {
+    const body = await res.text().catch(() => "");
+    structuredLog("warn", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.dynamic.fallback_to_mock',
-      error: { message: `Fleet dynamic API responded with HTTP ${res.status}`, body: body.slice(0, 500) },
+      event: "fleet.dynamic.fallback_to_mock",
+      error: {
+        message: `Fleet dynamic API responded with HTTP ${res.status}`,
+        body: body.slice(0, 500),
+      },
     });
     return { data: MOCK_DYNAMIC, fallback: true };
   }
@@ -356,10 +491,13 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
   try {
     rawText = await res.text();
   } catch (err) {
-    structuredLog('warn', {
+    structuredLog("warn", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.dynamic.fallback_to_mock',
-      error: { message: 'Fleet dynamic API body read failed', cause: String(err) },
+      event: "fleet.dynamic.fallback_to_mock",
+      error: {
+        message: "Fleet dynamic API body read failed",
+        cause: String(err),
+      },
     });
     return { data: MOCK_DYNAMIC, fallback: true };
   }
@@ -368,10 +506,14 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
   try {
     json = JSON.parse(rawText);
   } catch (err) {
-    structuredLog('warn', {
+    structuredLog("warn", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.dynamic.fallback_to_mock',
-      error: { message: 'Fleet dynamic API returned non-JSON', preview: rawText.slice(0, 200), cause: String(err) },
+      event: "fleet.dynamic.fallback_to_mock",
+      error: {
+        message: "Fleet dynamic API returned non-JSON",
+        preview: rawText.slice(0, 200),
+        cause: String(err),
+      },
     });
     return { data: MOCK_DYNAMIC, fallback: true };
   }
@@ -379,36 +521,36 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
   const items = extractItems(json);
 
   if (items.length > 0) {
-    structuredLog('info', {
+    structuredLog("info", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.dynamic.field_sample',
+      event: "fleet.dynamic.field_sample",
       fields: Object.keys(items[0]),
       sample: items[0],
       totalItems: (json as OdcloudResponse).totalCount ?? items.length,
     });
   }
 
-  const data = items
-    .map(mapDynamicItem)
-    .filter((d) => d.mmsi !== '');
+  const data = items.map(mapDynamicItem).filter((d) => d.mmsi !== "");
 
   // Warn when MMSI values are masked (e.g. "440******") — join with static will yield 0 results
-  const maskedCount = data.filter((d) => d.mmsi.includes('*')).length;
+  const maskedCount = data.filter((d) => d.mmsi.includes("*")).length;
   if (maskedCount > 0) {
-    console.warn(`[fleet] ${maskedCount}/${data.length} MMSI values are masked by ODCloud API — static join will fail, fallback expected`);
-    structuredLog('warn', {
+    console.warn(
+      `[fleet] ${maskedCount}/${data.length} MMSI values are masked by ODCloud API — static join will fail, fallback expected`,
+    );
+    structuredLog("warn", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.dynamic.mmsi_masked',
+      event: "fleet.dynamic.mmsi_masked",
       maskedCount,
       totalCount: data.length,
     });
   }
 
   if (data.length === 0) {
-    structuredLog('warn', {
+    structuredLog("warn", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.dynamic.fallback_to_mock',
-      error: { message: 'Fleet dynamic API returned empty dataset' },
+      event: "fleet.dynamic.fallback_to_mock",
+      error: { message: "Fleet dynamic API returned empty dataset" },
     });
     return { data: MOCK_DYNAMIC, fallback: true };
   }
@@ -418,83 +560,115 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
 
 async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
   const apiKey = process.env.FLEET_API_KEY;
-  if (!apiKey || process.env.FLEET_USE_MOCK === 'true') {
-    return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: false };
+  if (!apiKey || process.env.FLEET_USE_MOCK === "true") {
+    return {
+      data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
+      fallback: false,
+    };
   }
 
   // apis.data.go.kr static endpoint (dynamic보다 안정적인 경우가 많음)
   // serviceKey 이중 인코딩 방지를 위해 template string 직접 사용
-  const extra = new URLSearchParams({ resultType: 'json', numOfRows: '100', pageNo: '1' });
+  const extra = new URLSearchParams({
+    resultType: "json",
+    numOfRows: "100",
+    pageNo: "1",
+  });
   const urlStr = `https://apis.data.go.kr/1192000/VesselAisStatic/getStatic?serviceKey=${apiKey}&${extra.toString()}`;
 
-  structuredLog('info', {
+  structuredLog("info", {
     timestamp: new Date().toISOString(),
-    event: 'fleet.static.request',
-    endpoint: 'data.go.kr/VesselAisStatic',
-    url: urlStr.replace(apiKey, '[REDACTED]'),
+    event: "fleet.static.request",
+    endpoint: "data.go.kr/VesselAisStatic",
+    url: urlStr.replace(apiKey, "[REDACTED]"),
   });
 
   let res: Response;
   try {
-    res = await fetch(urlStr, { cache: 'no-store' });
+    res = await fetch(urlStr, { cache: "no-store" });
   } catch (err) {
-    structuredLog('warn', {
+    structuredLog("warn", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.static.fallback_to_mock',
-      error: { message: 'Fleet static API unreachable', cause: String(err) },
+      event: "fleet.static.fallback_to_mock",
+      error: { message: "Fleet static API unreachable", cause: String(err) },
     });
-    return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: true };
+    return {
+      data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
+      fallback: true,
+    };
   }
 
   if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    structuredLog('warn', {
+    const body = await res.text().catch(() => "");
+    structuredLog("warn", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.static.fallback_to_mock',
-      error: { message: `Fleet static API responded with HTTP ${res.status}`, body: body.slice(0, 500) },
+      event: "fleet.static.fallback_to_mock",
+      error: {
+        message: `Fleet static API responded with HTTP ${res.status}`,
+        body: body.slice(0, 500),
+      },
     });
-    return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: true };
+    return {
+      data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
+      fallback: true,
+    };
   }
 
   let rawText: string;
   try {
     rawText = await res.text();
   } catch (err) {
-    structuredLog('warn', {
+    structuredLog("warn", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.static.fallback_to_mock',
-      error: { message: 'Fleet static API body read failed', cause: String(err) },
+      event: "fleet.static.fallback_to_mock",
+      error: {
+        message: "Fleet static API body read failed",
+        cause: String(err),
+      },
     });
-    return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: true };
+    return {
+      data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
+      fallback: true,
+    };
   }
 
   let json: unknown;
   try {
     json = JSON.parse(rawText);
   } catch (err) {
-    structuredLog('warn', {
+    structuredLog("warn", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.static.fallback_to_mock',
-      error: { message: 'Fleet static API returned non-JSON', preview: rawText.slice(0, 200), cause: String(err) },
+      event: "fleet.static.fallback_to_mock",
+      error: {
+        message: "Fleet static API returned non-JSON",
+        preview: rawText.slice(0, 200),
+        cause: String(err),
+      },
     });
-    return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: true };
+    return {
+      data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
+      fallback: true,
+    };
   }
 
   const items = extractItems(json);
 
   if (items.length === 0) {
-    structuredLog('warn', {
+    structuredLog("warn", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.static.fallback_to_mock',
-      error: { message: 'Fleet static API returned empty dataset' },
+      event: "fleet.static.fallback_to_mock",
+      error: { message: "Fleet static API returned empty dataset" },
     });
-    return { data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])), fallback: true };
+    return {
+      data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
+      fallback: true,
+    };
   }
 
   if (items.length > 0) {
-    structuredLog('info', {
+    structuredLog("info", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.static.field_sample',
+      event: "fleet.static.field_sample",
       fields: Object.keys(items[0]),
       sample: items[0],
       totalItems: items.length,
@@ -509,6 +683,145 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
   return { data: map, fallback: false };
 }
 
+// --- AISStream.io real-time source ----------------------------------
+
+/**
+ * AIS type code → shipType 문자열 변환
+ */
+function inferShipType(aisType: number): string {
+  if (aisType >= 30 && aisType <= 39) return "fishing";
+  if (aisType >= 60 && aisType <= 69) return "passenger";
+  if (aisType >= 70 && aisType <= 79) return "cargo";
+  if (aisType >= 80 && aisType <= 89) return "tanker";
+  if (aisType === 36 || aisType === 37) return "leisure";
+  return "other";
+}
+
+/**
+ * AISStream.io WebSocket에서 한국 해역 선박 데이터를 수집한다.
+ * - BoundingBox: [[33.0, 124.0], [38.5, 132.0]] (한국 해역)
+ * - 최대 10초 또는 100척 수집 후 종료
+ * - AISSTREAM_API_KEY 없으면 null 반환
+ */
+async function fetchFromAISStream(): Promise<{
+  dynamic: DynamicRecord[];
+  staticMap: Map<string, StaticRecord>;
+} | null> {
+  const apiKey = process.env.AISSTREAM_API_KEY;
+  if (!apiKey) return null;
+
+  return new Promise((resolve) => {
+    const ws = new WebSocket("wss://stream.aisstream.io/v0/stream");
+    const dynamicMap = new Map<string, DynamicRecord>();
+    const staticMap = new Map<string, StaticRecord>();
+    let settled = false;
+
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      try {
+        ws.close();
+      } catch {}
+      if (dynamicMap.size === 0) {
+        structuredLog("warn", {
+          timestamp: new Date().toISOString(),
+          event: "fleet.aisstream.empty",
+        });
+        resolve(null);
+        return;
+      }
+      structuredLog("info", {
+        timestamp: new Date().toISOString(),
+        event: "fleet.aisstream.success",
+        dynamicCount: dynamicMap.size,
+        staticCount: staticMap.size,
+      });
+      resolve({ dynamic: Array.from(dynamicMap.values()), staticMap });
+    };
+
+    const timer = setTimeout(finish, 10000);
+
+    ws.on("open", () => {
+      structuredLog("info", {
+        timestamp: new Date().toISOString(),
+        event: "fleet.aisstream.connected",
+      });
+      ws.send(
+        JSON.stringify({
+          APIKey: apiKey,
+          BoundingBoxes: [
+            [
+              [33.0, 124.0],
+              [38.5, 132.0],
+            ],
+          ],
+          FilterMessageTypes: ["PositionReport", "ShipStaticData"],
+        }),
+      );
+    });
+
+    ws.on("message", (data: Buffer) => {
+      try {
+        const msg = JSON.parse(data.toString()) as Record<string, unknown>;
+        const meta = msg["MetaData"] as Record<string, unknown> | undefined;
+        const mmsi = String(meta?.["MMSI"] ?? "");
+        if (!mmsi) return;
+
+        if (msg["MessageType"] === "PositionReport") {
+          const posReport = msg["Message"] as
+            | Record<string, unknown>
+            | undefined;
+          const p = posReport?.["PositionReport"] as
+            | Record<string, unknown>
+            | undefined;
+          if (!p) return;
+          dynamicMap.set(mmsi, {
+            mmsi,
+            lat: Number(meta?.["latitude"] ?? p["Latitude"] ?? 0),
+            lon: Number(meta?.["longitude"] ?? p["Longitude"] ?? 0),
+            speed: Number(p["Sog"] ?? 0),
+            course: Number(p["Cog"] ?? 0),
+            timestamp: new Date().toISOString(),
+          });
+        } else if (msg["MessageType"] === "ShipStaticData") {
+          const staticMsg = msg["Message"] as
+            | Record<string, unknown>
+            | undefined;
+          const s = staticMsg?.["ShipStaticData"] as
+            | Record<string, unknown>
+            | undefined;
+          if (!s) return;
+          const dim = s["Dimension"] as Record<string, unknown> | undefined;
+          const rawName = String(meta?.["ShipName"] ?? s["Name"] ?? "").trim();
+          staticMap.set(mmsi, {
+            mmsi,
+            shipName: rawName || `선박 ${mmsi.slice(-4)}`,
+            shipType: inferShipType(Number(s["Type"] ?? 0)),
+            tonnage: 0,
+            length: Number(dim?.["A"] ?? 0) + Number(dim?.["B"] ?? 0),
+          });
+        }
+
+        // 100척 수집되면 조기 종료
+        if (dynamicMap.size >= 100) {
+          clearTimeout(timer);
+          finish();
+        }
+      } catch {}
+    });
+
+    ws.on("error", (err: Error) => {
+      structuredLog("warn", {
+        timestamp: new Date().toISOString(),
+        event: "fleet.aisstream.error",
+        error: String(err),
+      });
+      clearTimeout(timer);
+      finish();
+    });
+  });
+}
+
 // --- KHOA OceanGrid AIS fallback ------------------------------------
 
 /**
@@ -520,7 +833,7 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
  * docs: https://www.khoa.go.kr/oceangrid/khoa/takepart/openapi/openApiDeveloperGuide.do
  */
 const KHOA_VESSEL_POS_URL =
-  'https://www.khoa.go.kr/api/oceangrid/tsrtShipPos/search.do';
+  "https://www.khoa.go.kr/api/oceangrid/tsrtShipPos/search.do";
 
 interface KhoaVesselItem {
   mmsi?: string | number;
@@ -564,29 +877,29 @@ async function fetchFromKhoa(): Promise<{
 
   const url = `${KHOA_VESSEL_POS_URL}?ServiceKey=${khoaKey}&ResultType=json&numOfRows=100&pageNo=1`;
 
-  structuredLog('info', {
+  structuredLog("info", {
     timestamp: new Date().toISOString(),
-    event: 'fleet.khoa.request',
-    url: url.replace(khoaKey, '[REDACTED]'),
+    event: "fleet.khoa.request",
+    url: url.replace(khoaKey, "[REDACTED]"),
   });
 
   let res: Response;
   try {
-    res = await fetch(url, { cache: 'no-store' });
+    res = await fetch(url, { cache: "no-store" });
   } catch (err) {
-    structuredLog('warn', {
+    structuredLog("warn", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.khoa.unreachable',
+      event: "fleet.khoa.unreachable",
       error: String(err),
     });
     return null;
   }
 
   if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    structuredLog('warn', {
+    const body = await res.text().catch(() => "");
+    structuredLog("warn", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.khoa.http_error',
+      event: "fleet.khoa.http_error",
       status: res.status,
       body: body.slice(0, 300),
     });
@@ -597,10 +910,10 @@ async function fetchFromKhoa(): Promise<{
   try {
     json = (await res.json()) as KhoaApiResponse;
   } catch (err) {
-    const rawText = await res.text().catch(() => '');
-    structuredLog('warn', {
+    const rawText = await res.text().catch(() => "");
+    structuredLog("warn", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.khoa.parse_error',
+      event: "fleet.khoa.parse_error",
       preview: rawText.slice(0, 200),
       error: String(err),
     });
@@ -609,16 +922,16 @@ async function fetchFromKhoa(): Promise<{
 
   const items: KhoaVesselItem[] = json?.result?.data ?? [];
   if (items.length === 0) {
-    structuredLog('warn', {
+    structuredLog("warn", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.khoa.empty',
+      event: "fleet.khoa.empty",
     });
     return null;
   }
 
-  structuredLog('info', {
+  structuredLog("info", {
     timestamp: new Date().toISOString(),
-    event: 'fleet.khoa.field_sample',
+    event: "fleet.khoa.field_sample",
     fields: Object.keys(items[0]),
     totalItems: items.length,
   });
@@ -626,22 +939,22 @@ async function fetchFromKhoa(): Promise<{
   const dynamic: DynamicRecord[] = items
     .filter((item) => item.mmsi != null)
     .map((item) => ({
-      mmsi: String(item.mmsi ?? ''),
+      mmsi: String(item.mmsi ?? ""),
       lat: Number(item.lat ?? 0),
       lon: Number(item.lon ?? 0),
       speed: Number(item.speed ?? item.sog ?? 0),
       course: Number(item.course ?? item.cog ?? 0),
-      timestamp: parseRecptnDt(String(item.recptnDt ?? item.recptDt ?? '')),
+      timestamp: parseRecptnDt(String(item.recptnDt ?? item.recptDt ?? "")),
     }));
 
   const staticMap = new Map<string, StaticRecord>();
   for (const item of items) {
-    const mmsi = String(item.mmsi ?? '');
+    const mmsi = String(item.mmsi ?? "");
     if (!mmsi) continue;
     staticMap.set(mmsi, {
       mmsi,
-      shipName: String(item.shipNm ?? item.shipName ?? ''),
-      shipType: String(item.shipType ?? item.shipTp ?? ''),
+      shipName: String(item.shipNm ?? item.shipName ?? ""),
+      shipType: String(item.shipType ?? item.shipTp ?? ""),
       tonnage: Number(item.gt ?? item.grossTon ?? 0),
       length: Number(item.loa ?? item.shipLength ?? 0),
     });
@@ -659,7 +972,10 @@ export async function GET(request: NextRequest) {
     // 1. Query param 유효성 검사
     const parsed = parseAndValidateQuery(request.nextUrl.searchParams);
     if (!parsed.success) {
-      return NextResponse.json({ ok: false, error: parsed.message }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: parsed.message },
+        { status: 400 },
+      );
     }
     const params = parsed.data;
 
@@ -669,26 +985,35 @@ export async function GET(request: NextRequest) {
       fetchStatic(),
     ]);
 
-    // 3. primary API 중 하나라도 실패 시 KHOA OceanGrid로 fallback
-    //    이유: dynamic이 실제 MMSI를 반환하고 static이 Mock MMSI를 반환하면
-    //          joinFleetData 결과가 0건이 되어 실질적으로 mock과 동일해짐
+    // 3. 데이터 소스 우선순위: AISStream → ODCloud → KHOA → Mock
     let rawFleet: FleetEntry[];
-    let dataSource: 'primary' | 'khoa' | 'mock' = 'primary';
+    let dataSource: "aisstream" | "primary" | "khoa" | "mock" = "primary";
 
-    if (dynamicResult.fallback || staticResult.fallback) {
+    // 1순위: AISStream.io (실시간 WebSocket)
+    const aisResult = await fetchFromAISStream();
+    if (aisResult && aisResult.dynamic.length > 0) {
+      rawFleet = joinFleetData(aisResult.dynamic, aisResult.staticMap);
+      dataSource = "aisstream";
+    } else if (dynamicResult.fallback || staticResult.fallback) {
+      // 2순위 실패 시 KHOA OceanGrid로 fallback
+      //    이유: dynamic이 실제 MMSI를 반환하고 static이 Mock MMSI를 반환하면
+      //          joinFleetData 결과가 0건이 되어 실질적으로 mock과 동일해짐
       const khoaData = await fetchFromKhoa();
       if (khoaData && khoaData.dynamic.length > 0) {
         rawFleet = joinFleetData(khoaData.dynamic, khoaData.staticMap);
-        dataSource = 'khoa';
-        structuredLog('info', {
+        dataSource = "khoa";
+        structuredLog("info", {
           timestamp: new Date().toISOString(),
-          event: 'fleet.khoa.success',
+          event: "fleet.khoa.success",
           count: rawFleet.length,
         });
       } else {
         // 모든 외부 소스 실패 → mock 데이터 사용
-        rawFleet = joinFleetData(MOCK_DYNAMIC, new Map(MOCK_STATIC.map((s) => [s.mmsi, s])));
-        dataSource = 'mock';
+        rawFleet = joinFleetData(
+          MOCK_DYNAMIC,
+          new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
+        );
+        dataSource = "mock";
       }
     } else {
       rawFleet = joinFleetData(dynamicResult.data, staticResult.data);
@@ -699,11 +1024,11 @@ export async function GET(request: NextRequest) {
     const fleet = applyFilters(rawFleet, filters);
 
     const duration = Date.now() - t0;
-    const isMock = dataSource === 'mock';
+    const isMock = dataSource === "mock";
 
-    structuredLog('info', {
+    structuredLog("info", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.get.complete',
+      event: "fleet.get.complete",
       duration,
       count: fleet.length,
       rawCount: rawFleet.length,
@@ -721,14 +1046,20 @@ export async function GET(request: NextRequest) {
       dataSource,
     });
   } catch (err) {
-    structuredLog('error', {
+    structuredLog("error", {
       timestamp: new Date().toISOString(),
-      event: 'fleet.get.unhandled_error',
+      event: "fleet.get.unhandled_error",
       error: String(err),
       duration: Date.now() - t0,
     });
     return NextResponse.json(
-      { ok: false, error: 'Internal server error', mock: true, data: MOCK_DYNAMIC, count: MOCK_DYNAMIC.length },
+      {
+        ok: false,
+        error: "Internal server error",
+        mock: true,
+        data: MOCK_DYNAMIC,
+        count: MOCK_DYNAMIC.length,
+      },
       { status: 500 },
     );
   }

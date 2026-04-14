@@ -30,6 +30,7 @@
     "react-leaflet": "^5.0.0",
     "react-qr-code": "^2.0.18",
     "recharts": "^3.7.0",
+    "ws": "^8.20.0",
     "zod": "^4.3.6",
     "zustand": "^5.0.11"
   },
@@ -40,6 +41,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/ws": "^8.18.1",
     "agentation": "^2.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",

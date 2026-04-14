@@ -45,3 +45,6 @@ env:
 
   - variable: FLEET_API_KEY
     secret: FLEET_API_KEY
+
+  - variable: AISSTREAM_API_KEY
+    secret: AISSTREAM_API_KEY
