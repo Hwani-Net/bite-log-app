@@ -9,12 +9,12 @@ import {
   NewsSourceFilter,
 } from "@/services/fishingNewsService";
 
-const REGION_TABS: { key: NewsRegionFilter; label: string; emoji: string }[] = [
-  { key: "all", label: "전체", emoji: "🌊" },
-  { key: "east", label: "동해", emoji: "🏔️" },
-  { key: "west", label: "서해", emoji: "🌅" },
-  { key: "south", label: "남해", emoji: "🌴" },
-  { key: "jeju", label: "제주", emoji: "🍊" },
+const REGION_TABS: { key: NewsRegionFilter; label: string }[] = [
+  { key: "all", label: "전체" },
+  { key: "east", label: "동해" },
+  { key: "west", label: "서해" },
+  { key: "south", label: "남해" },
+  { key: "jeju", label: "제주" },
 ];
 
 const SOURCE_TABS: { key: NewsSourceFilter; label: string }[] = [
@@ -205,7 +205,7 @@ export default function NewsPage() {
   }, [loadNews]);
 
   return (
-    <div className="min-h-screen bg-[#080d14] page-enter">
+    <div className="min-h-dvh bg-[#080d14] page-enter pb-24">
       {/* Header */}
       <div className="sticky top-0 z-20 bg-[#080d14]/60 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-lg mx-auto px-4 pt-4 pb-2">

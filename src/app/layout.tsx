@@ -96,10 +96,10 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       {/* V4: Stitch body classes — bg-background-light dark:bg-background-dark */}
-      <body className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
+      <body className="bg-[#080d14] text-slate-900 dark:text-slate-100 antialiased">
         <AppInitializer />
         <SplashWrapper>
-          <main className="mx-auto max-w-md min-h-dvh pb-20 relative wave-bg overflow-x-hidden">
+          <main className="mx-auto max-w-md min-h-dvh pb-20 relative wave-bg overflow-x-hidden bg-[#080d14]">
             {children}
           </main>
           <BottomNav />

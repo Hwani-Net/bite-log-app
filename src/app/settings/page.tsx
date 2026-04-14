@@ -12,6 +12,7 @@ import {
   Newspaper,
   Trophy,
   Trash2,
+  Heart,
 } from "lucide-react";
 
 export default function SettingsPage() {
@@ -321,7 +322,7 @@ export default function SettingsPage() {
               {locale === "ko" ? "개발자" : "Developer"}
             </span>
             <span className="text-sm font-medium text-white flex items-center gap-1">
-              <DynamicIcon name="favorite" size={14} className="text-red-400" />
+              <Heart size={14} className="text-red-400" />
               BITE Log Team
             </span>
           </div>
