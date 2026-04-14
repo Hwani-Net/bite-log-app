@@ -221,7 +221,7 @@ function joinFleetData(
   const entries: FleetEntry[] = [];
   for (const d of dynamic) {
     const s = staticMap.get(d.mmsi);
-    if (!s) continue;
+    // static 정보 없어도 포함 (ShipStaticData는 6분마다 전송 — 10초 수집 윈도우에서 수신 불가)
     entries.push({
       mmsi: d.mmsi,
       lat: d.lat,
@@ -229,11 +229,11 @@ function joinFleetData(
       speed: d.speed,
       course: d.course,
       timestamp: d.timestamp,
-      shipName: s.shipName,
-      shipType: s.shipType,
-      tonnage: s.tonnage,
-      length: s.length,
-      sizeClass: classifySize(s.tonnage),
+      shipName: s?.shipName ?? `선박 ${d.mmsi.slice(-4)}`,
+      shipType: s?.shipType ?? "fishing",
+      tonnage: s?.tonnage ?? 0,
+      length: s?.length ?? 0,
+      sizeClass: classifySize(s?.tonnage ?? 0),
     });
   }
   return entries;
