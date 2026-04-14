@@ -12,7 +12,7 @@ export interface ViralGearItem {
   viralScore: number; // 바이럴 점수 0~100
   mentionCount: number; // 언급 횟수
   trend: "급상승" | "상승" | "유지" | "하락";
-  trendEmoji: string;
+  trendIcon: "trending-up-fast" | "trending-up" | "minus" | "trending-down";
   trendColor: string;
   summaryText: string; // Gemini가 작성한 요약
   coupangSearchUrl: string; // 쿠팡 검색 링크 (제휴)
@@ -60,7 +60,7 @@ function getMockReport(): ViralGearReport {
         viralScore: 94,
         mentionCount: 38,
         trend: "급상승",
-        trendEmoji: "🚀",
+        trendIcon: "trending-up-fast",
         trendColor: "text-red-500",
         summaryText:
           '블로그·카페 38건 언급. "맑은 날 오렌지 계열이 주꾸미에 최고"라는 평이 지배적. 9~10월 서해 공략 채비 1위.',
@@ -76,7 +76,7 @@ function getMockReport(): ViralGearReport {
         viralScore: 82,
         mentionCount: 24,
         trend: "상승",
-        trendEmoji: "📈",
+        trendIcon: "trending-up",
         trendColor: "text-orange-500",
         summaryText:
           '"흐린 날 핑크 슷테 갑오징어 대박"이라는 후기 연이어 등장. 남해권 낚시인들 사이 입소문 확산 중.',
@@ -92,7 +92,7 @@ function getMockReport(): ViralGearReport {
         viralScore: 76,
         mentionCount: 19,
         trend: "급상승",
-        trendEmoji: "🚀",
+        trendIcon: "trending-up-fast",
         trendColor: "text-red-500",
         summaryText:
           "제주 방어 시즌 개막과 함께 검색량 3배 폭증. 유튜버들이 일제히 블루핑크 슬로우 지그 추천 영상 업로드.",
@@ -108,7 +108,7 @@ function getMockReport(): ViralGearReport {
         viralScore: 68,
         mentionCount: 16,
         trend: "상승",
-        trendEmoji: "📈",
+        trendIcon: "trending-up",
         trendColor: "text-orange-500",
         summaryText:
           "볼락 야간 루어 붐과 함께 워터멜론 색상 바이브 추천글 급증. 서해 방파제 낚인들 사이 핫템.",
@@ -124,7 +124,7 @@ function getMockReport(): ViralGearReport {
         viralScore: 61,
         mentionCount: 12,
         trend: "유지",
-        trendEmoji: "➡️",
+        trendIcon: "minus",
         trendColor: "text-gray-500",
         summaryText:
           "볼락 마릿수 낚시의 정석 채비로 꾸준히 언급. 특히 태안·보령 방파제 야간 낚시에서 압도적.",
@@ -285,11 +285,17 @@ export async function getViralGearReport(): Promise<ViralGearReport> {
     if (!parsed.isSuccess || !Array.isArray(parsed.items))
       return getMockReport();
 
-    const TREND_META: Record<string, { emoji: string; color: string }> = {
-      급상승: { emoji: "🚀", color: "text-red-500" },
-      상승: { emoji: "📈", color: "text-orange-500" },
-      유지: { emoji: "➡️", color: "text-gray-500" },
-      하락: { emoji: "📉", color: "text-blue-400" },
+    const TREND_META: Record<
+      string,
+      {
+        icon: "trending-up-fast" | "trending-up" | "minus" | "trending-down";
+        color: string;
+      }
+    > = {
+      급상승: { icon: "trending-up-fast", color: "text-red-500" },
+      상승: { icon: "trending-up", color: "text-orange-500" },
+      유지: { icon: "minus", color: "text-gray-500" },
+      하락: { icon: "trending-down", color: "text-blue-400" },
     };
 
     const items: ViralGearItem[] = parsed.items.slice(0, 5).map(
@@ -318,7 +324,7 @@ export async function getViralGearReport(): Promise<ViralGearReport> {
           viralScore: Math.min(100, Math.max(0, item.viralScore ?? 50)),
           mentionCount: item.mentionCount ?? 0,
           trend: (item.trend ?? "유지") as ViralGearItem["trend"],
-          trendEmoji: meta.emoji,
+          trendIcon: meta.icon,
           trendColor: meta.color,
           summaryText: item.summaryText ?? "",
           coupangSearchUrl: `https://www.coupang.com/np/search?q=${q}&link_id=re_1765888&subId=bitelog`,

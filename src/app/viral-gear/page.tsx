@@ -9,7 +9,7 @@ import {
 } from "@/services/viralGearService";
 import { useAppStore } from "@/store/appStore";
 import BottomNav from "@/components/BottomNav";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, TrendingUp, Minus, TrendingDown } from "lucide-react";
 
 const LABELS = {
   ko: {
@@ -46,6 +46,16 @@ const LABELS = {
     noData: "Loading data...",
   },
 };
+
+function TrendIcon({ icon, className }: { icon: string; className?: string }) {
+  if (icon === "trending-up-fast")
+    return <TrendingUp size={14} className={className} strokeWidth={2.5} />;
+  if (icon === "trending-up")
+    return <TrendingUp size={14} className={className} />;
+  if (icon === "trending-down")
+    return <TrendingDown size={14} className={className} />;
+  return <Minus size={14} className={className} />;
+}
 
 function TrendBar({ score }: { score: number }) {
   return (
@@ -84,9 +94,10 @@ function GearCard({ item, locale }: { item: ViralGearItem; locale: string }) {
               {item.gearName}
             </h3>
             <span
-              className={`text-xs font-bold ${item.trendColor} flex-shrink-0`}
+              className={`text-xs font-bold ${item.trendColor} flex items-center gap-0.5 flex-shrink-0`}
             >
-              {item.trendEmoji} {item.trend}
+              <TrendIcon icon={item.trendIcon} />
+              {item.trend}
             </span>
           </div>
           <div className="flex items-center gap-2 mt-0.5">
@@ -278,7 +289,7 @@ export default function ViralGearPage() {
         {/* Affiliate Disclaimer */}
         {!loading && report && (
           <p className="text-[10px] text-gray-400 text-center px-4 leading-relaxed">
-            ℹ️ {L.disclaimer}
+            {L.disclaimer}
           </p>
         )}
       </div>
