@@ -11,6 +11,7 @@ import {
 import { useDragScroll } from "@/hooks/useDragScroll";
 import { useSubscriptionStore } from "@/store/subscriptionStore";
 import { DynamicIcon } from "@/lib/iconMap";
+import { Sparkles } from "lucide-react";
 
 interface OverviewTabProps {
   locale: string;
@@ -41,15 +42,11 @@ export default function OverviewTab({
       <section>
         <div className="rounded-2xl bg-white/5 backdrop-blur-[12px] p-5 flex items-start gap-4 border border-white/10 transition-transform duration-300 hover:bg-white/[0.07]">
           <div className="bg-gradient-to-br from-primary to-cyan-400 p-3 rounded-xl shrink-0 shadow-lg shadow-primary/25">
-            <DynamicIcon
-              name="auto_awesome"
-              size={28}
-              className="text-white drop-shadow-sm"
-            />
+            <Sparkles size={28} className="text-white drop-shadow-sm" />
           </div>
           <div className="flex-1">
             <h2 className="text-lg font-bold text-white">
-              {locale === "ko" ? "안녕하세요, 대표님!" : "Hello!"}
+              {locale === "ko" ? "안녕하세요, 낚시인님!" : "Hello!"}
             </h2>
             <p className="text-white/60 text-sm mt-1 leading-relaxed">
               {loading
