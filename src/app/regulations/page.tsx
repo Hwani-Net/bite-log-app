@@ -82,7 +82,7 @@ function RegulationCard({
         onClick={onToggle}
         className="w-full flex items-center gap-3 p-4 text-left hover:bg-white/5 transition-colors"
       >
-        <span className="text-2xl">{reg.emoji}</span>
+        <Fish className="w-6 h-6 text-white/50 flex-shrink-0" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-bold text-white">{reg.species}</h3>
@@ -258,7 +258,7 @@ function QuickCheckWidget() {
                 value={r.species}
                 className="bg-[#0f141b]"
               >
-                {r.emoji} {r.species}
+                {r.species}
               </option>
             ))}
           </select>
@@ -396,8 +396,7 @@ export default function RegulationsPage() {
                   key={r.species}
                   className="text-xs px-2.5 py-1 bg-red-500/20 text-red-300 rounded-full font-semibold"
                 >
-                  {r.emoji} {r.species} ({r.closedSeason!.start}~
-                  {r.closedSeason!.end})
+                  {r.species} ({r.closedSeason!.start}~{r.closedSeason!.end})
                 </span>
               ))}
             </div>
