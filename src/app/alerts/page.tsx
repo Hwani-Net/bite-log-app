@@ -571,7 +571,7 @@ export default function AlertsPage() {
           {subs.length === 0 ? (
             <div className="text-center py-12 space-y-2">
               <p className="text-sm font-semibold text-white/20 uppercase tracking-widest">
-                NO ALERTS
+                알림 없음
               </p>
               <p className="text-sm font-semibold text-white/30">{L.noSubs}</p>
               <p className="text-xs text-white/20">{L.noSubsSub}</p>
