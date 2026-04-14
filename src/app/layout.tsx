@@ -63,6 +63,12 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <head>
+        {/* Dark mode flash prevention — must be first in <head> */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('fishlog_theme')||'dark';if(t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');}catch(e){document.documentElement.classList.add('dark');}`,
+          }}
+        />
         {/* Preconnect for font loading performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -83,7 +89,7 @@ export default function RootLayout({
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
-        <meta name="theme-color" content="#f6f7f8" />
+        <meta name="theme-color" content="#080d14" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
