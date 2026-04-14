@@ -350,7 +350,7 @@ export default function StatsPage() {
   if (!stats) return null;
 
   return (
-    <div className="page-enter relative z-10 pb-24 min-h-dvh bg-[#080d14] text-white">
+    <div className="page-enter relative z-10 pb-32 min-h-dvh bg-[#080d14] text-white">
       {/* Header */}
       <header className="sticky top-0 z-50 flex items-center bg-[#080d14]/60 backdrop-blur-xl p-4 pb-2 justify-between border-b border-white/5">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-full" />
@@ -384,7 +384,7 @@ export default function StatsPage() {
         </div>
       </div>
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1">
         {activeTab === "stats" && (
           <>
             {/* Period filter */}

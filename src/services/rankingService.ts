@@ -30,20 +30,7 @@ interface UserAggregate {
 }
 
 // --------------- Mock data (fallback) ---------------
-const AVATARS = [
-  "🎣",
-  "🐟",
-  "🦈",
-  "🐠",
-  "🐡",
-  "🦀",
-  "🐙",
-  "🦑",
-  "🐚",
-  "🪸",
-  "🌊",
-  "⚓",
-];
+// @mock-data — No emoji avatars; photoURL left undefined so UI falls back to displayName initial
 
 // @mock-data — Replace with real Firestore ranking (used when Firestore has no data)
 const MOCK_DATA = {
@@ -96,7 +83,7 @@ function getMockRanking(
       id: item.uid,
       uid: item.uid,
       displayName: item.displayName,
-      photoURL: AVATARS[i % AVATARS.length],
+      photoURL: undefined,
       level: 10,
       totalCatch: 0,
       badges: [],
@@ -216,8 +203,7 @@ function buildRealEntries(
         id: a.uid,
         uid: a.uid,
         displayName: a.displayName,
-        photoURL:
-          a.photoURL || AVATARS[Math.abs(a.uid.charCodeAt(0)) % AVATARS.length],
+        photoURL: a.photoURL || undefined,
         level: 1,
         totalCatch: a.totalCount,
         badges: [],

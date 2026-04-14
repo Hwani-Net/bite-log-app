@@ -132,7 +132,7 @@ export default function RankingPage() {
         <div className="w-10" />
       </header>
 
-      <main className="flex-1 pb-40">
+      <main className="flex-1 pb-52">
         {/* Season Countdown Banner */}
         <div className="px-4 py-5">
           <div className="relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-[12px] border border-white/10 p-5">
