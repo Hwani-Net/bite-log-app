@@ -9,8 +9,12 @@ import {
   Calendar,
   Fish,
   Armchair,
+  Bot,
+  CheckCircle,
+  XCircle,
+  ShieldAlert,
+  ScanText,
 } from "lucide-react";
-import { DynamicIcon } from "@/lib/iconMap";
 
 export default function NoticeParserToolsPage() {
   const [input, setInput] = useState(
@@ -44,7 +48,7 @@ export default function NoticeParserToolsPage() {
           <span className="text-sm font-medium">돌아가기</span>
         </button>
         <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-          <DynamicIcon name="smart_toy" size={30} className="text-primary" />
+          <Bot size={30} className="text-primary" />
           자연어 공지 파서{" "}
           <span className="text-xs ml-2 bg-primary/10 text-primary px-2 py-0.5 rounded-md font-bold uppercase">
             LLM Feature
@@ -104,13 +108,11 @@ export default function NoticeParserToolsPage() {
               className={`rounded-2xl p-6 border shadow-sm h-full flex flex-col ${result.isSuccess ? "bg-white border-emerald-100" : "bg-red-50 border-red-100"}`}
             >
               <div className="flex items-center gap-2 border-b border-slate-100 pb-4 mb-4">
-                <DynamicIcon
-                  name={result.isSuccess ? "check_circle" : "error"}
-                  size={24}
-                  className={
-                    result.isSuccess ? "text-emerald-500" : "text-red-500"
-                  }
-                />
+                {result.isSuccess ? (
+                  <CheckCircle size={24} className="text-emerald-500" />
+                ) : (
+                  <XCircle size={24} className="text-red-500" />
+                )}
                 <div>
                   <h3 className="font-bold text-slate-900 dark:text-white">
                     {result.isSuccess
@@ -187,11 +189,7 @@ export default function NoticeParserToolsPage() {
                 </div>
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-slate-500">
-                  <DynamicIcon
-                    name="gpp_maybe"
-                    size={36}
-                    className="mb-2 text-slate-300"
-                  />
+                  <ShieldAlert size={36} className="mb-2 text-slate-300" />
                   <p className="text-sm">
                     입력된 텍스트가 낚시 공지사항과 관련이 없거나 필요한 정보를
                     찾을 수 없습니다.
@@ -206,11 +204,7 @@ export default function NoticeParserToolsPage() {
             </div>
           ) : (
             <div className="h-full bg-slate-100/50 rounded-2xl border border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 p-8 text-center">
-              <DynamicIcon
-                name="document_scanner"
-                size={48}
-                className="mb-3 text-slate-300"
-              />
+              <ScanText size={48} className="mb-3 text-slate-300" />
               <p className="font-medium">준비 완료</p>
               <p className="text-sm mt-1">
                 왼쪽에서 텍스트를 입력하고 &apos;정보 추출하기&apos; 버튼을
