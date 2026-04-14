@@ -493,22 +493,6 @@ export default function RegulationsPage() {
             : "Source: Korean Fisheries Resource Management Act"}
         </p>
       </div>
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(8px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.25s ease-out;
-        }
-      `}</style>
     </div>
   );
 }
