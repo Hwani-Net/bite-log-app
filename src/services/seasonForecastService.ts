@@ -9,12 +9,10 @@ import {
   getTotalRelease,
   getSeasonStatus,
   type Region,
-  type FishSeasonData,
-} from '@/data/fishSeasonDB';
+  type FishSeasonData } from '@/data/fishSeasonDB';
 
 export interface SeasonForecastReport {
   species: string;
-  emoji: string;
   currentMonth: number;
   isPeakNow: boolean;
   isClosedNow: boolean;
@@ -46,9 +44,9 @@ export function getSeasonForecast(species: string): SeasonForecastReport | null 
   const statusText = closed
     ? `현재 금어기 (${data.closedSeason!.start} ~ ${data.closedSeason!.end})`
     : status === 'gold'
-      ? '🔥 지금이 황금 조과 시즌!'
+      ? ' 지금이 황금 조과 시즌!'
       : peak
-        ? '📈 피크 시즌 진행 중'
+        ? ' 피크 시즌 진행 중'
         : `피크 시즌: ${data.peakFishingMonths.join('·')}월`;
 
   const summary = `${data.species} — ${cities}개 지역에서 총 ${total.toLocaleString()}마리 방류 계획. ${statusText}`;
@@ -61,7 +59,6 @@ export function getSeasonForecast(species: string): SeasonForecastReport | null 
 
   return {
     species: data.species,
-    emoji: data.emoji,
     currentMonth: month,
     isPeakNow: peak,
     isClosedNow: closed,
@@ -74,6 +71,5 @@ export function getSeasonForecast(species: string): SeasonForecastReport | null 
     disclaimer: '방류 계획 데이터 기반 예측입니다. 실제 조과는 기상·수온에 따라 달라질 수 있습니다.',
     peakMonths: data.peakFishingMonths,
     goldMonths: data.goldFishingMonths,
-    habitatDepth: data.habitatDepth,
-  };
+    habitatDepth: data.habitatDepth };
 }

@@ -4,8 +4,7 @@ import { useMemo, useState } from "react";
 import { TideData } from "@/services/tideService";
 import {
   getSpeciesPeakWindows,
-  TimelineSlot,
-} from "@/services/biteTimeService";
+  TimelineSlot } from "@/services/biteTimeService";
 import { Clock } from "lucide-react";
 import { getSpeciesConditions } from "@/services/speciesBiteService";
 import { useDragScroll } from "@/hooks/useDragScroll";
@@ -22,26 +21,20 @@ const GRADE_COLORS: Record<
   peak: {
     bar: "bg-gradient-to-t from-[#c9a84c] to-amber-400",
     bg: "bg-[#c9a84c]/10",
-    ring: "ring-[#c9a84c]",
-  },
+    ring: "ring-[#c9a84c]" },
   good: {
     bar: "bg-gradient-to-t from-[#7dd3fc] to-cyan-400",
     bg: "bg-[#7dd3fc]/10",
-    ring: "ring-[#7dd3fc]",
-  },
+    ring: "ring-[#7dd3fc]" },
   fair: {
     bar: "bg-gradient-to-t from-white/30 to-white/20",
     bg: "bg-white/5",
-    ring: "ring-white/20",
-  },
-  low: { bar: "bg-white/10", bg: "bg-white/5", ring: "ring-white/10" },
-};
+    ring: "ring-white/20" },
+  low: { bar: "bg-white/10", bg: "bg-white/5", ring: "ring-white/10" } };
 
 // Species list for filter chips
 const SPECIES_LIST = getSpeciesConditions().map((s) => ({
-  name: s.species,
-  emoji: s.emoji,
-}));
+  name: s.species }));
 
 export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
   const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);
@@ -153,8 +146,7 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
             style={{
               WebkitOverflowScrolling: "touch",
               scrollbarWidth: "none",
-              msOverflowStyle: "none",
-            }}
+              msOverflowStyle: "none" }}
           >
             {ranges.map((range, i) => {
               const isGolden = range.tags.some((t) => t.includes("골든"));

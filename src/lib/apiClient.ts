@@ -47,8 +47,7 @@ export async function apiFetch<T = unknown>(
 
       const res = await fetch(url, {
         ...fetchOptions,
-        signal: controller.signal,
-      });
+        signal: controller.signal });
 
       clearTimeout(timer);
 

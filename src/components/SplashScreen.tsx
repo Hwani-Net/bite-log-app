@@ -239,8 +239,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
               height: s.size,
               top: s.top,
               left: s.left,
-              animationDelay: s.delay,
-            }}
+              animationDelay: s.delay }}
           />
         ))}
 

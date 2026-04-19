@@ -15,15 +15,13 @@ import {
   Activity,
   History,
   Map as MapIcon,
-  X,
-} from "lucide-react";
+  X } from "lucide-react";
 import {
   FleetEntry,
   SafeHarborZone,
   fetchFleetData,
   computeSafeHarbors,
-  checkProximityAlert,
-} from "@/services/fleetRadarService";
+  checkProximityAlert } from "@/services/fleetRadarService";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -58,8 +56,7 @@ function shipTypeLabel(type: string): string {
     fishing: "어선",
     cargo: "화물선",
     leisure: "레저선",
-    passenger: "여객선",
-  };
+    passenger: "여객선" };
   return map[type] ?? type;
 }
 
@@ -68,8 +65,7 @@ function shipTypeEmoji(type: string): string {
     fishing: "어선",
     cargo: "화물",
     leisure: "레저",
-    passenger: "여객",
-  };
+    passenger: "여객" };
   return map[type] ?? "선박";
 }
 
@@ -167,8 +163,7 @@ export default function FleetRadar() {
       L.Icon.Default.mergeOptions({
         iconRetinaUrl: "/leaflet/marker-icon-2x.png",
         iconUrl: "/leaflet/marker-icon.png",
-        shadowUrl: "/leaflet/marker-shadow.png",
-      });
+        shadowUrl: "/leaflet/marker-shadow.png" });
 
       const container = document.getElementById("fleet-map");
       if (!container) return;
@@ -176,13 +171,11 @@ export default function FleetRadar() {
       mapInstance = L.map(container, {
         center: DEFAULT_CENTER,
         zoom: DEFAULT_ZOOM,
-        zoomControl: false,
-      });
+        zoomControl: false });
 
       L.tileLayer(KOREA_SEA_TILES, {
         attribution: "© OSM",
-        className: "map-tiles-dark",
-      }).addTo(mapInstance);
+        className: "map-tiles-dark" }).addTo(mapInstance);
 
       L.control.zoom({ position: "bottomright" }).addTo(mapInstance);
 
@@ -225,8 +218,7 @@ export default function FleetRadar() {
         radius: 500,
         color: "#39ff14",
         fillOpacity: 0.1,
-        weight: 1,
-      }).addTo(map);
+        weight: 1 }).addTo(map);
     }
 
     // Ships
@@ -239,8 +231,7 @@ export default function FleetRadar() {
         className: "",
         html: `<div style="width:${size}px;height:${size}px;background:${color};border:1.5px solid white;border-radius:50%;box-shadow:0 0 8px ${color}"></div>`,
         iconSize: [size, size],
-        iconAnchor: [size / 2, size / 2],
-      });
+        iconAnchor: [size / 2, size / 2] });
 
       const popupHtml = `
         <div style="font-family:sans-serif;min-width:140px;padding:2px">
@@ -272,8 +263,7 @@ export default function FleetRadar() {
         className: "",
         html: `<div style="width:14px;height:14px;background:#00d4ff;border:2px solid white;border-radius:50%;box-shadow:0 0 12px #00d4ff"></div>`,
         iconSize: [14, 14],
-        iconAnchor: [7, 7],
-      });
+        iconAnchor: [7, 7] });
       L.marker([userPos.lat, userPos.lon], { icon: userIcon }).addTo(map);
     }
   }, [fleet, safeHarbors, userPos, mapReady]);
@@ -298,8 +288,7 @@ export default function FleetRadar() {
         flexDirection: "column",
         overflow: "hidden",
         maxWidth: "28rem",
-        margin: "0 auto",
-      }}
+        margin: "0 auto" }}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 shrink-0 bg-slate-900/90 backdrop-blur-md border-b border-white/5 z-20">
@@ -449,8 +438,7 @@ function LegendItem({ color, label }: { color: string; label: string }) {
 function SimpleStat({
   label,
   value,
-  color = "text-slate-200",
-}: {
+  color = "text-slate-200" }: {
   label: string;
   value: number;
   color?: string;
@@ -465,8 +453,7 @@ function SimpleStat({
 
 function ShipDetailOverlay({
   ship,
-  onClose,
-}: {
+  onClose }: {
   ship: FleetEntry | null;
   onClose: () => void;
 }) {
@@ -504,8 +491,7 @@ function ShipDetailOverlay({
                   className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl"
                   style={{
                     background: `${color}15`,
-                    border: `1px solid ${color}30`,
-                  }}
+                    border: `1px solid ${color}30` }}
                 >
                   {shipTypeEmoji(ship.shipType)}
                 </div>
@@ -574,8 +560,7 @@ function ShipDetailOverlay({
                   style={{
                     width: `${Math.min((ship.speed / 20) * 100, 100)}%`,
                     background: `linear-gradient(90deg, ${color}cc, ${color})`,
-                    boxShadow: `0 0 10px ${color}40`,
-                  }}
+                    boxShadow: `0 0 10px ${color}40` }}
                 />
               </div>
               <div className="flex justify-between mt-1 px-0.5">
@@ -645,8 +630,7 @@ function ShipDetailOverlay({
 function DetailCell({
   icon,
   label,
-  value,
-}: {
+  value }: {
   icon: React.ReactNode;
   label: string;
   value: string;

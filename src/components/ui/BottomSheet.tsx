@@ -5,8 +5,7 @@ import {
   useCallback,
   useEffect,
   useRef,
-  useState,
-} from "react";
+  useState } from "react";
 import { X } from "lucide-react";
 
 type SnapPoint = "collapsed" | "half" | "expanded";
@@ -22,22 +21,25 @@ interface BottomSheetProps {
 const snapHeights: Record<SnapPoint, string> = {
   collapsed: "10vh",
   half: "50vh",
-  expanded: "90vh",
-};
+  expanded: "90vh" };
 
 export default function BottomSheet({
   children,
   open,
   onClose,
   title,
-  initialSnap = "half",
-}: BottomSheetProps) {
+  initialSnap = "half" }: BottomSheetProps) {
   const [snap, setSnap] = useState<SnapPoint>(initialSnap);
   const startY = useRef(0);
   const currentHeight = useRef(0);
 
+  const snapRef = useRef(initialSnap);
   useEffect(() => {
-    if (open) setSnap(initialSnap);
+    if (open && snapRef.current !== initialSnap) {
+      snapRef.current = initialSnap;
+      const timer = setTimeout(() => setSnap(initialSnap), 0);
+      return () => clearTimeout(timer);
+    }
   }, [open, initialSnap]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -79,8 +81,7 @@ export default function BottomSheet({
         style={{
           height: snapHeights[snap],
           maxWidth: "28rem",
-          margin: "0 auto",
-        }}
+          margin: "0 auto" }}
       >
         {/* Handle */}
         <div

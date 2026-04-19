@@ -9,17 +9,14 @@ import { fetchTideData, TideData } from "@/services/tideService";
 import { fetchMarineData } from "@/services/marineService";
 import {
   calculateBiteTime,
-  BiteTimePrediction,
-} from "@/services/biteTimeService";
+  BiteTimePrediction } from "@/services/biteTimeService";
 import {
   generateRecommendation,
   ConciergeRecommendation,
-  getInSeasonSpecies,
-} from "@/services/conciergeService";
+  getInSeasonSpecies } from "@/services/conciergeService";
 import {
   getGearRecommendations,
-  GearRecommendation,
-} from "@/services/affiliateService";
+  GearRecommendation } from "@/services/affiliateService";
 import { chatWithExpert, ChatMessage } from "@/services/fishExpertChatService";
 // Import new tab components
 import OverviewTab from "../components/concierge/OverviewTab";
@@ -141,8 +138,7 @@ export default function ConciergePage() {
           text:
             locale === "ko"
               ? "죄송합니다. 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
-              : "Sorry, an error occurred. Please try again later.",
-        },
+              : "Sorry, an error occurred. Please try again later." },
       ]);
     } finally {
       setChatLoading(false);

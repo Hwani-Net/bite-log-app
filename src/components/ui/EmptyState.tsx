@@ -16,8 +16,7 @@ export default function EmptyState({
   title,
   description,
   action,
-  className = "",
-}: EmptyStateProps) {
+  className = "" }: EmptyStateProps) {
   return (
     <div
       className={`flex flex-col items-center justify-center py-12 px-6 text-center ${className}`}

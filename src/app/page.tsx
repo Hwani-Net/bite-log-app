@@ -10,15 +10,13 @@ import { fetchWeather } from "@/services/weatherService";
 import { fetchMarineData } from "@/services/marineService";
 import {
   calculateBiteTime,
-  BiteTimePrediction,
-} from "@/services/biteTimeService";
+  BiteTimePrediction } from "@/services/biteTimeService";
 import { getSpeciesBiteScores } from "@/services/speciesBiteService";
 // fetchTopNews kept available for future news section restoration
 // import { fetchTopNews } from "@/services/fishingNewsService";
 import {
   analyzeUserRecords,
-  UserFishingProfile,
-} from "@/services/personalizationService";
+  UserFishingProfile } from "@/services/personalizationService";
 import { Bell } from "lucide-react";
 
 // Fish species default image/color mapping
@@ -31,15 +29,13 @@ const FISH_COLORS: Record<string, { gradient: string }> = {
   광어: { gradient: "from-yellow-400 to-amber-300" },
   고등어: { gradient: "from-indigo-500 to-blue-400" },
   방어: { gradient: "from-sky-500 to-cyan-400" },
-  주꾸미: { gradient: "from-red-400 to-orange-300" },
-};
+  주꾸미: { gradient: "from-red-400 to-orange-300" } };
 const DEFAULT_FISH = { gradient: "from-slate-400 to-slate-300" };
 
 // ─── Precision Index Gauge (Hero) ────────────────────────────────────────────
 function PrecisionGauge({
   biteTime,
-  loading,
-}: {
+  loading }: {
   biteTime: BiteTimePrediction | null;
   loading: boolean;
 }) {
@@ -142,8 +138,7 @@ function PrecisionGauge({
 function StatBar({
   totalCatch,
   thisMonth,
-  maxSize,
-}: {
+  maxSize }: {
   totalCatch: number;
   thisMonth: number;
   maxSize: number;
@@ -392,8 +387,7 @@ export default function HomePage() {
       memo: "범섬 포인트 캐스팅, 미노우 12cm 히트! 대물 농어 72cm",
       createdAt: daysAgo(1),
       updatedAt: daysAgo(1),
-      visibility: "public" as const,
-    },
+      visibility: "public" as const },
     {
       id: "demo-2",
       species: "우럭",
@@ -405,8 +399,7 @@ export default function HomePage() {
       memo: "왜목항 방파제 야간 원투, 우럭 5마리 마릿수 조과",
       createdAt: daysAgo(3),
       updatedAt: daysAgo(3),
-      visibility: "public" as const,
-    },
+      visibility: "public" as const },
     {
       id: "demo-3",
       species: "참돔",
@@ -418,8 +411,7 @@ export default function HomePage() {
       memo: "금오도 선상 타이라바, 45cm급 참돔 2마리! 물때 최고",
       createdAt: daysAgo(5),
       updatedAt: daysAgo(5),
-      visibility: "public" as const,
-    },
+      visibility: "public" as const },
     {
       id: "demo-4",
       species: "감성돔",
@@ -431,8 +423,7 @@ export default function HomePage() {
       memo: "욕지도 갯바위 찌낚시, 감성돔 42cm 1마리",
       createdAt: daysAgo(8),
       updatedAt: daysAgo(8),
-      visibility: "public" as const,
-    },
+      visibility: "public" as const },
   ];
 
   useEffect(() => {

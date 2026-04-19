@@ -8,8 +8,7 @@ import {
   FISH_SEASON_DB,
   getSeasonStatus,
   sortByCurrentSeason,
-  type FishSeasonData,
-} from "@/data/fishSeasonDB";
+  type FishSeasonData } from "@/data/fishSeasonDB";
 
 interface AIConciergeCardProps {
   locale: string;

@@ -49,8 +49,7 @@ export function analyzeFishingDna(records: CatchRecord[]): FishingDna | null {
     '한낮 (11~14시)': 0,
     '오후 (14~17시)': 0,
     '저녁 (17~20시)': 0,
-    '밤 (20~04시)': 0,
-  };
+    '밤 (20~04시)': 0 };
 
   const createdHours = records.map((r) => {
     const d = r.createdAt ? new Date(r.createdAt) : new Date(r.date);
@@ -154,6 +153,5 @@ export function analyzeFishingDna(records: CatchRecord[]): FishingDna | null {
     bestMonthCount,
     avgSizeCm,
     totalRecords: records.length,
-    analyzedAt: new Date().toISOString(),
-  };
+    analyzedAt: new Date().toISOString() };
 }

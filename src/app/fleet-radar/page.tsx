@@ -16,8 +16,7 @@ const FleetRadar = dynamic(
           alignItems: 'center',
           justifyContent: 'center',
           flexDirection: 'column',
-          gap: '12px',
-        }}
+          gap: '12px' }}
       >
         <div
           style={{
@@ -26,16 +25,14 @@ const FleetRadar = dynamic(
             borderRadius: '50%',
             border: '2px solid #00d4ff',
             borderTopColor: 'transparent',
-            animation: 'spin 0.8s linear infinite',
-          }}
+            animation: 'spin 0.8s linear infinite' }}
         />
         <p style={{ color: '#00d4ff', fontSize: '14px', fontFamily: 'sans-serif' }}>
           Fleet Radar 로딩 중...
         </p>
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       </div>
-    ),
-  },
+    ) },
 );
 
 export default function FleetRadarPage() {

@@ -51,8 +51,7 @@ export function analyzeUserRecords(records: CatchRecord[]): UserFishingProfile {
       avgCatchRate: 0,
       totalDays: 0,
       currentStreak: 0,
-      insights: getNewUserInsights(),
-    };
+      insights: getNewUserInsights() };
   }
 
   // Sort by date descending
@@ -106,8 +105,7 @@ export function analyzeUserRecords(records: CatchRecord[]): UserFishingProfile {
     avgCatchRate,
     totalDays,
     currentStreak,
-    insights,
-  };
+    insights };
 }
 
 function calculateStreak(sortedRecords: CatchRecord[]): number {
@@ -158,8 +156,7 @@ function generateInsights(
         pct > 60 ? '다른 어종에도 도전해보세요!' : '다양한 어종을 섭렵하고 있어요!'
       }`,
       highlight: `${pct}%`,
-      color: 'primary',
-    });
+      color: 'primary' });
   }
 
   // 2. Hot streak
@@ -167,11 +164,10 @@ function generateInsights(
     insights.push({
       type: 'streak',
       icon: 'local_fire_department',
-      title: `${streak}주 연속 출조 🔥`,
+      title: `${streak}주 연속 출조 `,
       description: '꾸준함이 실력을 만듭니다! 연속 출조 기록을 이어가세요.',
       highlight: `${streak}주`,
-      color: 'emerald',
-    });
+      color: 'emerald' });
   }
 
   // 3. Best month prediction
@@ -185,8 +181,7 @@ function generateInsights(
         ? `${bestMonth}은 조과가 가장 좋은 달입니다. 적극적으로 출조하세요!`
         : `분석 결과, ${bestMonth}에 조과가 가장 좋았어요.`,
       highlight: bestMonth,
-      color: isCurrentBestMonth ? 'emerald' : 'blue',
-    });
+      color: isCurrentBestMonth ? 'emerald' : 'blue' });
   }
 
   // 4. Size achievement
@@ -197,10 +192,9 @@ function generateInsights(
       type: 'achievement',
       icon: 'emoji_events',
       title: `대물 사냥꾼`,
-      description: `40cm 이상 대물 ${bigCatches.length}마리 기록! 최대 ${maxSize}cm 🏆`,
+      description: `40cm 이상 대물 ${bigCatches.length}마리 기록! 최대 ${maxSize}cm `,
       highlight: `${maxSize}cm`,
-      color: 'amber',
-    });
+      color: 'amber' });
   }
 
   // 5. Favorite spot loyalty
@@ -211,8 +205,7 @@ function generateInsights(
       title: `단골 낚시터`,
       description: `${favoriteSpot}을(를) ${topSpots[0][1]}회 방문. 이 포인트만의 비법을 가지고 있나요?`,
       highlight: `${topSpots[0][1]}회`,
-      color: 'red',
-    });
+      color: 'red' });
   }
 
   // 6. Catch rate performance
@@ -224,8 +217,7 @@ function generateInsights(
         title: '고효율 낚시!',
         description: `출조당 평균 ${avgCatchRate}마리. 상위 10% 실력자에요!`,
         highlight: `${avgCatchRate}마리/일`,
-        color: 'emerald',
-      });
+        color: 'emerald' });
     } else if (avgCatchRate < 2) {
       insights.push({
         type: 'tip',
@@ -233,8 +225,7 @@ function generateInsights(
         title: '효율 개선 팁',
         description: `출조당 평균 ${avgCatchRate}마리. AI 컨시어지에서 추천 포인트를 확인해보세요!`,
         highlight: `${avgCatchRate}마리/일`,
-        color: 'amber',
-      });
+        color: 'amber' });
     }
   }
 
@@ -249,8 +240,7 @@ function generateInsights(
         title: `${daysSince}일째 쉬는 중`,
         description: '오랜만에 출조해볼까요? AI 컨시어지가 오늘의 최적 포인트를 추천하고 있어요!',
         highlight: `${daysSince}일`,
-        color: 'amber',
-      });
+        color: 'amber' });
     }
   }
 
@@ -262,16 +252,14 @@ function getNewUserInsights(): PersonalInsight[] {
     {
       type: 'tip',
       icon: 'waving_hand',
-      title: '환영합니다! 🎣',
+      title: '환영합니다! ',
       description: '첫 조과를 기록하면 AI가 맞춤 분석을 제공해드립니다.',
-      color: 'primary',
-    },
+      color: 'primary' },
     {
       type: 'tip',
       icon: 'auto_awesome',
       title: 'AI 컨시어지를 만나보세요',
       description: '오늘의 추천 포인트, 시즌 어종, 장비를 AI가 분석해줍니다.',
-      color: 'blue',
-    },
+      color: 'blue' },
   ];
 }

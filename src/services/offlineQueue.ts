@@ -28,8 +28,7 @@ export async function enqueueOfflineRecord(data: Record<string, unknown>): Promi
   const tx = db.transaction(STORE_NAME, 'readwrite');
   tx.objectStore(STORE_NAME).add({
     data,
-    timestamp: new Date().toISOString(),
-  });
+    timestamp: new Date().toISOString() });
   await new Promise((resolve, reject) => {
     tx.oncomplete = resolve;
     tx.onerror = () => reject(tx.error);

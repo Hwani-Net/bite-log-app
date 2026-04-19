@@ -13,8 +13,7 @@ import {
   MapPin,
   SortAsc,
   Fish,
-  X,
-} from "lucide-react";
+  X } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
 type SortBy = "date" | "size" | "count";
@@ -78,18 +77,15 @@ export default function RecordsPage() {
     {
       value: "date",
       label: locale === "ko" ? "최신순" : "Newest",
-      icon: "calendar_today",
-    },
+      icon: "calendar_today" },
     {
       value: "size",
       label: locale === "ko" ? "크기순" : "Size",
-      icon: "straighten",
-    },
+      icon: "straighten" },
     {
       value: "count",
       label: locale === "ko" ? "마릿수순" : "Count",
-      icon: "tag",
-    },
+      icon: "tag" },
   ];
 
   return (

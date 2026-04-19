@@ -30,8 +30,7 @@ const GEAR_DATABASE: Record<string, GearRecommendation[]> = {
       description: "가벼운 바디에 부드러운 드래그, 감성돔 챔질에 최적",
       priceRange: "8~15만원",
       affiliateUrl: "https://link.coupang.com/a/dVUTSR",
-      icon: "Settings2",
-    },
+      icon: "Settings2" },
     {
       id: "gsd-2",
       species: "감성돔",
@@ -40,8 +39,7 @@ const GEAR_DATABASE: Record<string, GearRecommendation[]> = {
       description: "조류에 강한 구멍찌, 감도 최상급",
       priceRange: "2~5만원",
       affiliateUrl: "https://link.coupang.com/a/dVUYHW",
-      icon: "Circle",
-    },
+      icon: "Circle" },
     {
       id: "gsd-3",
       species: "감성돔",
@@ -50,8 +48,7 @@ const GEAR_DATABASE: Record<string, GearRecommendation[]> = {
       description: "감성돔 밑밥+미끼 겸용, 신선도 유지",
       priceRange: "3~6만원",
       affiliateUrl: "https://link.coupang.com/a/dVU2BW",
-      icon: "Waves",
-    },
+      icon: "Waves" },
   ],
   볼락: [
     {
@@ -64,8 +61,7 @@ const GEAR_DATABASE: Record<string, GearRecommendation[]> = {
       affiliateUrl: "https://link.coupang.com/a/dVTQFn",
       icon: "Anchor",
       image:
-        "https://thumbnail.coupangcdn.com/thumbnails/remote/230x230ex/image/vendor_inventory/4ab2/03259bf4bf730b20505dc95088160423052ec1759e495744575a4ec8b9d6.jpg",
-    },
+        "https://thumbnail.coupangcdn.com/thumbnails/remote/230x230ex/image/vendor_inventory/4ab2/03259bf4bf730b20505dc95088160423052ec1759e495744575a4ec8b9d6.jpg" },
     {
       id: "br-2",
       species: "볼락",
@@ -76,8 +72,7 @@ const GEAR_DATABASE: Record<string, GearRecommendation[]> = {
       affiliateUrl: "https://link.coupang.com/a/dVTSS7",
       icon: "Worm",
       image:
-        "https://shopping-phinf.pstatic.net/main_8415157/84151572662.jpg?type=f300",
-    },
+        "https://shopping-phinf.pstatic.net/main_8415157/84151572662.jpg?type=f300" },
     {
       id: "br-3",
       species: "볼락",
@@ -88,8 +83,7 @@ const GEAR_DATABASE: Record<string, GearRecommendation[]> = {
       affiliateUrl: "https://link.coupang.com/a/dVTTTj",
       icon: "FishOff",
       image:
-        "https://shopping-phinf.pstatic.net/main_8720253/87202537077.jpg?type=f300",
-    },
+        "https://shopping-phinf.pstatic.net/main_8720253/87202537077.jpg?type=f300" },
   ],
   농어: [
     {
@@ -100,8 +94,7 @@ const GEAR_DATABASE: Record<string, GearRecommendation[]> = {
       description: "표층~중층 바이브로 대물 농어 공략",
       priceRange: "2~5만원",
       affiliateUrl: "https://link.coupang.com/a/dVVaVr",
-      icon: "Fish",
-    },
+      icon: "Fish" },
     {
       id: "ne-2",
       species: "농어",
@@ -110,8 +103,7 @@ const GEAR_DATABASE: Record<string, GearRecommendation[]> = {
       description: "원투 + 파워 겸비, 대물 농어 랜딩까지",
       priceRange: "10~20만원",
       affiliateUrl: "https://link.coupang.com/a/dVVcUX",
-      icon: "Dumbbell",
-    },
+      icon: "Dumbbell" },
   ],
   우럭: [
     {
@@ -122,8 +114,7 @@ const GEAR_DATABASE: Record<string, GearRecommendation[]> = {
       description: "방파제 우럭 필수, 2단 카드로 효율 UP",
       priceRange: "0.5~1.5만원",
       affiliateUrl: "https://link.coupang.com/a/dVVeEl",
-      icon: "Link",
-    },
+      icon: "Link" },
     {
       id: "ur-2",
       species: "우럭",
@@ -132,8 +123,7 @@ const GEAR_DATABASE: Record<string, GearRecommendation[]> = {
       description: "우럭 미끼용 소프트웜, 장기 보관 가능",
       priceRange: "1~2만원",
       affiliateUrl: "https://link.coupang.com/a/dVVhcX",
-      icon: "Worm",
-    },
+      icon: "Worm" },
   ],
   방어: [
     {
@@ -144,8 +134,7 @@ const GEAR_DATABASE: Record<string, GearRecommendation[]> = {
       description: "수직 지깅으로 대물 방어 공략",
       priceRange: "1.5~4만원",
       affiliateUrl: "https://link.coupang.com/a/dVVjfT",
-      icon: "Zap",
-    },
+      icon: "Zap" },
     {
       id: "by-2",
       species: "방어",
@@ -154,10 +143,8 @@ const GEAR_DATABASE: Record<string, GearRecommendation[]> = {
       description: "방어·부시리 전용 파워 로드",
       priceRange: "15~30만원",
       affiliateUrl: "https://link.coupang.com/a/dVVkD1",
-      icon: "Dumbbell",
-    },
-  ],
-};
+      icon: "Dumbbell" },
+  ] };
 
 // Default gear for any species
 const DEFAULT_GEAR: GearRecommendation[] = [
@@ -171,8 +158,7 @@ const DEFAULT_GEAR: GearRecommendation[] = [
     affiliateUrl: "https://link.coupang.com/a/dVTXQJ",
     icon: "Briefcase",
     image:
-      "https://shopping-phinf.pstatic.net/main_8556734/85567347909.jpg?type=f300",
-  },
+      "https://shopping-phinf.pstatic.net/main_8556734/85567347909.jpg?type=f300" },
   {
     id: "def-2",
     species: "공통",
@@ -183,8 +169,7 @@ const DEFAULT_GEAR: GearRecommendation[] = [
     affiliateUrl: "https://link.coupang.com/a/dVTZoH",
     icon: "Shirt",
     image:
-      "https://shopping-phinf.pstatic.net/main_9050404/90504042024.1.jpg?type=f300",
-  },
+      "https://shopping-phinf.pstatic.net/main_9050404/90504042024.1.jpg?type=f300" },
   {
     id: "def-3",
     species: "공통",
@@ -195,8 +180,7 @@ const DEFAULT_GEAR: GearRecommendation[] = [
     affiliateUrl: "https://link.coupang.com/a/dVT1Hu",
     icon: "LifeBuoy",
     image:
-      "https://shopping-phinf.pstatic.net/main_8639489/86394892634.1.jpg?type=f300",
-  },
+      "https://shopping-phinf.pstatic.net/main_8639489/86394892634.1.jpg?type=f300" },
 ];
 
 /**

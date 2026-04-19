@@ -41,8 +41,7 @@ export const useAppStore = create<AppState>((set) => ({
       (localStorage.getItem("fishlog_theme") as ThemeMode) || "dark";
     applyTheme(savedTheme);
     set({ locale: savedLocale, theme: savedTheme, t: createT(savedLocale) });
-  },
-}));
+  } }));
 
 /** V4: .dark class on <html> — matches @custom-variant dark (&:is(.dark *)) */
 function applyTheme(theme: ThemeMode) {

@@ -75,8 +75,7 @@ const VesselQuerySchema = z.object({
     .string()
     .regex(/^\d+$/, "'numOfRows' must be a positive integer")
     .optional()
-    .transform((v) => (v != null ? Math.min(Number(v), 1000) : 100)),
-});
+    .transform((v) => (v != null ? Math.min(Number(v), 1000) : 100)) });
 
 type VesselQueryParams = z.output<typeof VesselQuerySchema>;
 
@@ -87,8 +86,7 @@ function parseAndValidateQuery(
     mmsi:       searchParams.get('mmsi')       ?? undefined,
     shipName:   searchParams.get('shipName')   ?? undefined,
     pageNo:     searchParams.get('pageNo')     ?? undefined,
-    numOfRows:  searchParams.get('numOfRows')  ?? undefined,
-  };
+    numOfRows:  searchParams.get('numOfRows')  ?? undefined };
 
   const result = VesselQuerySchema.safeParse(raw);
   if (!result.success) {
@@ -110,8 +108,7 @@ const MOCK_VESSELS: VesselInfo[] = [
     length: 8,
     callSign: 'HLRA1',
     portOfRegistry: '통영',
-    flag: 'KR',
-  },
+    flag: 'KR' },
   {
     imoNo: '9000002',
     mmsi: '440001001',
@@ -121,8 +118,7 @@ const MOCK_VESSELS: VesselInfo[] = [
     length: 6,
     callSign: 'HLRB2',
     portOfRegistry: '거제',
-    flag: 'KR',
-  },
+    flag: 'KR' },
   {
     imoNo: '9000003',
     mmsi: '440001002',
@@ -132,8 +128,7 @@ const MOCK_VESSELS: VesselInfo[] = [
     length: 18,
     callSign: 'HLRC3',
     portOfRegistry: '부산',
-    flag: 'KR',
-  },
+    flag: 'KR' },
   {
     imoNo: '9000004',
     mmsi: '440001003',
@@ -143,8 +138,7 @@ const MOCK_VESSELS: VesselInfo[] = [
     length: 5,
     callSign: 'HLRD4',
     portOfRegistry: '여수',
-    flag: 'KR',
-  },
+    flag: 'KR' },
   {
     imoNo: '9000005',
     mmsi: '440001004',
@@ -154,8 +148,7 @@ const MOCK_VESSELS: VesselInfo[] = [
     length: 25,
     callSign: 'HLRE5',
     portOfRegistry: '인천',
-    flag: 'KR',
-  },
+    flag: 'KR' },
 ];
 
 // --- Helpers ---------------------------------------------------------
@@ -223,8 +216,7 @@ function mapVesselItem(item: Record<string, unknown>): VesselInfo {
     flag: String(
       item['ntlCd']    ?? item['NTL_CD']  ?? item['natCd']    ?? item['NAT_CD']    ??
       item['국적코드'] ?? item['국적']    ?? '',
-    ),
-  };
+    ) };
 }
 
 /**
@@ -267,8 +259,7 @@ async function fetchVessels(params: VesselQueryParams): Promise<{
     structuredLog('warn', {
       timestamp: new Date().toISOString(),
       event: 'vessel.api.key_missing',
-      error: { message: 'FISHING_VESSEL_API_KEY environment variable is not set — returning mock data' },
-    });
+      error: { message: 'FISHING_VESSEL_API_KEY environment variable is not set — returning mock data' } });
     return { data: applyMockFilters(params), fallback: true };
   }
 
@@ -276,8 +267,7 @@ async function fetchVessels(params: VesselQueryParams): Promise<{
   const extra = new URLSearchParams({
     resultType: 'json',
     numOfRows:  String(params.numOfRows),
-    pageNo:     String(params.pageNo),
-  });
+    pageNo:     String(params.pageNo) });
   if (params.mmsi)     extra.set('mmsi',   params.mmsi);
   if (params.shipName) extra.set('vsslNm', params.shipName);
 
@@ -288,8 +278,7 @@ async function fetchVessels(params: VesselQueryParams): Promise<{
     event: 'vessel.api.request',
     endpoint: 'apis.data.go.kr/VsslEtrynd5',
     url: urlStr.replace(apiKey, '[REDACTED]'),
-    params,
-  });
+    params });
 
   // 1) HTTP 요청
   let res: Response;
@@ -299,8 +288,7 @@ async function fetchVessels(params: VesselQueryParams): Promise<{
     structuredLog('warn', {
       timestamp: new Date().toISOString(),
       event: 'vessel.api.unreachable',
-      error: { message: 'VsslEtrynd5 API unreachable', cause: String(err) },
-    });
+      error: { message: 'VsslEtrynd5 API unreachable', cause: String(err) } });
     return { data: applyMockFilters(params), fallback: true };
   }
 
@@ -309,8 +297,7 @@ async function fetchVessels(params: VesselQueryParams): Promise<{
     structuredLog('warn', {
       timestamp: new Date().toISOString(),
       event: 'vessel.api.http_error',
-      error: { message: `VsslEtrynd5 API HTTP ${res.status}`, body: body.slice(0, 500) },
-    });
+      error: { message: `VsslEtrynd5 API HTTP ${res.status}`, body: body.slice(0, 500) } });
     return { data: applyMockFilters(params), fallback: true };
   }
 
@@ -322,8 +309,7 @@ async function fetchVessels(params: VesselQueryParams): Promise<{
     structuredLog('warn', {
       timestamp: new Date().toISOString(),
       event: 'vessel.api.body_read_error',
-      error: { message: 'VsslEtrynd5 API body read failed', cause: String(err) },
-    });
+      error: { message: 'VsslEtrynd5 API body read failed', cause: String(err) } });
     return { data: applyMockFilters(params), fallback: true };
   }
 
@@ -338,9 +324,7 @@ async function fetchVessels(params: VesselQueryParams): Promise<{
       error: {
         message: 'VsslEtrynd5 API returned non-JSON',
         preview: rawText.slice(0, 200),
-        cause: String(err),
-      },
-    });
+        cause: String(err) } });
     return { data: applyMockFilters(params), fallback: true };
   }
 
@@ -350,8 +334,7 @@ async function fetchVessels(params: VesselQueryParams): Promise<{
     structuredLog('warn', {
       timestamp: new Date().toISOString(),
       event: 'vessel.api.api_level_error',
-      error: { message: apiError },
-    });
+      error: { message: apiError } });
     return { data: applyMockFilters(params), fallback: true };
   }
 
@@ -362,8 +345,7 @@ async function fetchVessels(params: VesselQueryParams): Promise<{
     structuredLog('warn', {
       timestamp: new Date().toISOString(),
       event: 'vessel.api.empty_result',
-      error: { message: 'VsslEtrynd5 API returned empty dataset' },
-    });
+      error: { message: 'VsslEtrynd5 API returned empty dataset' } });
     return { data: applyMockFilters(params), fallback: true };
   }
 
@@ -372,8 +354,7 @@ async function fetchVessels(params: VesselQueryParams): Promise<{
     event: 'vessel.api.field_sample',
     fields: Object.keys(items[0]),
     sample: items[0],
-    totalItems: items.length,
-  });
+    totalItems: items.length });
 
   const data = items
     .map(mapVesselItem)
@@ -382,8 +363,7 @@ async function fetchVessels(params: VesselQueryParams): Promise<{
   structuredLog('info', {
     timestamp: new Date().toISOString(),
     event: 'vessel.api.success',
-    count: data.length,
-  });
+    count: data.length });
 
   return { data, fallback: false };
 }
@@ -422,31 +402,27 @@ export async function GET(request: NextRequest) {
       duration,
       count: data.length,
       mock: fallback,
-      params,
-    });
+      params });
 
     return NextResponse.json({
       ok:        true,
       data,
       count:     data.length,
       timestamp: new Date().toISOString(),
-      mock:      fallback,
-    });
+      mock:      fallback });
   } catch (err) {
     structuredLog('error', {
       timestamp: new Date().toISOString(),
       event: 'vessel.get.unhandled_error',
       error: String(err),
-      duration: Date.now() - t0,
-    });
+      duration: Date.now() - t0 });
     return NextResponse.json(
       {
         ok:    false,
         error: 'Internal server error',
         mock:  true,
         data:  MOCK_VESSELS,
-        count: MOCK_VESSELS.length,
-      },
+        count: MOCK_VESSELS.length },
       { status: 500 },
     );
   }

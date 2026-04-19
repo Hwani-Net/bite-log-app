@@ -24,8 +24,7 @@ const DEFAULT_PREFERENCES: NotificationPreferences = {
   badgeAlert: true,
   quietHoursStart: 23,
   quietHoursEnd: 6,
-  regions: ['all'],
-};
+  regions: ['all'] };
 
 const PREFS_STORAGE_KEY = 'fishlog_notification_prefs';
 const FCM_TOKEN_KEY = 'fishlog_fcm_token';
@@ -106,8 +105,7 @@ export function sendLocalNotification(
     body,
     icon,
     tag: tag || 'fishlog',
-    badge: '/icons/icon-72x72.png',
-  });
+    badge: '/icons/icon-72x72.png' });
 }
 
 /**
@@ -131,7 +129,7 @@ export function scheduleBiteTimeAlert(
 
   setTimeout(() => {
     sendLocalNotification(
-      '🐟 입질 최적 시간 30분 전!',
+      ' 입질 최적 시간 30분 전!',
       `${optimalTime}에 입질 확률 ${score}%! 지금 준비하세요.`,
       '/icons/icon-192x192.png',
       'bite-time'
@@ -150,7 +148,7 @@ export function notifyBadgeEarned(
   if (!prefs.badgeAlert) return;
 
   sendLocalNotification(
-    '🏆 새 배지 획득!',
+    ' 새 배지 획득!',
     `"${badgeName}" 배지를 획득했습니다!`,
     '/icons/icon-192x192.png',
     'badge'
@@ -168,7 +166,7 @@ export function notifyNewFishingNews(
   if (!prefs.newsAlert) return;
 
   sendLocalNotification(
-    '📰 새 조과 소식!',
+    ' 새 조과 소식!',
     title,
     '/icons/icon-192x192.png',
     'news'

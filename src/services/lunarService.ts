@@ -49,23 +49,23 @@ export function getLunarInfo(date: Date = new Date()): LunarInfo {
   let phaseEmoji: string;
 
   if (age < 1.85) {
-    phaseName = '신월(삭)'; phaseEmoji = '🌑';
+    phaseName = '신월(삭)'; phaseEmoji = '';
   } else if (age < 5.53) {
-    phaseName = '초승달'; phaseEmoji = '🌒';
+    phaseName = '초승달'; phaseEmoji = '';
   } else if (age < 8.38) {
-    phaseName = '상현달'; phaseEmoji = '🌓';
+    phaseName = '상현달'; phaseEmoji = '';
   } else if (age < 12.91) {
-    phaseName = '상현 지남'; phaseEmoji = '🌔';
+    phaseName = '상현 지남'; phaseEmoji = '';
   } else if (age < 16.61) {
-    phaseName = '보름달(망)'; phaseEmoji = '🌕';
+    phaseName = '보름달(망)'; phaseEmoji = '';
   } else if (age < 20.29) {
-    phaseName = '하현 앞'; phaseEmoji = '🌖';
+    phaseName = '하현 앞'; phaseEmoji = '';
   } else if (age < 23.99) {
-    phaseName = '하현달'; phaseEmoji = '🌗';
+    phaseName = '하현달'; phaseEmoji = '';
   } else if (age < 27.68) {
-    phaseName = '그믐달'; phaseEmoji = '🌘';
+    phaseName = '그믐달'; phaseEmoji = '';
   } else {
-    phaseName = '그믐(삭 직전)'; phaseEmoji = '🌑';
+    phaseName = '그믐(삭 직전)'; phaseEmoji = '';
   }
 
   // 사리(대조기): 신월(0) 또는 보름(15) 전후 2~3일 — 물 세기 최대, 입질 활발
@@ -111,6 +111,5 @@ export function getLunarInfo(date: Date = new Date()): LunarInfo {
     isSariPeriod,
     isJogumPeriod,
     fishingImpact,
-    description,
-  };
+    description };
 }

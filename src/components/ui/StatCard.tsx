@@ -13,8 +13,7 @@ export default function StatCard({
   value,
   unit,
   accentColor = "border-l-primary",
-  className = "",
-}: StatCardProps) {
+  className = "" }: StatCardProps) {
   return (
     <div
       className={`glass-card rounded-2xl p-4 shadow-sm border-l-4 ${accentColor} ${className}`}

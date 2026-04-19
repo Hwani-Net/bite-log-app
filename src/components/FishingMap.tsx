@@ -24,18 +24,16 @@ function createFishIcon() {
       box-shadow: 0 2px 8px rgba(19,146,236,0.4);
       display: flex; align-items: center; justify-content: center;
       font-size: 11px; font-weight: 700; color: white;
-    ">★</div>`,
+    "></div>`,
     iconSize: [32, 32],
     iconAnchor: [16, 16],
-    popupAnchor: [0, -16],
-  });
+    popupAnchor: [0, -16] });
 }
 
 export default function FishingMap({
   records,
   locale,
-  height = "300px",
-}: FishingMapProps) {
+  height = "300px" }: FishingMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
 
@@ -60,13 +58,11 @@ export default function FishingMap({
 
     const map = L.map(mapRef.current, {
       zoomControl: false,
-      attributionControl: false,
-    }).setView(center, 8);
+      attributionControl: false }).setView(center, 8);
 
     // OpenStreetMap tiles (free, no API key)
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 18,
-    }).addTo(map);
+      maxZoom: 18 }).addTo(map);
 
     // Add zoom control to bottom-right
     L.control.zoom({ position: "bottomright" }).addTo(map);
@@ -119,12 +115,10 @@ export default function FishingMap({
       `;
 
       const marker = L.marker([first.location.lat!, first.location.lng!], {
-        icon,
-      })
+        icon })
         .bindPopup(popupContent, {
           closeButton: false,
-          className: "fish-popup",
-        })
+          className: "fish-popup" })
         .addTo(map);
       markers.push(marker);
     });

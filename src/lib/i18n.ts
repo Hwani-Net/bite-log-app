@@ -10,8 +10,7 @@ const translations = {
       viewAll: '전체보기',
       noCatches: '아직 조과 기록이 없습니다',
       addFirst: '첫 번째 기록을 추가해보세요!',
-      unit: { fish: '마리', cm: 'cm' },
-    },
+      unit: { fish: '마리', cm: 'cm' } },
     record: {
       title: '조과 기록',
       save: '저장',
@@ -52,8 +51,7 @@ const translations = {
       next: '다음',
       prev: '이전',
       photoGuide: '물고기 사진을 찍어주세요',
-      photoSubGuide: '최대 3장, 선명할수록 AI 인식 정확도 UP',
-    },
+      photoSubGuide: '최대 3장, 선명할수록 AI 인식 정확도 UP' },
     stats: {
       title: '나의 통계',
       totalTrips: '총 출조',
@@ -66,8 +64,7 @@ const translations = {
       visits: '회 방문',
       caught: '마리',
       noData: '데이터가 없습니다',
-      unit: { trips: '회', fishPerTrip: '마리/회', cm: 'cm', fish: '마리' },
-    },
+      unit: { trips: '회', fishPerTrip: '마리/회', cm: 'cm', fish: '마리' } },
     ranking: {
       title: '랭킹',
       catchKing: '조과왕',
@@ -83,8 +80,7 @@ const translations = {
       noRanking: '랭킹 데이터를 불러오는 중...',
       place1st: '1위',
       place2nd: '2위',
-      place3rd: '3위',
-    },
+      place3rd: '3위' },
     period: { week: '1주', month: '1개월', threeMonths: '3개월', all: '전체' },
     theme: { light: '라이트', dark: '다크', system: '시스템' },
     common: { cancel: '취소', delete: '삭제', edit: '수정', confirm: '확인' },
@@ -115,8 +111,7 @@ const translations = {
       'tip.chamdom': '타이라바 공략. 조류가 흐를 때 중층~하층 집중',
       'tip.bolrak': '야간 낚시 효과적. 암초 주변 라이트게임 추천',
       'tip.hanchi': '집어등 필수. 수온 높을수록 수면 가까이 올라옴',
-      aiMock: '(데모 — Gemini API 키 없음)',
-    },
+      aiMock: '(데모 — Gemini API 키 없음)' },
     viralGear: {
       title: '바이럴 채비 랭킹',
       subtitle: '지금 커뮤니티에서 가장 핫한 채비',
@@ -129,8 +124,7 @@ const translations = {
       buy: '쿠팡에서 보기',
       disclaimer: '쿠팡 파트너스 활동의 일환으로, 구매 시 수수료를 받을 수 있습니다.',
       refresh: '새로고침',
-      loading: '분석 중...',
-    },
+      loading: '분석 중...' },
     alerts: {
       title: '맞춤 오픈런 알림',
       subtitle: '선호 어종·지역 예약 오픈 즉시 알림',
@@ -159,9 +153,7 @@ const translations = {
       daysAhead: '일 전',
       allSpecies: '전 어종',
       allRegions: '전국',
-      catchesTitle: '조과 기록',
-    },
-  },
+      catchesTitle: '조과 기록' } },
   en: {
     app: { title: 'BITE Log', greeting: 'BITE Log' },
     nav: { home: 'Home', feed: 'Feed', fleet: 'Radar', record: 'Record', stats: 'Stats', settings: 'Settings', ai: 'AI' },
@@ -173,8 +165,7 @@ const translations = {
       viewAll: 'View All',
       noCatches: 'No catches recorded yet',
       addFirst: 'Add your first catch!',
-      unit: { fish: ' fish', cm: 'cm' },
-    },
+      unit: { fish: ' fish', cm: 'cm' } },
     record: {
       title: 'Catch Record',
       save: 'Save',
@@ -215,8 +206,7 @@ const translations = {
       next: 'Next',
       prev: 'Back',
       photoGuide: 'Take a photo of your catch',
-      photoSubGuide: 'Up to 3 photos — clearer = better AI accuracy',
-    },
+      photoSubGuide: 'Up to 3 photos — clearer = better AI accuracy' },
     stats: {
       title: 'My Stats',
       totalTrips: 'Total Trips',
@@ -229,8 +219,7 @@ const translations = {
       visits: ' visits',
       caught: ' fish',
       noData: 'No data available',
-      unit: { trips: '', fishPerTrip: '/trip', cm: 'cm', fish: '' },
-    },
+      unit: { trips: '', fishPerTrip: '/trip', cm: 'cm', fish: '' } },
     ranking: {
       title: 'Ranking',
       catchKing: 'Most Caught',
@@ -246,8 +235,7 @@ const translations = {
       noRanking: 'Loading ranking data...',
       place1st: '1st',
       place2nd: '2nd',
-      place3rd: '3rd',
-    },
+      place3rd: '3rd' },
     period: { week: '1W', month: '1M', threeMonths: '3M', all: 'All' },
     theme: { light: 'Light', dark: 'Dark', system: 'System' },
     common: { cancel: 'Cancel', delete: 'Delete', edit: 'Edit', confirm: 'Confirm' },
@@ -278,8 +266,7 @@ const translations = {
       'tip.chamdom': 'Tai rubber works well. Focus on mid-to-bottom when current is running',
       'tip.bolrak': 'Night fishing is effective. Try light tackle near rocky structures',
       'tip.hanchi': 'Fish attracting lights are essential. Rise higher in warmer water',
-      aiMock: '(Demo — No Gemini API key)',
-    },
+      aiMock: '(Demo — No Gemini API key)' },
     viralGear: {
       title: 'Viral Gear Ranking',
       subtitle: "What's trending in fishing communities",
@@ -292,8 +279,7 @@ const translations = {
       buy: 'View on Coupang',
       disclaimer: 'This is a Coupang Partners affiliate link.',
       refresh: 'Refresh',
-      loading: 'Analyzing...',
-    },
+      loading: 'Analyzing...' },
     alerts: {
       title: 'Custom Open-Run Alerts',
       subtitle: 'Get notified when bookings open for your favorites',
@@ -322,10 +308,7 @@ const translations = {
       daysAhead: 'd before',
       allSpecies: 'All Species',
       allRegions: 'Nationwide',
-      catchesTitle: 'Catch Records',
-    },
-  },
-} as const;
+      catchesTitle: 'Catch Records' } } } as const;
 
 export type Locale = 'ko' | 'en';
 export type TranslationKeys = typeof translations.ko;

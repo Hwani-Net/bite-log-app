@@ -21,32 +21,28 @@ const ITEMS: {
     labelEn: "Gear Ranking",
     href: "/viral-gear",
     gradient: "from-orange-500 to-amber-400",
-    shadow: "shadow-orange-200",
-  },
+    shadow: "shadow-orange-200" },
   {
     Icon: Scale,
     labelKo: "법규 가이드",
     labelEn: "Regulations",
     href: "/regulations",
     gradient: "from-slate-600 to-slate-500",
-    shadow: "shadow-slate-200",
-  },
+    shadow: "shadow-slate-200" },
   {
     Icon: Map,
     labelKo: "날씨 지도",
     labelEn: "Weather Map",
     href: "/live-dashboard",
     gradient: "from-blue-500 to-cyan-400",
-    shadow: "shadow-blue-200",
-  },
+    shadow: "shadow-blue-200" },
   {
     Icon: BarChart2,
     labelKo: "통계·DNA",
     labelEn: "Stats · DNA",
     href: "/stats?tab=dna",
     gradient: "from-violet-500 to-purple-400",
-    shadow: "shadow-violet-200",
-  },
+    shadow: "shadow-violet-200" },
 ];
 
 export default function QuickAccessGrid({ locale }: QuickAccessGridProps) {

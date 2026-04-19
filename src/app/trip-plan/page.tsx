@@ -6,12 +6,10 @@ import {
   TripPlan,
   TripBriefing,
   generateTripBriefing,
-  getBriefingAlertTime,
-} from "@/services/preTripBriefingService";
+  getBriefingAlertTime } from "@/services/preTripBriefingService";
 import {
   sendLocalNotification,
-  requestNotificationPermission,
-} from "@/services/pushNotificationService";
+  requestNotificationPermission } from "@/services/pushNotificationService";
 import {
   ArrowLeft,
   PenLine,
@@ -58,8 +56,7 @@ import {
   Zap,
   Briefcase,
   LifeBuoy,
-  type LucideProps,
-} from "lucide-react";
+  type LucideProps } from "lucide-react";
 import type { ComponentType } from "react";
 
 const ICON_MAP: Record<string, ComponentType<LucideProps>> = {
@@ -96,8 +93,7 @@ const ICON_MAP: Record<string, ComponentType<LucideProps>> = {
   Zap,
   Briefcase,
   LifeBuoy,
-  Waves,
-};
+  Waves };
 
 function ItemIcon({ name, size = 16 }: { name: string; size?: number }) {
   const Icon = ICON_MAP[name];
@@ -132,8 +128,7 @@ const LOCATION_COORDS: Record<string, { lat: number; lng: number }> = {
   제주: { lat: 33.4996, lng: 126.5312 },
   서귀포: { lat: 33.2541, lng: 126.5601 },
   속초: { lat: 38.2048, lng: 128.5912 },
-  포항: { lat: 36.019, lng: 129.3435 },
-};
+  포항: { lat: 36.019, lng: 129.3435 } };
 
 const FISHING_TYPES = [
   { value: "breakwater", label: "방파제" },
@@ -149,8 +144,7 @@ export default function TripPlanPage() {
     species: "볼락",
     location: "태안",
     fishingType: "breakwater",
-    alertHour: 14,
-  });
+    alertHour: 14 });
   const [briefing, setBriefing] = useState<TripBriefing | null>(null);
   const [loading, setLoading] = useState(false);
   const [alertSet, setAlertSet] = useState(false);
@@ -162,8 +156,7 @@ export default function TripPlanPage() {
 
     const coords = LOCATION_COORDS[form.location] || {
       lat: 37.5665,
-      lng: 126.978,
-    };
+      lng: 126.978 };
     const plan: TripPlan = {
       date: form.date,
       species: form.species,
@@ -172,8 +165,7 @@ export default function TripPlanPage() {
       lng: coords.lng,
       fishingType: form.fishingType || "breakwater",
       charterName: form.charterName,
-      alertHour: form.alertHour ?? 14,
-    };
+      alertHour: form.alertHour ?? 14 };
 
     try {
       const result = await generateTripBriefing(plan);

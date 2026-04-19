@@ -16,8 +16,7 @@ export default function Header({
   onBack,
   rightAction,
   subtitle,
-  sticky = true,
-}: HeaderProps) {
+  sticky = true }: HeaderProps) {
   return (
     <header
       className={`${sticky ? "sticky top-0 z-50" : ""} flex items-center justify-between px-4 py-3 bg-white/90 dark:bg-bg-dark/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/30`}

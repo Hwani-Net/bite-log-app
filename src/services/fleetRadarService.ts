@@ -63,8 +63,7 @@ export async function fetchFleetData(
       count: 0,
       timestamp: new Date().toISOString(),
       mock: false,
-      error: `HTTP ${res.status}`,
-    };
+      error: `HTTP ${res.status}` };
   }
   return res.json();
 }
@@ -144,8 +143,7 @@ export function computeSafeHarbors(fleet: FleetEntry[]): SafeHarborZone[] {
       centerLon,
       ships: cluster,
       avgSpeed,
-      label: `${cluster.length}척 소형선 밀집 (평균 ${avgSpeed.toFixed(1)}kt)`,
-    });
+      label: `${cluster.length}척 소형선 밀집 (평균 ${avgSpeed.toFixed(1)}kt)` });
   }
 
   return safeZones;

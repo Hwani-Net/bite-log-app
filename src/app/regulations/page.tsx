@@ -8,23 +8,20 @@ import {
   FishRegulation,
   getClosedSpecies,
   searchRegulations,
-  isCatchLegal,
-} from "@/data/fishRegulationDB";
+  isCatchLegal } from "@/data/fishRegulationDB";
 import {
   ArrowLeft,
   Search,
   ChevronRight,
   AlertTriangle,
-  Fish,
-} from "lucide-react";
+  Fish } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
 // ── Status badge component ────────────────────────────────────────────────────
 function StatusBadge({
   reg,
   month,
-  day,
-}: {
+  day }: {
   reg: FishRegulation;
   month: number;
   day: number;
@@ -60,8 +57,7 @@ function RegulationCard({
   month,
   day,
   expanded,
-  onToggle,
-}: {
+  onToggle }: {
   reg: FishRegulation;
   month: number;
   day: number;
@@ -335,18 +331,15 @@ export default function RegulationsPage() {
     {
       key: "all" as const,
       label: isKo ? "전체" : "All",
-      count: FISH_REGULATION_DB.length,
-    },
+      count: FISH_REGULATION_DB.length },
     {
       key: "closed" as const,
       label: isKo ? "금어기" : "Closed",
-      count: FISH_REGULATION_DB.filter((r) => r.closedSeason).length,
-    },
+      count: FISH_REGULATION_DB.filter((r) => r.closedSeason).length },
     {
       key: "size" as const,
       label: isKo ? "체장 규정" : "Min Size",
-      count: FISH_REGULATION_DB.filter((r) => r.minSizeCm).length,
-    },
+      count: FISH_REGULATION_DB.filter((r) => r.minSizeCm).length },
   ];
 
   return (

@@ -7,22 +7,22 @@ import { CatchRecord } from '@/types';
 export function generateShareText(record: CatchRecord, locale: string): string {
   const lines: string[] = [];
 
-  lines.push(locale === 'ko' ? '🎣 BITE Log 조과 기록' : '🎣 BITE Log Catch Record');
+  lines.push(locale === 'ko' ? ' BITE Log 조과 기록' : ' BITE Log Catch Record');
   lines.push('');
-  lines.push(`🐟 ${record.species} ${record.count}${locale === 'ko' ? '마리' : ' fish'}`);
+  lines.push(` ${record.species} ${record.count}${locale === 'ko' ? '마리' : ' fish'}`);
   if (record.sizeCm) {
-    lines.push(`📏 ${record.sizeCm}cm`);
+    lines.push(` ${record.sizeCm}cm`);
   }
-  lines.push(`📍 ${record.location.name}`);
-  lines.push(`📅 ${record.date}`);
+  lines.push(` ${record.location.name}`);
+  lines.push(` ${record.date}`);
 
   if (record.weather) {
-    lines.push(`🌤️ ${record.weather.condition} ${record.weather.tempC}°C`);
+    lines.push(`️ ${record.weather.condition} ${record.weather.tempC}°C`);
   }
 
   if (record.memo) {
     lines.push('');
-    lines.push(`💬 ${record.memo}`);
+    lines.push(` ${record.memo}`);
   }
 
   lines.push('');
@@ -46,8 +46,7 @@ export async function shareCatchRecord(
     try {
       await navigator.share({
         title: locale === 'ko' ? 'BITE Log 조과 기록' : 'BITE Log Catch Record',
-        text,
-      });
+        text });
       return { success: true, method: 'share' };
     } catch (err) {
       // User cancelled or share failed — fall through to clipboard

@@ -8,14 +8,12 @@ export default function TermsPage() {
     fontSize: 17,
     fontWeight: 600 as const,
     color: "var(--color-text)",
-    marginBottom: 8,
-  };
+    marginBottom: 8 };
   const pStyle = { color: "var(--color-text-secondary)", fontSize: 14 };
   const ulStyle = {
     color: "var(--color-text-secondary)",
     fontSize: 14,
-    paddingLeft: 20,
-  };
+    paddingLeft: 20 };
 
   return (
     <div
@@ -24,16 +22,14 @@ export default function TermsPage() {
         padding: "24px 16px",
         maxWidth: 640,
         margin: "0 auto",
-        lineHeight: 1.8,
-      }}
+        lineHeight: 1.8 }}
     >
       <Link
         href="/settings"
         style={{
           color: "var(--color-primary)",
           textDecoration: "none",
-          fontSize: 14,
-        }}
+          fontSize: 14 }}
       >
         ← 설정으로 돌아가기
       </Link>
@@ -43,8 +39,7 @@ export default function TermsPage() {
           fontSize: 24,
           fontWeight: 700,
           margin: "16px 0 8px",
-          color: "var(--color-text)",
-        }}
+          color: "var(--color-text)" }}
       >
         이용약관
       </h1>
@@ -52,8 +47,7 @@ export default function TermsPage() {
         style={{
           color: "var(--color-text-secondary)",
           fontSize: 13,
-          marginBottom: 24,
-        }}
+          marginBottom: 24 }}
       >
         시행일: 2026년 3월 1일
       </p>
@@ -274,8 +268,7 @@ export default function TermsPage() {
         style={{
           borderTop: "1px solid var(--color-border)",
           paddingTop: 16,
-          marginTop: 32,
-        }}
+          marginTop: 32 }}
       >
         <p style={{ color: "var(--color-text-secondary)", fontSize: 12 }}>
           문의: hwanizero01@gmail.com
@@ -284,8 +277,7 @@ export default function TermsPage() {
           style={{
             color: "var(--color-text-secondary)",
             fontSize: 11,
-            marginTop: 4,
-          }}
+            marginTop: 4 }}
         >
           © 2026 BITE Log. All rights reserved.
         </p>

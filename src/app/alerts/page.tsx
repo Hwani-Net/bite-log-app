@@ -12,13 +12,11 @@ import {
   deleteSubscription,
   toggleSubscription,
   getAutoDetectedPrefs,
-  sendSimulationAlert,
-} from "@/services/openRunAlertService";
+  sendSimulationAlert } from "@/services/openRunAlertService";
 import {
   requestNotificationPermission,
   getNotificationPermission,
-  isPushSupported,
-} from "@/services/pushNotificationService";
+  isPushSupported } from "@/services/pushNotificationService";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -71,8 +69,7 @@ const LABELS = {
     howDesc:
       "공지 파서가 선사 공지를 분석하면, 구독 조건과 일치할 때 즉시 알림을 보내드립니다.",
     subscribeChip: "구독하기",
-    deleteConfirm: "이 구독을 삭제할까요?",
-  },
+    deleteConfirm: "이 구독을 삭제할까요?" },
   en: {
     title: "Custom Open-Run Alerts",
     subtitle: "Get notified when bookings open for your favorites",
@@ -108,17 +105,14 @@ const LABELS = {
     howDesc:
       "When our notice parser detects a booking opening matching your subscription, you&apos;ll get an instant alert.",
     subscribeChip: "Subscribe",
-    deleteConfirm: "Delete this subscription?",
-  },
-};
+    deleteConfirm: "Delete this subscription?" } };
 
 // ─── Permission Banner ────────────────────────────────────────────────────────
 
 function PermissionBanner({
   permission,
   onRequest,
-  locale,
-}: {
+  locale }: {
   permission: string;
   onRequest: () => void;
   locale: string;
@@ -134,7 +128,7 @@ function PermissionBanner({
     >
       <div className="flex items-start gap-3">
         <span className="text-2xl flex-shrink-0">
-          {permission === "denied" ? "✕" : "●"}
+          {permission === "denied" ? "" : "●"}
         </span>
         <div className="flex-1">
           <p className="text-sm font-bold text-white">{L.permissionBanner}</p>
@@ -161,8 +155,7 @@ function PermissionBanner({
 function AutoDetectChips({
   records,
   onSubscribe,
-  locale,
-}: {
+  locale }: {
   records: CatchRecord[];
   onSubscribe: (species: string, region: string) => void;
   locale: string;
@@ -204,8 +197,7 @@ function AddForm({
   onCancel,
   initialSpecies,
   initialRegion,
-  locale,
-}: {
+  locale }: {
   onSave: (sub: Omit<AlertSubscription, "id" | "createdAt">) => void;
   onCancel: () => void;
   initialSpecies?: string;
@@ -238,8 +230,7 @@ function AddForm({
         .map((k) => k.trim())
         .filter(Boolean),
       notifyDaysAhead: daysAhead,
-      isActive: true,
-    });
+      isActive: true });
   };
 
   return (
@@ -356,8 +347,7 @@ function SubCard({
   onDelete,
   onToggle,
   onSimulate,
-  locale,
-}: {
+  locale }: {
   sub: AlertSubscription;
   onDelete: () => void;
   onToggle: () => void;

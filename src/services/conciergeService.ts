@@ -21,7 +21,6 @@ export interface FishingSpot {
 
 export interface SpeciesInfo {
   name: string;
-  emoji: string;
   image?: string; // real fish photo URL
   seasons: number[]; // months 1-12
   optimalTemp: [number, number]; // [min, max] °C
@@ -62,8 +61,7 @@ const FISHING_SPOTS: FishingSpot[] = [
     type: 'breakwater',
     bestSpecies: ['우럭', '노래미', '망둥어'],
     bestSeasons: [4, 5, 6, 7, 8, 9, 10],
-    description: '수도권 접근성 좋은 가족 낚시 포인트',
-  },
+    description: '수도권 접근성 좋은 가족 낚시 포인트' },
   {
     name: '남해 방파제',
     region: '경남',
@@ -71,8 +69,7 @@ const FISHING_SPOTS: FishingSpot[] = [
     type: 'breakwater',
     bestSpecies: ['감성돔', '볼락', '학꽁치'],
     bestSeasons: [3, 4, 5, 9, 10, 11],
-    description: '남해안 대표 방파제 낚시 포인트',
-  },
+    description: '남해안 대표 방파제 낚시 포인트' },
   {
     name: '울진 후포항',
     region: '경북',
@@ -80,8 +77,7 @@ const FISHING_SPOTS: FishingSpot[] = [
     type: 'port',
     bestSpecies: ['가자미', '광어', '우럭'],
     bestSeasons: [5, 6, 7, 8, 9, 10],
-    description: '동해안 수심 깊은 항구 낚시터',
-  },
+    description: '동해안 수심 깊은 항구 낚시터' },
   {
     name: '부산 기장 연화리',
     region: '부산',
@@ -89,8 +85,7 @@ const FISHING_SPOTS: FishingSpot[] = [
     type: 'reef',
     bestSpecies: ['감성돔', '벵에돔', '참돔'],
     bestSeasons: [4, 5, 6, 9, 10, 11],
-    description: '부산 근교 갯바위 포인트, 대물 감성돔 출현',
-  },
+    description: '부산 근교 갯바위 포인트, 대물 감성돔 출현' },
   {
     name: '서귀포 범섬 포인트',
     region: '제주',
@@ -98,8 +93,7 @@ const FISHING_SPOTS: FishingSpot[] = [
     type: 'reef',
     bestSpecies: ['벵에돔', '참돔', '다금바리'],
     bestSeasons: [5, 6, 7, 8, 9, 10, 11],
-    description: '제주 최고의 갯바위 포인트',
-  },
+    description: '제주 최고의 갯바위 포인트' },
   {
     name: '태안 만리포 해변',
     region: '충남',
@@ -107,8 +101,7 @@ const FISHING_SPOTS: FishingSpot[] = [
     type: 'shore',
     bestSpecies: ['노래미', '도다리', '광어'],
     bestSeasons: [4, 5, 6, 9, 10],
-    description: '서해안 모래 해변 원투 낚시 포인트',
-  },
+    description: '서해안 모래 해변 원투 낚시 포인트' },
   {
     name: '여수 돌산공원',
     region: '전남',
@@ -116,8 +109,7 @@ const FISHING_SPOTS: FishingSpot[] = [
     type: 'breakwater',
     bestSpecies: ['감성돔', '농어', '볼락'],
     bestSeasons: [3, 4, 5, 10, 11, 12],
-    description: '여수 대표 야간 낚시 포인트',
-  },
+    description: '여수 대표 야간 낚시 포인트' },
   {
     name: '포항 구룡포항',
     region: '경북',
@@ -125,8 +117,7 @@ const FISHING_SPOTS: FishingSpot[] = [
     type: 'port',
     bestSpecies: ['오징어', '학꽁치', '고등어'],
     bestSeasons: [8, 9, 10, 11],
-    description: '가을 오징어 시즌 핫스팟',
-  },
+    description: '가을 오징어 시즌 핫스팟' },
   {
     name: '보령 원산도 방파제',
     region: '충남',
@@ -134,8 +125,7 @@ const FISHING_SPOTS: FishingSpot[] = [
     type: 'breakwater',
     bestSpecies: ['우럭', '노래미', '쥐노래미'],
     bestSeasons: [4, 5, 6, 7, 8, 9],
-    description: '서해 섬 방파제 가족 낚시 포인트',
-  },
+    description: '서해 섬 방파제 가족 낚시 포인트' },
   {
     name: '속초 청호동 방파제',
     region: '강원',
@@ -143,8 +133,7 @@ const FISHING_SPOTS: FishingSpot[] = [
     type: 'breakwater',
     bestSpecies: ['가자미', '노래미', '고등어'],
     bestSeasons: [5, 6, 7, 8, 9, 10],
-    description: '속초 시내 접근 용이한 방파제',
-  },
+    description: '속초 시내 접근 용이한 방파제' },
 ];
 
 // ─── Data: Secret PRO Spots ──────────────────────────────────
@@ -157,8 +146,7 @@ const SECRET_FISHING_SPOTS: FishingSpot[] = [
     type: 'reef',
     bestSpecies: ['감성돔', '참돔', '긴꼬리벵에돔'],
     bestSeasons: [1, 2, 3, 10, 11, 12],
-    description: '명인들만 아는 대물 감성돔 포인트, 급류 지대',
-  },
+    description: '명인들만 아는 대물 감성돔 포인트, 급류 지대' },
   {
     name: '추자도 절명여',
     region: '제주',
@@ -166,8 +154,7 @@ const SECRET_FISHING_SPOTS: FishingSpot[] = [
     type: 'reef',
     bestSpecies: ['감성돔', '벵에돔', '부시리'],
     bestSeasons: [4, 5, 6, 9, 10, 11],
-    description: '대한민국 최고의 갯바위 포인트, 6자 감성돔 출몰',
-  },
+    description: '대한민국 최고의 갯바위 포인트, 6자 감성돔 출몰' },
   {
     name: '가거도 대리 포인트',
     region: '전남',
@@ -175,27 +162,26 @@ const SECRET_FISHING_SPOTS: FishingSpot[] = [
     type: 'reef',
     bestSpecies: ['감성돔', '농어', '볼락'],
     bestSeasons: [1, 2, 6, 7, 11, 12],
-    description: '국토 최서남단, 평생 한 번은 가봐야 할 성지',
-  },
+    description: '국토 최서남단, 평생 한 번은 가봐야 할 성지' },
 ];
 
 // ─── Data: Fish Species by Season ─────────────────────────────
 
 const SPECIES_DB: SpeciesInfo[] = [
-  { name: '감성돔', emoji: '🐟', image: 'https://search.pstatic.net/common/?src=http%3A%2F%2Fimgnews.naver.net%2Fimage%2F5119%2F2017%2F05%2F12%2F0000593409_001_20170512060327273.png&type=l340_165', seasons: [3, 4, 5, 10, 11, 12], optimalTemp: [12, 22], difficulty: 'intermediate', techniques: ['찌낚시', '원투낚시'] },
-  { name: '우럭', emoji: '🐡', seasons: [4, 5, 6, 7, 8, 9, 10], optimalTemp: [10, 25], difficulty: 'beginner', techniques: ['외줄낚시', '루어낚시'] },
-  { name: '볼락', emoji: '🐠', image: 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTExMjdfMzEg%2FMDAxNzY0MjMwMzY2ODI5.D02DZ_0aJMFTE4xNn1bJEgN-muC5HLCXx99OUNQN7JEg.BSx5RD94P2d9lKw5Zudg1kYsPMVQGxQgcpJC_jTX00Yg.JPEG%2F20251126_015326.jpg&type=a340', seasons: [11, 12, 1, 2, 3], optimalTemp: [5, 15], difficulty: 'beginner', techniques: ['메바링', '볼락루어'] },
-  { name: '농어', emoji: '🐟', image: 'https://search.pstatic.net/sunny/?src=https%3A%2F%2Fmblogthumb-phinf.pstatic.net%2FMjAyNDEyMzFfMjI5%2FMDAxNzM1NjMzNTA0NDkw.CY892IopGCGUR7f-lbrSjVhj-Q8vZ7c3r0wO7jbveEog.oG5NISyB3Y5-CB1QmjxgN7tyHxkb19Bw14ZkloU7Pq8g.JPEG%2FIMG_6904.jpg%3Ftype%3Dw800&type=a340', seasons: [5, 6, 7, 8, 9], optimalTemp: [15, 28], difficulty: 'advanced', techniques: ['루어낚시', '미노우'] },
-  { name: '참돔', emoji: '🐟', seasons: [4, 5, 6, 9, 10, 11], optimalTemp: [14, 24], difficulty: 'advanced', techniques: ['타이라바', '참돔찌낚시'] },
-  { name: '노래미', emoji: '🐟', image: 'https://search.pstatic.net/sunny/?src=https%3A%2F%2Fwww.innak.kr%2Fdata%2Ffile%2Fpdspictorial%2F50_20061122_134854_1.jpg&type=a340', seasons: [3, 4, 5, 6, 9, 10, 11], optimalTemp: [8, 20], difficulty: 'beginner', techniques: ['찌낚시', '다운샷'] },
-  { name: '고등어', emoji: '🐟', seasons: [8, 9, 10, 11], optimalTemp: [15, 25], difficulty: 'beginner', techniques: ['사비키', '찌낚시'] },
-  { name: '오징어', emoji: '🦑', seasons: [8, 9, 10, 11], optimalTemp: [15, 22], difficulty: 'intermediate', techniques: ['에기낚시', '봉돌채비'] },
-  { name: '벵에돔', emoji: '🐟', seasons: [5, 6, 7, 8, 9, 10], optimalTemp: [16, 26], difficulty: 'advanced', techniques: ['찌낚시', '반유동'] },
-  { name: '광어', emoji: '🐟', seasons: [5, 6, 7, 8, 9], optimalTemp: [14, 24], difficulty: 'intermediate', techniques: ['다운샷', '루어'] },
-  { name: '도다리', emoji: '🐟', seasons: [2, 3, 4, 5], optimalTemp: [8, 18], difficulty: 'beginner', techniques: ['원투낚시', '청갯지렁이'] },
-  { name: '망둥어', emoji: '🐟', seasons: [9, 10, 11], optimalTemp: [12, 22], difficulty: 'beginner', techniques: ['원투낚시', '미끼낚시'] },
-  { name: '학꽁치', emoji: '🐟', seasons: [10, 11, 12, 1, 2], optimalTemp: [8, 18], difficulty: 'beginner', techniques: ['학꽁치채비', '찌낚시'] },
-  { name: '가자미', emoji: '🐟', seasons: [11, 12, 1, 2, 3, 4], optimalTemp: [5, 15], difficulty: 'beginner', techniques: ['원투낚시', '카드채비'] },
+  { name: '감성돔', image: 'https://search.pstatic.net/common/?src=http%3A%2F%2Fimgnews.naver.net%2Fimage%2F5119%2F2017%2F05%2F12%2F0000593409_001_20170512060327273.png&type=l340_165', seasons: [3, 4, 5, 10, 11, 12], optimalTemp: [12, 22], difficulty: 'intermediate', techniques: ['찌낚시', '원투낚시'] },
+  { name: '우럭', seasons: [4, 5, 6, 7, 8, 9, 10], optimalTemp: [10, 25], difficulty: 'beginner', techniques: ['외줄낚시', '루어낚시'] },
+  { name: '볼락', image: 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTExMjdfMzEg%2FMDAxNzY0MjMwMzY2ODI5.D02DZ_0aJMFTE4xNn1bJEgN-muC5HLCXx99OUNQN7JEg.BSx5RD94P2d9lKw5Zudg1kYsPMVQGxQgcpJC_jTX00Yg.JPEG%2F20251126_015326.jpg&type=a340', seasons: [11, 12, 1, 2, 3], optimalTemp: [5, 15], difficulty: 'beginner', techniques: ['메바링', '볼락루어'] },
+  { name: '농어', image: 'https://search.pstatic.net/sunny/?src=https%3A%2F%2Fmblogthumb-phinf.pstatic.net%2FMjAyNDEyMzFfMjI5%2FMDAxNzM1NjMzNTA0NDkw.CY892IopGCGUR7f-lbrSjVhj-Q8vZ7c3r0wO7jbveEog.oG5NISyB3Y5-CB1QmjxgN7tyHxkb19Bw14ZkloU7Pq8g.JPEG%2FIMG_6904.jpg%3Ftype%3Dw800&type=a340', seasons: [5, 6, 7, 8, 9], optimalTemp: [15, 28], difficulty: 'advanced', techniques: ['루어낚시', '미노우'] },
+  { name: '참돔', seasons: [4, 5, 6, 9, 10, 11], optimalTemp: [14, 24], difficulty: 'advanced', techniques: ['타이라바', '참돔찌낚시'] },
+  { name: '노래미', image: 'https://search.pstatic.net/sunny/?src=https%3A%2F%2Fwww.innak.kr%2Fdata%2Ffile%2Fpdspictorial%2F50_20061122_134854_1.jpg&type=a340', seasons: [3, 4, 5, 6, 9, 10, 11], optimalTemp: [8, 20], difficulty: 'beginner', techniques: ['찌낚시', '다운샷'] },
+  { name: '고등어', seasons: [8, 9, 10, 11], optimalTemp: [15, 25], difficulty: 'beginner', techniques: ['사비키', '찌낚시'] },
+  { name: '오징어', seasons: [8, 9, 10, 11], optimalTemp: [15, 22], difficulty: 'intermediate', techniques: ['에기낚시', '봉돌채비'] },
+  { name: '벵에돔', seasons: [5, 6, 7, 8, 9, 10], optimalTemp: [16, 26], difficulty: 'advanced', techniques: ['찌낚시', '반유동'] },
+  { name: '광어', seasons: [5, 6, 7, 8, 9], optimalTemp: [14, 24], difficulty: 'intermediate', techniques: ['다운샷', '루어'] },
+  { name: '도다리', seasons: [2, 3, 4, 5], optimalTemp: [8, 18], difficulty: 'beginner', techniques: ['원투낚시', '청갯지렁이'] },
+  { name: '망둥어', seasons: [9, 10, 11], optimalTemp: [12, 22], difficulty: 'beginner', techniques: ['원투낚시', '미끼낚시'] },
+  { name: '학꽁치', seasons: [10, 11, 12, 1, 2], optimalTemp: [8, 18], difficulty: 'beginner', techniques: ['학꽁치채비', '찌낚시'] },
+  { name: '가자미', seasons: [11, 12, 1, 2, 3, 4], optimalTemp: [5, 15], difficulty: 'beginner', techniques: ['원투낚시', '카드채비'] },
 ];
 
 // ─── Data: Trending Gear ──────────────────────────────────────
@@ -345,37 +331,37 @@ function generateTips(
   // Weather-based tips
   if (weather) {
     if ((weather.windSpeed ?? 0) > 8) {
-      tips.push('⚠️ 바람이 강합니다. 무거운 봉돌과 안전장비를 준비하세요.');
+      tips.push('️ 바람이 강합니다. 무거운 봉돌과 안전장비를 준비하세요.');
     }
     if (weather.tempC < 5) {
-      tips.push('🧤 체감온도가 낮습니다. 방한복 필수!');
+      tips.push(' 체감온도가 낮습니다. 방한복 필수!');
     }
     if (weather.tempC > 28) {
-      tips.push('☀️ 무더위 주의! 자외선 차단과 수분 보충을 챙기세요.');
+      tips.push('️ 무더위 주의! 자외선 차단과 수분 보충을 챙기세요.');
     }
     if (weather.conditionKo.includes('비') || weather.conditionKo.includes('소나기')) {
-      tips.push('🌧️ 비 소식이 있습니다. 우비와 방수가방을 챙기세요.');
+      tips.push('️ 비 소식이 있습니다. 우비와 방수가방을 챙기세요.');
     }
   }
 
   // Time-based tips
   if (hour >= 4 && hour <= 6) {
-    tips.push('🌅 새벽 매직아워! 입질이 가장 활발한 시간입니다.');
+    tips.push(' 새벽 매직아워! 입질이 가장 활발한 시간입니다.');
   } else if (hour >= 17 && hour <= 19) {
-    tips.push('🌇 해질녘 황금시간대. 대물 확률이 높아집니다.');
+    tips.push(' 해질녘 황금시간대. 대물 확률이 높아집니다.');
   }
 
   // Bite-based tips
   if (biteTime) {
     if (biteTime.score >= 75) {
-      tips.push('🟢 오늘은 최고의 낚시 컨디션! 대물을 기대하세요.');
+      tips.push(' 오늘은 최고의 낚시 컨디션! 대물을 기대하세요.');
     } else if (biteTime.score < 35) {
-      tips.push('🟡 조건이 까다롭습니다. 인내심을 갖고 도전하세요.');
+      tips.push(' 조건이 까다롭습니다. 인내심을 갖고 도전하세요.');
     }
   }
 
   // Species-specific tips
-  tips.push(`🎣 ${species.name} 추천 기법: ${species.techniques.join(', ')}`);
+  tips.push(` ${species.name} 추천 기법: ${species.techniques.join(', ')}`);
 
   return tips.slice(0, 4); // max 4 tips
 }
@@ -450,8 +436,7 @@ export function generateRecommendation(
     tips,
     gear: recommendedGear,
     reasoning,
-    secretSpot: isPro ? SECRET_FISHING_SPOTS[Math.floor(Math.random() * SECRET_FISHING_SPOTS.length)] : undefined,
-  };
+    secretSpot: isPro ? SECRET_FISHING_SPOTS[Math.floor(Math.random() * SECRET_FISHING_SPOTS.length)] : undefined };
 }
 
 function buildReasoning(
@@ -645,6 +630,5 @@ export function generateCatchReport(
     period: `${targetYear}년 ${monthLabel}`,
     totalTrips, totalFish, topSpecies, topSpots,
     bestDay, biggestFish, avgPerTrip, trendVsPrev,
-    monthSummary,
-  };
+    monthSummary };
 }

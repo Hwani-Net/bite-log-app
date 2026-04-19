@@ -7,8 +7,7 @@ import { FishingNewsItem } from "@/services/fishingNewsService";
 import { BiteTimePrediction } from "@/services/biteTimeService";
 import {
   getSpeciesBiteScores,
-  SpeciesBiteScore,
-} from "@/services/speciesBiteService";
+  SpeciesBiteScore } from "@/services/speciesBiteService";
 import { MapPin, ChevronRight, Loader2 } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
@@ -22,8 +21,7 @@ const FISH_COLORS: Record<string, { gradient: string }> = {
   광어: { gradient: "from-yellow-400 to-amber-300" },
   고등어: { gradient: "from-indigo-500 to-blue-400" },
   방어: { gradient: "from-sky-500 to-cyan-400" },
-  주꾸미: { gradient: "from-red-400 to-orange-300" },
-};
+  주꾸미: { gradient: "from-red-400 to-orange-300" } };
 const DEFAULT_FISH = { gradient: "from-slate-400 to-slate-300" };
 
 const NEWS_GRADIENTS = [
@@ -47,8 +45,7 @@ export default function ContentTabs({
   recordsLoading,
   topNews,
   biteTime,
-  locale,
-}: ContentTabsProps) {
+  locale }: ContentTabsProps) {
   const [activeTab, setActiveTab] = useState<TabId>("catches");
   const isKo = locale === "ko";
 
@@ -58,8 +55,7 @@ export default function ContentTabs({
     {
       id: "forecast",
       label: isKo ? "입질 예보" : "Forecast",
-      icon: "analytics",
-    },
+      icon: "analytics" },
   ];
 
   return (
@@ -104,8 +100,7 @@ export default function ContentTabs({
 function CatchesTab({
   records,
   loading,
-  locale,
-}: {
+  locale }: {
   records: CatchRecord[];
   loading: boolean;
   locale: string;
@@ -201,8 +196,7 @@ function CatchesTab({
 // ─── News Tab ────────────────────────────────────────────────────────────────
 function NewsTab({
   news,
-  locale,
-}: {
+  locale }: {
   news: FishingNewsItem[];
   locale: string;
 }) {
@@ -289,8 +283,7 @@ function NewsTab({
 // ─── Forecast Tab ────────────────────────────────────────────────────────────
 function ForecastTab({
   biteTime,
-  locale,
-}: {
+  locale }: {
   biteTime: BiteTimePrediction | null;
   locale: string;
 }) {

@@ -30,8 +30,7 @@ import {
   Loader2,
   Camera,
   CheckCircle,
-  Cloud,
-} from "lucide-react";
+  Cloud } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
 function RecordDetailContent() {
@@ -79,8 +78,7 @@ function RecordDetailContent() {
         species,
         count,
         sizeCm: sizeCm ? Number(sizeCm) : undefined,
-        memo: memo.trim() || undefined,
-      });
+        memo: memo.trim() || undefined });
       setRecord(updated);
       setEditing(false);
     } catch (err) {

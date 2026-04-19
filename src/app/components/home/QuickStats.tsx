@@ -13,28 +13,24 @@ export default function QuickStats({
   totalCatch,
   thisMonth,
   maxSize,
-  locale,
-}: QuickStatsProps) {
+  locale }: QuickStatsProps) {
   const isKo = locale === "ko";
   const items = [
     {
       label: isKo ? "전체" : "Total",
       value: totalCatch,
       unit: isKo ? "마리" : "",
-      icon: "phishing",
-    },
+      icon: "phishing" },
     {
       label: isKo ? "월간" : "Month",
       value: thisMonth,
       unit: isKo ? "마리" : "",
-      icon: "calendar_month",
-    },
+      icon: "calendar_month" },
     {
       label: isKo ? "최대 조과" : "Max",
       value: maxSize || "--",
       unit: maxSize ? "cm" : "",
-      icon: "straighten",
-    },
+      icon: "straighten" },
   ];
 
   return (

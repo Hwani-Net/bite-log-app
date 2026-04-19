@@ -66,8 +66,7 @@ function getMockReport(): ViralGearReport {
           '블로그·카페 38건 언급. "맑은 날 오렌지 계열이 주꾸미에 최고"라는 평이 지배적. 9~10월 서해 공략 채비 1위.',
         coupangSearchUrl:
           "https://www.coupang.com/np/search?q=야마시타+에기+OH+3.5&link_id=re_1765888&subId=bitelog",
-        sourceCount: 38,
-      },
+        sourceCount: 38 },
       {
         rank: 2,
         gearName: "요즈리 슷테 M 핑크",
@@ -82,8 +81,7 @@ function getMockReport(): ViralGearReport {
           '"흐린 날 핑크 슷테 갑오징어 대박"이라는 후기 연이어 등장. 남해권 낚시인들 사이 입소문 확산 중.',
         coupangSearchUrl:
           "https://www.coupang.com/np/search?q=요즈리+슷테+핑크&link_id=re_1765888&subId=bitelog",
-        sourceCount: 24,
-      },
+        sourceCount: 24 },
       {
         rank: 3,
         gearName: "아이마 슬로우 지그 80g 블루핑크",
@@ -98,8 +96,7 @@ function getMockReport(): ViralGearReport {
           "제주 방어 시즌 개막과 함께 검색량 3배 폭증. 유튜버들이 일제히 블루핑크 슬로우 지그 추천 영상 업로드.",
         coupangSearchUrl:
           "https://www.coupang.com/np/search?q=슬로우+지그+80g&link_id=re_1765888&subId=bitelog",
-        sourceCount: 19,
-      },
+        sourceCount: 19 },
       {
         rank: 4,
         gearName: "에코기어 바이브 70 워터멜론",
@@ -114,8 +111,7 @@ function getMockReport(): ViralGearReport {
           "볼락 야간 루어 붐과 함께 워터멜론 색상 바이브 추천글 급증. 서해 방파제 낚인들 사이 핫템.",
         coupangSearchUrl:
           "https://www.coupang.com/np/search?q=에코기어+바이브&link_id=re_1765888&subId=bitelog",
-        sourceCount: 16,
-      },
+        sourceCount: 16 },
       {
         rank: 5,
         gearName: "오너 지그헤드 1.5g + 갈피나무 웜",
@@ -130,10 +126,8 @@ function getMockReport(): ViralGearReport {
           "볼락 마릿수 낚시의 정석 채비로 꾸준히 언급. 특히 태안·보령 방파제 야간 낚시에서 압도적.",
         coupangSearchUrl:
           "https://www.coupang.com/np/search?q=볼락+지그헤드+1.5g&link_id=re_1765888&subId=bitelog",
-        sourceCount: 12,
-      },
-    ],
-  };
+        sourceCount: 12 },
+    ] };
 }
 
 // ─── Naver Blog Search ────────────────────────────────────────────────────────
@@ -157,17 +151,14 @@ async function searchNaverBlog(query: string): Promise<NaverSearchItem[]> {
       {
         headers: {
           "X-Naver-Client-Id": clientId,
-          "X-Naver-Client-Secret": clientSecret,
-        },
-      },
+          "X-Naver-Client-Secret": clientSecret } },
     );
     if (!res.ok) return [];
     const data = await res.json();
     return (data.items || []).map((item: NaverSearchItem) => ({
       title: item.title.replace(/<[^>]*>/g, ""),
       description: item.description.replace(/<[^>]*>/g, ""),
-      link: item.link,
-    }));
+      link: item.link }));
   } catch {
     return [];
   }
@@ -259,17 +250,13 @@ export async function getViralGearReport(): Promise<ViralGearReport> {
           contents: [
             {
               role: "user",
-              parts: [{ text: `낚시 커뮤니티 최신 글 목록:\n${inputText}` }],
-            },
+              parts: [{ text: `낚시 커뮤니티 최신 글 목록:\n${inputText}` }] },
           ],
           systemInstruction: { parts: [{ text: VIRAL_SYSTEM_PROMPT }] },
           generationConfig: {
             temperature: 0.2,
             maxOutputTokens: 1024,
-            responseMimeType: "application/json",
-          },
-        }),
-      },
+            responseMimeType: "application/json" } }) },
     );
 
     if (!res.ok) {
@@ -295,8 +282,7 @@ export async function getViralGearReport(): Promise<ViralGearReport> {
       급상승: { icon: "trending-up-fast", color: "text-red-500" },
       상승: { icon: "trending-up", color: "text-orange-500" },
       유지: { icon: "minus", color: "text-gray-500" },
-      하락: { icon: "trending-down", color: "text-blue-400" },
-    };
+      하락: { icon: "trending-down", color: "text-blue-400" } };
 
     const items: ViralGearItem[] = parsed.items.slice(0, 5).map(
       (
@@ -328,8 +314,7 @@ export async function getViralGearReport(): Promise<ViralGearReport> {
           trendColor: meta.color,
           summaryText: item.summaryText ?? "",
           coupangSearchUrl: `https://www.coupang.com/np/search?q=${q}&link_id=re_1765888&subId=bitelog`,
-          sourceCount: unique.length,
-        };
+          sourceCount: unique.length };
       },
     );
 
@@ -339,8 +324,7 @@ export async function getViralGearReport(): Promise<ViralGearReport> {
       totalSources: unique.length,
       isAI: true,
       topSpecies: parsed.topSpecies ?? "주꾸미",
-      hotKeyword: parsed.hotKeyword ?? "",
-    };
+      hotKeyword: parsed.hotKeyword ?? "" };
   } catch (err) {
     console.error("[ViralGear] Error:", err);
     return getMockReport();

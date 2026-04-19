@@ -5,8 +5,7 @@ import Link from "next/link";
 import {
   getViralGearReport,
   type ViralGearItem,
-  type ViralGearReport,
-} from "@/services/viralGearService";
+  type ViralGearReport } from "@/services/viralGearService";
 import { useAppStore } from "@/store/appStore";
 import BottomNav from "@/components/BottomNav";
 import { ShoppingCart, TrendingUp, Minus, TrendingDown } from "lucide-react";
@@ -27,8 +26,7 @@ const LABELS = {
     disclaimer:
       "쿠팡 파트너스 활동의 일환으로, 구매 시 수수료를 받을 수 있습니다.",
     updatedAt: "기준",
-    noData: "데이터를 불러오는 중입니다...",
-  },
+    noData: "데이터를 불러오는 중입니다..." },
   en: {
     title: "Viral Gear Ranking",
     subtitle: "What's trending in fishing communities right now",
@@ -43,9 +41,7 @@ const LABELS = {
     buy: "View on Coupang",
     disclaimer: "This is a Coupang Partners affiliate link.",
     updatedAt: "as of",
-    noData: "Loading data...",
-  },
-};
+    noData: "Loading data..." } };
 
 function TrendIcon({ icon, className }: { icon: string; className?: string }) {
   if (icon === "trending-up-fast")

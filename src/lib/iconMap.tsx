@@ -3,6 +3,7 @@
  * Used during gradual migration from Material Symbols to Lucide.
  * Dynamic icon names (from API responses) can use this mapper.
  */
+import React from "react";
 import {
   Home,
   Bell,
@@ -84,8 +85,7 @@ import {
   ScanText,
   CheckCircle,
   CircleAlert,
-  type LucideIcon,
-} from "lucide-react";
+  type LucideIcon } from "lucide-react";
 
 const iconMap: Record<string, LucideIcon> = {
   // Navigation
@@ -190,8 +190,7 @@ const iconMap: Record<string, LucideIcon> = {
   gpp_maybe: ShieldAlert,
   document_scanner: ScanText,
   check_circle: CheckCircle,
-  error: CircleAlert,
-};
+  error: CircleAlert };
 
 /**
  * Get a Lucide icon component by Material Symbols name.
@@ -205,17 +204,21 @@ export function getLucideIcon(materialName: string): LucideIcon {
  * Render a Lucide icon from a Material Symbols name string.
  * Drop-in replacement for <span className="material-symbols-outlined">{name}</span>
  */
+interface DynamicIconProps {
+  name: string;
+  size?: number;
+  className?: string;
+  strokeWidth?: number;
+}
+
 export function DynamicIcon({
   name,
   size = 16,
   className = "",
   ...props
-}: {
-  name: string;
-  size?: number;
-  className?: string;
-  strokeWidth?: number;
-}) {
-  const Icon = getLucideIcon(name);
-  return <Icon size={size} className={className} {...props} />;
+}: DynamicIconProps) {
+  return React.createElement(getLucideIcon(name), {
+    size,
+    className,
+    ...(props as Record<string, unknown>) });
 }

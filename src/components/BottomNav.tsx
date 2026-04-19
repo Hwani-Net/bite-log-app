@@ -10,8 +10,7 @@ import {
   Sparkles,
   Trophy,
   Settings,
-  type LucideIcon,
-} from "lucide-react";
+  type LucideIcon } from "lucide-react";
 
 interface NavItem {
   href: string;

@@ -22,8 +22,7 @@ import {
   Trophy,
   Dna,
   Compass,
-  Clock,
-} from "lucide-react";
+  Clock } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 import {
   BarChart,
@@ -36,8 +35,7 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend,
-} from "recharts";
+  Legend } from "recharts";
 
 const CHART_COLORS = [
   "#c9a84c",
@@ -50,8 +48,7 @@ const CHART_COLORS = [
 
 // Dynamic import for Leaflet (SSR not supported)
 const FishingMap = dynamic(() => import("@/components/FishingMap"), {
-  ssr: false,
-});
+  ssr: false });
 
 const PERIOD_TABS: { value: PeriodFilter; ko: string; en: string }[] = [
   { value: "week", ko: "1주", en: "1W" },
@@ -64,8 +61,7 @@ function MiniStatCard({
   icon,
   label,
   value,
-  unit,
-}: {
+  unit }: {
   icon: string;
   label: string;
   value: number | string;
@@ -88,8 +84,7 @@ function MiniStatCard({
 // ===== Calendar Component =====
 function CalendarView({
   records,
-  locale,
-}: {
+  locale }: {
   records: CatchRecord[];
   locale: string;
 }) {
@@ -115,8 +110,7 @@ function CalendarView({
       month: m,
       days: daysInMonth,
       firstDay: firstDayOfWeek,
-      dateMap: map,
-    };
+      dateMap: map };
   }, [records, monthOffset]);
 
   const dayLabels =
@@ -129,8 +123,7 @@ function CalendarView({
       ? `${year}년 ${month + 1}월`
       : new Date(year, month).toLocaleDateString("en", {
           year: "numeric",
-          month: "long",
-        });
+          month: "long" });
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -229,8 +222,7 @@ function CalendarView({
 // ===== Badge Component =====
 function BadgeCard({
   badge,
-  locale,
-}: {
+  locale }: {
   badge: AchievementBadge;
   locale: string;
 }) {
@@ -320,31 +312,26 @@ export default function StatsPage() {
     {
       key: "stats" as const,
       icon: "bar_chart",
-      label: locale === "ko" ? "통계" : "Stats",
-    },
+      label: locale === "ko" ? "통계" : "Stats" },
     {
       key: "dna" as const,
       icon: "genetics",
-      label: locale === "ko" ? "DNA" : "DNA",
-    },
+      label: locale === "ko" ? "DNA" : "DNA" },
     {
       key: "map" as const,
       icon: "map",
-      label: locale === "ko" ? "지도" : "Map",
-    },
+      label: locale === "ko" ? "지도" : "Map" },
     {
       key: "calendar" as const,
       icon: "calendar_month",
-      label: locale === "ko" ? "캘린더" : "Calendar",
-    },
+      label: locale === "ko" ? "캘린더" : "Calendar" },
     {
       key: "badges" as const,
       icon: "military_tech",
       label:
         locale === "ko"
           ? `배지 ${earnedCount}/${badges.length}`
-          : `Badges ${earnedCount}/${badges.length}`,
-    },
+          : `Badges ${earnedCount}/${badges.length}` },
   ];
 
   if (!stats) return null;
@@ -470,8 +457,7 @@ export default function StatsPage() {
                           border: "1px solid rgba(255,255,255,0.1)",
                           borderRadius: "12px",
                           fontSize: "12px",
-                          color: "#ffffff",
-                        }}
+                          color: "#ffffff" }}
                       />
                       <Bar
                         dataKey="count"
@@ -540,8 +526,7 @@ export default function StatsPage() {
                           <span
                             style={{
                               fontSize: "12px",
-                              color: "rgba(255,255,255,0.5)",
-                            }}
+                              color: "rgba(255,255,255,0.5)" }}
                           >
                             {value}
                           </span>
@@ -558,8 +543,7 @@ export default function StatsPage() {
                           border: "1px solid rgba(255,255,255,0.1)",
                           borderRadius: "12px",
                           fontSize: "12px",
-                          color: "#ffffff",
-                        }}
+                          color: "#ffffff" }}
                       />
                     </PieChart>
                   </ResponsiveContainer>

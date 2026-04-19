@@ -13,8 +13,7 @@ import {
   CheckCircle,
   XCircle,
   ShieldAlert,
-  ScanText,
-} from "lucide-react";
+  ScanText } from "lucide-react";
 
 export default function NoticeParserToolsPage() {
   const [input, setInput] = useState(

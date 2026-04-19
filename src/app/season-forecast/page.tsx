@@ -11,8 +11,7 @@ import {
   getTotalRelease,
   sortByCurrentSeason,
   getSeasonStatus,
-  filterByRegion,
-} from "@/data/fishSeasonDB";
+  filterByRegion } from "@/data/fishSeasonDB";
 import { useAppStore } from "@/store/appStore";
 import BottomNav from "@/components/BottomNav";
 
@@ -28,27 +27,22 @@ const STATUS_CONFIG = {
     label: "황금 시즌",
     bg: "bg-[#c9a84c]/10 border-[#c9a84c]/40",
     text: "text-[#c9a84c]",
-    badge: "bg-[#c9a84c]",
-  },
+    badge: "bg-[#c9a84c]" },
   peak: {
     label: "피크 시즌",
     bg: "bg-green-500/10 border-green-500/30",
     text: "text-green-400",
-    badge: "bg-green-500",
-  },
+    badge: "bg-green-500" },
   closed: {
     label: "금어기",
     bg: "bg-red-500/10 border-red-500/30",
     text: "text-red-400",
-    badge: "bg-red-500",
-  },
+    badge: "bg-red-500" },
   offseason: {
     label: "⏳ 비수기",
     bg: "bg-white/5 border-white/10",
     text: "text-white/60",
-    badge: "bg-white/20",
-  },
-};
+    badge: "bg-white/20" } };
 
 function formatCount(n: number): string {
   if (n >= 1000000) return `${(n / 10000).toFixed(0)}만`;
@@ -59,8 +53,7 @@ function formatCount(n: number): string {
 function MonthBar({
   peakMonths,
   goldMonths,
-  closedSeason,
-}: {
+  closedSeason }: {
   peakMonths: number[];
   goldMonths: number[];
   closedSeason: FishSeasonData["closedSeason"];
@@ -119,8 +112,7 @@ function ReleaseSiteRow({ site }: { site: ReleaseSite }) {
 
 function FishCard({
   data,
-  regionFilter,
-}: {
+  regionFilter }: {
   data: FishSeasonData;
   regionFilter: Region | "전국";
 }) {

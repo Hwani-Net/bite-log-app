@@ -1,32 +1,35 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi } from "vitest";
 
 // vi.mock calls are hoisted — must be before the service import
-vi.mock('@/services/lunarService', () => ({
+vi.mock("@/services/lunarService", () => ({
   getLunarInfo: vi.fn(() => ({
-    phaseName: '보름달',
-    phaseEmoji: '🌕',
-    fishingImpact: 'excellent' as const,
-    description: '대조기 — 조류 강하여 입질 활발',
+    phaseName: "보름달",
+    phaseEmoji: "🌕",
+    fishingImpact: "excellent" as const,
+    description: "대조기 — 조류 강하여 입질 활발",
   })),
 }));
 
-vi.mock('@/services/tideService', () => ({
+vi.mock("@/services/tideService", () => ({
   getCurrentPhase: vi.fn(() => null),
 }));
 
 // Safety mocks for type-only imports (isolatedModules emits them at runtime)
-vi.mock('@/services/weatherService', () => ({}));
-vi.mock('@/services/marineService', () => ({}));
+vi.mock("@/services/weatherService", () => ({}));
+vi.mock("@/services/marineService", () => ({}));
 
 import {
   calculateBiteTime,
   getPeakFishingWindows,
   getSpeciesPeakWindows,
-} from '@/services/biteTimeService';
-import type { BiteTimePrediction, TimelineSlot } from '@/services/biteTimeService';
+} from "@/services/biteTimeService";
+import type {
+  BiteTimePrediction,
+  TimelineSlot,
+} from "@/services/biteTimeService";
 
-import type { WeatherData } from '@/services/weatherService';
-import type { MarineData } from '@/services/marineService';
+import type { WeatherData } from "@/services/weatherService";
+import type { MarineData } from "@/services/marineService";
 
 // ── Fixtures ──────────────────────────────────────────────────────
 const mockWeather = {
@@ -35,19 +38,19 @@ const mockWeather = {
   pressureMsl: 1005,
   humidity: 70,
   wmoCode: 0,
-  description: '맑음',
-  condition: 'clear',
-  conditionKo: '맑음',
-  conditionEn: 'Clear',
-  icon: '01d',
+  description: "맑음",
+  condition: "clear",
+  conditionKo: "맑음",
+  conditionEn: "Clear",
+  icon: "01d",
 } as unknown as WeatherData;
 
 const mockTideData = {
-  stationName: '인천',
+  stationName: "인천",
   tides: [
-    { type: 'High' as const, time: '08:00', level: 350 },
-    { type: 'Low' as const, time: '14:00', level: 50 },
-    { type: 'High' as const, time: '20:00', level: 320 },
+    { type: "High" as const, time: "08:00", level: 350 },
+    { type: "Low" as const, time: "14:00", level: 50 },
+    { type: "High" as const, time: "20:00", level: 320 },
   ],
 } as unknown as Parameters<typeof getPeakFishingWindows>[0];
 
@@ -64,11 +67,11 @@ const poorWeather = {
   pressureMsl: 985,
   humidity: 90,
   wmoCode: 95,
-  description: '폭풍',
-  condition: 'thunderstorm',
-  conditionKo: '폭풍',
-  conditionEn: 'Thunderstorm',
-  icon: '11d',
+  description: "폭풍",
+  condition: "thunderstorm",
+  conditionKo: "폭풍",
+  conditionEn: "Thunderstorm",
+  icon: "11d",
 } as unknown as WeatherData;
 
 const poorMarine = {
@@ -79,19 +82,18 @@ const poorMarine = {
 } as unknown as MarineData;
 
 // ── calculateBiteTime ─────────────────────────────────────────────
-describe('calculateBiteTime', () => {
-  it('should return a valid prediction with all null inputs', () => {
+describe("calculateBiteTime", () => {
+  it("should return a valid prediction with all null inputs", () => {
     const result = calculateBiteTime(null, null);
 
     expect(result).toBeDefined();
     expect(result.score).toBeGreaterThanOrEqual(0);
     expect(result.score).toBeLessThanOrEqual(100);
-    expect(['excellent', 'good', 'fair', 'poor']).toContain(result.grade);
+    expect(["excellent", "good", "fair", "poor"]).toContain(result.grade);
     expect(result.gradeLabel).toBeTruthy();
-    expect(result.gradeEmoji).toBeTruthy();
   });
 
-  it('should always return exactly 7 factors', () => {
+  it("should always return exactly 7 factors", () => {
     const results: BiteTimePrediction[] = [
       calculateBiteTime(null, null),
       calculateBiteTime(mockWeather, mockTideData, mockMarine),
@@ -103,19 +105,19 @@ describe('calculateBiteTime', () => {
     }
   });
 
-  it('each factor should have valid structure', () => {
+  it("each factor should have valid structure", () => {
     const result = calculateBiteTime(mockWeather, mockTideData, mockMarine);
 
     result.factors.forEach((factor) => {
       expect(factor.name).toBeTruthy();
       expect(factor.score).toBeGreaterThanOrEqual(0);
-      expect(['positive', 'neutral', 'negative']).toContain(factor.status);
+      expect(["positive", "neutral", "negative"]).toContain(factor.status);
       expect(factor.description).toBeTruthy();
       expect(factor.icon).toBeTruthy();
     });
   });
 
-  it('score should always be normalized between 0 and 100', () => {
+  it("score should always be normalized between 0 and 100", () => {
     const inputs = [
       { weather: null, tide: null, marine: undefined },
       { weather: mockWeather, tide: mockTideData, marine: mockMarine },
@@ -129,64 +131,70 @@ describe('calculateBiteTime', () => {
     }
   });
 
-  it('optimal SST (18°C) should yield higher score than extreme temp (35°C)', () => {
+  it("optimal SST (18°C) should yield higher score than extreme temp (35°C)", () => {
     const optimal = calculateBiteTime({ ...mockWeather, tempC: 18 }, null);
     const extreme = calculateBiteTime({ ...mockWeather, tempC: 35 }, null);
     expect(optimal.score).toBeGreaterThan(extreme.score);
   });
 
-  it('low wind (2 m/s) should yield higher score than storm wind (15 m/s)', () => {
+  it("low wind (2 m/s) should yield higher score than storm wind (15 m/s)", () => {
     const calm = calculateBiteTime({ ...mockWeather, windSpeed: 2 }, null);
     const storm = calculateBiteTime({ ...mockWeather, windSpeed: 15 }, null);
     expect(calm.score).toBeGreaterThan(storm.score);
   });
 
-  it('low pressure (1005 hPa) should score higher than strong high pressure (1030 hPa)', () => {
+  it("low pressure (1005 hPa) should score higher than strong high pressure (1030 hPa)", () => {
     const low = calculateBiteTime({ ...mockWeather, pressureMsl: 1005 }, null);
     const high = calculateBiteTime({ ...mockWeather, pressureMsl: 1030 }, null);
     expect(low.score).toBeGreaterThan(high.score);
   });
 
-  it('good wave height (0.3m) should score higher than dangerous waves (3.5m)', () => {
-    const calm = calculateBiteTime(null, null, { ...mockMarine, waveHeight: 0.3 });
-    const rough = calculateBiteTime(null, null, { ...mockMarine, waveHeight: 3.5 });
+  it("good wave height (0.3m) should score higher than dangerous waves (3.5m)", () => {
+    const calm = calculateBiteTime(null, null, {
+      ...mockMarine,
+      waveHeight: 0.3,
+    });
+    const rough = calculateBiteTime(null, null, {
+      ...mockMarine,
+      waveHeight: 3.5,
+    });
     expect(calm.score).toBeGreaterThan(rough.score);
   });
 
-  it('grade thresholds should match score correctly', () => {
+  it("grade thresholds should match score correctly", () => {
     // We cannot control time-of-day factor, but we can validate grade matches score
     const result = calculateBiteTime(mockWeather, mockTideData, mockMarine);
     const { score, grade } = result;
 
-    if (score >= 75) expect(grade).toBe('excellent');
-    else if (score >= 55) expect(grade).toBe('good');
-    else if (score >= 35) expect(grade).toBe('fair');
-    else expect(grade).toBe('poor');
+    if (score >= 75) expect(grade).toBe("excellent");
+    else if (score >= 55) expect(grade).toBe("good");
+    else if (score >= 35) expect(grade).toBe("fair");
+    else expect(grade).toBe("poor");
   });
 
-  it('should return currentPhaseLabel when phase info is available', () => {
+  it("should return currentPhaseLabel when phase info is available", () => {
     // Phase is mocked to return null, so currentPhaseLabel should be undefined
     const result = calculateBiteTime(mockWeather, mockTideData);
     // With our mock returning null, currentPhaseLabel is undefined — just verify no crash
     expect(result).toBeDefined();
   });
 
-  it('should include lunarInfo from mocked getLunarInfo', () => {
+  it("should include lunarInfo from mocked getLunarInfo", () => {
     const result = calculateBiteTime(null, null);
     expect(result.lunarInfo).toBeDefined();
-    expect(result.lunarInfo?.phaseName).toBe('보름달');
-    expect(result.lunarInfo?.fishingImpact).toBe('excellent');
+    expect(result.lunarInfo?.phaseName).toBe("보름달");
+    expect(result.lunarInfo?.fishingImpact).toBe("excellent");
   });
 });
 
 // ── getPeakFishingWindows ─────────────────────────────────────────
-describe('getPeakFishingWindows', () => {
-  it('should return exactly 24 time slots', () => {
+describe("getPeakFishingWindows", () => {
+  it("should return exactly 24 time slots", () => {
     expect(getPeakFishingWindows(null)).toHaveLength(24);
     expect(getPeakFishingWindows(mockTideData)).toHaveLength(24);
   });
 
-  it('each slot should have the correct hour index and label format', () => {
+  it("each slot should have the correct hour index and label format", () => {
     const slots = getPeakFishingWindows(null);
 
     slots.forEach((slot: TimelineSlot, index) => {
@@ -195,15 +203,15 @@ describe('getPeakFishingWindows', () => {
     });
   });
 
-  it('each slot should have a valid grade', () => {
+  it("each slot should have a valid grade", () => {
     const slots = getPeakFishingWindows(null);
 
     slots.forEach((slot) => {
-      expect(['peak', 'good', 'fair', 'low']).toContain(slot.grade);
+      expect(["peak", "good", "fair", "low"]).toContain(slot.grade);
     });
   });
 
-  it('each slot score should be between 0 and 100', () => {
+  it("each slot score should be between 0 and 100", () => {
     const slots = getPeakFishingWindows(null);
 
     slots.forEach((slot) => {
@@ -212,7 +220,7 @@ describe('getPeakFishingWindows', () => {
     });
   });
 
-  it('dawn hours (4–7) should be marked as magic hours', () => {
+  it("dawn hours (4–7) should be marked as magic hours", () => {
     const slots = getPeakFishingWindows(null);
 
     for (let h = 4; h <= 7; h++) {
@@ -220,7 +228,7 @@ describe('getPeakFishingWindows', () => {
     }
   });
 
-  it('dusk hours (17–20) should be marked as magic hours', () => {
+  it("dusk hours (17–20) should be marked as magic hours", () => {
     const slots = getPeakFishingWindows(null);
 
     for (let h = 17; h <= 20; h++) {
@@ -228,7 +236,7 @@ describe('getPeakFishingWindows', () => {
     }
   });
 
-  it('midday hours (11–15) should NOT be magic hours', () => {
+  it("midday hours (11–15) should NOT be magic hours", () => {
     const slots = getPeakFishingWindows(null);
 
     for (let h = 11; h <= 15; h++) {
@@ -236,13 +244,13 @@ describe('getPeakFishingWindows', () => {
     }
   });
 
-  it('tide peaks should be at 1–3 hours before high tide', () => {
+  it("tide peaks should be at 1–3 hours before high tide", () => {
     // High tide at 10:00 → tide peaks at 7, 8, 9
     const tideData = {
-      stationName: '인천',
+      stationName: "인천",
       tides: [
-        { type: 'High' as const, time: '10:00', level: 350 },
-        { type: 'Low' as const, time: '16:00', level: 50 },
+        { type: "High" as const, time: "10:00", level: 350 },
+        { type: "Low" as const, time: "16:00", level: 50 },
       ],
     };
     const slots = getPeakFishingWindows(tideData);
@@ -254,14 +262,14 @@ describe('getPeakFishingWindows', () => {
     expect(slots[10].isTidePeak).toBe(false);
   });
 
-  it('magic hour + tide peak → golden time', () => {
+  it("magic hour + tide peak → golden time", () => {
     // High tide at 09:00 → tide peaks at 6, 7, 8
     // Hours 6 and 7 fall in dawn magic hour (4–7) → golden time
     const tideData = {
-      stationName: '인천',
+      stationName: "인천",
       tides: [
-        { type: 'High' as const, time: '09:00', level: 350 },
-        { type: 'Low' as const, time: '15:00', level: 50 },
+        { type: "High" as const, time: "09:00", level: 350 },
+        { type: "Low" as const, time: "15:00", level: 50 },
       ],
     };
     const slots = getPeakFishingWindows(tideData);
@@ -270,7 +278,7 @@ describe('getPeakFishingWindows', () => {
     expect(slots[7].isGoldenTime).toBe(true);
   });
 
-  it('each slot should have a tags array', () => {
+  it("each slot should have a tags array", () => {
     const slots = getPeakFishingWindows(mockTideData);
 
     slots.forEach((slot) => {
@@ -280,14 +288,14 @@ describe('getPeakFishingWindows', () => {
 });
 
 // ── getSpeciesPeakWindows (generic mode) ─────────────────────────
-describe('getSpeciesPeakWindows — generic mode (no species)', () => {
-  it('should return exactly 24 slots', () => {
+describe("getSpeciesPeakWindows — generic mode (no species)", () => {
+  it("should return exactly 24 slots", () => {
     expect(getSpeciesPeakWindows(null)).toHaveLength(24);
     expect(getSpeciesPeakWindows(null, null)).toHaveLength(24);
     expect(getSpeciesPeakWindows(mockTideData)).toHaveLength(24);
   });
 
-  it('each slot should have valid structure', () => {
+  it("each slot should have valid structure", () => {
     const slots = getSpeciesPeakWindows(null);
 
     slots.forEach((slot: TimelineSlot, index) => {
@@ -295,12 +303,12 @@ describe('getSpeciesPeakWindows — generic mode (no species)', () => {
       expect(slot.label).toMatch(/^\d{2}:00$/);
       expect(slot.score).toBeGreaterThanOrEqual(0);
       expect(slot.score).toBeLessThanOrEqual(100);
-      expect(['peak', 'good', 'fair', 'low']).toContain(slot.grade);
+      expect(["peak", "good", "fair", "low"]).toContain(slot.grade);
       expect(Array.isArray(slot.tags)).toBe(true);
     });
   });
 
-  it('dawn (4–7) and dusk (17–20) should be marked as magic hours', () => {
+  it("dawn (4–7) and dusk (17–20) should be marked as magic hours", () => {
     const slots = getSpeciesPeakWindows(null);
 
     for (let h = 4; h <= 7; h++) {
@@ -311,13 +319,13 @@ describe('getSpeciesPeakWindows — generic mode (no species)', () => {
     }
   });
 
-  it('generic mode: tide peak hours should be flagged when tideData is provided', () => {
+  it("generic mode: tide peak hours should be flagged when tideData is provided", () => {
     // High tide at 12:00 → tide peaks at 9, 10, 11
     const tideData = {
-      stationName: '인천',
+      stationName: "인천",
       tides: [
-        { type: 'High' as const, time: '12:00', level: 350 },
-        { type: 'Low' as const, time: '18:00', level: 50 },
+        { type: "High" as const, time: "12:00", level: 350 },
+        { type: "Low" as const, time: "18:00", level: 50 },
       ],
     };
     const slots = getSpeciesPeakWindows(tideData);
@@ -327,12 +335,12 @@ describe('getSpeciesPeakWindows — generic mode (no species)', () => {
     expect(slots[11].isTidePeak).toBe(true);
   });
 
-  it('generic mode: uses env(40%) + tide(60%) weighting', () => {
+  it("generic mode: uses env(40%) + tide(60%) weighting", () => {
     // Without tideData, tide score defaults to 50 for all hours
     // Dawn (score=80): 80*0.4 + 50*0.6 = 32+30 = 62 → 'good'
     // Midday (score=40): 40*0.4 + 50*0.6 = 16+30 = 46 → 'fair'
     const slots = getSpeciesPeakWindows(null);
-    const dawnSlot = slots[5];   // 05:00, env=80
+    const dawnSlot = slots[5]; // 05:00, env=80
     const middaySlot = slots[12]; // 12:00, env=40
 
     expect(dawnSlot.score).toBeGreaterThan(middaySlot.score);

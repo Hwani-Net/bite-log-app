@@ -2,8 +2,7 @@ import {
   CatchRecord,
   DataService,
   UserStats,
-  PeriodFilter,
-} from '@/types';
+  PeriodFilter } from '@/types';
 
 const STORAGE_KEY = 'fishlog_catches';
 
@@ -68,8 +67,7 @@ function computeStats(records: CatchRecord[]): UserStats {
     .map(([species, count]) => ({
       species,
       count,
-      percentage: totalCatch > 0 ? Math.round((count / totalCatch) * 100) : 0,
-    }))
+      percentage: totalCatch > 0 ? Math.round((count / totalCatch) * 100) : 0 }))
     .sort((a, b) => b.count - a.count);
 
   // Monthly trend
@@ -82,8 +80,7 @@ function computeStats(records: CatchRecord[]): UserStats {
     .map(([month, count]) => ({
       month,
       label: `${parseInt(month.split('-')[1])}월`,
-      count,
-    }))
+      count }))
     .sort((a, b) => a.month.localeCompare(b.month));
 
   // Top spots
@@ -122,8 +119,7 @@ export const localStorageService: DataService = {
       id: generateId(),
       createdAt: now,
       updatedAt: now,
-      visibility: data.visibility || 'public',
-    };
+      visibility: data.visibility || 'public' };
     records.push(record);
     saveRecords(records);
     return record;
@@ -147,5 +143,4 @@ export const localStorageService: DataService = {
     const all = loadRecords();
     const filtered = filterByPeriod(all, period);
     return computeStats(filtered);
-  },
-};
+  } };

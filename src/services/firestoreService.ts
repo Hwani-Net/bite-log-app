@@ -7,15 +7,13 @@ import {
   updateDoc,
   deleteDoc,
   query,
-  orderBy,
-} from 'firebase/firestore';
+  orderBy } from 'firebase/firestore';
 import { getFirebaseDb } from '@/lib/firebase';
 import {
   CatchRecord,
   DataService,
   UserStats,
-  PeriodFilter,
-} from '@/types';
+  PeriodFilter } from '@/types';
 import { publishToFeed, unpublishFromFeed } from '@/services/feedService';
 
 // Helper: compute stats from records
@@ -34,8 +32,7 @@ function computeStats(records: CatchRecord[]): UserStats {
     .map(([species, count]) => ({
       species,
       count,
-      percentage: totalCatch > 0 ? Math.round((count / totalCatch) * 100) : 0,
-    }))
+      percentage: totalCatch > 0 ? Math.round((count / totalCatch) * 100) : 0 }))
     .sort((a, b) => b.count - a.count);
 
   const monthMap = new Map<string, number>();
@@ -47,8 +44,7 @@ function computeStats(records: CatchRecord[]): UserStats {
     .map(([month, count]) => ({
       month,
       label: `${parseInt(month.split('-')[1])}월`,
-      count,
-    }))
+      count }))
     .sort((a, b) => a.month.localeCompare(b.month));
 
   const spotMap = new Map<string, { visits: Set<string>; totalCatch: number; spot: CatchRecord['location'] }>();
@@ -159,6 +155,5 @@ export function createFirestoreService(uid: string): DataService {
       const all = await this.getCatchRecords();
       const filtered = filterByPeriod(all, period);
       return computeStats(filtered);
-    },
-  };
+    } };
 }

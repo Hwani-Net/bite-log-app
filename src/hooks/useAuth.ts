@@ -6,8 +6,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signOut as firebaseSignOut,
-  onAuthStateChanged,
-} from 'firebase/auth';
+  onAuthStateChanged } from 'firebase/auth';
 import { getFirebaseAuth, isFirebaseReady } from '@/lib/firebase';
 
 const googleProvider = new GoogleAuthProvider();
@@ -22,8 +21,7 @@ export function useAuth() {
   const [state, setState] = useState<AuthState>({
     user: null,
     loading: true,
-    error: null,
-  });
+    error: null });
 
   useEffect(() => {
     const auth = getFirebaseAuth();
@@ -72,6 +70,5 @@ export function useAuth() {
     signInWithGoogle,
     signOut,
     isLoggedIn: !!state.user,
-    isFirebaseConfigured: isFirebaseReady(),
-  };
+    isFirebaseConfigured: isFirebaseReady() };
 }

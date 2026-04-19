@@ -12,8 +12,7 @@ import {
   limit,
   increment,
   runTransaction,
-  Firestore,
-} from 'firebase/firestore';
+  Firestore } from 'firebase/firestore';
 import { getFirebaseDb, isFirebaseReady, getFirebaseAuth } from '@/lib/firebase';
 import { getDataService, isUsingFirestore } from '@/services/dataServiceFactory';
 import { CatchRecord, PublicFeedItem, FeedComment } from '@/types';
@@ -39,8 +38,7 @@ export function recordToFeedItem(record: CatchRecord): PublicFeedItem {
     date: record.date,
     location: {
       name: record.location.name,
-      region: record.location.region,
-    },
+      region: record.location.region },
     species: record.species,
     count: record.count,
     sizeCm: record.sizeCm,
@@ -51,8 +49,7 @@ export function recordToFeedItem(record: CatchRecord): PublicFeedItem {
     likeCount: record.likeCount || 0,
     commentCount: 0,
     sourceRecordId: record.id,
-    comments: [],
-  };
+    comments: [] };
 }
 
 // ====================================================================
@@ -76,8 +73,7 @@ export async function getPublicFeed(): Promise<PublicFeedItem[]> {
         const commentsSnap = await getDocs(query(commentsRef, orderBy('createdAt', 'asc')));
         const comments: FeedComment[] = commentsSnap.docs.map((c) => ({
           id: c.id,
-          ...c.data(),
-        })) as FeedComment[];
+          ...c.data() })) as FeedComment[];
 
         items.push({
           id: docSnap.id,
@@ -95,8 +91,7 @@ export async function getPublicFeed(): Promise<PublicFeedItem[]> {
           likeCount: data.likeCount || 0,
           commentCount: comments.length,
           sourceRecordId: data.sourceRecordId,
-          comments,
-        });
+          comments });
       }
       return items;
     } catch (err) {
@@ -142,8 +137,7 @@ export async function publishToFeed(record: CatchRecord): Promise<void> {
     tide: record.tide || null,
     createdAt: record.createdAt,
     likeCount: 0,
-    sourceRecordId: record.id,
-  });
+    sourceRecordId: record.id });
 }
 
 export async function unpublishFromFeed(sourceRecordId: string): Promise<void> {
@@ -248,8 +242,7 @@ export async function addComment(
     userId,
     userDisplayName: displayName,
     content,
-    createdAt: new Date().toISOString(),
-  };
+    createdAt: new Date().toISOString() };
   const docRef = await addDoc(commentsRef, newComment);
   return { id: docRef.id, ...newComment };
 }

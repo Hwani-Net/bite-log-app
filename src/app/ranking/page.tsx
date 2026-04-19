@@ -17,20 +17,17 @@ const CATEGORY_KEYS: {
     value: "catch",
     koLabel: "조과왕",
     enLabel: "Most Caught",
-    icon: "set_meal",
-  },
+    icon: "set_meal" },
   {
     value: "size",
     koLabel: "대어왕",
     enLabel: "Biggest Fish",
-    icon: "straighten",
-  },
+    icon: "straighten" },
   {
     value: "variety",
     koLabel: "다양왕",
     enLabel: "Most Variety",
-    icon: "category",
-  },
+    icon: "category" },
 ];
 
 export default function RankingPage() {

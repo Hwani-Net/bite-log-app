@@ -11,15 +11,13 @@ export default function Skeleton({
   className = "",
   variant = "rectangular",
   width,
-  height,
-}: SkeletonProps) {
+  height }: SkeletonProps) {
   const baseClass = "bg-slate-200/60 dark:bg-slate-700/40 skeleton";
 
   const variantClass = {
     text: "rounded-md h-4",
     circular: "rounded-full",
-    rectangular: "rounded-2xl",
-  }[variant];
+    rectangular: "rounded-2xl" }[variant];
 
   return (
     <div

@@ -12,8 +12,7 @@ import {
   Newspaper,
   Trophy,
   Trash2,
-  Heart,
-} from "lucide-react";
+  Heart } from "lucide-react";
 
 export default function SettingsPage() {
   const { t, theme, setTheme, locale, setLocale } = useAppStore();
@@ -24,20 +23,17 @@ export default function SettingsPage() {
       value: "light" as const,
       icon: "light_mode",
       label: t("theme.light"),
-      desc: locale === "ko" ? "밝은 화면" : "Bright",
-    },
+      desc: locale === "ko" ? "밝은 화면" : "Bright" },
     {
       value: "dark" as const,
       icon: "dark_mode",
       label: t("theme.dark"),
-      desc: locale === "ko" ? "어두운 화면" : "Dark",
-    },
+      desc: locale === "ko" ? "어두운 화면" : "Dark" },
     {
       value: "system" as const,
       icon: "devices",
       label: t("theme.system"),
-      desc: locale === "ko" ? "기기 설정" : "Device",
-    },
+      desc: locale === "ko" ? "기기 설정" : "Device" },
   ];
 
   const languages = [
@@ -232,18 +228,15 @@ export default function SettingsPage() {
               Icon: Fish,
               label:
                 locale === "ko" ? "입질 최적 시간 알림" : "Bite Time Alert",
-              key: "biteTimeAlert",
-            },
+              key: "biteTimeAlert" },
             {
               Icon: Newspaper,
               label: locale === "ko" ? "조과 뉴스 알림" : "News Alert",
-              key: "newsAlert",
-            },
+              key: "newsAlert" },
             {
               Icon: Trophy,
               label: locale === "ko" ? "배지 획득 알림" : "Badge Alert",
-              key: "badgeAlert",
-            },
+              key: "badgeAlert" },
           ].map((item, i) => (
             <div key={item.key}>
               <div className="flex items-center justify-between py-2">

@@ -30,8 +30,7 @@ const WMO_CODES: Record<number, { ko: string; en: string; icon: string }> = {
   86: { ko: '강한 눈보라', en: 'Heavy snow showers', icon: 'weather_snowy' },
   95: { ko: '뇌우', en: 'Thunderstorm', icon: 'thunderstorm' },
   96: { ko: '우박 뇌우', en: 'Thunderstorm with hail', icon: 'thunderstorm' },
-  99: { ko: '강한 우박 뇌우', en: 'Thunderstorm with heavy hail', icon: 'thunderstorm' },
-};
+  99: { ko: '강한 우박 뇌우', en: 'Thunderstorm with heavy hail', icon: 'thunderstorm' } };
 
 export interface WeatherData extends WeatherInfo {
   icon: string;
@@ -66,8 +65,7 @@ export async function fetchWeather(lat: number, lng: number): Promise<WeatherDat
       tempC: Math.round(current.temperature_2m * 10) / 10,
       windSpeed: Math.round(current.wind_speed_10m * 10) / 10,
       humidity: Math.round(current.relative_humidity_2m),
-      pressureMsl: current.pressure_msl ? Math.round(current.pressure_msl * 10) / 10 : undefined,
-    };
+      pressureMsl: current.pressure_msl ? Math.round(current.pressure_msl * 10) / 10 : undefined };
   } catch (err) {
     console.error('Weather fetch failed:', err);
     return null;

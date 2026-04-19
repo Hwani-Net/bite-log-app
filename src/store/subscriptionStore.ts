@@ -46,8 +46,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
         if (get().lastCreditResetDate !== today) {
           set({
             chatbotCredits: DAILY_MAX_CREDITS,
-            lastCreditResetDate: today,
-          });
+            lastCreditResetDate: today });
         }
       },
 
@@ -57,8 +56,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
 
       closePaywall: () => {
         set({ isPaywallOpen: false, paywallFeature: 'none' });
-      },
-    }),
+      } }),
     {
       name: 'fishlog-subscription-v4',
       partialize: (state) => ({ 

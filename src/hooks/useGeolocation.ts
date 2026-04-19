@@ -61,8 +61,7 @@ export function useGeolocation() {
     position: null,
     loading: false,
     error: null,
-    locationName: '',
-  });
+    locationName: '' });
 
   const requestLocation = useCallback(async () => {
     if (!navigator.geolocation) {
@@ -84,8 +83,7 @@ export function useGeolocation() {
       const geoPos: GeoPosition = {
         lat: pos.coords.latitude,
         lng: pos.coords.longitude,
-        accuracy: pos.coords.accuracy,
-      };
+        accuracy: pos.coords.accuracy };
 
       // Reverse geocode in parallel
       const name = await reverseGeocode(geoPos.lat, geoPos.lng);
@@ -94,8 +92,7 @@ export function useGeolocation() {
         position: geoPos,
         loading: false,
         error: null,
-        locationName: name,
-      });
+        locationName: name });
 
       return { position: geoPos, locationName: name };
     } catch (err) {

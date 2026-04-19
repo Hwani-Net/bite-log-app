@@ -55,8 +55,7 @@ export function saveSubscription(sub: Omit<AlertSubscription, 'id' | 'createdAt'
   const newSub: AlertSubscription = {
     ...sub,
     id: `sub_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-    createdAt: new Date().toISOString(),
-  };
+    createdAt: new Date().toISOString() };
   const subs = getSubscriptions();
   subs.push(newSub);
   localStorage.setItem(SUBS_KEY, JSON.stringify(subs));
@@ -86,8 +85,7 @@ const REGION_MAP: Record<string, string> = {
   '고성': '남해', '사천': '남해', '창원': '남해', '남해군': '남해',
   '동해': '동해', '속초': '동해', '강릉': '동해', '묵호': '동해',
   '삼척': '동해', '포항': '동해', '울산': '동해', '후포': '동해',
-  '제주': '제주', '서귀포': '제주',
-};
+  '제주': '제주', '서귀포': '제주' };
 
 function guessRegion(locationName: string): string {
   for (const [keyword, region] of Object.entries(REGION_MAP)) {
@@ -205,7 +203,7 @@ export function checkAndNotify(
         const speciesLabel = sub.species.length > 0 ? sub.species.join('/') : '전 어종';
         const regionLabel = sub.regions.length > 0 ? sub.regions.join('/') : '전국';
         sendLocalNotification(
-          `🎣 오픈런 알림! ${speciesLabel} · ${regionLabel}`,
+          ` 오픈런 알림! ${speciesLabel} · ${regionLabel}`,
           notice.title,
           '/icons/icon-192x192.png',
           `openrun_${noticeId}`
@@ -239,11 +237,10 @@ export function sendSimulationAlert(sub: AlertSubscription): void {
 
   try {
     // 조용한 시간 로직을 완전히 생략하고 직접 발송
-    new Notification(`🎣 [테스트] 오픈런 알림 — ${speciesLabel} · ${regionLabel}`, {
+    new Notification(` [테스트] 오픈런 알림 — ${speciesLabel} · ${regionLabel}`, {
       body: '이 알림은 설정 테스트용입니다. 실제 예약 오픈이 아닙니다.',
       tag: 'simulation_test',
-      requireInteraction: false,
-    });
+      requireInteraction: false });
   } catch (err) {
     console.error('[SimAlert] Notification failed:', err);
   }

@@ -39,25 +39,19 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "BITE Log — AI 낚시 일지 앱",
-      },
-    ],
-  },
+        alt: "BITE Log — AI 낚시 일지 앱" },
+    ] },
   twitter: {
     card: "summary_large_image",
     title: "BITE Log — 바이트로그",
     description: "입질의 순간을 기록하다. AI 낚시 일지 앱.",
-    images: ["/og-image.png"],
-  },
+    images: ["/og-image.png"] },
   robots: {
     index: true,
-    follow: true,
-  },
-};
+    follow: true } };
 
 export default function RootLayout({
-  children,
-}: Readonly<{
+  children }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
@@ -66,8 +60,7 @@ export default function RootLayout({
         {/* Dark mode flash prevention — must be first in <head> */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('fishlog_theme')||'dark';if(t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');}catch(e){document.documentElement.classList.add('dark');}`,
-          }}
+            __html: `try{var t=localStorage.getItem('fishlog_theme')||'dark';if(t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');}catch(e){document.documentElement.classList.add('dark');}` }}
         />
         {/* Preconnect for font loading performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />

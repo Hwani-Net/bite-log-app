@@ -4,8 +4,7 @@ import { useRef, useEffect } from "react";
 import {
   ChatMessage,
   CHAT_SPECIES,
-  getQuickReplies,
-} from "@/services/fishExpertChatService";
+  getQuickReplies } from "@/services/fishExpertChatService";
 import { useSubscriptionStore } from "@/store/subscriptionStore";
 import { Send, Sparkles } from "lucide-react";
 
@@ -32,8 +31,7 @@ export default function AIChatTab({
   setChatInput,
   setSelectedSpecies,
   onSend,
-  onClear,
-}: AIChatTabProps) {
+  onClear }: AIChatTabProps) {
   const chatBottomRef = useRef<HTMLDivElement>(null);
   const { isPro, chatbotCredits } = useSubscriptionStore();
 

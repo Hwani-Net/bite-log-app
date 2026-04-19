@@ -99,6 +99,5 @@ async function fetchMarineDataRaw(lat: number, lng: number): Promise<MarineData 
     currentVelocity: current.ocean_current_velocity != null
       ? Math.round(current.ocean_current_velocity * 100) / 100 : undefined,
     currentDirection: current.ocean_current_direction != null
-      ? Math.round(current.ocean_current_direction) : undefined,
-  };
+      ? Math.round(current.ocean_current_direction) : undefined };
 }

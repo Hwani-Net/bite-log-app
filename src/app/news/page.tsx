@@ -6,8 +6,7 @@ import {
   fetchAllFishingNews,
   FishingNewsItem,
   NewsRegionFilter,
-  NewsSourceFilter,
-} from "@/services/fishingNewsService";
+  NewsSourceFilter } from "@/services/fishingNewsService";
 
 const REGION_TABS: { key: NewsRegionFilter; label: string }[] = [
   { key: "all", label: "전체" },
@@ -30,26 +29,21 @@ function FreshnessBadge({ freshness }: { freshness: string }) {
       bg: "bg-red-500",
       text: "text-white",
       label: "실시간",
-      dotCls: "bg-white",
-    },
+      dotCls: "bg-white" },
     today: {
       bg: "bg-[#c9a84c]",
       text: "text-[#080d14]",
       label: "오늘",
-      dotCls: "bg-[#080d14]",
-    },
+      dotCls: "bg-[#080d14]" },
     week: {
       bg: "bg-white/10",
       text: "text-white/60",
       label: "이번주",
-      dotCls: "bg-white/40",
-    },
-  }[freshness] || {
+      dotCls: "bg-white/40" } }[freshness] || {
     bg: "bg-white/10",
     text: "text-white/60",
     label: "기타",
-    dotCls: "bg-white/40",
-  };
+    dotCls: "bg-white/40" };
 
   return (
     <span
@@ -65,8 +59,7 @@ function ReliabilityBadge({ reliability }: { reliability: string }) {
   const config = {
     official: { color: "text-[#7dd3fc]", label: "공식" },
     community: { color: "text-green-400", label: "커뮤니티" },
-    sns: { color: "text-purple-400", label: "SNS" },
-  }[reliability] || { color: "text-white/60", label: "기타" };
+    sns: { color: "text-purple-400", label: "SNS" } }[reliability] || { color: "text-white/60", label: "기타" };
 
   return (
     <span className={`text-[10px] font-medium ${config.color}`}>
@@ -81,8 +74,7 @@ function SourceIcon({ source }: { source: string }) {
     naver_news: "뉴스",
     naver_cafe: "카페",
     youtube: "YouTube",
-    community: "커뮤니티",
-  };
+    community: "커뮤니티" };
   return (
     <span className="text-[10px] font-medium text-white/40">
       {labels[source] || "미디어"}
@@ -175,8 +167,7 @@ function getTimeAgo(dateStr: string): string {
   if (diffDays < 7) return `${diffDays}일 전`;
   return new Date(dateStr).toLocaleDateString("ko-KR", {
     month: "short",
-    day: "numeric",
-  });
+    day: "numeric" });
 }
 
 export default function NewsPage() {

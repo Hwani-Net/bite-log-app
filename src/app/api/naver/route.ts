@@ -26,10 +26,8 @@ export async function GET(request: NextRequest) {
     const res = await fetch(url, {
       headers: {
         "X-Naver-Client-Id": clientId,
-        "X-Naver-Client-Secret": clientSecret,
-      },
-      cache: "no-store",
-    });
+        "X-Naver-Client-Secret": clientSecret },
+      cache: "no-store" });
 
     if (!res.ok) {
       console.error(`[Naver API] HTTP ${res.status}: ${await res.text()}`);
@@ -39,8 +37,7 @@ export async function GET(request: NextRequest) {
           total: 0,
           start: 1,
           display: 0,
-          error: `HTTP ${res.status}`,
-        },
+          error: `HTTP ${res.status}` },
         { status: 200 }, // Return 200 with empty items so client falls back gracefully
       );
     }

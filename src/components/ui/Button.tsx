@@ -20,14 +20,12 @@ const variantStyles: Record<ButtonVariant, string> = {
     "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700",
   ghost:
     "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800",
-  danger: "bg-error text-white hover:bg-red-600 active:bg-red-700",
-};
+  danger: "bg-error text-white hover:bg-red-600 active:bg-red-700" };
 
 const sizeStyles: Record<ButtonSize, string> = {
   sm: "px-3 py-1.5 text-xs rounded-lg",
   md: "px-4 py-2.5 text-sm rounded-xl",
-  lg: "px-6 py-3.5 text-base rounded-xl",
-};
+  lg: "px-6 py-3.5 text-base rounded-xl" };
 
 export default function Button({
   children,

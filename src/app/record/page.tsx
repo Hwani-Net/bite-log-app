@@ -12,14 +12,12 @@ import { identifyFish, FishAIResult } from "@/services/fishAIService";
 import {
   parseVoiceInput,
   applyParsedResult,
-  VoiceParsedResult,
-} from "@/services/voiceParseService";
+  VoiceParsedResult } from "@/services/voiceParseService";
 import {
   CatchRecord,
   FISH_SPECIES,
   TideRecordData,
-  RecordVisibility,
-} from "@/types";
+  RecordVisibility } from "@/types";
 import {
   ArrowLeft,
   X,
@@ -42,8 +40,7 @@ import {
   CheckCircle,
   AlertTriangle,
   Loader2,
-  Waves,
-} from "lucide-react";
+  Waves } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
 export default function RecordPage() {
@@ -195,8 +192,7 @@ export default function RecordPage() {
             locationName.trim() ||
             (locale === "ko" ? "위치 미지정" : "Unknown"),
           lat: gpsLat,
-          lng: gpsLng,
-        },
+          lng: gpsLng },
         species,
         count,
         sizeCm: sizeCm ? Number(sizeCm) : undefined,
@@ -207,12 +203,10 @@ export default function RecordPage() {
               condition: weather.condition,
               tempC: weather.tempC,
               windSpeed: weather.windSpeed,
-              humidity: weather.humidity,
-            }
+              humidity: weather.humidity }
           : undefined,
         tide: tide || undefined,
-        visibility,
-      };
+        visibility };
 
       try {
         await getDataService().addCatchRecord(recordData);
@@ -234,10 +228,26 @@ export default function RecordPage() {
 
   // ===== Voice Recording (Web Speech API) =====
   function startVoiceRecording() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type SpeechRecognitionCtor = new () => {
+      lang: string;
+      continuous: boolean;
+      interimResults: boolean;
+      onresult:
+        | ((event: {
+            results: ArrayLike<ArrayLike<{ transcript: string }>>;
+          }) => void)
+        | null;
+      onerror: ((event: unknown) => void) | null;
+      onend: (() => void) | null;
+      start: () => void;
+      stop: () => void;
+    };
+    const win = window as unknown as {
+      SpeechRecognition?: SpeechRecognitionCtor;
+      webkitSpeechRecognition?: SpeechRecognitionCtor;
+    };
     const SpeechRecognitionAPI =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
+      win.SpeechRecognition || win.webkitSpeechRecognition;
 
     if (!SpeechRecognitionAPI) {
       alert(
@@ -291,8 +301,7 @@ export default function RecordPage() {
       setSpecies,
       setCount,
       setSizeCm,
-      setLocationName,
-    });
+      setLocationName });
     setVoiceFilled(filled);
     setVoiceState("idle");
     setStep("form");
@@ -524,7 +533,7 @@ export default function RecordPage() {
                   </button>
                 ) : (
                   <div className="flex gap-2">
-                    {/* 🎤 Voice record button */}
+                    {/*  Voice record button */}
                     <button
                       type="button"
                       onClick={startVoiceRecording}
@@ -533,7 +542,7 @@ export default function RecordPage() {
                       <Mic size={20} />
                       {locale === "ko" ? "음성으로 기록" : "Voice Record"}
                     </button>
-                    {/* ⚡ Quick form button */}
+                    {/*  Quick form button */}
                     <button
                       type="button"
                       onClick={skipToForm}

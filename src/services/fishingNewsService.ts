@@ -18,7 +18,7 @@ export interface FishingNewsItem {
   sourceLabel: string;
   thumbnail?: string;
   publishedAt: string;
-  freshness: "realtime" | "today" | "week"; // 🔴 실시간 / 🟡 오늘 / ⚪ 이번주
+  freshness: "realtime" | "today" | "week"; //  실시간 /  오늘 /  이번주
   reliability: "official" | "community" | "sns"; // 공식 / 커뮤니티 / SNS
   region?: string;
   species?: string;
@@ -36,8 +36,7 @@ const REGION_KEYWORDS: Record<string, string[]> = {
   east: ["동해", "속초", "강릉", "삼척", "울진", "포항", "울산", "부산 기장"],
   west: ["서해", "인천", "태안", "보령", "군산", "목포", "신안", "영광"],
   south: ["남해", "통영", "거제", "여수", "완도", "고흥", "사천", "남해군"],
-  jeju: ["제주", "서귀포", "한림", "성산", "모슬포", "추자도"],
-};
+  jeju: ["제주", "서귀포", "한림", "성산", "모슬포", "추자도"] };
 
 const SPECIES_KEYWORDS = [
   "감성돔",
@@ -76,8 +75,7 @@ function assignDefaultThumbnail(
   if (item.thumbnail) return item;
   return {
     ...item,
-    thumbnail: FISHING_THUMBNAILS[index % FISHING_THUMBNAILS.length],
-  };
+    thumbnail: FISHING_THUMBNAILS[index % FISHING_THUMBNAILS.length] };
 }
 
 // Relevance keywords — articles must contain at least one to be considered fishing-related
@@ -282,8 +280,7 @@ export async function fetchNaverNews(
           ),
           reliability: "community",
           region: detectRegion(combined),
-          species: detectSpecies(combined),
-        });
+          species: detectSpecies(combined) });
       }
     }
 
@@ -306,8 +303,7 @@ export async function fetchNaverNews(
           ),
           reliability: "official",
           region: detectRegion(combined),
-          species: detectSpecies(combined),
-        });
+          species: detectSpecies(combined) });
       }
     }
 
@@ -379,8 +375,7 @@ export async function fetchNaverCafeArticles(
           freshness: "today" as const,
           reliability: "community" as const,
           region: detectRegion(combined),
-          species: detectSpecies(combined),
-        };
+          species: detectSpecies(combined) };
       },
     );
   } catch (err) {
@@ -499,8 +494,7 @@ export async function fetchYouTubeVideos(
           freshness: calculateFreshness(item.snippet.publishedAt),
           reliability: "sns" as const,
           region: detectRegion(combined),
-          species: detectSpecies(combined),
-        };
+          species: detectSpecies(combined) };
       },
     );
 
@@ -604,8 +598,7 @@ function getMockNews(): FishingNewsItem[] {
       freshness: "today",
       reliability: "community",
       region: "south",
-      species: "감성돔",
-    },
+      species: "감성돔" },
     {
       id: "mock_2",
       title: "서해 태안 볼락 야간 루어 폭발 조과",
@@ -619,8 +612,7 @@ function getMockNews(): FishingNewsItem[] {
       freshness: "realtime",
       reliability: "community",
       region: "west",
-      species: "볼락",
-    },
+      species: "볼락" },
     {
       id: "mock_3",
       title: "[속보] 제주 방어 시즌 개막! 80cm급 방어 입질 시작",
@@ -634,8 +626,7 @@ function getMockNews(): FishingNewsItem[] {
       freshness: "today",
       reliability: "official",
       region: "jeju",
-      species: "방어",
-    },
+      species: "방어" },
     {
       id: "mock_4",
       title: "동해 속초 오징어 한 박스 조과! 에기 사이즈별 정리",
@@ -649,8 +640,7 @@ function getMockNews(): FishingNewsItem[] {
       freshness: "today",
       reliability: "community",
       region: "east",
-      species: "오징어",
-    },
+      species: "오징어" },
     {
       id: "mock_5",
       title: "남해 여수 광어 플랫피싱 시즌 돌입",
@@ -666,8 +656,7 @@ function getMockNews(): FishingNewsItem[] {
       freshness: "week",
       reliability: "community",
       region: "south",
-      species: "광어",
-    },
+      species: "광어" },
   ];
 }
 
@@ -676,7 +665,7 @@ function getMockYouTube(): FishingNewsItem[] {
   return [
     {
       id: "yt_mock_1",
-      title: "🐟 통영 선상낚시 감성돔 대물 연발! | 원투낚시 가이드",
+      title: " 통영 선상낚시 감성돔 대물 연발! | 원투낚시 가이드",
       description:
         "통영 욕지도에서 감성돔 40cm급을 연달아 잡았습니다! 채비법과 포인트 완벽 가이드...",
       link: "https://www.youtube.com/watch?v=cQQHK36-xbQ",
@@ -687,11 +676,10 @@ function getMockYouTube(): FishingNewsItem[] {
       freshness: "today",
       reliability: "sns",
       region: "south",
-      species: "감성돔",
-    },
+      species: "감성돔" },
     {
       id: "yt_mock_2",
-      title: "🎣 볼락 루어 마릿수 폭발! 태안 밤낚시 브이로그",
+      title: " 볼락 루어 마릿수 폭발! 태안 밤낚시 브이로그",
       description:
         "볼락 야간 루어 낚시 꿀팁 대공개! 지그헤드 선택법부터 액션까지...",
       link: "https://www.youtube.com/watch?v=-l0PNR6gxgo",
@@ -702,7 +690,6 @@ function getMockYouTube(): FishingNewsItem[] {
       freshness: "today",
       reliability: "sns",
       region: "west",
-      species: "볼락",
-    },
+      species: "볼락" },
   ];
 }

@@ -21,8 +21,7 @@ const PLATFORMS: BookingPlatform[] = [
     url: "https://www.sunsang24.com/",
     regions: ["전국", "동해", "서해", "남해", "제주"],
     features: ["실시간 예약", "조황 정보", "낚싯배 비교"],
-    color: "from-blue-500 to-cyan-500",
-  },
+    color: "from-blue-500 to-cyan-500" },
   {
     id: "thefishing",
     name: "더피싱",
@@ -30,8 +29,7 @@ const PLATFORMS: BookingPlatform[] = [
     url: "https://thefishing.kr/",
     regions: ["전국", "동해", "서해", "남해"],
     features: ["긴급모집", "출조버스", "낚시대회"],
-    color: "from-orange-500 to-red-500",
-  },
+    color: "from-orange-500 to-red-500" },
   {
     id: "naksiga",
     name: "낚시가",
@@ -39,8 +37,7 @@ const PLATFORMS: BookingPlatform[] = [
     url: "https://www.naksiga.com/",
     regions: ["전국", "서해", "남해"],
     features: ["포인트 리뷰", "가격 비교", "초보 가이드"],
-    color: "from-emerald-500 to-teal-500",
-  },
+    color: "from-emerald-500 to-teal-500" },
   {
     id: "fishingcamp",
     name: "피싱캠프",
@@ -48,8 +45,7 @@ const PLATFORMS: BookingPlatform[] = [
     url: "https://www.fishingcamp.co.kr/",
     regions: ["전국", "남해", "제주"],
     features: ["패키지 상품", "가족 체험", "장비 렌탈"],
-    color: "from-violet-500 to-purple-500",
-  },
+    color: "from-violet-500 to-purple-500" },
 ];
 
 export default function BookingPage() {

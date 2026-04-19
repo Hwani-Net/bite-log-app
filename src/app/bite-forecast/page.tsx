@@ -10,8 +10,7 @@ import { fetchMarineData } from "@/services/marineService";
 import {
   calculateBiteTime,
   BiteTimePrediction,
-  BiteFactor,
-} from "@/services/biteTimeService";
+  BiteFactor } from "@/services/biteTimeService";
 import { TideData, getCurrentPhase, TidePhase } from "@/services/tideService";
 import { WeatherData } from "@/services/weatherService";
 import PeakTimeline from "@/app/components/concierge/PeakTimeline";
@@ -21,8 +20,7 @@ import { DynamicIcon } from "@/lib/iconMap";
 // ─── Secret Spots Section ─────────────────────────────────────────────────────
 function SecretSpotsSection({
   isPro,
-  onOpenPaywall,
-}: {
+  onOpenPaywall }: {
   isPro: boolean;
   onOpenPaywall: () => void;
 }) {
@@ -30,18 +28,15 @@ function SecretSpotsSection({
     {
       name: "대천항 남단 테트라포드",
       species: "감성돔, 우럭",
-      desc: "들물 타임에 대물 출현 빈도 매우 높음",
-    },
+      desc: "들물 타임에 대물 출현 빈도 매우 높음" },
     {
       name: "시화방조제 1km 지점 수중여",
       species: "삼치, 광어",
-      desc: "조류가 바뀌는 시점에 폭발적 피딩",
-    },
+      desc: "조류가 바뀌는 시점에 폭발적 피딩" },
     {
       name: "영흥도 남서쪽 시크릿 여밭",
       species: "참돔, 갑오징어",
-      desc: "현지인들만 아는 최고급 포인트",
-    },
+      desc: "현지인들만 아는 최고급 포인트" },
   ];
 
   return (
@@ -160,21 +155,17 @@ function FactorCard({ factor }: { factor: BiteFactor }) {
       bg: "bg-emerald-500/10",
       border: "border-emerald-500/20",
       text: "text-emerald-400",
-      bar: "bg-emerald-500",
-    },
+      bar: "bg-emerald-500" },
     neutral: {
       bg: "bg-[#c9a84c]/10",
       border: "border-[#c9a84c]/20",
       text: "text-[#c9a84c]",
-      bar: "bg-[#c9a84c]",
-    },
+      bar: "bg-[#c9a84c]" },
     negative: {
       bg: "bg-red-500/10",
       border: "border-red-500/20",
       text: "text-red-400",
-      bar: "bg-red-500",
-    },
-  };
+      bar: "bg-red-500" } };
   const s = statusStyles[factor.status];
 
   return (
@@ -208,8 +199,7 @@ function FactorCard({ factor }: { factor: BiteFactor }) {
 // ─── Tide Timeline ────────────────────────────────────────────────────────────
 function TideTimeline({
   tideData,
-  phase,
-}: {
+  phase }: {
   tideData: TideData;
   phase: TidePhase | null;
 }) {
@@ -344,26 +334,22 @@ function WeatherDetail({ weather }: { weather: WeatherData }) {
           ? "text-orange-400"
           : weather.tempC < 5
             ? "text-[#7dd3fc]"
-            : "text-emerald-400",
-    },
+            : "text-emerald-400" },
     {
       label: "바람",
       value: `${weather.windSpeed}m/s`,
       icon: "air",
-      color: (weather.windSpeed ?? 0) > 10 ? "text-red-400" : "text-[#7dd3fc]",
-    },
+      color: (weather.windSpeed ?? 0) > 10 ? "text-red-400" : "text-[#7dd3fc]" },
     {
       label: "습도",
       value: `${weather.humidity}%`,
       icon: "humidity_percentage",
-      color: "text-[#7dd3fc]",
-    },
+      color: "text-[#7dd3fc]" },
     {
       label: "날씨",
       value: weather.conditionKo,
       icon: weather.icon,
-      color: "text-[#c9a84c]",
-    },
+      color: "text-[#c9a84c]" },
   ];
 
   return (
@@ -566,7 +552,6 @@ export default function BiteForecastPage() {
               <ScoreRing score={biteTime.score} />
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-2xl">{biteTime.gradeEmoji}</span>
                   <span className="text-lg font-bold text-white">
                     {biteTime.gradeLabel}
                   </span>

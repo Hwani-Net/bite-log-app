@@ -37,8 +37,7 @@ export async function migrateLocalToFirestore(uid: string): Promise<number> {
         memo: record.memo,
         weather: record.weather,
         tide: record.tide,
-        visibility: record.visibility || 'public',
-      });
+        visibility: record.visibility || 'public' });
       migrated++;
     } catch (err) {
       console.error('Migration error for record:', record.id, err);

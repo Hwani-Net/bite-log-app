@@ -13,8 +13,7 @@ export default function Card({
   children,
   className = "",
   glass = true,
-  onClick,
-}: CardProps) {
+  onClick }: CardProps) {
   const base = glass
     ? "glass-card rounded-2xl p-4 shadow-sm"
     : "bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/50";

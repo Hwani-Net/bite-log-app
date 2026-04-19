@@ -15,15 +15,13 @@ const icons: Record<ToastType, React.ReactNode> = {
   success: <CheckCircle size={18} />,
   warning: <AlertTriangle size={18} />,
   error: <XCircle size={18} />,
-  info: <Info size={18} />,
-};
+  info: <Info size={18} /> };
 
 const styles: Record<ToastType, string> = {
   success: "bg-success/10 border-success/20 text-success",
   warning: "bg-accent-warm/10 border-accent-warm/20 text-accent-warm",
   error: "bg-error/10 border-error/20 text-error",
-  info: "bg-info/10 border-info/20 text-info",
-};
+  info: "bg-info/10 border-info/20 text-info" };
 
 // Global toast state
 let toastListeners: Array<(toast: ToastData) => void> = [];

@@ -10,16 +10,14 @@ export default function PrivacyPage() {
         padding: "24px 16px",
         maxWidth: 640,
         margin: "0 auto",
-        lineHeight: 1.8,
-      }}
+        lineHeight: 1.8 }}
     >
       <Link
         href="/settings"
         style={{
           color: "var(--color-primary)",
           textDecoration: "none",
-          fontSize: 14,
-        }}
+          fontSize: 14 }}
       >
         ← 설정으로 돌아가기
       </Link>
@@ -29,8 +27,7 @@ export default function PrivacyPage() {
           fontSize: 24,
           fontWeight: 700,
           margin: "16px 0 8px",
-          color: "var(--color-text)",
-        }}
+          color: "var(--color-text)" }}
       >
         개인정보처리방침
       </h1>
@@ -38,8 +35,7 @@ export default function PrivacyPage() {
         style={{
           color: "var(--color-text-secondary)",
           fontSize: 13,
-          marginBottom: 24,
-        }}
+          marginBottom: 24 }}
       >
         시행일: 2026년 3월 1일
       </p>
@@ -50,8 +46,7 @@ export default function PrivacyPage() {
             fontSize: 17,
             fontWeight: 600,
             color: "var(--color-text)",
-            marginBottom: 8,
-          }}
+            marginBottom: 8 }}
         >
           1. 수집하는 개인정보 항목
         </h2>
@@ -60,8 +55,7 @@ export default function PrivacyPage() {
             width: "100%",
             borderCollapse: "collapse",
             fontSize: 13,
-            color: "var(--color-text-secondary)",
-          }}
+            color: "var(--color-text-secondary)" }}
         >
           <thead>
             <tr style={{ borderBottom: "2px solid var(--color-border)" }}>
@@ -69,8 +63,7 @@ export default function PrivacyPage() {
                 style={{
                   padding: 8,
                   textAlign: "left",
-                  color: "var(--color-text)",
-                }}
+                  color: "var(--color-text)" }}
               >
                 항목
               </th>
@@ -78,8 +71,7 @@ export default function PrivacyPage() {
                 style={{
                   padding: 8,
                   textAlign: "left",
-                  color: "var(--color-text)",
-                }}
+                  color: "var(--color-text)" }}
               >
                 수집 목적
               </th>
@@ -87,8 +79,7 @@ export default function PrivacyPage() {
                 style={{
                   padding: 8,
                   textAlign: "left",
-                  color: "var(--color-text)",
-                }}
+                  color: "var(--color-text)" }}
               >
                 수집 방법
               </th>
@@ -127,8 +118,7 @@ export default function PrivacyPage() {
             fontSize: 17,
             fontWeight: 600,
             color: "var(--color-text)",
-            marginBottom: 8,
-          }}
+            marginBottom: 8 }}
         >
           2. 개인정보 보유 및 이용 기간
         </h2>
@@ -136,8 +126,7 @@ export default function PrivacyPage() {
           style={{
             color: "var(--color-text-secondary)",
             fontSize: 14,
-            paddingLeft: 20,
-          }}
+            paddingLeft: 20 }}
         >
           <li>회원 탈퇴 시까지 보유하며, 탈퇴 즉시 삭제됩니다.</li>
           <li>
@@ -152,8 +141,7 @@ export default function PrivacyPage() {
             fontSize: 17,
             fontWeight: 600,
             color: "var(--color-text)",
-            marginBottom: 8,
-          }}
+            marginBottom: 8 }}
         >
           3. 개인정보의 제3자 제공
         </h2>
@@ -165,8 +153,7 @@ export default function PrivacyPage() {
           style={{
             color: "var(--color-text-secondary)",
             fontSize: 14,
-            paddingLeft: 20,
-          }}
+            paddingLeft: 20 }}
         >
           <li>이용자가 사전에 동의한 경우</li>
           <li>법령에 따른 요청이 있는 경우</li>
@@ -179,8 +166,7 @@ export default function PrivacyPage() {
             fontSize: 17,
             fontWeight: 600,
             color: "var(--color-text)",
-            marginBottom: 8,
-          }}
+            marginBottom: 8 }}
         >
           4. 개인정보 처리 위탁
         </h2>
@@ -189,8 +175,7 @@ export default function PrivacyPage() {
             width: "100%",
             borderCollapse: "collapse",
             fontSize: 13,
-            color: "var(--color-text-secondary)",
-          }}
+            color: "var(--color-text-secondary)" }}
         >
           <thead>
             <tr style={{ borderBottom: "2px solid var(--color-border)" }}>
@@ -198,8 +183,7 @@ export default function PrivacyPage() {
                 style={{
                   padding: 8,
                   textAlign: "left",
-                  color: "var(--color-text)",
-                }}
+                  color: "var(--color-text)" }}
               >
                 수탁자
               </th>
@@ -207,8 +191,7 @@ export default function PrivacyPage() {
                 style={{
                   padding: 8,
                   textAlign: "left",
-                  color: "var(--color-text)",
-                }}
+                  color: "var(--color-text)" }}
               >
                 위탁 업무
               </th>
@@ -239,8 +222,7 @@ export default function PrivacyPage() {
             fontSize: 17,
             fontWeight: 600,
             color: "var(--color-text)",
-            marginBottom: 8,
-          }}
+            marginBottom: 8 }}
         >
           5. 이용자의 권리
         </h2>
@@ -248,8 +230,7 @@ export default function PrivacyPage() {
           style={{
             color: "var(--color-text-secondary)",
             fontSize: 14,
-            paddingLeft: 20,
-          }}
+            paddingLeft: 20 }}
         >
           <li>개인정보 열람, 정정, 삭제를 요청할 수 있습니다.</li>
           <li>
@@ -268,8 +249,7 @@ export default function PrivacyPage() {
             fontSize: 17,
             fontWeight: 600,
             color: "var(--color-text)",
-            marginBottom: 8,
-          }}
+            marginBottom: 8 }}
         >
           6. 개인정보 보호 조치
         </h2>
@@ -277,8 +257,7 @@ export default function PrivacyPage() {
           style={{
             color: "var(--color-text-secondary)",
             fontSize: 14,
-            paddingLeft: 20,
-          }}
+            paddingLeft: 20 }}
         >
           <li>
             Firebase의 보안 규칙(Firestore Security Rules)을 적용하여 인가된
@@ -295,8 +274,7 @@ export default function PrivacyPage() {
             fontSize: 17,
             fontWeight: 600,
             color: "var(--color-text)",
-            marginBottom: 8,
-          }}
+            marginBottom: 8 }}
         >
           7. 개인정보 보호 책임자
         </h2>
@@ -309,8 +287,7 @@ export default function PrivacyPage() {
         style={{
           borderTop: "1px solid var(--color-border)",
           paddingTop: 16,
-          marginTop: 32,
-        }}
+          marginTop: 32 }}
       >
         <p style={{ color: "var(--color-text-secondary)", fontSize: 12 }}>
           본 개인정보처리방침은 관련 법령 또는 서비스 정책 변경에 따라 수정될 수

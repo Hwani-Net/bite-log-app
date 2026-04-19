@@ -25,8 +25,7 @@ const KO_NUMBERS: Record<string, number> = {
   '일곱': 7, '칠': 7,
   '여덟': 8, '팔': 8,
   '아홉': 9, '구': 9,
-  '열': 10, '십': 10,
-};
+  '열': 10, '십': 10 };
 
 // Size unit synonyms
 const SIZE_UNITS = ['센티', '센치', 'cm', 'CM', '센티미터'];

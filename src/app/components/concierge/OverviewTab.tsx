@@ -6,8 +6,7 @@ import { BiteTimePrediction } from "@/services/biteTimeService";
 import PeakTimeline from "./PeakTimeline";
 import {
   ConciergeRecommendation,
-  SpeciesInfo,
-} from "@/services/conciergeService";
+  SpeciesInfo } from "@/services/conciergeService";
 import { useDragScroll } from "@/hooks/useDragScroll";
 import { useSubscriptionStore } from "@/store/subscriptionStore";
 import { DynamicIcon } from "@/lib/iconMap";
@@ -30,8 +29,7 @@ export default function OverviewTab({
   tideData,
   biteTime,
   recommendation,
-  inSeasonSpecies,
-}: OverviewTabProps) {
+  inSeasonSpecies }: OverviewTabProps) {
   const { isPro, openPaywall } = useSubscriptionStore();
   const biteScore = biteTime?.score ?? 0;
   const seasonChipsRef = useDragScroll();
@@ -434,9 +432,6 @@ export default function OverviewTab({
               </div>
             ))}
             <div className="flex items-center gap-2 mt-4 pt-3 border-t border-white/10">
-              <span className="text-2xl drop-shadow-sm">
-                {biteTime.gradeEmoji}
-              </span>
               <span
                 className={`text-sm font-black ${
                   biteTime.grade === "excellent"

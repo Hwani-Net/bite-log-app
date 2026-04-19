@@ -17,8 +17,7 @@ const BADGE_DEFS = [
     icon: 'stars',
     name: { ko: '첫 조과', en: 'First Catch' },
     desc: { ko: '첫 번째 조과를 기록하세요', en: 'Record your first catch' },
-    check: (r: CatchRecord[]) => ({ current: Math.min(r.length, 1), requirement: 1 }),
-  },
+    check: (r: CatchRecord[]) => ({ current: Math.min(r.length, 1), requirement: 1 }) },
   {
     id: 'catch-10',
     icon: 'military_tech',
@@ -27,8 +26,7 @@ const BADGE_DEFS = [
     check: (r: CatchRecord[]) => {
       const total = r.reduce((s, c) => s + c.count, 0);
       return { current: Math.min(total, 10), requirement: 10 };
-    },
-  },
+    } },
   {
     id: 'catch-50',
     icon: 'emoji_events',
@@ -37,8 +35,7 @@ const BADGE_DEFS = [
     check: (r: CatchRecord[]) => {
       const total = r.reduce((s, c) => s + c.count, 0);
       return { current: Math.min(total, 50), requirement: 50 };
-    },
-  },
+    } },
   {
     id: 'catch-100',
     icon: 'workspace_premium',
@@ -47,8 +44,7 @@ const BADGE_DEFS = [
     check: (r: CatchRecord[]) => {
       const total = r.reduce((s, c) => s + c.count, 0);
       return { current: Math.min(total, 100), requirement: 100 };
-    },
-  },
+    } },
   {
     id: 'big-fish-40',
     icon: 'phishing',
@@ -57,8 +53,7 @@ const BADGE_DEFS = [
     check: (r: CatchRecord[]) => {
       const max = r.reduce((m, c) => Math.max(m, c.sizeCm ?? 0), 0);
       return { current: max >= 40 ? 1 : 0, requirement: 1 };
-    },
-  },
+    } },
   {
     id: 'big-fish-60',
     icon: 'trophy',
@@ -67,8 +62,7 @@ const BADGE_DEFS = [
     check: (r: CatchRecord[]) => {
       const max = r.reduce((m, c) => Math.max(m, c.sizeCm ?? 0), 0);
       return { current: max >= 60 ? 1 : 0, requirement: 1 };
-    },
-  },
+    } },
   {
     id: 'variety-5',
     icon: 'diversity_3',
@@ -77,8 +71,7 @@ const BADGE_DEFS = [
     check: (r: CatchRecord[]) => {
       const species = new Set(r.map((c) => c.species));
       return { current: Math.min(species.size, 5), requirement: 5 };
-    },
-  },
+    } },
   {
     id: 'trips-10',
     icon: 'sailing',
@@ -87,8 +80,7 @@ const BADGE_DEFS = [
     check: (r: CatchRecord[]) => {
       const dates = new Set(r.map((c) => c.date));
       return { current: Math.min(dates.size, 10), requirement: 10 };
-    },
-  },
+    } },
   {
     id: 'spots-5',
     icon: 'explore',
@@ -97,8 +89,7 @@ const BADGE_DEFS = [
     check: (r: CatchRecord[]) => {
       const spots = new Set(r.map((c) => c.location.name));
       return { current: Math.min(spots.size, 5), requirement: 5 };
-    },
-  },
+    } },
   {
     id: 'ai-master',
     icon: 'smart_toy',
@@ -107,8 +98,7 @@ const BADGE_DEFS = [
     check: (r: CatchRecord[]) => {
       const aiUsed = r.filter(c => c.memo?.includes('AI') || c.memo?.includes('ai')).length;
       return { current: Math.min(aiUsed, 10), requirement: 10 };
-    },
-  },
+    } },
   {
     id: 'night-fisher',
     icon: 'dark_mode',
@@ -120,8 +110,7 @@ const BADGE_DEFS = [
         return hour >= 20 || hour < 5;
       }).length;
       return { current: Math.min(nightCatches, 5), requirement: 5 };
-    },
-  },
+    } },
   {
     id: 'streak-7',
     icon: 'local_fire_department',
@@ -139,8 +128,7 @@ const BADGE_DEFS = [
       }
       if (dates.length <= 1) maxStreak = dates.length;
       return { current: Math.min(maxStreak, 7), requirement: 7 };
-    },
-  },
+    } },
   {
     id: 'five-seas',
     icon: 'public',
@@ -152,8 +140,7 @@ const BADGE_DEFS = [
         east: ['동해', '속초', '강릉', '삼척', '울진', '포항'],
         west: ['서해', '인천', '태안', '보령', '군산', '영광'],
         south: ['남해', '통영', '거제', '여수', '완도', '사천'],
-        jeju: ['제주', '서귀포'],
-      };
+        jeju: ['제주', '서귀포'] };
       r.forEach(c => {
         const loc = c.location.name;
         for (const [region, keywords] of Object.entries(regionMap)) {
@@ -161,8 +148,7 @@ const BADGE_DEFS = [
         }
       });
       return { current: Math.min(regions.size, 4), requirement: 4 };
-    },
-  },
+    } },
   {
     id: 'photo-master',
     icon: 'photo_camera',
@@ -171,8 +157,7 @@ const BADGE_DEFS = [
     check: (r: CatchRecord[]) => {
       const withPhotos = r.filter(c => c.photos && c.photos.length > 0).length;
       return { current: Math.min(withPhotos, 20), requirement: 20 };
-    },
-  },
+    } },
   {
     id: 'season-all',
     icon: 'calendar_month',
@@ -188,8 +173,7 @@ const BADGE_DEFS = [
         else seasons.add('winter');
       });
       return { current: Math.min(seasons.size, 4), requirement: 4 };
-    },
-  },
+    } },
 ] as const;
 
 export function computeBadges(records: CatchRecord[]): AchievementBadge[] {
@@ -203,7 +187,6 @@ export function computeBadges(records: CatchRecord[]): AchievementBadge[] {
       earned: current >= requirement,
       progress: Math.min(current / requirement, 1),
       requirement,
-      current,
-    };
+      current };
   });
 }
