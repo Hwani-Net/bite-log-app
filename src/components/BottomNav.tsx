@@ -73,7 +73,7 @@ export default function BottomNav() {
                 {t(item.labelKey)}
               </span>
               {isActive && (
-                <div className="w-1 h-1 rounded-full bg-[#c9a84c]" />
+                <div className="w-1 h-1 rounded-full bg-[#c9a84c] nav-glow" />
               )}
             </Link>
           );

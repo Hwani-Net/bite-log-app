@@ -188,6 +188,9 @@
   .blue-glow {
     text-shadow: 0 0 15px rgba(125, 211, 252, 0.4);
   }
+  .nav-glow {
+    box-shadow: 0 -2px 10px rgba(201, 168, 76, 0.3);
+  }
 }
 
 @keyframes radar-sweep {

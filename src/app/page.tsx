@@ -22,18 +22,18 @@ import {
 import { Bell } from "lucide-react";
 
 // Fish species default image/color mapping
-const FISH_COLORS: Record<string, { gradient: string; emoji: string }> = {
-  농어: { gradient: "from-blue-500 to-cyan-400", emoji: "🐟" },
-  우럭: { gradient: "from-amber-500 to-orange-400", emoji: "🪨" },
-  참돔: { gradient: "from-rose-400 to-pink-300", emoji: "🍣" },
-  감성돔: { gradient: "from-violet-500 to-purple-400", emoji: "🐠" },
-  볼락: { gradient: "from-emerald-500 to-green-400", emoji: "🔮" },
-  광어: { gradient: "from-yellow-400 to-amber-300", emoji: "🫓" },
-  고등어: { gradient: "from-indigo-500 to-blue-400", emoji: "🐟" },
-  방어: { gradient: "from-sky-500 to-cyan-400", emoji: "🐟" },
-  주꾸미: { gradient: "from-red-400 to-orange-300", emoji: "🐙" },
+const FISH_COLORS: Record<string, { gradient: string }> = {
+  농어: { gradient: "from-blue-500 to-cyan-400" },
+  우럭: { gradient: "from-amber-500 to-orange-400" },
+  참돔: { gradient: "from-rose-400 to-pink-300" },
+  감성돔: { gradient: "from-violet-500 to-purple-400" },
+  볼락: { gradient: "from-emerald-500 to-green-400" },
+  광어: { gradient: "from-yellow-400 to-amber-300" },
+  고등어: { gradient: "from-indigo-500 to-blue-400" },
+  방어: { gradient: "from-sky-500 to-cyan-400" },
+  주꾸미: { gradient: "from-red-400 to-orange-300" },
 };
-const DEFAULT_FISH = { gradient: "from-slate-400 to-slate-300", emoji: "🎣" };
+const DEFAULT_FISH = { gradient: "from-slate-400 to-slate-300" };
 
 // ─── Precision Index Gauge (Hero) ────────────────────────────────────────────
 function PrecisionGauge({
