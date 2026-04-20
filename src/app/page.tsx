@@ -22,6 +22,7 @@ import { Bell, Fish, Wind, Newspaper, Users } from "lucide-react";
 import SeasonAlertBanner from "@/components/SeasonAlertBanner";
 import MonthlyFishCard from "@/components/MonthlyFishCard";
 import MonthlySummaryCard from "@/components/MonthlySummaryCard";
+import DailyFishingTip from "@/components/DailyFishingTip";
 
 // Fish species default image/color mapping
 const FISH_COLORS: Record<string, { gradient: string }> = {
@@ -608,6 +609,9 @@ export default function HomePage() {
             thisMonth={thisMonthCatch}
             maxSize={maxSize}
           />
+
+          {/* Daily Fishing Tip */}
+          <DailyFishingTip />
 
           {/* Season Alert Banner */}
           <SeasonAlertBanner />
