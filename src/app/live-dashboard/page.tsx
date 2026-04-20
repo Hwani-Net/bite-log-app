@@ -41,7 +41,8 @@ const REGION_MAP: Record<string, string> = {
   강릉: "동해",
   포항: "동해",
   울산: "동해",
-  동해: "동해" };
+  동해: "동해",
+};
 
 function getRegion(locationName: string): string {
   for (const [key, region] of Object.entries(REGION_MAP)) {
@@ -50,27 +51,14 @@ function getRegion(locationName: string): string {
   return "기타";
 }
 
-const SPECIES_EMOJIS: Record<string, string> = {
-  농어: "",
-  우럭: "",
-  참돔: "",
-  감성돔: "",
-  볼락: "",
-  광어: "",
-  고등어: "",
-  방어: "",
-  주꾸미: "",
-  전갱이: "",
-  숭어: "",
-  학꽁치: "" };
-
 // ─── Region Card ──────────────────────────────────────────────────────────────
 const REGION_ACCENT: Record<string, string> = {
   서해: "text-[#c9a84c]",
   남해: "text-[#7dd3fc]",
   동해: "text-blue-400",
   제주: "text-emerald-400",
-  기타: "text-white/50" };
+  기타: "text-white/50",
+};
 
 function RegionCard({ stat }: { stat: RegionStat }) {
   const accent = REGION_ACCENT[stat.region] || REGION_ACCENT["기타"];
@@ -223,7 +211,7 @@ export default function LiveDashboardPage() {
           region,
           count: data.count,
           topSpecies: topSpeciesEntry?.[0] || "-",
-          emoji: SPECIES_EMOJIS[topSpeciesEntry?.[0]] || "" };
+        };
       })
       .sort((a, b) => b.count - a.count);
   }, [feed]);
@@ -240,7 +228,8 @@ export default function LiveDashboardPage() {
         speciesMap.set(item.species, {
           count: 0,
           sizes: [],
-          locations: new Map() });
+          locations: new Map(),
+        });
       }
       const stat = speciesMap.get(item.species)!;
       stat.count += item.count;
@@ -258,7 +247,6 @@ export default function LiveDashboardPage() {
         )[0];
         return {
           species,
-          emoji: SPECIES_EMOJIS[species] || "",
           count: data.count,
           avgSize:
             data.sizes.length > 0
@@ -266,7 +254,8 @@ export default function LiveDashboardPage() {
                   data.sizes.reduce((a, b) => a + b, 0) / data.sizes.length,
                 )
               : 0,
-          topLocation: topLocation?.[0] || "-" };
+          topLocation: topLocation?.[0] || "-",
+        };
       })
       .sort((a, b) => b.count - a.count);
   }, [feed]);
