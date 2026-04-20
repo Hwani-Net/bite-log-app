@@ -6,10 +6,12 @@ import {
   TripPlan,
   TripBriefing,
   generateTripBriefing,
-  getBriefingAlertTime } from "@/services/preTripBriefingService";
+  getBriefingAlertTime,
+} from "@/services/preTripBriefingService";
 import {
   sendLocalNotification,
-  requestNotificationPermission } from "@/services/pushNotificationService";
+  requestNotificationPermission,
+} from "@/services/pushNotificationService";
 import {
   ArrowLeft,
   PenLine,
@@ -56,7 +58,8 @@ import {
   Zap,
   Briefcase,
   LifeBuoy,
-  type LucideProps } from "lucide-react";
+  type LucideProps,
+} from "lucide-react";
 import type { ComponentType } from "react";
 
 const ICON_MAP: Record<string, ComponentType<LucideProps>> = {
@@ -93,7 +96,8 @@ const ICON_MAP: Record<string, ComponentType<LucideProps>> = {
   Zap,
   Briefcase,
   LifeBuoy,
-  Waves };
+  Waves,
+};
 
 function ItemIcon({ name, size = 16 }: { name: string; size?: number }) {
   const Icon = ICON_MAP[name];
@@ -101,7 +105,7 @@ function ItemIcon({ name, size = 16 }: { name: string; size?: number }) {
   return <Icon size={size} />;
 }
 
-// 어종 목록
+// @mock-data — 하드코딩된 어종 목록. 실서비스 시 fishSeasonDB 또는 API로 교체
 const SPECIES_LIST = [
   "볼락",
   "감성돔",
@@ -114,7 +118,7 @@ const SPECIES_LIST = [
   "참돔",
 ];
 
-// 지역 → 좌표 매핑
+// @mock-data — 하드코딩된 지역-좌표 매핑. 실서비스 시 지도 API 검색으로 교체
 const LOCATION_COORDS: Record<string, { lat: number; lng: number }> = {
   인천: { lat: 37.4563, lng: 126.7052 },
   태안: { lat: 36.7485, lng: 126.2982 },
@@ -128,7 +132,8 @@ const LOCATION_COORDS: Record<string, { lat: number; lng: number }> = {
   제주: { lat: 33.4996, lng: 126.5312 },
   서귀포: { lat: 33.2541, lng: 126.5601 },
   속초: { lat: 38.2048, lng: 128.5912 },
-  포항: { lat: 36.019, lng: 129.3435 } };
+  포항: { lat: 36.019, lng: 129.3435 },
+};
 
 const FISHING_TYPES = [
   { value: "breakwater", label: "방파제" },
@@ -144,7 +149,8 @@ export default function TripPlanPage() {
     species: "볼락",
     location: "태안",
     fishingType: "breakwater",
-    alertHour: 14 });
+    alertHour: 14,
+  });
   const [briefing, setBriefing] = useState<TripBriefing | null>(null);
   const [loading, setLoading] = useState(false);
   const [alertSet, setAlertSet] = useState(false);
@@ -156,7 +162,8 @@ export default function TripPlanPage() {
 
     const coords = LOCATION_COORDS[form.location] || {
       lat: 37.5665,
-      lng: 126.978 };
+      lng: 126.978,
+    };
     const plan: TripPlan = {
       date: form.date,
       species: form.species,
@@ -165,7 +172,8 @@ export default function TripPlanPage() {
       lng: coords.lng,
       fishingType: form.fishingType || "breakwater",
       charterName: form.charterName,
-      alertHour: form.alertHour ?? 14 };
+      alertHour: form.alertHour ?? 14,
+    };
 
     try {
       const result = await generateTripBriefing(plan);
@@ -390,6 +398,21 @@ export default function TripPlanPage() {
             )}
           </button>
         </section>
+
+        {/* ── 브리핑 결과 없음 ── */}
+        {!briefing && !loading && (
+          <section className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+            <div className="w-14 h-14 rounded-full bg-white/5 flex items-center justify-center">
+              <Sparkles size={24} className="text-white/20" />
+            </div>
+            <p className="text-sm font-semibold text-white/40">
+              아직 브리핑이 없습니다
+            </p>
+            <p className="text-xs text-white/25 leading-relaxed max-w-[220px]">
+              출조 계획을 입력하고 AI 브리핑 생성을 눌러주세요
+            </p>
+          </section>
+        )}
 
         {/* ── 브리핑 결과 ── */}
         {briefing && (
