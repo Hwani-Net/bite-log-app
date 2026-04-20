@@ -244,6 +244,7 @@ function QuickCheckWidget() {
         </h2>
         <div className="flex gap-2 mb-3">
           <select
+            aria-label="어종 선택"
             value={selectedSpecies}
             onChange={(e) => setSelectedSpecies(e.target.value)}
             style={{ colorScheme: "dark" }}
@@ -263,6 +264,7 @@ function QuickCheckWidget() {
             ))}
           </select>
           <input
+            aria-label="체장(cm) 입력"
             type="number"
             value={inputSize}
             onChange={(e) => setInputSize(e.target.value)}

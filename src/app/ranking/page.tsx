@@ -130,10 +130,11 @@ export default function RankingPage() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-[#080d14]/60 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between">
         <button
+          aria-label="뒤로 가기"
           className="size-10 flex items-center justify-center text-white/50 hover:bg-white/5 rounded-full transition-colors"
           onClick={() => window.history.back()}
         >
-          <DynamicIcon name="arrow_back" size={20} />
+          <DynamicIcon name="arrow_back" size={20} aria-hidden="true" />
         </button>
         <div className="flex items-center gap-2">
           <h1 className="text-lg font-bold tracking-tight text-white">

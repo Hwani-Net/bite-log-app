@@ -347,6 +347,15 @@ export default function OverviewTab({
           </div>
         </div>
 
+        {/* Location permission hint when weather unavailable */}
+        {!loading && !weather && (
+          <p className="text-[10px] text-white/40 text-center mt-2">
+            {locale === "ko"
+              ? "위치 권한을 허용하면 실시간 날씨를 확인할 수 있습니다"
+              : "Allow location access to see real-time weather"}
+          </p>
+        )}
+
         {/* Tide bar chart */}
         {tideData && tideData.tides.length > 0 && (
           <div className="mt-4 bg-white/5 rounded-xl p-4 border border-white/10">

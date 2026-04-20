@@ -304,10 +304,11 @@ export default function FleetRadar() {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 shrink-0 bg-slate-900/90 backdrop-blur-md border-b border-white/5 z-20">
         <button
+          aria-label="뒤로 가기"
           onClick={() => (window.location.href = "/")}
           className="p-2 text-slate-400 hover:text-white"
         >
-          <X size={20} />
+          <X size={20} aria-hidden="true" />
         </button>
         <div className="text-center">
           <h1 className="text-base font-bold text-slate-100 flex items-center gap-1.5 justify-center">

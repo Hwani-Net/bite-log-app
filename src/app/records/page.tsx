@@ -13,7 +13,8 @@ import {
   MapPin,
   SortAsc,
   Fish,
-  X } from "lucide-react";
+  X,
+} from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
 type SortBy = "date" | "size" | "count";
@@ -77,15 +78,18 @@ export default function RecordsPage() {
     {
       value: "date",
       label: locale === "ko" ? "최신순" : "Newest",
-      icon: "calendar_today" },
+      icon: "calendar_today",
+    },
     {
       value: "size",
       label: locale === "ko" ? "크기순" : "Size",
-      icon: "straighten" },
+      icon: "straighten",
+    },
     {
       value: "count",
       label: locale === "ko" ? "마릿수순" : "Count",
-      icon: "tag" },
+      icon: "tag",
+    },
   ];
 
   return (
@@ -125,10 +129,11 @@ export default function RecordsPage() {
           className="w-full pl-10 pr-12 py-3 rounded-2xl bg-white/5 border border-white/10 text-sm text-white placeholder-white/30 focus:border-[#c9a84c]/50 focus:ring-1 focus:ring-[#c9a84c]/30 transition-all"
         />
         <button
+          aria-label="필터"
           onClick={() => setShowFilters(!showFilters)}
           className={`absolute right-2 top-1/2 -translate-y-1/2 size-8 flex items-center justify-center rounded-xl transition-colors ${showFilters ? "bg-[#c9a84c] text-[#080d14]" : "text-white/60 hover:bg-white/10"}`}
         >
-          <Filter size={18} />
+          <Filter size={18} aria-hidden="true" />
         </button>
       </div>
 

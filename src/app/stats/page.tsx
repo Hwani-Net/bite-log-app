@@ -254,7 +254,7 @@ function BadgeCard({
           </p>
         </div>
         {badge.earned ? (
-          <Award size={20} className="text-[#c9a84c]" />
+          <Award size={20} className="text-[#c9a84c]" aria-hidden="true" />
         ) : (
           <span className="text-[10px] font-bold text-white/60">
             {Math.round(badge.progress * 100)}%
@@ -360,6 +360,7 @@ export default function StatsPage() {
           <BarChart3
             size={16}
             className="text-[#c9a84c] ml-1 inline align-middle"
+            aria-hidden="true"
           />
         </h1>
         <div className="flex w-10 items-center justify-end" />
@@ -385,7 +386,7 @@ export default function StatsPage() {
         </div>
       </div>
 
-      <main className="flex-1">
+      <div className="flex-1">
         {activeTab === "stats" && (
           <>
             {/* Period filter */}
@@ -900,7 +901,7 @@ export default function StatsPage() {
             )}
           </section>
         )}
-      </main>
+      </div>
     </div>
   );
 }
