@@ -38,14 +38,16 @@ export const FISH_REGULATION_DB: FishRegulation[] = [
     penaltyNote: "금어기 위반 시 300만원 이하 과태료",
     legalRef: "수산자원관리법 시행규칙 별표30",
     category: "saltwater",
-    tipKo: "금어기 해제 직후(9월)가 최고 시즌! 에기 색상은 주황·빨강 추천." },
+    tipKo: "금어기 해제 직후(9월)가 최고 시즌! 에기 색상은 주황·빨강 추천.",
+  },
   {
     species: "감성돔",
     speciesEn: "Black Sea Bream",
     closedSeason: {
       start: "5/1",
       end: "6/30",
-      note: "산란기 보호 (일부 해역)" },
+      note: "산란기 보호 (일부 해역)",
+    },
     minSizeCm: 25,
     dailyLimit: 10,
     regionalNotes: [
@@ -56,7 +58,8 @@ export const FISH_REGULATION_DB: FishRegulation[] = [
     penaltyNote: "체장 미달 포획 시 100만원 이하 과태료",
     legalRef: "수산자원관리법 시행규칙 별표4",
     category: "saltwater",
-    tipKo: "25cm 미만은 반드시 방류! 줄자 필수 지참." },
+    tipKo: "25cm 미만은 반드시 방류! 줄자 필수 지참.",
+  },
   {
     species: "참돔",
     speciesEn: "Red Sea Bream",
@@ -70,7 +73,8 @@ export const FISH_REGULATION_DB: FishRegulation[] = [
     penaltyNote: "체장 미달 포획 시 100만원 이하 과태료",
     legalRef: "수산자원관리법 시행규칙 별표4",
     category: "saltwater",
-    tipKo: "24cm 이상만 킵! 바늘 수거 후 방류 시 생존율 높음." },
+    tipKo: "24cm 이상만 킵! 바늘 수거 후 방류 시 생존율 높음.",
+  },
   {
     species: "우럭",
     speciesEn: "Black Rockfish",
@@ -85,7 +89,8 @@ export const FISH_REGULATION_DB: FishRegulation[] = [
     legalRef: "수산자원관리법 시행규칙 별표4",
     category: "saltwater",
     tipKo:
-      "23cm 미만은 즉시 방류. 수심 30m 이상에서 올린 물고기는 부력 조절 실패 → 방류 불가능할 수 있음." },
+      "23cm 미만은 즉시 방류. 수심 30m 이상에서 올린 물고기는 부력 조절 실패 → 방류 불가능할 수 있음.",
+  },
   {
     species: "광어",
     speciesEn: "Olive Flounder",
@@ -100,7 +105,8 @@ export const FISH_REGULATION_DB: FishRegulation[] = [
     legalRef: "수산자원관리법 시행규칙 별표4",
     category: "saltwater",
     tipKo:
-      "35cm 미만 즉시 방류! 방류 시 물에 몇 초간 담갔다 놓아주면 생존율 UP." },
+      "35cm 미만 즉시 방류! 방류 시 물에 몇 초간 담갔다 놓아주면 생존율 UP.",
+  },
   {
     species: "볼락",
     speciesEn: "Korean Rockfish",
@@ -114,7 +120,8 @@ export const FISH_REGULATION_DB: FishRegulation[] = [
     penaltyNote: "체장 미달 포획 시 100만원 이하 과태료",
     legalRef: "수산자원관리법 시행규칙 별표4",
     category: "saltwater",
-    tipKo: "15cm 미만은 즉시 방류. 작은 볼락이 많이 올라오면 포인트 이동 추천." },
+    tipKo: "15cm 미만은 즉시 방류. 작은 볼락이 많이 올라오면 포인트 이동 추천.",
+  },
   {
     species: "고등어",
     speciesEn: "Chub Mackerel",
@@ -126,7 +133,8 @@ export const FISH_REGULATION_DB: FishRegulation[] = [
     legalRef: "수산자원관리법 시행규칙 별표4",
     category: "saltwater",
     tipKo:
-      "21cm 미만 방류. 배 위에서 줄자 재기 어려우면 손 한 뼘(약 20cm)과 비교." },
+      "21cm 미만 방류. 배 위에서 줄자 재기 어려우면 손 한 뼘(약 20cm)과 비교.",
+  },
   {
     species: "방어",
     speciesEn: "Yellowtail",
@@ -140,7 +148,8 @@ export const FISH_REGULATION_DB: FishRegulation[] = [
     penaltyNote: "체장 미달 포획 시 100만원 이하 과태료",
     legalRef: "수산자원관리법 시행규칙 별표4",
     category: "saltwater",
-    tipKo: "30cm 미만 즉시 방류. 겨울 방어가 가장 맛있음 (11~1월)." },
+    tipKo: "30cm 미만 즉시 방류. 겨울 방어가 가장 맛있음 (11~1월).",
+  },
   {
     species: "전갱이",
     speciesEn: "Horse Mackerel",
@@ -151,14 +160,16 @@ export const FISH_REGULATION_DB: FishRegulation[] = [
     penaltyNote: "체장 미달 포획 시 100만원 이하 과태료",
     legalRef: "수산자원관리법 시행규칙 별표4",
     category: "saltwater",
-    tipKo: "15cm 미만 방류. 미끼용 전갱이도 체장 규정 적용됨!" },
+    tipKo: "15cm 미만 방류. 미끼용 전갱이도 체장 규정 적용됨!",
+  },
   {
     species: "대구",
     speciesEn: "Pacific Cod",
     closedSeason: {
       start: "1/16",
       end: "2/15",
-      note: "산란기 보호 (일부 해역)" },
+      note: "산란기 보호 (일부 해역)",
+    },
     minSizeCm: 35,
     dailyLimit: null,
     regionalNotes: [
@@ -168,7 +179,8 @@ export const FISH_REGULATION_DB: FishRegulation[] = [
     penaltyNote: "금어기 및 체장 미달 위반 시 300만원 이하 과태료",
     legalRef: "수산자원관리법 시행규칙 별표4, 별표30",
     category: "saltwater",
-    tipKo: "겨울 대구 낚시 시 금어기 주의. 특히 진해만 해역은 별도 규정." },
+    tipKo: "겨울 대구 낚시 시 금어기 주의. 특히 진해만 해역은 별도 규정.",
+  },
   {
     species: "갑오징어",
     speciesEn: "Cuttlefish",
@@ -179,7 +191,8 @@ export const FISH_REGULATION_DB: FishRegulation[] = [
     penaltyNote: "금어기 위반 시 300만원 이하 과태료",
     legalRef: "수산자원관리법 시행규칙 별표30",
     category: "saltwater",
-    tipKo: "금어기 해제 후 9~11월이 시즌. 산란 개체는 반드시 방류." },
+    tipKo: "금어기 해제 후 9~11월이 시즌. 산란 개체는 반드시 방류.",
+  },
   {
     species: "쥐노래미",
     speciesEn: "Greenling",
@@ -193,7 +206,8 @@ export const FISH_REGULATION_DB: FishRegulation[] = [
     penaltyNote: "금어기 및 체장 미달 위반 시 300만원 이하 과태료",
     legalRef: "수산자원관리법 시행규칙 별표4, 별표30",
     category: "saltwater",
-    tipKo: "겨울 방파제 낚시 시 노래미 금어기 주의! 11~12월은 산란기." },
+    tipKo: "겨울 방파제 낚시 시 노래미 금어기 주의! 11~12월은 산란기.",
+  },
   // ── 담수어 (Freshwater) ─────────────────────────────
   {
     species: "배스",
@@ -208,7 +222,8 @@ export const FISH_REGULATION_DB: FishRegulation[] = [
     penaltyNote: "방류 시 200만원 이하 과태료",
     legalRef: "생태계교란 생물 관리에 관한 규정",
     category: "freshwater",
-    tipKo: "️ 배스는 외래종! 잡으면 방사 금지, 수거 의무. 살아서 이동도 금지." },
+    tipKo: "배스는 외래종! 잡으면 방사 금지, 수거 의무. 살아서 이동도 금지.",
+  },
   {
     species: "블루길",
     speciesEn: "Bluegill",
@@ -222,7 +237,8 @@ export const FISH_REGULATION_DB: FishRegulation[] = [
     penaltyNote: "방류 시 200만원 이하 과태료",
     legalRef: "생태계교란 생물 관리에 관한 규정",
     category: "freshwater",
-    tipKo: "️ 블루길은 외래종! 잡으면 수거 의무. 방류 시 과태료 부과." },
+    tipKo: "블루길은 외래종! 잡으면 수거 의무. 방류 시 과태료 부과.",
+  },
 ];
 
 // ── Helpers ─────────────────────────────────────────────────
@@ -302,5 +318,6 @@ export function isCatchLegal(
 
   return {
     legal: violations.length === 0,
-    violations };
+    violations,
+  };
 }

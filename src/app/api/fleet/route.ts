@@ -84,7 +84,8 @@ const FleetQuerySchema = z.object({
     .regex(/^\d+(\.\d+)?$/, "'maxTonnage' must be a positive numeric value")
     .nullable()
     .optional()
-    .transform((v) => (v != null ? Number(v) : null)) });
+    .transform((v) => (v != null ? Number(v) : null)),
+});
 
 /** Zod inference から生成した型 */
 type FleetQueryParams = z.output<typeof FleetQuerySchema>;
@@ -98,7 +99,8 @@ function parseAndValidateQuery(
   const raw = {
     size: searchParams.get("size") ?? undefined,
     minTonnage: searchParams.get("minTonnage") ?? undefined,
-    maxTonnage: searchParams.get("maxTonnage") ?? undefined };
+    maxTonnage: searchParams.get("maxTonnage") ?? undefined,
+  };
 
   const result = FleetQuerySchema.safeParse(raw);
   if (!result.success) {
@@ -117,35 +119,40 @@ const MOCK_DYNAMIC: DynamicRecord[] = [
     lon: 128.62,
     speed: 10,
     course: 90,
-    timestamp: new Date().toISOString() },
+    timestamp: new Date().toISOString(),
+  },
   {
     mmsi: "222222222",
     lat: 34.86,
     lon: 128.65,
     speed: 0,
     course: 0,
-    timestamp: new Date().toISOString() },
+    timestamp: new Date().toISOString(),
+  },
   {
     mmsi: "333333333",
     lat: 34.92,
     lon: 128.58,
     speed: 15,
     course: 180,
-    timestamp: new Date().toISOString() },
+    timestamp: new Date().toISOString(),
+  },
   {
     mmsi: "444444444",
     lat: 34.91,
     lon: 128.68,
     speed: 5,
     course: 270,
-    timestamp: new Date().toISOString() },
+    timestamp: new Date().toISOString(),
+  },
   {
     mmsi: "555555555",
     lat: 34.85,
     lon: 128.6,
     speed: 2,
     course: 45,
-    timestamp: new Date().toISOString() },
+    timestamp: new Date().toISOString(),
+  },
 ];
 
 const MOCK_STATIC: StaticRecord[] = [
@@ -154,31 +161,36 @@ const MOCK_STATIC: StaticRecord[] = [
     shipName: "풍어호",
     shipType: "fishing",
     tonnage: 5,
-    length: 12 },
+    length: 12,
+  },
   {
     mmsi: "222222222",
     shipName: "만선호",
     shipType: "fishing",
     tonnage: 2,
-    length: 8 },
+    length: 8,
+  },
   {
     mmsi: "333333333",
     shipName: "오션스타",
     shipType: "passenger",
     tonnage: 50,
-    length: 35 },
+    length: 35,
+  },
   {
     mmsi: "444444444",
     shipName: "바다의왕자",
     shipType: "leisure",
     tonnage: 1,
-    length: 6 },
+    length: 6,
+  },
   {
     mmsi: "555555555",
     shipName: "갈매기호",
     shipType: "fishing",
     tonnage: 9,
-    length: 15 },
+    length: 15,
+  },
 ];
 
 // --- Helpers ---------------------------------------------------------
@@ -221,7 +233,8 @@ function joinFleetData(
       shipType: s?.shipType ?? "fishing",
       tonnage: s?.tonnage ?? 0,
       length: s?.length ?? 0,
-      sizeClass: classifySize(s?.tonnage ?? 0) });
+      sizeClass: classifySize(s?.tonnage ?? 0),
+    });
   }
   return entries;
 }
@@ -278,7 +291,7 @@ interface FetchResult<T> {
  * URLSearchParams.set()을 사용하면 이중 인코딩(%2B → %252B)이 발생하므로
  * template string으로 serviceKey를 직접 삽입한다.
  *
- * ️  FLEET_API_KEY 발급: https://www.data.go.kr → 검색 "선박 AIS 동적정보" →
+ * FLEET_API_KEY 발급: https://www.data.go.kr → 검색 "선박 AIS 동적정보" →
  *     활용신청 후 발급된 인코딩 키를 그대로 .env.local에 설정한다.
  *
  * Primary endpoint: api.odcloud.kr/api/15129186/v1 (선박AIS동적정보)
@@ -380,7 +393,8 @@ function mapDynamicItem(item: Record<string, unknown>): DynamicRecord {
           item["수신시간"] ??
           "",
       ),
-    ) };
+    ),
+  };
 }
 
 /** StaticRecord 매핑: odcloud/data.go.kr 양쪽 필드명 처리 */
@@ -417,7 +431,8 @@ function mapStaticItem(item: Record<string, unknown>): StaticRecord {
         item["SHIP_LENGTH"] ??
         item["선체전장"] ??
         0,
-    ) };
+    ),
+  };
 }
 
 async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
@@ -444,7 +459,8 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
     timestamp: new Date().toISOString(),
     event: "fleet.dynamic.request",
     endpoint: "odcloud/15129186",
-    url: urlStr.replace(apiKey, "[REDACTED]") });
+    url: urlStr.replace(apiKey, "[REDACTED]"),
+  });
 
   let res: Response;
   try {
@@ -453,7 +469,8 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
     structuredLog("warn", {
       timestamp: new Date().toISOString(),
       event: "fleet.dynamic.fallback_to_mock",
-      error: { message: "Fleet dynamic API unreachable", cause: String(err) } });
+      error: { message: "Fleet dynamic API unreachable", cause: String(err) },
+    });
     return { data: MOCK_DYNAMIC, fallback: true };
   }
 
@@ -464,7 +481,9 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
       event: "fleet.dynamic.fallback_to_mock",
       error: {
         message: `Fleet dynamic API responded with HTTP ${res.status}`,
-        body: body.slice(0, 500) } });
+        body: body.slice(0, 500),
+      },
+    });
     return { data: MOCK_DYNAMIC, fallback: true };
   }
 
@@ -477,7 +496,9 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
       event: "fleet.dynamic.fallback_to_mock",
       error: {
         message: "Fleet dynamic API body read failed",
-        cause: String(err) } });
+        cause: String(err),
+      },
+    });
     return { data: MOCK_DYNAMIC, fallback: true };
   }
 
@@ -491,7 +512,9 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
       error: {
         message: "Fleet dynamic API returned non-JSON",
         preview: rawText.slice(0, 200),
-        cause: String(err) } });
+        cause: String(err),
+      },
+    });
     return { data: MOCK_DYNAMIC, fallback: true };
   }
 
@@ -503,7 +526,8 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
       event: "fleet.dynamic.field_sample",
       fields: Object.keys(items[0]),
       sample: items[0],
-      totalItems: (json as OdcloudResponse).totalCount ?? items.length });
+      totalItems: (json as OdcloudResponse).totalCount ?? items.length,
+    });
   }
 
   const data = items.map(mapDynamicItem).filter((d) => d.mmsi !== "");
@@ -518,14 +542,16 @@ async function fetchDynamic(): Promise<FetchResult<DynamicRecord[]>> {
       timestamp: new Date().toISOString(),
       event: "fleet.dynamic.mmsi_masked",
       maskedCount,
-      totalCount: data.length });
+      totalCount: data.length,
+    });
   }
 
   if (data.length === 0) {
     structuredLog("warn", {
       timestamp: new Date().toISOString(),
       event: "fleet.dynamic.fallback_to_mock",
-      error: { message: "Fleet dynamic API returned empty dataset" } });
+      error: { message: "Fleet dynamic API returned empty dataset" },
+    });
     return { data: MOCK_DYNAMIC, fallback: true };
   }
 
@@ -537,7 +563,8 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
   if (!apiKey || process.env.FLEET_USE_MOCK === "true") {
     return {
       data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
-      fallback: false };
+      fallback: false,
+    };
   }
 
   // apis.data.go.kr static endpoint (dynamic보다 안정적인 경우가 많음)
@@ -545,14 +572,16 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
   const extra = new URLSearchParams({
     resultType: "json",
     numOfRows: "100",
-    pageNo: "1" });
+    pageNo: "1",
+  });
   const urlStr = `https://apis.data.go.kr/1192000/VesselAisStatic/getStatic?serviceKey=${apiKey}&${extra.toString()}`;
 
   structuredLog("info", {
     timestamp: new Date().toISOString(),
     event: "fleet.static.request",
     endpoint: "data.go.kr/VesselAisStatic",
-    url: urlStr.replace(apiKey, "[REDACTED]") });
+    url: urlStr.replace(apiKey, "[REDACTED]"),
+  });
 
   let res: Response;
   try {
@@ -561,10 +590,12 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
     structuredLog("warn", {
       timestamp: new Date().toISOString(),
       event: "fleet.static.fallback_to_mock",
-      error: { message: "Fleet static API unreachable", cause: String(err) } });
+      error: { message: "Fleet static API unreachable", cause: String(err) },
+    });
     return {
       data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
-      fallback: true };
+      fallback: true,
+    };
   }
 
   if (!res.ok) {
@@ -574,10 +605,13 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
       event: "fleet.static.fallback_to_mock",
       error: {
         message: `Fleet static API responded with HTTP ${res.status}`,
-        body: body.slice(0, 500) } });
+        body: body.slice(0, 500),
+      },
+    });
     return {
       data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
-      fallback: true };
+      fallback: true,
+    };
   }
 
   let rawText: string;
@@ -589,10 +623,13 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
       event: "fleet.static.fallback_to_mock",
       error: {
         message: "Fleet static API body read failed",
-        cause: String(err) } });
+        cause: String(err),
+      },
+    });
     return {
       data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
-      fallback: true };
+      fallback: true,
+    };
   }
 
   let json: unknown;
@@ -605,10 +642,13 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
       error: {
         message: "Fleet static API returned non-JSON",
         preview: rawText.slice(0, 200),
-        cause: String(err) } });
+        cause: String(err),
+      },
+    });
     return {
       data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
-      fallback: true };
+      fallback: true,
+    };
   }
 
   const items = extractItems(json);
@@ -617,10 +657,12 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
     structuredLog("warn", {
       timestamp: new Date().toISOString(),
       event: "fleet.static.fallback_to_mock",
-      error: { message: "Fleet static API returned empty dataset" } });
+      error: { message: "Fleet static API returned empty dataset" },
+    });
     return {
       data: new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
-      fallback: true };
+      fallback: true,
+    };
   }
 
   if (items.length > 0) {
@@ -629,7 +671,8 @@ async function fetchStatic(): Promise<FetchResult<Map<string, StaticRecord>>> {
       event: "fleet.static.field_sample",
       fields: Object.keys(items[0]),
       sample: items[0],
-      totalItems: items.length });
+      totalItems: items.length,
+    });
   }
 
   const map = new Map<string, StaticRecord>();
@@ -682,7 +725,8 @@ async function fetchFromAISStream(): Promise<{
       if (dynamicMap.size === 0) {
         structuredLog("warn", {
           timestamp: new Date().toISOString(),
-          event: "fleet.aisstream.empty" });
+          event: "fleet.aisstream.empty",
+        });
         resolve(null);
         return;
       }
@@ -690,7 +734,8 @@ async function fetchFromAISStream(): Promise<{
         timestamp: new Date().toISOString(),
         event: "fleet.aisstream.success",
         dynamicCount: dynamicMap.size,
-        staticCount: staticMap.size });
+        staticCount: staticMap.size,
+      });
       resolve({ dynamic: Array.from(dynamicMap.values()), staticMap });
     };
 
@@ -699,7 +744,8 @@ async function fetchFromAISStream(): Promise<{
     ws.on("open", () => {
       structuredLog("info", {
         timestamp: new Date().toISOString(),
-        event: "fleet.aisstream.connected" });
+        event: "fleet.aisstream.connected",
+      });
       ws.send(
         JSON.stringify({
           APIKey: apiKey,
@@ -709,7 +755,8 @@ async function fetchFromAISStream(): Promise<{
               [38.5, 132.0],
             ],
           ],
-          FilterMessageTypes: ["PositionReport", "ShipStaticData"] }),
+          FilterMessageTypes: ["PositionReport", "ShipStaticData"],
+        }),
       );
     });
 
@@ -734,7 +781,8 @@ async function fetchFromAISStream(): Promise<{
             lon: Number(meta?.["longitude"] ?? p["Longitude"] ?? 0),
             speed: Number(p["Sog"] ?? 0),
             course: Number(p["Cog"] ?? 0),
-            timestamp: new Date().toISOString() });
+            timestamp: new Date().toISOString(),
+          });
         } else if (msg["MessageType"] === "ShipStaticData") {
           const staticMsg = msg["Message"] as
             | Record<string, unknown>
@@ -750,7 +798,8 @@ async function fetchFromAISStream(): Promise<{
             shipName: rawName || `선박 ${mmsi.slice(-4)}`,
             shipType: inferShipType(Number(s["Type"] ?? 0)),
             tonnage: 0,
-            length: Number(dim?.["A"] ?? 0) + Number(dim?.["B"] ?? 0) });
+            length: Number(dim?.["A"] ?? 0) + Number(dim?.["B"] ?? 0),
+          });
         }
 
         // 100척 수집되면 조기 종료
@@ -765,7 +814,8 @@ async function fetchFromAISStream(): Promise<{
       structuredLog("warn", {
         timestamp: new Date().toISOString(),
         event: "fleet.aisstream.error",
-        error: String(err) });
+        error: String(err),
+      });
       clearTimeout(timer);
       finish();
     });
@@ -830,7 +880,8 @@ async function fetchFromKhoa(): Promise<{
   structuredLog("info", {
     timestamp: new Date().toISOString(),
     event: "fleet.khoa.request",
-    url: url.replace(khoaKey, "[REDACTED]") });
+    url: url.replace(khoaKey, "[REDACTED]"),
+  });
 
   let res: Response;
   try {
@@ -839,7 +890,8 @@ async function fetchFromKhoa(): Promise<{
     structuredLog("warn", {
       timestamp: new Date().toISOString(),
       event: "fleet.khoa.unreachable",
-      error: String(err) });
+      error: String(err),
+    });
     return null;
   }
 
@@ -849,7 +901,8 @@ async function fetchFromKhoa(): Promise<{
       timestamp: new Date().toISOString(),
       event: "fleet.khoa.http_error",
       status: res.status,
-      body: body.slice(0, 300) });
+      body: body.slice(0, 300),
+    });
     return null;
   }
 
@@ -862,7 +915,8 @@ async function fetchFromKhoa(): Promise<{
       timestamp: new Date().toISOString(),
       event: "fleet.khoa.parse_error",
       preview: rawText.slice(0, 200),
-      error: String(err) });
+      error: String(err),
+    });
     return null;
   }
 
@@ -870,7 +924,8 @@ async function fetchFromKhoa(): Promise<{
   if (items.length === 0) {
     structuredLog("warn", {
       timestamp: new Date().toISOString(),
-      event: "fleet.khoa.empty" });
+      event: "fleet.khoa.empty",
+    });
     return null;
   }
 
@@ -878,7 +933,8 @@ async function fetchFromKhoa(): Promise<{
     timestamp: new Date().toISOString(),
     event: "fleet.khoa.field_sample",
     fields: Object.keys(items[0]),
-    totalItems: items.length });
+    totalItems: items.length,
+  });
 
   const dynamic: DynamicRecord[] = items
     .filter((item) => item.mmsi != null)
@@ -888,7 +944,8 @@ async function fetchFromKhoa(): Promise<{
       lon: Number(item.lon ?? 0),
       speed: Number(item.speed ?? item.sog ?? 0),
       course: Number(item.course ?? item.cog ?? 0),
-      timestamp: parseRecptnDt(String(item.recptnDt ?? item.recptDt ?? "")) }));
+      timestamp: parseRecptnDt(String(item.recptnDt ?? item.recptDt ?? "")),
+    }));
 
   const staticMap = new Map<string, StaticRecord>();
   for (const item of items) {
@@ -899,7 +956,8 @@ async function fetchFromKhoa(): Promise<{
       shipName: String(item.shipNm ?? item.shipName ?? ""),
       shipType: String(item.shipType ?? item.shipTp ?? ""),
       tonnage: Number(item.gt ?? item.grossTon ?? 0),
-      length: Number(item.loa ?? item.shipLength ?? 0) });
+      length: Number(item.loa ?? item.shipLength ?? 0),
+    });
   }
 
   return { dynamic, staticMap };
@@ -947,7 +1005,8 @@ export async function GET(request: NextRequest) {
         structuredLog("info", {
           timestamp: new Date().toISOString(),
           event: "fleet.khoa.success",
-          count: rawFleet.length });
+          count: rawFleet.length,
+        });
       } else {
         // 모든 외부 소스 실패 → mock 데이터 사용
         rawFleet = joinFleetData(
@@ -975,7 +1034,8 @@ export async function GET(request: NextRequest) {
       rawCount: rawFleet.length,
       dataSource,
       mock: isMock,
-      params });
+      params,
+    });
 
     return NextResponse.json({
       ok: true,
@@ -983,20 +1043,23 @@ export async function GET(request: NextRequest) {
       count: fleet.length,
       timestamp: new Date().toISOString(),
       mock: isMock,
-      dataSource });
+      dataSource,
+    });
   } catch (err) {
     structuredLog("error", {
       timestamp: new Date().toISOString(),
       event: "fleet.get.unhandled_error",
       error: String(err),
-      duration: Date.now() - t0 });
+      duration: Date.now() - t0,
+    });
     return NextResponse.json(
       {
         ok: false,
         error: "Internal server error",
         mock: true,
         data: MOCK_DYNAMIC,
-        count: MOCK_DYNAMIC.length },
+        count: MOCK_DYNAMIC.length,
+      },
       { status: 500 },
     );
   }

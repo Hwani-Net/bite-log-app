@@ -61,7 +61,8 @@ const QUICK_REPLIES_BY_SPECIES: Record<string, string[]> = {
   ],
   전갱이: ["전갱이 낚시법", "전갱이 사비키 채비", "전갱이 입질 시간대"],
   삼치: ["삼치 시즌", "삼치 루어 선택", "삼치 릴링 속도", "삼치 포인트"],
-  방어: ["방어 시즌", "방어 GT 채비", "방어 포인트", "방어 vs 부시리"] };
+  방어: ["방어 시즌", "방어 GT 채비", "방어 포인트", "방어 vs 부시리"],
+};
 
 const DEFAULT_QUICK_REPLIES = [
   "지금 시즌 조황 알려줘",
@@ -103,10 +104,12 @@ export async function chatWithExpert(
     const contents = [
       ...recentHistory.map((m) => ({
         role: m.role,
-        parts: [{ text: m.text }] })),
+        parts: [{ text: m.text }],
+      })),
       {
         role: "user",
-        parts: [{ text: contextHint + userMessage }] },
+        parts: [{ text: contextHint + userMessage }],
+      },
     ];
 
     const requestBody = {
@@ -116,14 +119,17 @@ export async function chatWithExpert(
         temperature: 0.6,
         maxOutputTokens: 200,
         topK: 40,
-        topP: 0.9 } };
+        topP: 0.9,
+      },
+    };
 
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody) },
+        body: JSON.stringify(requestBody),
+      },
     );
 
     if (!res.ok) {
@@ -145,8 +151,8 @@ function getMockAnswer(species: string | null, question: string): string {
   const q = question.toLowerCase();
   if (q.includes("시즌") || q.includes("언제")) {
     return species
-      ? `️ **${species} 시즌**: 봄(4~6월)과 가을(9~11월)이 최성수기입니다.\n가을이 씨알이 굵고 조과도 풍성해 추천해요!`
-      : `️ 봄·가을이 전반적인 낚시 성수기입니다.\n현재(${new Date().getMonth() + 1}월)는 ${new Date().getMonth() >= 3 && new Date().getMonth() <= 5 ? "봄 시즌 — 광어, 우럭 추천!" : new Date().getMonth() >= 8 && new Date().getMonth() <= 10 ? "가을 시즌 — 주꾸미, 고등어 추천!" : "동절기 — 우럭, 볼락이 주력입니다."}`;
+      ? `**${species} 시즌**: 봄(4~6월)과 가을(9~11월)이 최성수기입니다.\n가을이 씨알이 굵고 조과도 풍성해 추천해요!`
+      : `봄·가을이 전반적인 낚시 성수기입니다.\n현재(${new Date().getMonth() + 1}월)는 ${new Date().getMonth() >= 3 && new Date().getMonth() <= 5 ? "봄 시즌 — 광어, 우럭 추천!" : new Date().getMonth() >= 8 && new Date().getMonth() <= 10 ? "가을 시즌 — 주꾸미, 고등어 추천!" : "동절기 — 우럭, 볼락이 주력입니다."}`;
   }
   if (q.includes("채비") || q.includes("루어")) {
     return species
@@ -154,7 +160,7 @@ function getMockAnswer(species: string | null, question: string): string {
       : ` 범용 루어 채비로는 10~40g 왜건 바이브가 많은 어종에 효과적입니다.`;
   }
   if (q.includes("입문") || q.includes("장비") || q.includes("추천")) {
-    return `️ **입문 장비 패키지** (약 10~15만원 예산):\n① 스피닝 릴 + 로드 콤보셋 ② PE 라인 1~1.5호 ③ 워엠 지그헤드\n낚시점 패키지가 가성비 최고!`;
+    return `**입문 장비 패키지** (약 10~15만원 예산):\n① 스피닝 릴 + 로드 콤보셋 ② PE 라인 1~1.5호 ③ 워엠 지그헤드\n낚시점 패키지가 가성비 최고!`;
   }
   return ` 네, ${species ? species + " 낚시" : "낚시"}에 대해 더 구체적으로 물어봐 주세요!\n예: "시즌이 언제야?", "채비 추천해줘", "포인트 알려줘" (Demo 모드)`;
 }

@@ -1,4 +1,4 @@
-import { CatchRecord } from '@/types';
+import { CatchRecord } from "@/types";
 
 /**
  * Generate a shareable catch card as an HTML string that can be used
@@ -7,28 +7,30 @@ import { CatchRecord } from '@/types';
 export function generateShareText(record: CatchRecord, locale: string): string {
   const lines: string[] = [];
 
-  lines.push(locale === 'ko' ? ' BITE Log 조과 기록' : ' BITE Log Catch Record');
-  lines.push('');
-  lines.push(` ${record.species} ${record.count}${locale === 'ko' ? '마리' : ' fish'}`);
+  lines.push(locale === "ko" ? "BITE Log 조과 기록" : "BITE Log Catch Record");
+  lines.push("");
+  lines.push(
+    `${record.species} ${record.count}${locale === "ko" ? "마리" : " fish"}`,
+  );
   if (record.sizeCm) {
-    lines.push(` ${record.sizeCm}cm`);
+    lines.push(`${record.sizeCm}cm`);
   }
-  lines.push(` ${record.location.name}`);
-  lines.push(` ${record.date}`);
+  lines.push(record.location.name);
+  lines.push(record.date);
 
   if (record.weather) {
-    lines.push(`️ ${record.weather.condition} ${record.weather.tempC}°C`);
+    lines.push(`${record.weather.condition} ${record.weather.tempC}°C`);
   }
 
   if (record.memo) {
-    lines.push('');
-    lines.push(` ${record.memo}`);
+    lines.push("");
+    lines.push(record.memo);
   }
 
-  lines.push('');
-  lines.push('#BITE Log #낚시 #조과');
+  lines.push("");
+  lines.push("#BITE Log #낚시 #조과");
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
@@ -37,21 +39,22 @@ export function generateShareText(record: CatchRecord, locale: string): string {
  */
 export async function shareCatchRecord(
   record: CatchRecord,
-  locale: string
-): Promise<{ success: boolean; method: 'share' | 'clipboard' }> {
+  locale: string,
+): Promise<{ success: boolean; method: "share" | "clipboard" }> {
   const text = generateShareText(record, locale);
 
   // Try native Web Share API first
   if (navigator.share) {
     try {
       await navigator.share({
-        title: locale === 'ko' ? 'BITE Log 조과 기록' : 'BITE Log Catch Record',
-        text });
-      return { success: true, method: 'share' };
+        title: locale === "ko" ? "BITE Log 조과 기록" : "BITE Log Catch Record",
+        text,
+      });
+      return { success: true, method: "share" };
     } catch (err) {
       // User cancelled or share failed — fall through to clipboard
-      if ((err as DOMException).name === 'AbortError') {
-        return { success: false, method: 'share' };
+      if ((err as DOMException).name === "AbortError") {
+        return { success: false, method: "share" };
       }
     }
   }
@@ -59,8 +62,8 @@ export async function shareCatchRecord(
   // Fallback: copy to clipboard
   try {
     await navigator.clipboard.writeText(text);
-    return { success: true, method: 'clipboard' };
+    return { success: true, method: "clipboard" };
   } catch {
-    return { success: false, method: 'clipboard' };
+    return { success: false, method: "clipboard" };
   }
 }
