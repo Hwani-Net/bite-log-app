@@ -320,7 +320,7 @@ export default function FleetRadar() {
           <div className="flex items-center gap-1.5 justify-center mt-0.5">
             <span className="w-1.5 h-1.5 rounded-full animate-pulse bg-emerald-500" />
             <span className="text-[10px] text-slate-400">
-              LIVE · {lastUpdate || "--:--:--"}
+              LIVE · {lastUpdate || "데이터 수신 중..."}
             </span>
           </div>
         </div>

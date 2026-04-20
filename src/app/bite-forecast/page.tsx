@@ -654,6 +654,13 @@ export default function BiteForecastPage() {
             );
           })()}
 
+          {/* ── GPS permission banner ── */}
+          {!weather && !tideData && (
+            <p className="text-xs text-white/40 text-center py-2">
+              위치 권한을 허용하면 실시간 데이터를 제공합니다
+            </p>
+          )}
+
           {/* ── Factor Detail Cards ── */}
           <div>
             <div className="flex items-center gap-2 mb-3">

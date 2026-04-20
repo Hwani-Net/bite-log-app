@@ -263,16 +263,21 @@ function QuickCheckWidget() {
               </option>
             ))}
           </select>
-          <input
-            aria-label="체장(cm) 입력"
-            type="number"
-            value={inputSize}
-            onChange={(e) => setInputSize(e.target.value)}
-            placeholder="크기(cm)"
-            min={0}
-            max={300}
-            className="w-24 bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-white/30 text-center"
-          />
+          <div className="relative flex items-center">
+            <input
+              aria-label="체장(cm) 입력"
+              type="number"
+              value={inputSize}
+              onChange={(e) => setInputSize(e.target.value)}
+              placeholder="예: 25"
+              min={0}
+              max={300}
+              className="w-24 bg-white/10 border border-white/20 rounded-xl pl-3 pr-8 py-2.5 text-sm text-white placeholder:text-white/30 text-center"
+            />
+            <span className="absolute right-2.5 text-[10px] text-white/30 pointer-events-none">
+              cm
+            </span>
+          </div>
         </div>
 
         {result && (
