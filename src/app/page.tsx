@@ -13,13 +13,12 @@ import {
   BiteTimePrediction,
 } from "@/services/biteTimeService";
 import { getSpeciesBiteScores } from "@/services/speciesBiteService";
-// fetchTopNews kept available for future news section restoration
-// import { fetchTopNews } from "@/services/fishingNewsService";
+import { fetchTopNews, FishingNewsItem } from "@/services/fishingNewsService";
 import {
   analyzeUserRecords,
   UserFishingProfile,
 } from "@/services/personalizationService";
-import { Bell, Fish } from "lucide-react";
+import { Bell, Fish, Wind, Newspaper, Users } from "lucide-react";
 
 // Fish species default image/color mapping
 const FISH_COLORS: Record<string, { gradient: string }> = {
@@ -371,6 +370,109 @@ function CatchGallery({ records }: { records: CatchRecord[] }) {
   );
 }
 
+// ─── Windy 출항 날씨 ──────────────────────────────────────────────────────────
+function WindySection() {
+  return (
+    <section className="pt-2">
+      <div className="flex items-center gap-2 mb-3">
+        <Wind size={14} className="text-[#7dd3fc]" />
+        <h2 className="text-[0.6rem] font-bold text-white/60 uppercase tracking-[0.25em]">
+          출항 날씨
+        </h2>
+      </div>
+      <div className="rounded-2xl overflow-hidden border border-white/5">
+        <iframe
+          title="Windy Weather"
+          width="100%"
+          height="280"
+          src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=°C&metricWind=m/s&zoom=7&overlay=wind&product=ecmwf&level=surface&lat=35.5&lon=128.5&detailLat=35.5&detailLon=128.5&marker=true&message=true"
+          frameBorder="0"
+          style={{ display: "block" }}
+        />
+      </div>
+      <p className="text-[0.45rem] text-white/20 text-center mt-2 tracking-[0.2em] uppercase">
+        바람 · 파도 · 해류 · Powered by Windy.com
+      </p>
+    </section>
+  );
+}
+
+// ─── 낚시 뉴스 섹션 ────────────────────────────────────────────────────────────
+function NewsSection({ news }: { news: FishingNewsItem[] }) {
+  if (news.length === 0) return null;
+  return (
+    <section className="pt-2">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Newspaper size={14} className="text-[#c9a84c]" />
+          <h2 className="text-[0.6rem] font-bold text-white/60 uppercase tracking-[0.25em]">
+            낚시 뉴스
+          </h2>
+        </div>
+        <a
+          href="/news"
+          className="text-[0.5rem] text-white/30 uppercase tracking-[0.2em] hover:text-[#c9a84c] transition-colors"
+        >
+          전체보기
+        </a>
+      </div>
+      <div className="space-y-2">
+        {news.slice(0, 3).map((item, i) => (
+          <a
+            key={i}
+            href={item.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-start gap-3 p-3 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-colors"
+          >
+            <div className="flex-1 min-w-0">
+              <p className="text-[0.65rem] font-medium text-white/80 line-clamp-2 leading-relaxed">
+                {item.title}
+              </p>
+              <p className="text-[0.5rem] text-white/30 mt-1 uppercase tracking-widest">
+                {item.source ?? "뉴스"}
+              </p>
+            </div>
+            {item.thumbnail && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={item.thumbnail}
+                alt=""
+                className="w-14 h-14 rounded-lg object-cover flex-shrink-0 opacity-80"
+              />
+            )}
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─── 커뮤니티 조과 배너 ───────────────────────────────────────────────────────
+function CommunityFeedBanner() {
+  return (
+    <a
+      href="/feed"
+      className="flex items-center justify-between p-4 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-colors"
+    >
+      <div className="flex items-center gap-3">
+        <Users size={18} className="text-[#c9a84c]/70" />
+        <div>
+          <p className="text-[0.65rem] font-bold text-white/80 uppercase tracking-[0.15em]">
+            최신 조과 피드
+          </p>
+          <p className="text-[0.5rem] text-white/30 mt-0.5">
+            다른 낚시인의 오늘 조과 보기
+          </p>
+        </div>
+      </div>
+      <span className="text-[0.5rem] text-white/20 uppercase tracking-widest">
+        →
+      </span>
+    </a>
+  );
+}
+
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function HomePage() {
   const [mounted, setMounted] = useState(false);
@@ -379,6 +481,7 @@ export default function HomePage() {
   const [biteTime, setBiteTime] = useState<BiteTimePrediction | null>(null);
   const [biteLoading, setBiteLoading] = useState(true);
   const [aiProfile, setAiProfile] = useState<UserFishingProfile | null>(null);
+  const [topNews, setTopNews] = useState<FishingNewsItem[]>([]);
 
   useEffect(() => {
     setMounted(true);
@@ -395,6 +498,12 @@ export default function HomePage() {
       }
     }
     load();
+  }, []);
+
+  useEffect(() => {
+    fetchTopNews()
+      .then(setTopNews)
+      .catch((err) => console.error("[News] fetch failed:", err));
   }, []);
 
   useEffect(() => {
@@ -510,6 +619,15 @@ export default function HomePage() {
               </Link>
             </section>
           )}
+
+          {/* 커뮤니티 최신 조과 피드 */}
+          <CommunityFeedBanner />
+
+          {/* 낚시 뉴스 */}
+          <NewsSection news={topNews} />
+
+          {/* Windy 출항 날씨 */}
+          <WindySection />
         </div>
       </main>
 
