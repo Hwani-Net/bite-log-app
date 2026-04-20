@@ -16,6 +16,12 @@ const FISHING_CHANNELS = [
   { name: "피싱트립&태클", id: "UC86kmEzDxYXrA2dG8zs4jDg" },
   { name: "초짜낚시", id: "UC2p_1UG0IjoRfAo8rmVsmKQ" },
   { name: "와우낚시tv", id: "UCqMO8qO0HoCR9QIuOJ0PFDw" },
+  { name: "마초TV", id: "UCg16fV-BKHHxnK_6eaDDtDw" },
+  { name: "힛뜨TV", id: "UCE2kNR6hsy-FZz1KjwDipvQ" },
+  { name: "허기자TV", id: "UCyVo7_aj_HpFOfEbJTLwLTQ" },
+  { name: "낚시가자!설튜브", id: "UCwaKj1D0aU0p8gzG8hm6p4w" },
+  { name: "팀쎈언니", id: "UC60GSAcz1yeQ7JuM96UTPug" },
+  { name: "낚시처방전", id: "UCLPSTDCMFIOupS5a1s4MEmg" },
 ];
 
 const FISHING_RELEVANCE_KEYWORDS = [
