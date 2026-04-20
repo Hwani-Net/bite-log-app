@@ -10,17 +10,19 @@ import { fetchMarineData } from "@/services/marineService";
 import {
   calculateBiteTime,
   BiteTimePrediction,
-  BiteFactor } from "@/services/biteTimeService";
+  BiteFactor,
+} from "@/services/biteTimeService";
 import { TideData, getCurrentPhase, TidePhase } from "@/services/tideService";
 import { WeatherData } from "@/services/weatherService";
 import PeakTimeline from "@/app/components/concierge/PeakTimeline";
-import { ArrowLeft, Lock, MapPin, ChevronRight, Loader2 } from "lucide-react";
+import { ArrowLeft, Lock, MapPin, ChevronRight } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
 // ─── Secret Spots Section ─────────────────────────────────────────────────────
 function SecretSpotsSection({
   isPro,
-  onOpenPaywall }: {
+  onOpenPaywall,
+}: {
   isPro: boolean;
   onOpenPaywall: () => void;
 }) {
@@ -28,15 +30,18 @@ function SecretSpotsSection({
     {
       name: "대천항 남단 테트라포드",
       species: "감성돔, 우럭",
-      desc: "들물 타임에 대물 출현 빈도 매우 높음" },
+      desc: "들물 타임에 대물 출현 빈도 매우 높음",
+    },
     {
       name: "시화방조제 1km 지점 수중여",
       species: "삼치, 광어",
-      desc: "조류가 바뀌는 시점에 폭발적 피딩" },
+      desc: "조류가 바뀌는 시점에 폭발적 피딩",
+    },
     {
       name: "영흥도 남서쪽 시크릿 여밭",
       species: "참돔, 갑오징어",
-      desc: "현지인들만 아는 최고급 포인트" },
+      desc: "현지인들만 아는 최고급 포인트",
+    },
   ];
 
   return (
@@ -155,18 +160,23 @@ function FactorCard({ factor }: { factor: BiteFactor }) {
       bg: "bg-emerald-500/10",
       border: "border-emerald-500/20",
       text: "text-emerald-400",
-      bar: "bg-emerald-500" },
+      bar: "bg-emerald-500",
+    },
     neutral: {
       bg: "bg-[#c9a84c]/10",
       border: "border-[#c9a84c]/20",
       text: "text-[#c9a84c]",
-      bar: "bg-[#c9a84c]" },
+      bar: "bg-[#c9a84c]",
+    },
     negative: {
       bg: "bg-red-500/10",
       border: "border-red-500/20",
       text: "text-red-400",
-      bar: "bg-red-500" } };
+      bar: "bg-red-500",
+    },
+  };
   const s = statusStyles[factor.status];
+  const noData = factor.description.includes("정보 없음");
 
   return (
     <div className={`rounded-2xl p-4 border ${s.bg} ${s.border}`}>
@@ -181,15 +191,30 @@ function FactorCard({ factor }: { factor: BiteFactor }) {
           <p className="text-[10px] text-white/60">{factor.description}</p>
         </div>
         <div className="text-right">
-          <span className={`text-lg font-black ${s.text}`}>{factor.score}</span>
-          <span className="text-[10px] text-white/30">/20</span>
+          {noData ? (
+            <>
+              <span className="text-lg font-black text-white/30">--</span>
+              <span className="text-[10px] text-white/30">/20</span>
+            </>
+          ) : (
+            <>
+              <span className={`text-lg font-black ${s.text}`}>
+                {factor.score}
+              </span>
+              <span className="text-[10px] text-white/30">/20</span>
+            </>
+          )}
         </div>
       </div>
       {/* Progress bar */}
       <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
         <div
-          className={`h-full rounded-full ${s.bar} transition-all duration-700 ease-out`}
-          style={{ width: `${Math.min(100, (factor.score / 20) * 100)}%` }}
+          className={`h-full rounded-full ${noData ? "bg-white/10" : s.bar} transition-all duration-700 ease-out`}
+          style={{
+            width: noData
+              ? "0%"
+              : `${Math.min(100, (factor.score / 20) * 100)}%`,
+          }}
         />
       </div>
     </div>
@@ -199,7 +224,8 @@ function FactorCard({ factor }: { factor: BiteFactor }) {
 // ─── Tide Timeline ────────────────────────────────────────────────────────────
 function TideTimeline({
   tideData,
-  phase }: {
+  phase,
+}: {
   tideData: TideData;
   phase: TidePhase | null;
 }) {
@@ -334,22 +360,26 @@ function WeatherDetail({ weather }: { weather: WeatherData }) {
           ? "text-orange-400"
           : weather.tempC < 5
             ? "text-[#7dd3fc]"
-            : "text-emerald-400" },
+            : "text-emerald-400",
+    },
     {
       label: "바람",
       value: `${weather.windSpeed}m/s`,
       icon: "air",
-      color: (weather.windSpeed ?? 0) > 10 ? "text-red-400" : "text-[#7dd3fc]" },
+      color: (weather.windSpeed ?? 0) > 10 ? "text-red-400" : "text-[#7dd3fc]",
+    },
     {
       label: "습도",
       value: `${weather.humidity}%`,
       icon: "humidity_percentage",
-      color: "text-[#7dd3fc]" },
+      color: "text-[#7dd3fc]",
+    },
     {
       label: "날씨",
       value: weather.conditionKo,
       icon: weather.icon,
-      color: "text-[#c9a84c]" },
+      color: "text-[#c9a84c]",
+    },
   ];
 
   return (
@@ -547,48 +577,82 @@ export default function BiteForecastPage() {
       ) : biteTime ? (
         <div className="space-y-4 px-4 pt-4">
           {/* ── Score Hero ── */}
-          <div className="glass-morphism rounded-2xl border border-white/5 p-5">
-            <div className="flex items-center gap-6">
-              <ScoreRing score={biteTime.score} />
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg font-bold text-white">
-                    {biteTime.gradeLabel}
-                  </span>
-                </div>
-                <p className="text-xs text-white/60 mb-3">
-                  7가지 요소를 종합 분석한 결과입니다
-                </p>
-                {/* Mini factor tags */}
-                <div className="flex flex-wrap gap-1.5">
-                  {biteTime.factors.map((f) => {
-                    const dotColor =
-                      f.status === "positive"
-                        ? "bg-emerald-400"
-                        : f.status === "negative"
-                          ? "bg-red-400"
-                          : "bg-[#c9a84c]";
-                    return (
-                      <span
-                        key={f.name}
-                        className="flex items-center gap-1 bg-white/5 rounded-full px-2 py-0.5"
+          {(() => {
+            const validCount = biteTime.factors.filter(
+              (f) => !f.description.includes("정보 없음"),
+            ).length;
+            const showScore = validCount >= 2;
+            return (
+              <div className="glass-morphism rounded-2xl border border-white/5 p-5">
+                <div className="flex items-center gap-6">
+                  {showScore ? (
+                    <ScoreRing score={biteTime.score} />
+                  ) : (
+                    <div className="relative flex items-center justify-center w-[120px] h-[120px]">
+                      <svg
+                        className="-rotate-90"
+                        style={{ width: 120, height: 120 }}
                       >
-                        <span
-                          className={`w-1.5 h-1.5 rounded-full ${dotColor}`}
+                        <circle
+                          cx={60}
+                          cy={60}
+                          r={54}
+                          fill="none"
+                          stroke="rgba(255,255,255,0.08)"
+                          strokeWidth="10"
                         />
-                        <span className="text-[10px] font-medium text-white/50">
-                          {f.name}
+                      </svg>
+                      <div className="absolute flex flex-col items-center">
+                        <span className="text-3xl font-black text-white/30">
+                          --
                         </span>
-                        <span className="text-[10px] font-bold text-white/70">
-                          {f.score}
+                        <span className="text-[10px] text-white/30 font-medium">
+                          / 100
                         </span>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-lg font-bold text-white">
+                        {biteTime.gradeLabel}
                       </span>
-                    );
-                  })}
+                    </div>
+                    <p className="text-xs text-white/60 mb-3">
+                      7가지 요소를 종합 분석한 결과입니다
+                    </p>
+                    {/* Mini factor tags */}
+                    <div className="flex flex-wrap gap-1.5">
+                      {biteTime.factors.map((f) => {
+                        const dotColor =
+                          f.status === "positive"
+                            ? "bg-emerald-400"
+                            : f.status === "negative"
+                              ? "bg-red-400"
+                              : "bg-[#c9a84c]";
+                        return (
+                          <span
+                            key={f.name}
+                            className="flex items-center gap-1 bg-white/5 rounded-full px-2 py-0.5"
+                          >
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${dotColor}`}
+                            />
+                            <span className="text-[10px] font-medium text-white/50">
+                              {f.name}
+                            </span>
+                            <span className="text-[10px] font-bold text-white/70">
+                              {f.score}
+                            </span>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            );
+          })()}
 
           {/* ── Factor Detail Cards ── */}
           <div>
