@@ -12,12 +12,14 @@ import { identifyFish, FishAIResult } from "@/services/fishAIService";
 import {
   parseVoiceInput,
   applyParsedResult,
-  VoiceParsedResult } from "@/services/voiceParseService";
+  VoiceParsedResult,
+} from "@/services/voiceParseService";
 import {
   CatchRecord,
   FISH_SPECIES,
   TideRecordData,
-  RecordVisibility } from "@/types";
+  RecordVisibility,
+} from "@/types";
 import {
   ArrowLeft,
   X,
@@ -40,7 +42,8 @@ import {
   CheckCircle,
   AlertTriangle,
   Loader2,
-  Waves } from "lucide-react";
+  Waves,
+} from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
 export default function RecordPage() {
@@ -192,7 +195,8 @@ export default function RecordPage() {
             locationName.trim() ||
             (locale === "ko" ? "위치 미지정" : "Unknown"),
           lat: gpsLat,
-          lng: gpsLng },
+          lng: gpsLng,
+        },
         species,
         count,
         sizeCm: sizeCm ? Number(sizeCm) : undefined,
@@ -203,10 +207,12 @@ export default function RecordPage() {
               condition: weather.condition,
               tempC: weather.tempC,
               windSpeed: weather.windSpeed,
-              humidity: weather.humidity }
+              humidity: weather.humidity,
+            }
           : undefined,
         tide: tide || undefined,
-        visibility };
+        visibility,
+      };
 
       try {
         await getDataService().addCatchRecord(recordData);
@@ -301,7 +307,8 @@ export default function RecordPage() {
       setSpecies,
       setCount,
       setSizeCm,
-      setLocationName });
+      setLocationName,
+    });
     setVoiceFilled(filled);
     setVoiceState("idle");
     setStep("form");
@@ -337,7 +344,7 @@ export default function RecordPage() {
 
       {/* ===== STEP: PHOTO (optional) ===== */}
       {step === "photo" && (
-        <div className="px-4 pt-6 pb-32 space-y-5 animate-fadeIn">
+        <div className="px-4 pt-6 pb-36 space-y-5 animate-fadeIn">
           <div
             onClick={() => fileRef.current?.click()}
             className="flex flex-col items-center gap-4 rounded-2xl border-2 border-dashed border-white/10 bg-white/5 px-6 py-14 transition-all hover:border-[#c9a84c]/40 cursor-pointer"
@@ -581,7 +588,7 @@ export default function RecordPage() {
         <form
           id="record-form"
           onSubmit={handleSubmit}
-          className="px-4 pt-4 pb-32 space-y-4 animate-fadeIn"
+          className="px-4 pt-4 pb-36 space-y-4 animate-fadeIn"
         >
           {/* Photo summary (if any) */}
           {photos.length > 0 && (
