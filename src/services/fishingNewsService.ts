@@ -36,7 +36,8 @@ const REGION_KEYWORDS: Record<string, string[]> = {
   east: ["동해", "속초", "강릉", "삼척", "울진", "포항", "울산", "부산 기장"],
   west: ["서해", "인천", "태안", "보령", "군산", "목포", "신안", "영광"],
   south: ["남해", "통영", "거제", "여수", "완도", "고흥", "사천", "남해군"],
-  jeju: ["제주", "서귀포", "한림", "성산", "모슬포", "추자도"] };
+  jeju: ["제주", "서귀포", "한림", "성산", "모슬포", "추자도"],
+};
 
 const SPECIES_KEYWORDS = [
   "감성돔",
@@ -75,7 +76,8 @@ function assignDefaultThumbnail(
   if (item.thumbnail) return item;
   return {
     ...item,
-    thumbnail: FISHING_THUMBNAILS[index % FISHING_THUMBNAILS.length] };
+    thumbnail: FISHING_THUMBNAILS[index % FISHING_THUMBNAILS.length],
+  };
 }
 
 // Relevance keywords — articles must contain at least one to be considered fishing-related
@@ -280,7 +282,8 @@ export async function fetchNaverNews(
           ),
           reliability: "community",
           region: detectRegion(combined),
-          species: detectSpecies(combined) });
+          species: detectSpecies(combined),
+        });
       }
     }
 
@@ -303,7 +306,8 @@ export async function fetchNaverNews(
           ),
           reliability: "official",
           region: detectRegion(combined),
-          species: detectSpecies(combined) });
+          species: detectSpecies(combined),
+        });
       }
     }
 
@@ -375,7 +379,8 @@ export async function fetchNaverCafeArticles(
           freshness: "today" as const,
           reliability: "community" as const,
           region: detectRegion(combined),
-          species: detectSpecies(combined) };
+          species: detectSpecies(combined),
+        };
       },
     );
   } catch (err) {
@@ -441,67 +446,24 @@ export async function fetchCommunityInsights(
 }
 
 /**
- * Fetch fishing videos from YouTube
- * Direct client-side call (static export compatible)
+ * Fetch fishing videos from YouTube via server-side RSS route.
+ * Replaces direct YouTube Data API v3 call to eliminate NEXT_PUBLIC_YOUTUBE_API_KEY exposure.
  */
 export async function fetchYouTubeVideos(
-  query: string = "낚시 조과",
-  maxResults: number = 6,
+  _query: string = "낚시 조과",
+  _maxResults: number = 6,
 ): Promise<FishingNewsItem[]> {
-  const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || "";
-
-  if (!apiKey) {
-    console.warn("YouTube API key not set, using mock data");
-    return getMockYouTube();
-  }
-
   try {
-    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=${maxResults}&order=date&relevanceLanguage=ko&key=${apiKey}`;
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch("/api/youtube-rss");
     if (!res.ok) {
-      // Graceful fallback — don't pollute console with errors
-      console.warn(`YouTube API returned ${res.status}, using mock data`);
+      console.error(`[YT RSS] /api/youtube-rss returned ${res.status}`);
       return getMockYouTube();
     }
-
-    const data = await res.json();
-
-    const items = (data.items || []).map(
-      (item: {
-        id: { videoId: string };
-        snippet: {
-          title: string;
-          description: string;
-          publishedAt: string;
-          thumbnails: { medium?: { url: string }; default?: { url: string } };
-        };
-      }) => {
-        const title = item.snippet.title;
-        const desc = item.snippet.description;
-        const combined = title + " " + desc;
-
-        return {
-          id: `yt_${item.id.videoId}`,
-          title,
-          description: desc.slice(0, 120) + (desc.length > 120 ? "..." : ""),
-          link: `https://www.youtube.com/watch?v=${item.id.videoId}`,
-          source: "youtube" as const,
-          sourceLabel: "YouTube",
-          thumbnail:
-            item.snippet.thumbnails?.medium?.url ||
-            item.snippet.thumbnails?.default?.url,
-          publishedAt: item.snippet.publishedAt,
-          freshness: calculateFreshness(item.snippet.publishedAt),
-          reliability: "sns" as const,
-          region: detectRegion(combined),
-          species: detectSpecies(combined) };
-      },
-    );
-
+    const items: FishingNewsItem[] = await res.json();
     return items.length > 0 ? items : getMockYouTube();
   } catch (err) {
-    console.warn(
-      "YouTube fetch failed, using mock data:",
+    console.error(
+      "YouTube RSS fetch failed, using mock data:",
       err instanceof Error ? err.message : err,
     );
     return getMockYouTube();
@@ -598,7 +560,8 @@ function getMockNews(): FishingNewsItem[] {
       freshness: "today",
       reliability: "community",
       region: "south",
-      species: "감성돔" },
+      species: "감성돔",
+    },
     {
       id: "mock_2",
       title: "서해 태안 볼락 야간 루어 폭발 조과",
@@ -612,7 +575,8 @@ function getMockNews(): FishingNewsItem[] {
       freshness: "realtime",
       reliability: "community",
       region: "west",
-      species: "볼락" },
+      species: "볼락",
+    },
     {
       id: "mock_3",
       title: "[속보] 제주 방어 시즌 개막! 80cm급 방어 입질 시작",
@@ -626,7 +590,8 @@ function getMockNews(): FishingNewsItem[] {
       freshness: "today",
       reliability: "official",
       region: "jeju",
-      species: "방어" },
+      species: "방어",
+    },
     {
       id: "mock_4",
       title: "동해 속초 오징어 한 박스 조과! 에기 사이즈별 정리",
@@ -640,7 +605,8 @@ function getMockNews(): FishingNewsItem[] {
       freshness: "today",
       reliability: "community",
       region: "east",
-      species: "오징어" },
+      species: "오징어",
+    },
     {
       id: "mock_5",
       title: "남해 여수 광어 플랫피싱 시즌 돌입",
@@ -656,7 +622,8 @@ function getMockNews(): FishingNewsItem[] {
       freshness: "week",
       reliability: "community",
       region: "south",
-      species: "광어" },
+      species: "광어",
+    },
   ];
 }
 
@@ -676,7 +643,8 @@ function getMockYouTube(): FishingNewsItem[] {
       freshness: "today",
       reliability: "sns",
       region: "south",
-      species: "감성돔" },
+      species: "감성돔",
+    },
     {
       id: "yt_mock_2",
       title: " 볼락 루어 마릿수 폭발! 태안 밤낚시 브이로그",
@@ -690,6 +658,7 @@ function getMockYouTube(): FishingNewsItem[] {
       freshness: "today",
       reliability: "sns",
       region: "west",
-      species: "볼락" },
+      species: "볼락",
+    },
   ];
 }
