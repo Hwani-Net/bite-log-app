@@ -994,10 +994,9 @@ export async function GET(request: NextRequest) {
     if (aisResult && aisResult.dynamic.length > 0) {
       rawFleet = joinFleetData(aisResult.dynamic, aisResult.staticMap);
       dataSource = "aisstream";
-    } else if (dynamicResult.fallback || staticResult.fallback) {
-      // 2순위 실패 시 KHOA OceanGrid로 fallback
-      //    이유: dynamic이 실제 MMSI를 반환하고 static이 Mock MMSI를 반환하면
-      //          joinFleetData 결과가 0건이 되어 실질적으로 mock과 동일해짐
+    } else if (dynamicResult.fallback && staticResult.fallback) {
+      // dynamic + static 모두 실패 시에만 KHOA로 fallback
+      // (static만 실패해도 dynamic 데이터는 그대로 사용 — joinFleetData가 static 없이도 동작)
       const khoaData = await fetchFromKhoa();
       if (khoaData && khoaData.dynamic.length > 0) {
         rawFleet = joinFleetData(khoaData.dynamic, khoaData.staticMap);
