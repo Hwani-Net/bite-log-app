@@ -19,6 +19,10 @@ import { DynamicIcon } from "@/lib/iconMap";
 
 type SortBy = "date" | "size" | "count";
 
+type GroupedItem =
+  | { type: "header"; yearMonth: string; label: string; count: number }
+  | { type: "record"; record: CatchRecord };
+
 export default function RecordsPage() {
   const { t, locale } = useAppStore();
   const [records, setRecords] = useState<CatchRecord[]>([]);
@@ -73,6 +77,42 @@ export default function RecordsPage() {
     const set = new Set(records.map((r) => r.species));
     return Array.from(set);
   }, [records]);
+
+  const groupedItems = useMemo<GroupedItem[]>(() => {
+    if (sortBy !== "date") {
+      return filtered.map((record) => ({ type: "record", record }));
+    }
+
+    const items: GroupedItem[] = [];
+    let lastYearMonth = "";
+
+    for (const record of filtered) {
+      // record.date format: "YYYY-MM-DD"
+      const yearMonth = record.date.slice(0, 7); // "YYYY-MM"
+
+      if (yearMonth !== lastYearMonth) {
+        const [year, month] = yearMonth.split("-").map(Number);
+        const label =
+          locale === "ko"
+            ? `${year}년 ${month}월`
+            : new Date(year, month - 1).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+              });
+
+        const count = filtered.filter(
+          (r) => r.date.slice(0, 7) === yearMonth,
+        ).length;
+
+        items.push({ type: "header", yearMonth, label, count });
+        lastYearMonth = yearMonth;
+      }
+
+      items.push({ type: "record", record });
+    }
+
+    return items;
+  }, [filtered, sortBy, locale]);
 
   const sortOptions: { value: SortBy; label: string; icon: string }[] = [
     {
@@ -216,60 +256,79 @@ export default function RecordsPage() {
       ) : (
         /* Records list — tap to view detail */
         <div className="flex flex-col gap-3 pb-4">
-          {filtered.map((record) => (
-            <Link
-              key={record.id}
-              href={`/records/detail?id=${record.id}`}
-              className="flex items-start gap-3 p-3 rounded-2xl glass-morphism border border-white/5 hover:border-[#c9a84c]/30 transition-all active:scale-[0.98]"
-            >
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-tr from-[#c9a84c]/40 to-[#7dd3fc]/30 flex items-center justify-center shrink-0 overflow-hidden">
-                {record.photos.length > 0 ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={record.photos[0]}
-                    alt={record.species}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Fish size={20} className="text-[#c9a84c]" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-sm text-white">
-                    {record.species}
-                  </h3>
-                  <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-[#c9a84c]/20 text-[#c9a84c]">
-                    {record.count}
-                    {t("home.unit.fish")}
+          {groupedItems.map((item, idx) => {
+            if (item.type === "header") {
+              const isFirst = idx === 0;
+              return (
+                <div
+                  key={`header-${item.yearMonth}`}
+                  className={`flex items-center justify-between text-xs text-white/40 uppercase tracking-widest pb-1 ${isFirst ? "pt-0" : "pt-4"}`}
+                >
+                  <span>{item.label}</span>
+                  <span className="normal-case tracking-normal text-white/30">
+                    {item.count}
+                    {locale === "ko" ? "건" : " records"}
                   </span>
-                  {record.sizeCm && (
-                    <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-[#7dd3fc]/10 text-[#7dd3fc]">
-                      {record.sizeCm}cm
-                    </span>
+                </div>
+              );
+            }
+
+            const record = item.record;
+            return (
+              <Link
+                key={record.id}
+                href={`/records/detail?id=${record.id}`}
+                className="flex items-start gap-3 p-3 rounded-2xl glass-morphism border border-white/5 hover:border-[#c9a84c]/30 transition-all active:scale-[0.98]"
+              >
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-tr from-[#c9a84c]/40 to-[#7dd3fc]/30 flex items-center justify-center shrink-0 overflow-hidden">
+                  {record.photos.length > 0 ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={record.photos[0]}
+                      alt={record.species}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Fish size={20} className="text-[#c9a84c]" />
                   )}
                 </div>
-                <div className="flex items-center gap-1 mt-1 text-xs text-white/60">
-                  <MapPin size={14} />
-                  <span className="truncate">{record.location.name}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-sm text-white">
+                      {record.species}
+                    </h3>
+                    <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-[#c9a84c]/20 text-[#c9a84c]">
+                      {record.count}
+                      {t("home.unit.fish")}
+                    </span>
+                    {record.sizeCm && (
+                      <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-[#7dd3fc]/10 text-[#7dd3fc]">
+                        {record.sizeCm}cm
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 mt-1 text-xs text-white/60">
+                    <MapPin size={14} />
+                    <span className="truncate">{record.location.name}</span>
+                  </div>
+                  <div className="flex items-center gap-1 mt-0.5 text-xs text-white/60">
+                    <DynamicIcon name="calendar_today" size={14} />
+                    <span>{record.date}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1 mt-0.5 text-xs text-white/60">
-                  <DynamicIcon name="calendar_today" size={14} />
-                  <span>{record.date}</span>
+                <div className="flex flex-col items-center gap-1 shrink-0">
+                  <button
+                    onClick={(e) => handleDelete(e, record.id)}
+                    className="p-2 rounded-lg hover:bg-red-500/20 text-white/30 hover:text-red-400 transition-colors"
+                    aria-label={t("common.delete")}
+                  >
+                    <DynamicIcon name="delete" size={18} />
+                  </button>
+                  <ChevronRight size={14} className="text-white/20" />
                 </div>
-              </div>
-              <div className="flex flex-col items-center gap-1 shrink-0">
-                <button
-                  onClick={(e) => handleDelete(e, record.id)}
-                  className="p-2 rounded-lg hover:bg-red-500/20 text-white/30 hover:text-red-400 transition-colors"
-                  aria-label={t("common.delete")}
-                >
-                  <DynamicIcon name="delete" size={18} />
-                </button>
-                <ChevronRight size={14} className="text-white/20" />
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
