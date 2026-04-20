@@ -10,14 +10,16 @@ import { fetchWeather } from "@/services/weatherService";
 import { fetchMarineData } from "@/services/marineService";
 import {
   calculateBiteTime,
-  BiteTimePrediction } from "@/services/biteTimeService";
+  BiteTimePrediction,
+} from "@/services/biteTimeService";
 import { getSpeciesBiteScores } from "@/services/speciesBiteService";
 // fetchTopNews kept available for future news section restoration
 // import { fetchTopNews } from "@/services/fishingNewsService";
 import {
   analyzeUserRecords,
-  UserFishingProfile } from "@/services/personalizationService";
-import { Bell } from "lucide-react";
+  UserFishingProfile,
+} from "@/services/personalizationService";
+import { Bell, Fish } from "lucide-react";
 
 // Fish species default image/color mapping
 const FISH_COLORS: Record<string, { gradient: string }> = {
@@ -29,13 +31,15 @@ const FISH_COLORS: Record<string, { gradient: string }> = {
   광어: { gradient: "from-yellow-400 to-amber-300" },
   고등어: { gradient: "from-indigo-500 to-blue-400" },
   방어: { gradient: "from-sky-500 to-cyan-400" },
-  주꾸미: { gradient: "from-red-400 to-orange-300" } };
+  주꾸미: { gradient: "from-red-400 to-orange-300" },
+};
 const DEFAULT_FISH = { gradient: "from-slate-400 to-slate-300" };
 
 // ─── Precision Index Gauge (Hero) ────────────────────────────────────────────
 function PrecisionGauge({
   biteTime,
-  loading }: {
+  loading,
+}: {
   biteTime: BiteTimePrediction | null;
   loading: boolean;
 }) {
@@ -138,7 +142,8 @@ function PrecisionGauge({
 function StatBar({
   totalCatch,
   thisMonth,
-  maxSize }: {
+  maxSize,
+}: {
   totalCatch: number;
   thisMonth: number;
   maxSize: number;
@@ -367,65 +372,6 @@ export default function HomePage() {
     setMounted(true);
   }, []);
 
-  // Demo records — dynamic dates relative to today for a realistic feel
-  const today = new Date();
-  const daysAgo = (d: number) => {
-    const t = new Date(today);
-    t.setDate(today.getDate() - d);
-    return t.toISOString().slice(0, 10);
-  };
-
-  const DEMO_RECORDS: CatchRecord[] = [
-    {
-      id: "demo-1",
-      species: "농어",
-      sizeCm: 72,
-      count: 1,
-      date: daysAgo(1),
-      location: { name: "제주 서귀포 범섬", lat: 33.22, lng: 126.51 },
-      photos: [],
-      memo: "범섬 포인트 캐스팅, 미노우 12cm 히트! 대물 농어 72cm",
-      createdAt: daysAgo(1),
-      updatedAt: daysAgo(1),
-      visibility: "public" as const },
-    {
-      id: "demo-2",
-      species: "우럭",
-      sizeCm: 28,
-      count: 5,
-      date: daysAgo(3),
-      location: { name: "충남 당진 왜목항", lat: 36.96, lng: 126.88 },
-      photos: [],
-      memo: "왜목항 방파제 야간 원투, 우럭 5마리 마릿수 조과",
-      createdAt: daysAgo(3),
-      updatedAt: daysAgo(3),
-      visibility: "public" as const },
-    {
-      id: "demo-3",
-      species: "참돔",
-      sizeCm: 45,
-      count: 2,
-      date: daysAgo(5),
-      location: { name: "전남 여수 금오도", lat: 34.5, lng: 127.75 },
-      photos: [],
-      memo: "금오도 선상 타이라바, 45cm급 참돔 2마리! 물때 최고",
-      createdAt: daysAgo(5),
-      updatedAt: daysAgo(5),
-      visibility: "public" as const },
-    {
-      id: "demo-4",
-      species: "감성돔",
-      sizeCm: 42,
-      count: 1,
-      date: daysAgo(8),
-      location: { name: "경남 통영 욕지도", lat: 34.59, lng: 128.25 },
-      photos: [],
-      memo: "욕지도 갯바위 찌낚시, 감성돔 42cm 1마리",
-      createdAt: daysAgo(8),
-      updatedAt: daysAgo(8),
-      visibility: "public" as const },
-  ];
-
   useEffect(() => {
     async function load() {
       try {
@@ -473,30 +419,19 @@ export default function HomePage() {
     loadBiteTime();
   }, []);
 
-  const isDemo = !recordsLoading && records.length === 0;
-  const displayRecords = recordsLoading
-    ? []
-    : records.length > 0
-      ? records
-      : DEMO_RECORDS;
+  const hasRecords = !recordsLoading && records.length > 0;
   const totalCatch = recordsLoading
     ? 0
-    : isDemo
-      ? 128
-      : records.reduce((acc, r) => acc + r.count, 0);
+    : records.reduce((acc, r) => acc + r.count, 0);
   const maxSize = recordsLoading
     ? 0
-    : isDemo
-      ? 58
-      : records.reduce((acc, r) => Math.max(acc, r.sizeCm ?? 0), 0);
+    : records.reduce((acc, r) => Math.max(acc, r.sizeCm ?? 0), 0);
   const currentMonthPrefix = new Date().toISOString().slice(0, 7);
   const thisMonthCatch = recordsLoading
     ? 0
-    : isDemo
-      ? 15
-      : records
-          .filter((r) => r.date.startsWith(currentMonthPrefix))
-          .reduce((acc, r) => acc + r.count, 0);
+    : records
+        .filter((r) => r.date.startsWith(currentMonthPrefix))
+        .reduce((acc, r) => acc + r.count, 0);
 
   if (!mounted) return null;
 
@@ -547,8 +482,22 @@ export default function HomePage() {
             <SpeciesBiteRanking biteTime={biteTime} />
           )}
 
-          {/* Catch Gallery */}
-          {!recordsLoading && <CatchGallery records={displayRecords} />}
+          {/* Catch Gallery or Empty State */}
+          {!recordsLoading && hasRecords && <CatchGallery records={records} />}
+          {!recordsLoading && !hasRecords && (
+            <section className="py-10 flex flex-col items-center gap-4 text-center">
+              <Fish size={48} className="text-[#c9a84c]/40" />
+              <p className="text-sm font-bold text-white/60 uppercase tracking-widest">
+                첫 조과를 기록해보세요!
+              </p>
+              <Link
+                href="/record"
+                className="mt-2 px-6 py-2.5 rounded-full border border-[#c9a84c]/40 text-[#c9a84c] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[#c9a84c]/10 transition-colors"
+              >
+                기록하기
+              </Link>
+            </section>
+          )}
         </div>
       </main>
 

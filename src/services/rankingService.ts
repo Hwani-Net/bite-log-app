@@ -69,7 +69,8 @@ const MOCK_DATA = {
     { uid: "u8", displayName: "포항물개", value: 6, label: "6종" },
     { uid: "u9", displayName: "목포바지락", value: 5, label: "5종" },
     { uid: "u10", displayName: "여수밤바다", value: 4, label: "4종" },
-  ] };
+  ],
+};
 
 function getMockRanking(
   category: RankingCategory,
@@ -87,9 +88,11 @@ function getMockRanking(
       totalCatch: 0,
       badges: [],
       createdAt: "",
-      updatedAt: "" },
+      updatedAt: "",
+    },
     value: item.value,
-    label: item.label }));
+    label: item.label,
+  }));
 
   const topThree = entries.slice(0, 3);
   const rest = entries.slice(3, 10);
@@ -107,7 +110,23 @@ function getMockRanking(
     myRank,
     topThree,
     rest,
-    isRealData: false };
+    isRealData: false,
+  };
+}
+
+// --------------- Empty ranking (no real data) ---------------
+function getEmptyRanking(category: RankingCategory): RankingData {
+  const now = new Date();
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+  return {
+    category,
+    seasonLabel: `${now.getFullYear()}년 ${now.getMonth() + 1}월 시즌`,
+    seasonEndDate: end.toISOString(),
+    myRank: null,
+    topThree: [],
+    rest: [],
+    isRealData: true,
+  };
 }
 
 // --------------- Season window ---------------
@@ -152,7 +171,8 @@ async function fetchAndAggregate(): Promise<Map<string, UserAggregate>> {
         photoURL: data.userPhotoURL,
         totalCount: 0,
         maxSizeCm: 0,
-        speciesSet: new Set() });
+        speciesSet: new Set(),
+      });
     }
 
     const agg = aggregates.get(uid)!;
@@ -203,9 +223,11 @@ function buildRealEntries(
         totalCatch: a.totalCount,
         badges: [],
         createdAt: "",
-        updatedAt: "" },
+        updatedAt: "",
+      },
       value: getValue(a),
-      label: getLabel(getValue(a)) }))
+      label: getLabel(getValue(a)),
+    }))
     .sort((a, b) => b.value - a.value)
     .map((e, i) => ({ ...e, rank: i + 1 }));
 }
@@ -220,9 +242,9 @@ export async function getFirebaseRanking(
     try {
       const aggregates = await fetchAndAggregate();
 
-      // If no real data yet, fall back to mock but mark it
+      // No real data yet — return empty ranking
       if (aggregates.size === 0) {
-        return getMockRanking(category, myUid);
+        return getEmptyRanking(category);
       }
 
       const entries = buildRealEntries(aggregates, category);
@@ -239,16 +261,18 @@ export async function getFirebaseRanking(
         myRank,
         topThree,
         rest,
-        isRealData: true };
+        isRealData: true,
+      };
     } catch (err) {
-      console.warn("[RankingService] Firebase read failed, using mock:", err);
+      throw new Error(`[RankingService] Firebase read failed: ${err}`);
     }
   }
 
-  return getMockRanking(category, myUid);
+  return getEmptyRanking(category);
 }
 
 // Legacy mock export kept for backward compatibility
 export const mockRankingService = {
   getRanking: (category: RankingCategory) =>
-    Promise.resolve(getMockRanking(category)) };
+    Promise.resolve(getMockRanking(category)),
+};

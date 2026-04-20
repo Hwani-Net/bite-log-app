@@ -17,17 +17,20 @@ const CATEGORY_KEYS: {
     value: "catch",
     koLabel: "조과왕",
     enLabel: "Most Caught",
-    icon: "set_meal" },
+    icon: "set_meal",
+  },
   {
     value: "size",
     koLabel: "대어왕",
     enLabel: "Biggest Fish",
-    icon: "straighten" },
+    icon: "straighten",
+  },
   {
     value: "variety",
     koLabel: "다양왕",
     enLabel: "Most Variety",
-    icon: "category" },
+    icon: "category",
+  },
 ];
 
 export default function RankingPage() {
@@ -36,6 +39,7 @@ export default function RankingPage() {
   const [category, setCategory] = useState<RankingCategory>("catch");
   const [data, setData] = useState<RankingData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [days, setDays] = useState(0);
   const [hours, setHours] = useState(0);
@@ -44,9 +48,15 @@ export default function RankingPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const result = await getFirebaseRanking(category, user?.uid);
       setData(result);
+    } catch (err) {
+      console.error("[RankingPage] load failed:", err);
+      setError(
+        err instanceof Error ? err.message : "랭킹을 불러올 수 없습니다.",
+      );
     } finally {
       setLoading(false);
     }
@@ -94,6 +104,21 @@ export default function RankingPage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 bg-[#080d14] px-6 text-center">
+        <DynamicIcon name="wifi_off" size={36} className="text-red-400" />
+        <p className="text-white/60 text-sm">{error}</p>
+        <button
+          onClick={load}
+          className="px-4 py-2 rounded-full border border-[#c9a84c]/40 text-[#c9a84c] text-xs font-bold uppercase tracking-[0.2em]"
+        >
+          다시 시도
+        </button>
+      </div>
+    );
+  }
+
   if (!data) return null;
 
   const first = data.topThree[0];
@@ -115,16 +140,10 @@ export default function RankingPage() {
             {locale === "ko" ? "낚시 랭킹" : "Fishing Ranking"}
           </h1>
           {/* Real/Mock badge */}
-          {data.isRealData ? (
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a84c]/20 text-[#c9a84c] font-bold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#c9a84c] animate-pulse inline-block" />
-              LIVE
-            </span>
-          ) : (
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/30 font-medium">
-              DEMO
-            </span>
-          )}
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a84c]/20 text-[#c9a84c] font-bold flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#c9a84c] animate-pulse inline-block" />
+            LIVE
+          </span>
         </div>
         <div className="w-10" />
       </header>
