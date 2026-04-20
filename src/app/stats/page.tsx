@@ -18,11 +18,13 @@ import {
   Target,
   ChevronRight,
   BarChart3,
+  BarChart2,
   Loader2,
   Trophy,
   Dna,
   Compass,
-  Clock } from "lucide-react";
+  Clock,
+} from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 import {
   BarChart,
@@ -35,7 +37,8 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend } from "recharts";
+  Legend,
+} from "recharts";
 
 const CHART_COLORS = [
   "#c9a84c",
@@ -48,7 +51,8 @@ const CHART_COLORS = [
 
 // Dynamic import for Leaflet (SSR not supported)
 const FishingMap = dynamic(() => import("@/components/FishingMap"), {
-  ssr: false });
+  ssr: false,
+});
 
 const PERIOD_TABS: { value: PeriodFilter; ko: string; en: string }[] = [
   { value: "week", ko: "1주", en: "1W" },
@@ -61,7 +65,8 @@ function MiniStatCard({
   icon,
   label,
   value,
-  unit }: {
+  unit,
+}: {
   icon: string;
   label: string;
   value: number | string;
@@ -84,7 +89,8 @@ function MiniStatCard({
 // ===== Calendar Component =====
 function CalendarView({
   records,
-  locale }: {
+  locale,
+}: {
   records: CatchRecord[];
   locale: string;
 }) {
@@ -110,7 +116,8 @@ function CalendarView({
       month: m,
       days: daysInMonth,
       firstDay: firstDayOfWeek,
-      dateMap: map };
+      dateMap: map,
+    };
   }, [records, monthOffset]);
 
   const dayLabels =
@@ -123,7 +130,8 @@ function CalendarView({
       ? `${year}년 ${month + 1}월`
       : new Date(year, month).toLocaleDateString("en", {
           year: "numeric",
-          month: "long" });
+          month: "long",
+        });
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -222,7 +230,8 @@ function CalendarView({
 // ===== Badge Component =====
 function BadgeCard({
   badge,
-  locale }: {
+  locale,
+}: {
   badge: AchievementBadge;
   locale: string;
 }) {
@@ -312,26 +321,31 @@ export default function StatsPage() {
     {
       key: "stats" as const,
       icon: "bar_chart",
-      label: locale === "ko" ? "통계" : "Stats" },
+      label: locale === "ko" ? "통계" : "Stats",
+    },
     {
       key: "dna" as const,
       icon: "genetics",
-      label: locale === "ko" ? "DNA" : "DNA" },
+      label: locale === "ko" ? "DNA" : "DNA",
+    },
     {
       key: "map" as const,
       icon: "map",
-      label: locale === "ko" ? "지도" : "Map" },
+      label: locale === "ko" ? "지도" : "Map",
+    },
     {
       key: "calendar" as const,
       icon: "calendar_month",
-      label: locale === "ko" ? "캘린더" : "Calendar" },
+      label: locale === "ko" ? "캘린더" : "Calendar",
+    },
     {
       key: "badges" as const,
       icon: "military_tech",
       label:
         locale === "ko"
           ? `배지 ${earnedCount}/${badges.length}`
-          : `Badges ${earnedCount}/${badges.length}` },
+          : `Badges ${earnedCount}/${badges.length}`,
+    },
   ];
 
   if (!stats) return null;
@@ -457,7 +471,8 @@ export default function StatsPage() {
                           border: "1px solid rgba(255,255,255,0.1)",
                           borderRadius: "12px",
                           fontSize: "12px",
-                          color: "#ffffff" }}
+                          color: "#ffffff",
+                        }}
                       />
                       <Bar
                         dataKey="count"
@@ -486,9 +501,25 @@ export default function StatsPage() {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <p className="text-center text-white/30 py-8">
-                    {t("stats.noData")}
-                  </p>
+                  <div className="flex flex-col items-center justify-center gap-3 py-8">
+                    <BarChart2 size={36} className="text-[#c9a84c]/40" />
+                    <p className="text-sm font-bold text-white/60">
+                      {locale === "ko"
+                        ? "아직 기록이 없습니다"
+                        : "No records yet"}
+                    </p>
+                    <p className="text-xs text-white/30">
+                      {locale === "ko"
+                        ? "기록을 추가하면 통계가 나타납니다"
+                        : "Add a catch to see stats"}
+                    </p>
+                    <Link
+                      href="/record"
+                      className="mt-1 px-5 py-2 rounded-full border border-[#c9a84c]/40 text-[#c9a84c] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[#c9a84c]/10 transition-colors"
+                    >
+                      {locale === "ko" ? "기록하기" : "Add Record"}
+                    </Link>
+                  </div>
                 )}
               </div>
             </section>
@@ -526,7 +557,8 @@ export default function StatsPage() {
                           <span
                             style={{
                               fontSize: "12px",
-                              color: "rgba(255,255,255,0.5)" }}
+                              color: "rgba(255,255,255,0.5)",
+                            }}
                           >
                             {value}
                           </span>
@@ -543,14 +575,31 @@ export default function StatsPage() {
                           border: "1px solid rgba(255,255,255,0.1)",
                           borderRadius: "12px",
                           fontSize: "12px",
-                          color: "#ffffff" }}
+                          color: "#ffffff",
+                        }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <p className="text-center text-white/30 py-8">
-                    {t("stats.noData")}
-                  </p>
+                  <div className="flex flex-col items-center justify-center gap-3 py-8">
+                    <BarChart2 size={36} className="text-[#c9a84c]/40" />
+                    <p className="text-sm font-bold text-white/60">
+                      {locale === "ko"
+                        ? "아직 기록이 없습니다"
+                        : "No records yet"}
+                    </p>
+                    <p className="text-xs text-white/30">
+                      {locale === "ko"
+                        ? "기록을 추가하면 통계가 나타납니다"
+                        : "Add a catch to see stats"}
+                    </p>
+                    <Link
+                      href="/record"
+                      className="mt-1 px-5 py-2 rounded-full border border-[#c9a84c]/40 text-[#c9a84c] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[#c9a84c]/10 transition-colors"
+                    >
+                      {locale === "ko" ? "기록하기" : "Add Record"}
+                    </Link>
+                  </div>
                 )}
               </div>
             </section>
@@ -587,9 +636,25 @@ export default function StatsPage() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-center text-white/30 py-4">
-                    {t("stats.noData")}
-                  </p>
+                  <div className="flex flex-col items-center justify-center gap-3 py-8">
+                    <BarChart2 size={36} className="text-[#c9a84c]/40" />
+                    <p className="text-sm font-bold text-white/60">
+                      {locale === "ko"
+                        ? "아직 기록이 없습니다"
+                        : "No records yet"}
+                    </p>
+                    <p className="text-xs text-white/30">
+                      {locale === "ko"
+                        ? "기록을 추가하면 통계가 나타납니다"
+                        : "Add a catch to see stats"}
+                    </p>
+                    <Link
+                      href="/record"
+                      className="mt-1 px-5 py-2 rounded-full border border-[#c9a84c]/40 text-[#c9a84c] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[#c9a84c]/10 transition-colors"
+                    >
+                      {locale === "ko" ? "기록하기" : "Add Record"}
+                    </Link>
+                  </div>
                 )}
               </div>
             </section>
