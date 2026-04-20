@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   Anchor,
   ArrowLeft,
-  ExternalLink,
   Fish,
   Users,
   Calendar,
