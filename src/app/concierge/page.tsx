@@ -9,14 +9,17 @@ import { fetchTideData, TideData } from "@/services/tideService";
 import { fetchMarineData } from "@/services/marineService";
 import {
   calculateBiteTime,
-  BiteTimePrediction } from "@/services/biteTimeService";
+  BiteTimePrediction,
+} from "@/services/biteTimeService";
 import {
   generateRecommendation,
   ConciergeRecommendation,
-  getInSeasonSpecies } from "@/services/conciergeService";
+  getInSeasonSpecies,
+} from "@/services/conciergeService";
 import {
   getGearRecommendations,
-  GearRecommendation } from "@/services/affiliateService";
+  GearRecommendation,
+} from "@/services/affiliateService";
 import { chatWithExpert, ChatMessage } from "@/services/fishExpertChatService";
 // Import new tab components
 import OverviewTab from "../components/concierge/OverviewTab";
@@ -72,20 +75,25 @@ export default function ConciergePage() {
             const lat = pos.coords.latitude;
             const lng = pos.coords.longitude;
             setUserCoords({ lat, lng });
-
-            const [w, td, m] = await Promise.all([
-              fetchWeather(lat, lng),
-              fetchTideData(lat, lng),
-              fetchMarineData(lat, lng),
-            ]);
-            setWeather(w);
-            setTideData(td);
-            finalize(w, td, lat, lng, m);
+            try {
+              const [w, td, m] = await Promise.all([
+                fetchWeather(lat, lng),
+                fetchTideData(lat, lng),
+                fetchMarineData(lat, lng),
+              ]);
+              setWeather(w);
+              setTideData(td);
+              finalize(w, td, lat, lng, m);
+            } catch (err) {
+              console.error("[Concierge] API fetch failed:", err);
+              finalize(null, null, lat, lng);
+            }
           },
           () => finalize(null, null, 37.5665, 126.978),
           { timeout: 5000, maximumAge: 300000 },
         );
-      } catch {
+      } catch (err) {
+        console.error("[Concierge] loadData failed:", err);
         finalize(null, null, 37.5665, 126.978);
       }
     }
@@ -138,7 +146,8 @@ export default function ConciergePage() {
           text:
             locale === "ko"
               ? "죄송합니다. 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
-              : "Sorry, an error occurred. Please try again later." },
+              : "Sorry, an error occurred. Please try again later.",
+        },
       ]);
     } finally {
       setChatLoading(false);

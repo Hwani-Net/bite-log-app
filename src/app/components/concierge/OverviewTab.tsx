@@ -6,7 +6,8 @@ import { BiteTimePrediction } from "@/services/biteTimeService";
 import PeakTimeline from "./PeakTimeline";
 import {
   ConciergeRecommendation,
-  SpeciesInfo } from "@/services/conciergeService";
+  SpeciesInfo,
+} from "@/services/conciergeService";
 import { useDragScroll } from "@/hooks/useDragScroll";
 import { useSubscriptionStore } from "@/store/subscriptionStore";
 import { DynamicIcon } from "@/lib/iconMap";
@@ -29,7 +30,8 @@ export default function OverviewTab({
   tideData,
   biteTime,
   recommendation,
-  inSeasonSpecies }: OverviewTabProps) {
+  inSeasonSpecies,
+}: OverviewTabProps) {
   const { isPro, openPaywall } = useSubscriptionStore();
   const biteScore = biteTime?.score ?? 0;
   const seasonChipsRef = useDragScroll();
@@ -304,7 +306,7 @@ export default function OverviewTab({
                 ? "—"
                 : weather?.tempC != null
                   ? `${weather.tempC}°C`
-                  : "—"}
+                  : "데이터 없음"}
             </p>
           </div>
           <div className="bg-white/5 p-3 rounded-xl text-center border border-white/10">
@@ -319,7 +321,7 @@ export default function OverviewTab({
                 ? "—"
                 : weather?.windSpeed != null
                   ? `${weather.windSpeed}m/s`
-                  : "—"}
+                  : "데이터 없음"}
             </p>
           </div>
           <div className="bg-white/5 p-3 rounded-xl text-center border border-white/10">
@@ -340,7 +342,7 @@ export default function OverviewTab({
                 ? "—"
                 : weather?.humidity != null
                   ? `${weather.humidity}%`
-                  : "—"}
+                  : "데이터 없음"}
             </p>
           </div>
         </div>
