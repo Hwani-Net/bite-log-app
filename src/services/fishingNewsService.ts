@@ -457,16 +457,16 @@ export async function fetchYouTubeVideos(
     const res = await fetch("/api/youtube-rss");
     if (!res.ok) {
       console.error(`[YT RSS] /api/youtube-rss returned ${res.status}`);
-      return getMockYouTube();
+      return [];
     }
     const items: FishingNewsItem[] = await res.json();
-    return items.length > 0 ? items : getMockYouTube();
+    return items;
   } catch (err) {
     console.error(
-      "YouTube RSS fetch failed, using mock data:",
+      "YouTube RSS fetch failed:",
       err instanceof Error ? err.message : err,
     );
-    return getMockYouTube();
+    return [];
   }
 }
 
