@@ -204,6 +204,14 @@ export default function RecordsPage() {
                 : "No results found"
               : t("home.noCatches")}
           </p>
+          {!search && (
+            <Link
+              href="/record"
+              className="inline-block mt-4 bg-[#c9a84c] text-[#080d14] rounded-xl px-6 py-3 text-sm font-medium"
+            >
+              첫 조과 기록하기
+            </Link>
+          )}
         </div>
       ) : (
         /* Records list — tap to view detail */

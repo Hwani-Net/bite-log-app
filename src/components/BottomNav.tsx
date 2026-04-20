@@ -23,7 +23,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/records", icon: BookOpen, label: "기록" },
   { href: "/ranking", icon: Trophy, label: "랭킹" },
   { href: "/bite-forecast", icon: Fish, label: "입질예보" },
-  { href: "/concierge", icon: Menu, label: "더보기" },
+  { href: "/concierge", icon: Menu, label: "AI" },
 ];
 
 export default function BottomNav() {
