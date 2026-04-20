@@ -374,7 +374,7 @@ function CatchGallery({ records }: { records: CatchRecord[] }) {
 // ─── Windy 출항 날씨 ──────────────────────────────────────────────────────────
 function WindySection() {
   return (
-    <section className="pt-2">
+    <section id="windy-section" className="pt-2">
       <div className="flex items-center gap-2 mb-3">
         <Wind size={14} className="text-[#7dd3fc]" />
         <h2 className="text-[0.6rem] font-bold text-white/60 uppercase tracking-[0.25em]">
@@ -589,6 +589,17 @@ export default function HomePage() {
 
         {/* Content area */}
         <div className="px-4 -mt-8 relative z-20 space-y-10">
+          {/* Quick Actions */}
+          <div className="flex gap-2 flex-wrap">
+            <a
+              href="#windy-section"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white/60 hover:border-[#c9a84c]/30 transition-all"
+            >
+              <Wind size={14} className="text-[#7dd3fc]" />
+              출항 날씨
+            </a>
+          </div>
+
           {/* Stat Bar */}
           <StatBar
             totalCatch={totalCatch}
