@@ -4,9 +4,19 @@ import { useRef, useEffect } from "react";
 import {
   ChatMessage,
   CHAT_SPECIES,
-  getQuickReplies } from "@/services/fishExpertChatService";
+  getQuickReplies,
+} from "@/services/fishExpertChatService";
 import { useSubscriptionStore } from "@/store/subscriptionStore";
 import { Send, Sparkles } from "lucide-react";
+
+const QUICK_PROMPTS = [
+  "오늘 낚시 가기 좋은 날인가요?",
+  "4월에 잡기 좋은 어종은?",
+  "초보자 바다낚시 채비 추천",
+  "감성돔 포인트 고르는 법",
+  "루어낚시 입문 장비 추천",
+  "물때가 낚시에 미치는 영향",
+];
 
 interface AIChatTabProps {
   locale: string;
@@ -31,7 +41,8 @@ export default function AIChatTab({
   setChatInput,
   setSelectedSpecies,
   onSend,
-  onClear }: AIChatTabProps) {
+  onClear,
+}: AIChatTabProps) {
   const chatBottomRef = useRef<HTMLDivElement>(null);
   const { isPro, chatbotCredits } = useSubscriptionStore();
 
@@ -146,6 +157,22 @@ export default function AIChatTab({
         )}
         <div ref={chatBottomRef} className="h-2" />
       </div>
+
+      {/* Quick Prompt Chips — visible only when chat is empty */}
+      {chatHistory.length === 0 && (
+        <div className="flex gap-2 overflow-x-auto pb-1 mb-2 shrink-0 scrollbar-none">
+          {QUICK_PROMPTS.map((prompt) => (
+            <button
+              key={prompt}
+              onClick={() => onSend(prompt)}
+              disabled={chatLoading}
+              className="shrink-0 px-3 py-1.5 rounded-full text-xs border border-white/15 bg-white/5 text-white/70 whitespace-nowrap hover:border-[#c9a84c]/50 hover:text-[#c9a84c] transition-colors disabled:opacity-50"
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Free-form Input */}
       <div className="flex gap-2 shrink-0 bg-white/5 p-2 rounded-full border border-white/10 focus-within:ring-2 focus-within:ring-[#c9a84c]/20 focus-within:border-[#c9a84c]/50 transition-all mb-2">
