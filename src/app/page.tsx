@@ -119,19 +119,31 @@ function PrecisionGauge({
           <span className="text-[0.45rem] font-thin uppercase tracking-[0.2em] text-white/60 mb-1">
             수온
           </span>
-          <span className="text-lg font-light text-white">
-            {waterTemp != null ? waterTemp.toFixed(1) : "--"}
-            <span className="text-xs text-[#7dd3fc] ml-0.5">°C</span>
-          </span>
+          {loading || waterTemp == null ? (
+            <span className="text-sm font-light text-white/40">
+              {loading ? "측정 중" : "데이터 없음"}
+            </span>
+          ) : (
+            <span className="text-lg font-light text-white">
+              {waterTemp.toFixed(1)}
+              <span className="text-xs text-[#7dd3fc] ml-0.5">°C</span>
+            </span>
+          )}
         </div>
         <div className="glass-morphism p-3 border-l-2 border-[#c9a84c] flex flex-col">
           <span className="text-[0.45rem] font-thin uppercase tracking-[0.2em] text-white/60 mb-1">
             풍속
           </span>
-          <span className="text-lg font-light text-white">
-            {windSpeed != null ? windSpeed.toFixed(1) : "--"}
-            <span className="text-xs text-[#c9a84c] ml-0.5">m/s</span>
-          </span>
+          {loading || windSpeed == null ? (
+            <span className="text-sm font-light text-white/40">
+              {loading ? "측정 중" : "데이터 없음"}
+            </span>
+          ) : (
+            <span className="text-lg font-light text-white">
+              {windSpeed.toFixed(1)}
+              <span className="text-xs text-[#c9a84c] ml-0.5">m/s</span>
+            </span>
+          )}
         </div>
       </div>
     </section>
