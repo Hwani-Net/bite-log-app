@@ -8,20 +8,23 @@ import {
   FishRegulation,
   getClosedSpecies,
   searchRegulations,
-  isCatchLegal } from "@/data/fishRegulationDB";
+  isCatchLegal,
+} from "@/data/fishRegulationDB";
 import {
   ArrowLeft,
   Search,
   ChevronRight,
   AlertTriangle,
-  Fish } from "lucide-react";
+  Fish,
+} from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
 // ── Status badge component ────────────────────────────────────────────────────
 function StatusBadge({
   reg,
   month,
-  day }: {
+  day,
+}: {
   reg: FishRegulation;
   month: number;
   day: number;
@@ -57,7 +60,8 @@ function RegulationCard({
   month,
   day,
   expanded,
-  onToggle }: {
+  onToggle,
+}: {
   reg: FishRegulation;
   month: number;
   day: number;
@@ -312,6 +316,8 @@ export default function RegulationsPage() {
   const now = new Date();
   const month = now.getMonth() + 1;
   const day = now.getDate();
+  // dateKey is stable within a day — safe useMemo dependency
+  const dateKey = month * 100 + day;
 
   const closedNow = getClosedSpecies(month, day);
 
@@ -320,26 +326,35 @@ export default function RegulationsPage() {
       ? searchRegulations(searchQuery)
       : FISH_REGULATION_DB;
     if (filterTab === "closed") {
-      results = results.filter((r) => r.closedSeason !== null);
+      // 현재 날짜가 금어기 범위 안에 있는 어종만 표시
+      results = results.filter((r) => {
+        if (!r.closedSeason) return false;
+        const [startM, startD] = r.closedSeason.start.split("/").map(Number);
+        const [endM, endD] = r.closedSeason.end.split("/").map(Number);
+        return dateKey >= startM * 100 + startD && dateKey <= endM * 100 + endD;
+      });
     } else if (filterTab === "size") {
       results = results.filter((r) => r.minSizeCm !== null);
     }
     return results;
-  }, [searchQuery, filterTab]);
+  }, [searchQuery, filterTab, dateKey]);
 
   const tabs = [
     {
       key: "all" as const,
       label: isKo ? "전체" : "All",
-      count: FISH_REGULATION_DB.length },
+      count: FISH_REGULATION_DB.length,
+    },
     {
       key: "closed" as const,
       label: isKo ? "금어기" : "Closed",
-      count: FISH_REGULATION_DB.filter((r) => r.closedSeason).length },
+      count: closedNow.length,
+    },
     {
       key: "size" as const,
       label: isKo ? "체장 규정" : "Min Size",
-      count: FISH_REGULATION_DB.filter((r) => r.minSizeCm).length },
+      count: FISH_REGULATION_DB.filter((r) => r.minSizeCm).length,
+    },
   ];
 
   return (
