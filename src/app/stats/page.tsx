@@ -317,6 +317,14 @@ export default function StatsPage() {
 
   const earnedCount = badges.filter((b) => b.earned).length;
 
+  const TAB_DESCRIPTIONS: Record<string, string> = {
+    stats: "기간별 조과 통계 · 어종 분포 · 기록 트렌드",
+    dna: "내 낚시 스타일 · 선호 어종 · 패턴 분석",
+    map: "조과 위치 지도 · 포인트 히트맵",
+    calendar: "날짜별 조과 달력 · 출조 히스토리",
+    badges: "업적 배지 달성 현황 · 목표까지 진행률",
+  };
+
   const tabs = [
     {
       key: "stats" as const,
@@ -384,6 +392,10 @@ export default function StatsPage() {
             </button>
           ))}
         </div>
+        {/* Tab description */}
+        <p className="text-[10px] text-white/30 text-center mt-1.5 px-4">
+          {TAB_DESCRIPTIONS[activeTab]}
+        </p>
       </div>
 
       <div className="flex-1">
