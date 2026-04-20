@@ -108,6 +108,17 @@ export default function RecordPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [photos]);
 
+  // ===== Auto-fetch weather when coordinates are confirmed (any path) =====
+  useEffect(() => {
+    if (gpsLat == null || gpsLng == null) return;
+    if (weather || weatherLoading) return; // already fetched or in progress
+    setWeatherLoading(true);
+    fetchWeather(gpsLat, gpsLng)
+      .then((w) => setWeather(w))
+      .finally(() => setWeatherLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gpsLat, gpsLng]);
+
   async function detectLocation() {
     const result = await geo.requestLocation();
     if (result) {
