@@ -6,9 +6,10 @@ import {
   getPublicFeed,
   toggleLike,
   getLikedSet,
-  addComment } from "@/services/feedService";
+  addComment,
+} from "@/services/feedService";
 import { PublicFeedItem } from "@/types";
-import { ArrowLeft, Heart, MessageCircle, MapPin } from "lucide-react";
+import { Heart, MessageCircle, MapPin } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
 type FilterType = "all" | "species" | "region";
@@ -75,7 +76,8 @@ export default function FeedPage() {
               likeCount:
                 newCount > 0
                   ? newCount
-                  : Math.max(0, item.likeCount + (liked ? 1 : -1)) }
+                  : Math.max(0, item.likeCount + (liked ? 1 : -1)),
+            }
           : item,
       ),
     );
@@ -94,14 +96,16 @@ export default function FeedPage() {
       userId: "me",
       userDisplayName: locale === "ko" ? "나" : "Me",
       content: commentText.trim(),
-      createdAt: new Date().toISOString() };
+      createdAt: new Date().toISOString(),
+    };
     setFeed((prev) =>
       prev.map((fi) =>
         fi.id === item.id
           ? {
               ...fi,
               comments: [...(fi.comments || []), newComment],
-              commentCount: fi.commentCount + 1 }
+              commentCount: fi.commentCount + 1,
+            }
           : fi,
       ),
     );
