@@ -14,10 +14,53 @@ import {
   SortAsc,
   Fish,
   X,
+  Download,
 } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
 type SortBy = "date" | "size" | "count";
+
+function exportRecords(records: CatchRecord[], format: "json" | "csv") {
+  let content: string;
+  let filename: string;
+  let mimeType: string;
+
+  if (format === "json") {
+    content = JSON.stringify(records, null, 2);
+    filename = `bitelog_records_${new Date().toISOString().slice(0, 10)}.json`;
+    mimeType = "application/json";
+  } else {
+    const headers = [
+      "날짜",
+      "어종",
+      "마릿수",
+      "크기(cm)",
+      "무게(kg)",
+      "장소",
+      "메모",
+    ];
+    const rows = records.map((r) => [
+      r.date,
+      r.species,
+      r.count,
+      r.sizeCm ?? "",
+      r.weightKg ?? "",
+      r.location.name,
+      (r.memo ?? "").replace(/,/g, "；"),
+    ]);
+    content = [headers, ...rows].map((row) => row.join(",")).join("\n");
+    filename = `bitelog_records_${new Date().toISOString().slice(0, 10)}.csv`;
+    mimeType = "text/csv;charset=utf-8;";
+  }
+
+  const blob = new Blob(["\uFEFF" + content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 type GroupedItem =
   | { type: "header"; yearMonth: string; label: string; count: number }
@@ -29,6 +72,7 @@ export default function RecordsPage() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<SortBy>("date");
   const [showFilters, setShowFilters] = useState(false);
+  const [showExport, setShowExport] = useState(false);
 
   useEffect(() => {
     getDataService().getCatchRecords().then(setRecords);
@@ -145,10 +189,43 @@ export default function RecordsPage() {
         <h1 className="text-lg font-bold text-white tracking-[0.1em] uppercase">
           {t("home.recentCatch")}
         </h1>
-        <span className="text-sm text-white/60 ml-auto">
-          {filtered.length}
-          {locale === "ko" ? "건" : ""}
-        </span>
+        <div className="ml-auto flex items-center gap-2">
+          <div className="relative">
+            <button
+              aria-label="내보내기"
+              onClick={() => setShowExport((v) => !v)}
+              className="size-8 flex items-center justify-center rounded-xl text-white/50 hover:bg-white/10 transition-colors"
+            >
+              <Download size={18} aria-hidden="true" />
+            </button>
+            {showExport && (
+              <div className="absolute right-0 top-10 z-20 flex flex-col gap-1 rounded-2xl bg-[#111820] border border-white/10 p-2 shadow-xl animate-in slide-in-from-top-2 duration-200">
+                <button
+                  onClick={() => {
+                    exportRecords(filtered, "csv");
+                    setShowExport(false);
+                  }}
+                  className="px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 border border-white/10 text-white/70 hover:border-[#c9a84c]/50 transition-colors whitespace-nowrap"
+                >
+                  CSV 다운로드
+                </button>
+                <button
+                  onClick={() => {
+                    exportRecords(filtered, "json");
+                    setShowExport(false);
+                  }}
+                  className="px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 border border-white/10 text-white/70 hover:border-[#c9a84c]/50 transition-colors whitespace-nowrap"
+                >
+                  JSON 다운로드
+                </button>
+              </div>
+            )}
+          </div>
+          <span className="text-sm text-white/60">
+            {filtered.length}
+            {locale === "ko" ? "건" : ""}
+          </span>
+        </div>
       </header>
 
       {/* Search bar */}
