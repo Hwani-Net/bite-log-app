@@ -6,6 +6,8 @@ import { getFirebaseRanking } from "@/services/rankingService";
 import { RankingCategory, RankingData } from "@/types/ranking";
 import { useAuth } from "@/hooks/useAuth";
 import { DynamicIcon } from "@/lib/iconMap";
+import { getFirebaseAuth } from "@/lib/firebase";
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 const CATEGORY_KEYS: {
   value: RankingCategory;
@@ -392,12 +394,26 @@ export default function RankingPage() {
 
             {/* Not logged in prompt */}
             {!user && (
-              <div className="mx-4 mt-2 p-4 rounded-2xl bg-white/5 border border-white/10 text-center">
+              <div className="mx-4 mt-2 p-4 rounded-2xl bg-white/5 border border-white/10 text-center flex flex-col items-center gap-3">
                 <p className="text-sm text-white/50">
                   {locale === "ko"
                     ? "로그인하면 내 순위를 확인할 수 있어요"
                     : "Sign in to see your rank"}
                 </p>
+                <button
+                  onClick={async () => {
+                    const auth = getFirebaseAuth();
+                    if (!auth) return;
+                    const provider = new GoogleAuthProvider();
+                    await signInWithPopup(auth, provider);
+                    window.location.reload();
+                  }}
+                  className="bg-[#c9a84c] text-[#080d14] rounded-xl px-4 py-2 text-sm font-medium"
+                >
+                  {locale === "ko"
+                    ? "로그인하고 내 순위 확인하기"
+                    : "Sign in to see your rank"}
+                </button>
               </div>
             )}
           </>

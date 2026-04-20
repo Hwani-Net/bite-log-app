@@ -513,11 +513,22 @@ export default function BiteForecastPage() {
               if (t) setLocationName(t.stationName || "현재 위치");
               setLoading(false);
             },
-            () => {
-              // No location permission — use default
-              setWeather(null);
+            async () => {
+              // No location permission — fallback to nearest coast from Seoul
+              const DEFAULT_LAT = 37.45; // 인천 앞바다
+              const DEFAULT_LNG = 126.4;
+              const [w, m] = await Promise.allSettled([
+                fetchWeather(DEFAULT_LAT, DEFAULT_LNG),
+                fetchMarineData(DEFAULT_LAT, DEFAULT_LNG),
+              ]);
+              const fallbackWeather = w.status === "fulfilled" ? w.value : null;
+              const fallbackMarine = m.status === "fulfilled" ? m.value : null;
+              setWeather(fallbackWeather);
               setTideData(null);
-              setBiteTime(calculateBiteTime(null, null));
+              setBiteTime(
+                calculateBiteTime(fallbackWeather, null, fallbackMarine),
+              );
+              setLocationName("인천 앞바다 (기본)");
               setLoading(false);
             },
             { timeout: 8000, maximumAge: 300000 },
