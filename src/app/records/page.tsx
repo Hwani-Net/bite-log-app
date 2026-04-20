@@ -15,10 +15,26 @@ import {
   Fish,
   X,
   Download,
+  LayoutList,
+  LayoutGrid,
 } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
+// Fish species color mapping (matches home page palette)
+const FISH_COLORS: Record<string, string> = {
+  농어: "from-blue-500 to-cyan-400",
+  우럭: "from-amber-500 to-orange-400",
+  참돔: "from-rose-400 to-pink-300",
+  감성돔: "from-violet-500 to-purple-400",
+  볼락: "from-emerald-500 to-green-400",
+  광어: "from-yellow-400 to-amber-300",
+  고등어: "from-indigo-500 to-blue-400",
+  방어: "from-sky-500 to-cyan-400",
+  주꾸미: "from-red-400 to-orange-300",
+};
+
 type SortBy = "date" | "size" | "count";
+type ViewMode = "list" | "gallery";
 
 function exportRecords(records: CatchRecord[], format: "json" | "csv") {
   let content: string;
@@ -73,6 +89,7 @@ export default function RecordsPage() {
   const [sortBy, setSortBy] = useState<SortBy>("date");
   const [showFilters, setShowFilters] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
 
   useEffect(() => {
     getDataService().getCatchRecords().then(setRecords);
@@ -190,6 +207,23 @@ export default function RecordsPage() {
           {t("home.recentCatch")}
         </h1>
         <div className="ml-auto flex items-center gap-2">
+          {/* View mode toggle */}
+          <div className="flex items-center rounded-xl bg-white/5 border border-white/10 p-0.5">
+            <button
+              aria-label="리스트 뷰"
+              onClick={() => setViewMode("list")}
+              className={`size-7 flex items-center justify-center rounded-lg transition-all ${viewMode === "list" ? "bg-[#c9a84c] text-[#080d14]" : "text-white/40 hover:text-white/70"}`}
+            >
+              <LayoutList size={14} />
+            </button>
+            <button
+              aria-label="갤러리 뷰"
+              onClick={() => setViewMode("gallery")}
+              className={`size-7 flex items-center justify-center rounded-lg transition-all ${viewMode === "gallery" ? "bg-[#c9a84c] text-[#080d14]" : "text-white/40 hover:text-white/70"}`}
+            >
+              <LayoutGrid size={14} />
+            </button>
+          </div>
           <div className="relative">
             <button
               aria-label="내보내기"
@@ -330,8 +364,61 @@ export default function RecordsPage() {
             </Link>
           )}
         </div>
+      ) : viewMode === "gallery" ? (
+        /* ── Gallery view ── */
+        <div className="grid grid-cols-3 gap-1.5 pb-4">
+          {filtered.map((record) => {
+            const hasPhoto =
+              record.photos.length > 0 &&
+              !record.photos[0].startsWith("/fish-");
+            const colorClass =
+              FISH_COLORS[record.species] ?? "from-slate-600 to-slate-500";
+
+            return (
+              <Link
+                key={record.id}
+                href={`/records/detail?id=${record.id}`}
+                className="relative aspect-square overflow-hidden rounded-xl block group"
+              >
+                {hasPhoto ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={record.photos[0]}
+                    alt={record.species}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <div
+                    className={`w-full h-full bg-gradient-to-br ${colorClass} flex items-center justify-center`}
+                  >
+                    <Fish size={28} className="text-white/40" />
+                  </div>
+                )}
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#080d14]/90 via-transparent to-transparent" />
+                {/* Bottom info */}
+                <div className="absolute bottom-0 left-0 right-0 p-2">
+                  <p className="text-[10px] font-bold text-white leading-tight truncate">
+                    {record.species}
+                  </p>
+                  <p className="text-[9px] text-white/50 leading-tight">
+                    {record.sizeCm
+                      ? `${record.sizeCm}cm`
+                      : `${record.count}${locale === "ko" ? "마리" : ""}`}
+                  </p>
+                </div>
+                {/* Top-right date badge */}
+                <div className="absolute top-1.5 right-1.5">
+                  <span className="px-1.5 py-0.5 rounded-md bg-[#080d14]/70 text-[8px] text-white/60 font-medium backdrop-blur-sm">
+                    {record.date.slice(5)}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       ) : (
-        /* Records list — tap to view detail */
+        /* ── List view (original) ── */
         <div className="flex flex-col gap-3 pb-4">
           {groupedItems.map((item, idx) => {
             if (item.type === "header") {
