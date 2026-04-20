@@ -3,32 +3,31 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { useAppStore } from "@/store/appStore";
 import {
   Home,
-  Radar,
-  Sparkles,
+  BookOpen,
   Trophy,
-  Settings,
-  type LucideIcon } from "lucide-react";
+  Fish,
+  Menu,
+  type LucideIcon,
+} from "lucide-react";
 
 interface NavItem {
   href: string;
   icon: LucideIcon;
-  labelKey: string;
+  label: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/", icon: Home, labelKey: "nav.home" },
-  { href: "/fleet-radar", icon: Radar, labelKey: "nav.fleet" },
-  { href: "/concierge", icon: Sparkles, labelKey: "nav.ai" },
-  { href: "/ranking", icon: Trophy, labelKey: "ranking.title" },
-  { href: "/settings", icon: Settings, labelKey: "nav.settings" },
+  { href: "/", icon: Home, label: "홈" },
+  { href: "/records", icon: BookOpen, label: "기록" },
+  { href: "/ranking", icon: Trophy, label: "랭킹" },
+  { href: "/bite-forecast", icon: Fish, label: "입질예보" },
+  { href: "/concierge", icon: Menu, label: "더보기" },
 ];
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const t = useAppStore((s) => s.t);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -54,7 +53,7 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              aria-label={t(item.labelKey)}
+              aria-label={item.label}
               className={`flex flex-col items-center gap-0.5 px-3 py-1 min-h-[48px] min-w-[48px] justify-center transition-all ${
                 isActive
                   ? "text-[#c9a84c]"
@@ -69,7 +68,7 @@ export default function BottomNav() {
               <span
                 className={`font-space-grotesk tracking-[0.15em] text-[0.45rem] uppercase ${isActive ? "font-bold" : "font-medium"} leading-normal`}
               >
-                {t(item.labelKey)}
+                {item.label}
               </span>
               {isActive && (
                 <div className="w-1 h-1 rounded-full bg-[#c9a84c] nav-glow" />
