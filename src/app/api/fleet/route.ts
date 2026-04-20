@@ -751,8 +751,8 @@ async function fetchFromAISStream(): Promise<{
           APIKey: apiKey,
           BoundingBoxes: [
             [
-              [33.0, 124.0],
-              [38.5, 132.0],
+              [30.0, 120.0],
+              [42.0, 136.0],
             ],
           ],
           FilterMessageTypes: ["PositionReport", "ShipStaticData"],
