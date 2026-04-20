@@ -6,7 +6,7 @@ import { useAppStore } from "@/store/appStore";
 import { useSubscriptionStore } from "@/store/subscriptionStore";
 import { fetchTideData } from "@/services/tideService";
 import { fetchWeather } from "@/services/weatherService";
-import { fetchMarineData } from "@/services/marineService";
+import { fetchMarineData, MarineData } from "@/services/marineService";
 import {
   calculateBiteTime,
   BiteTimePrediction,
@@ -102,6 +102,70 @@ function SecretSpotsSection({
       )}
     </div>
   );
+}
+
+// ─── Fishing Score Calculator ────────────────────────────────────────────────
+function calcFishingScore(params: {
+  windSpeed: number;
+  waveHeight: number;
+  waterTemp: number;
+}): { score: number; label: string; color: string; desc: string } {
+  const windScore =
+    params.windSpeed <= 3
+      ? 40
+      : params.windSpeed <= 6
+        ? 30
+        : params.windSpeed <= 10
+          ? 15
+          : 0;
+
+  const waveScore =
+    params.waveHeight <= 0.3
+      ? 40
+      : params.waveHeight <= 0.8
+        ? 30
+        : params.waveHeight <= 1.5
+          ? 15
+          : 0;
+
+  const waterScore =
+    params.waterTemp >= 15 && params.waterTemp <= 25
+      ? 20
+      : params.waterTemp >= 10 && params.waterTemp < 15
+        ? 12
+        : params.waterTemp > 25 && params.waterTemp <= 28
+          ? 12
+          : 5;
+
+  const score = windScore + waveScore + waterScore;
+
+  if (score >= 80)
+    return {
+      score,
+      label: "낚시 최적",
+      color: "#4ade80",
+      desc: "출조하기 좋은 날씨입니다",
+    };
+  if (score >= 60)
+    return {
+      score,
+      label: "낚시 양호",
+      color: "#c9a84c",
+      desc: "무난한 조건입니다",
+    };
+  if (score >= 40)
+    return {
+      score,
+      label: "낚시 주의",
+      color: "#fb923c",
+      desc: "바람·파도를 확인하세요",
+    };
+  return {
+    score,
+    label: "출항 자제",
+    color: "#f87171",
+    desc: "기상 악화로 위험할 수 있습니다",
+  };
 }
 
 // ─── Score Ring ───────────────────────────────────────────────────────────────
@@ -490,6 +554,7 @@ export default function BiteForecastPage() {
   const [biteTime, setBiteTime] = useState<BiteTimePrediction | null>(null);
   const [tideData, setTideData] = useState<TideData | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [marine, setMarine] = useState<MarineData | null>(null);
   const [loading, setLoading] = useState(true);
   const [locationName, setLocationName] = useState("현재 위치");
 
@@ -509,6 +574,7 @@ export default function BiteForecastPage() {
               ]);
               setWeather(w);
               setTideData(t);
+              setMarine(m);
               setBiteTime(calculateBiteTime(w, t, m));
               if (t) setLocationName(t.stationName || "현재 위치");
               setLoading(false);
@@ -525,6 +591,7 @@ export default function BiteForecastPage() {
               const fallbackMarine = m.status === "fulfilled" ? m.value : null;
               setWeather(fallbackWeather);
               setTideData(null);
+              setMarine(fallbackMarine);
               setBiteTime(
                 calculateBiteTime(fallbackWeather, null, fallbackMarine),
               );
@@ -587,6 +654,73 @@ export default function BiteForecastPage() {
         </div>
       ) : biteTime ? (
         <div className="space-y-4 px-4 pt-4">
+          {/* ── Fishing Score Card ── */}
+          {weather &&
+            marine &&
+            (() => {
+              const result = calcFishingScore({
+                windSpeed: weather.windSpeed ?? 0,
+                waveHeight: marine.waveHeight ?? 0,
+                waterTemp: marine.seaSurfaceTemp ?? 18,
+              });
+              const circumference = 2 * Math.PI * 24;
+              return (
+                <div
+                  className="rounded-2xl border p-4 mb-4 flex items-center gap-4"
+                  style={{ borderColor: `${result.color}40` }}
+                >
+                  <div className="flex flex-col items-start flex-1">
+                    <span
+                      className="text-4xl font-bold leading-none"
+                      style={{ color: result.color }}
+                    >
+                      {result.score}
+                    </span>
+                    <span
+                      className="text-sm font-bold mt-1"
+                      style={{ color: result.color }}
+                    >
+                      {result.label}
+                    </span>
+                    <span className="text-xs text-white/60 mt-0.5">
+                      {result.desc}
+                    </span>
+                  </div>
+                  <svg width="56" height="56" viewBox="0 0 56 56">
+                    <circle
+                      cx="28"
+                      cy="28"
+                      r="24"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.1)"
+                      strokeWidth="4"
+                    />
+                    <circle
+                      cx="28"
+                      cy="28"
+                      r="24"
+                      fill="none"
+                      stroke={result.color}
+                      strokeWidth="4"
+                      strokeDasharray={`${(result.score / 100) * circumference} ${circumference}`}
+                      strokeLinecap="round"
+                      transform="rotate(-90 28 28)"
+                    />
+                    <text
+                      x="28"
+                      y="33"
+                      textAnchor="middle"
+                      fill={result.color}
+                      fontSize="12"
+                      fontWeight="bold"
+                    >
+                      {result.score}
+                    </text>
+                  </svg>
+                </div>
+              );
+            })()}
+
           {/* ── Score Hero ── */}
           {(() => {
             const validCount = biteTime.factors.filter(
