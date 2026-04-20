@@ -85,7 +85,12 @@ import {
   ScanText,
   CheckCircle,
   CircleAlert,
-  type LucideIcon } from "lucide-react";
+  Medal,
+  Sailboat,
+  Microscope,
+  ImageIcon,
+  type LucideIcon,
+} from "lucide-react";
 
 const iconMap: Record<string, LucideIcon> = {
   // Navigation
@@ -190,7 +195,18 @@ const iconMap: Record<string, LucideIcon> = {
   gpp_maybe: ShieldAlert,
   document_scanner: ScanText,
   check_circle: CheckCircle,
-  error: CircleAlert };
+  error: CircleAlert,
+
+  // Badge icons (from badgeService)
+  stars: Star,
+  military_tech: Medal,
+  workspace_premium: Trophy,
+  diversity_3: Users,
+  sailing: Sailboat,
+  trophy: Trophy,
+  photo_camera: ImageIcon,
+  biotech: Microscope,
+};
 
 /**
  * Get a Lucide icon component by Material Symbols name.
@@ -220,5 +236,6 @@ export function DynamicIcon({
   return React.createElement(getLucideIcon(name), {
     size,
     className,
-    ...(props as Record<string, unknown>) });
+    ...(props as Record<string, unknown>),
+  });
 }
