@@ -19,6 +19,7 @@ import {
   UserFishingProfile,
 } from "@/services/personalizationService";
 import { Bell, Fish, Wind, Newspaper, Users } from "lucide-react";
+import SeasonAlertBanner from "@/components/SeasonAlertBanner";
 
 // Fish species default image/color mapping
 const FISH_COLORS: Record<string, { gradient: string }> = {
@@ -594,6 +595,9 @@ export default function HomePage() {
             thisMonth={thisMonthCatch}
             maxSize={maxSize}
           />
+
+          {/* Season Alert Banner */}
+          <SeasonAlertBanner />
 
           {/* AI Insight Banner */}
           <AIInsightBanner profile={aiProfile} />
