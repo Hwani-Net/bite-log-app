@@ -240,7 +240,13 @@ export async function getFirebaseRanking(
   // Try Firebase first
   if (isFirebaseReady()) {
     try {
-      const aggregates = await fetchAndAggregate();
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("ranking fetch timeout")), 5000),
+      );
+      const aggregates = await Promise.race([
+        fetchAndAggregate(),
+        timeoutPromise,
+      ]);
 
       // No real data yet — return empty ranking
       if (aggregates.size === 0) {
@@ -264,7 +270,8 @@ export async function getFirebaseRanking(
         isRealData: true,
       };
     } catch (err) {
-      throw new Error(`[RankingService] Firebase read failed: ${err}`);
+      console.error("[RankingService] Firebase read failed:", err);
+      return getEmptyRanking(category);
     }
   }
 
