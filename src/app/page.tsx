@@ -18,7 +18,15 @@ import {
   analyzeUserRecords,
   UserFishingProfile,
 } from "@/services/personalizationService";
-import { Bell, Fish, Wind, Newspaper, Users, PenLine } from "lucide-react";
+import {
+  Bell,
+  Fish,
+  Wind,
+  Newspaper,
+  Users,
+  PenLine,
+  Radar,
+} from "lucide-react";
 import SeasonAlertBanner from "@/components/SeasonAlertBanner";
 import MonthlyFishCard from "@/components/MonthlyFishCard";
 import MonthlySummaryCard from "@/components/MonthlySummaryCard";
@@ -608,6 +616,13 @@ export default function HomePage() {
               <Wind size={14} className="text-[#7dd3fc]" />
               출항 날씨
             </a>
+            <Link
+              href="/fleet-radar"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white/60 hover:border-[#c9a84c]/30 transition-all"
+            >
+              <Radar size={14} className="text-[#c9a84c]" />
+              선단 레이더
+            </Link>
           </div>
 
           {/* Stat Bar */}

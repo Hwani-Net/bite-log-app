@@ -846,7 +846,12 @@ export default function BiteForecastPage() {
           <FishingTips biteTime={biteTime} />
 
           {/* ── Windy Link ── */}
-          <Link href="/weather" className="block">
+          <a
+            href="https://www.windy.com/?36.0,128.0,7"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block"
+          >
             <div className="bg-gradient-to-r from-[#7dd3fc]/20 to-[#c9a84c]/10 border border-[#7dd3fc]/20 rounded-2xl p-4 flex items-center gap-3">
               <DynamicIcon
                 name="satellite_alt"
@@ -859,6 +864,28 @@ export default function BiteForecastPage() {
                 </p>
                 <p className="text-[10px] text-white/60">
                   7일 출항 날씨 · Windy.com
+                </p>
+              </div>
+              <ChevronRight size={20} className="text-white/60" />
+            </div>
+          </a>
+
+          {/* ── Fleet Radar Link ── */}
+          <Link href="/fleet-radar" className="block">
+            <div className="bg-gradient-to-r from-[#c9a84c]/10 to-[#7dd3fc]/10 border border-[#c9a84c]/20 rounded-2xl p-4 flex items-center gap-3">
+              <DynamicIcon
+                name="radar"
+                size={22}
+                className="text-[#c9a84c] shrink-0"
+              />
+              <div className="flex-1">
+                <p className="text-xs font-bold text-white uppercase tracking-[0.1em]">
+                  {isKo ? "선단 레이더" : "Fleet Radar"}
+                </p>
+                <p className="text-[10px] text-white/60">
+                  {isKo
+                    ? "주변 어선 AIS 실시간 현황"
+                    : "Real-time AIS vessel tracking"}
                 </p>
               </div>
               <ChevronRight size={20} className="text-white/60" />
