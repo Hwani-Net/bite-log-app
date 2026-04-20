@@ -18,7 +18,7 @@ import {
   analyzeUserRecords,
   UserFishingProfile,
 } from "@/services/personalizationService";
-import { Bell, Fish, Wind, Newspaper, Users } from "lucide-react";
+import { Bell, Fish, Wind, Newspaper, Users, PenLine } from "lucide-react";
 import SeasonAlertBanner from "@/components/SeasonAlertBanner";
 import MonthlyFishCard from "@/components/MonthlyFishCard";
 import MonthlySummaryCard from "@/components/MonthlySummaryCard";
@@ -594,6 +594,13 @@ export default function HomePage() {
         <div className="px-4 -mt-8 relative z-20 space-y-10">
           {/* Quick Actions */}
           <div className="flex gap-2 flex-wrap">
+            <Link
+              href="/record"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white/60 hover:border-[#c9a84c]/30 transition-all"
+            >
+              <PenLine size={14} className="text-[#c9a84c]" />
+              기록 추가
+            </Link>
             <a
               href="#windy-section"
               className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white/60 hover:border-[#c9a84c]/30 transition-all"
