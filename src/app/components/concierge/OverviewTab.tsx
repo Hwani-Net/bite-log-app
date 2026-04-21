@@ -46,7 +46,7 @@ export default function OverviewTab({
           </div>
           <div className="flex-1">
             <h2 className="text-lg font-bold text-white">
-              {locale === "ko" ? "안녕하세요, 낚시인님!" : "Hello!"}
+              {locale === "ko" ? "안녕하세요, 낚시인!" : "Hello!"}
             </h2>
             <p className="text-white/60 text-sm mt-1 leading-relaxed">
               {loading
