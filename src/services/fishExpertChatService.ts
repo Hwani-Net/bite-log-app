@@ -143,7 +143,7 @@ export async function chatWithExpert(
   }
 }
 
-// @mock-data — Replace with real Gemini Chat API (needs NEXT_PUBLIC_GEMINI_API_KEY)
+// @mock-data — Fallback when /api/gemini returns 503 (GEMINI_API_KEY not configured)
 function getMockAnswer(species: string | null, question: string): string {
   const q = question.toLowerCase();
   if (q.includes("시즌") || q.includes("언제")) {

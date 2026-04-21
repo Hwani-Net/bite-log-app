@@ -36,7 +36,7 @@ const GEMINI_PROMPT = `당신은 한국 연안 낚시 40년 경력의 어류 전
   "fishingTip": "이 어종을 잡기 위한 핵심 팁 1문장"
 }`;
 
-// @mock-data — Replace with real Gemini Vision API (server proxy: /api/gemini)
+// @mock-data — Fallback when /api/gemini returns 503 (GEMINI_API_KEY not configured)
 const MOCK_RESULTS: FishAIResult[] = [
   {
     species: "Red Sea Bream",

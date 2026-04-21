@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   const clientSecret = process.env.NAVER_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
-    // @mock-data — No Naver API keys, return empty for client-side mock fallback
+    // NAVER_CLIENT_ID/SECRET not set — return empty so client falls back to mock
     return NextResponse.json({ items: [], total: 0, start: 1, display: 0 });
   }
 

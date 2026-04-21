@@ -525,7 +525,7 @@ export async function fetchTopNews(): Promise<FishingNewsItem[]> {
   return all.slice(0, 3);
 }
 
-// @mock-data — Replace with real Naver Search API (needs NEXT_PUBLIC_NAVER_CLIENT_ID/SECRET)
+// @mock-data — Fallback when /api/naver returns empty (NAVER_CLIENT_ID/SECRET not configured)
 
 function getMockNews(): FishingNewsItem[] {
   const now = new Date();

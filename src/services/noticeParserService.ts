@@ -32,7 +32,7 @@ const SYSTEM_PROMPT = `당신은 대한민국 낚시/선박 공지사항의 정�
   "reasoning": "수요일 출조 명시되었고 주꾸미 3석 언급됨"
 }`;
 
-// @mock-data — Replace with real Gemini API (needs NEXT_PUBLIC_GEMINI_API_KEY)
+// @mock-data — Fallback when /api/gemini server key is absent or upstream fails
 const MOCK_FALLBACK: NoticeParseResult = {
   date: "이번주 수요일",
   species: ["주꾸미"],
@@ -40,38 +40,38 @@ const MOCK_FALLBACK: NoticeParseResult = {
   isSuccess: true,
   rawResult: {},
   confidence: 90,
-  reasoning: "API 키가 없어 Mock 데이터를 반환합니다." };
+  reasoning: "서버 API 키 미설정으로 Mock 데이터를 반환합니다.",
+};
 
 export async function parseNotice(
   text: string,
 ): Promise<NoticeParseResult | null> {
-  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-
-  if (!apiKey) {
-    console.warn(
-      "Gemini API key not configured. Returning mock parser result.",
-    );
-    await new Promise((r) => setTimeout(r, 1000));
-    return MOCK_FALLBACK;
-  }
-
   try {
     const requestBody = {
+      model: "gemini-2.0-flash",
       contents: [{ role: "user", parts: [{ text }] }],
       systemInstruction: {
-        parts: [{ text: SYSTEM_PROMPT }] },
+        parts: [{ text: SYSTEM_PROMPT }],
+      },
       generationConfig: {
-        temperature: 0.1, // Low temperature for factual extraction
+        temperature: 0.1,
         maxOutputTokens: 256,
-        responseMimeType: "application/json" } };
+        responseMimeType: "application/json",
+      },
+    };
 
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody) },
-    );
+    const res = await fetch("/api/gemini", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody),
+    });
+
+    // 503 = GEMINI_API_KEY not configured on server → mock fallback
+    if (res.status === 503) {
+      console.warn("[NoticeParser] No server API key → Mock mode");
+      await new Promise((r) => setTimeout(r, 1000));
+      return MOCK_FALLBACK;
+    }
 
     if (!res.ok) {
       const errText = await res.text();
@@ -83,7 +83,8 @@ export async function parseNotice(
         isSuccess: false,
         confidence: 0,
         rawResult: null,
-        reasoning: `[API 오류 ${res.status}] AI 서버 연결에 실패했습니다. (API 활성화 여부 확인 필요)` };
+        reasoning: `[API 오류 ${res.status}] AI 서버 연결에 실패했습니다. (API 활성화 여부 확인 필요)`,
+      };
     }
 
     const data = await res.json();
@@ -98,7 +99,8 @@ export async function parseNotice(
         confidence: 0,
         rawResult: null,
         reasoning:
-          "[파싱 실패] AI 모델이 텍스트를 인식하지 못했거나 안전 필터에 의해 차단되었습니다." };
+          "[파싱 실패] AI 모델이 텍스트를 인식하지 못했거나 안전 필터에 의해 차단되었습니다.",
+      };
     }
 
     const parsed = JSON.parse(textContent);
@@ -113,7 +115,8 @@ export async function parseNotice(
       isSuccess: parsed.isSuccess === true,
       confidence: parsed.confidence || 0,
       reasoning: parsed.reasoning || "",
-      rawResult: parsed };
+      rawResult: parsed,
+    };
   } catch (err: unknown) {
     console.error("Notice Parsing failed:", err);
     const message = err instanceof Error ? err.message : "Unknown";
@@ -124,6 +127,7 @@ export async function parseNotice(
       isSuccess: false,
       confidence: 0,
       rawResult: null,
-      reasoning: `[서버 파싱 에러] 예외가 발생했습니다: ${message}` };
+      reasoning: `[서버 파싱 에러] 예외가 발생했습니다: ${message}`,
+    };
   }
 }

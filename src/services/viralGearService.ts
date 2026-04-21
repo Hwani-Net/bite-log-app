@@ -41,7 +41,7 @@ const GEAR_SEARCH_QUERIES = [
   "낚시 대박 채비",
 ];
 
-// @mock-data — Replace with real Naver/Gemini gear analysis (needs API keys)
+// @mock-data — Fallback when Naver/Gemini API unavailable (keys not configured on server)
 
 function getMockReport(): ViralGearReport {
   const now = new Date().toISOString();
