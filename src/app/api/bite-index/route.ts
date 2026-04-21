@@ -150,6 +150,26 @@ function resolveGubun(raw?: string): "갯바위" | "선상" {
   return "갯바위";
 }
 
+// --- Deduplication -----------------------------------------------------------
+
+/**
+ * When KHOA returns multiple observation-station rows for the same
+ * (placeName + targetFish) pair, keep only the row with the highest
+ * indexScore. Ties are broken by order of appearance (first wins).
+ * Result is sorted descending by indexScore so the best spots surface first.
+ */
+function deduplicateByLocationSpecies(items: BiteIndexItem[]): BiteIndexItem[] {
+  const map = new Map<string, BiteIndexItem>();
+  for (const item of items) {
+    const key = `${item.placeName}||${item.targetFish}`;
+    const existing = map.get(key);
+    if (!existing || item.indexScore > existing.indexScore) {
+      map.set(key, item);
+    }
+  }
+  return Array.from(map.values()).sort((a, b) => b.indexScore - a.indexScore);
+}
+
 // --- Upstream response extraction -------------------------------------------
 
 function extractItems(json: unknown): Array<Record<string, unknown>> {
@@ -453,7 +473,9 @@ export async function GET(request: NextRequest) {
   }
 
   const items = extractItems(json);
-  const data = items.map((it) => mapBiteIndexItem(it, { gubun, reqDate }));
+  const data = deduplicateByLocationSpecies(
+    items.map((it) => mapBiteIndexItem(it, { gubun, reqDate })),
+  );
 
   const duration = Date.now() - t0;
   structuredLog("info", {
