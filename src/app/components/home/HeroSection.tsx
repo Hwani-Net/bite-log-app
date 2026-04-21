@@ -43,7 +43,11 @@ export default function HeroSection({ biteTime, loading }: HeroSectionProps) {
           {/* Score Gauge */}
           <div className="flex justify-center mb-4">
             <div className="relative w-36 h-36">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
+              <svg
+                aria-hidden="true"
+                className="w-full h-full -rotate-90"
+                viewBox="0 0 120 120"
+              >
                 <circle
                   cx="60"
                   cy="60"

@@ -496,6 +496,7 @@ export default function AlertsPage() {
             className="p-2 rounded-xl hover:bg-white/5 transition-colors"
           >
             <svg
+              aria-hidden="true"
               className="w-5 h-5 text-white/60"
               fill="none"
               stroke="currentColor"

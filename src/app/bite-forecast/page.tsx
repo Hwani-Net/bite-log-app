@@ -192,7 +192,11 @@ function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
       className="relative flex items-center justify-center"
       style={{ width: size, height: size }}
     >
-      <svg className="-rotate-90" style={{ width: size, height: size }}>
+      <svg
+        aria-hidden="true"
+        className="-rotate-90"
+        style={{ width: size, height: size }}
+      >
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -857,7 +861,12 @@ export default function BiteForecastPage() {
                       {result.desc}
                     </span>
                   </div>
-                  <svg width="56" height="56" viewBox="0 0 56 56">
+                  <svg
+                    aria-hidden="true"
+                    width="56"
+                    height="56"
+                    viewBox="0 0 56 56"
+                  >
                     <circle
                       cx="28"
                       cy="28"
@@ -906,6 +915,7 @@ export default function BiteForecastPage() {
                   ) : (
                     <div className="relative flex items-center justify-center w-[120px] h-[120px]">
                       <svg
+                        aria-hidden="true"
                         className="-rotate-90"
                         style={{ width: 120, height: 120 }}
                       >

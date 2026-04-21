@@ -118,7 +118,7 @@ export default function SettingsPage() {
                 disabled={loading}
                 className="flex items-center gap-3 px-6 py-3 rounded-xl bg-white/10 border border-white/20 hover:bg-white/15 transition-all active:scale-95 disabled:opacity-50"
               >
-                <svg viewBox="0 0 24 24" className="w-5 h-5">
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="w-5 h-5">
                   <path
                     fill="#4285F4"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
