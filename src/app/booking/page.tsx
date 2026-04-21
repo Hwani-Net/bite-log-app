@@ -186,6 +186,13 @@ export default function BookingPage() {
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedParty, setSelectedParty] = useState<number>(2);
   const [showResult, setShowResult] = useState(false);
+  const [selectedPlatform, setSelectedPlatform] = useState<BookingPlatform>(
+    () => {
+      if (typeof window === "undefined") return PLATFORMS[0];
+      const saved = localStorage.getItem("biteLog_bookingPlatform");
+      return PLATFORMS.find((p) => p.id === saved) ?? PLATFORMS[0];
+    },
+  );
 
   const checklist = selectedSpecies
     ? [
@@ -391,6 +398,31 @@ export default function BookingPage() {
                 </div>
               )}
 
+              {/* Platform selector */}
+              <div>
+                <label className="block text-xs text-white/50 mb-2 font-medium">
+                  예약 플랫폼 선택
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {PLATFORMS.map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => {
+                        setSelectedPlatform(p);
+                        localStorage.setItem("biteLog_bookingPlatform", p.id);
+                      }}
+                      className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all text-left ${
+                        selectedPlatform.id === p.id
+                          ? "bg-[#c9a84c] text-[#080d14] border-[#c9a84c]"
+                          : "bg-white/5 text-white/60 border-white/10 hover:border-white/30"
+                      }`}
+                    >
+                      {p.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="flex gap-2">
                 <button
                   onClick={handleReset}
@@ -399,12 +431,12 @@ export default function BookingPage() {
                   다시 선택
                 </button>
                 <a
-                  href={PLATFORMS[0].url}
+                  href={selectedPlatform.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 py-2.5 rounded-xl bg-[#c9a84c] text-[#080d14] text-sm font-bold text-center hover:brightness-110 transition-all"
                 >
-                  예약하러 가기
+                  {selectedPlatform.name}으로 예약
                 </a>
               </div>
             </div>

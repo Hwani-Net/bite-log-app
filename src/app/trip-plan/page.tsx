@@ -153,7 +153,24 @@ export default function TripPlanPage() {
   });
   const [briefing, setBriefing] = useState<TripBriefing | null>(null);
   const [loading, setLoading] = useState(false);
-  const [alertSet, setAlertSet] = useState(false);
+  const [alertSet, setAlertSet] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const saved = localStorage.getItem("biteLog_tripAlert");
+    if (!saved) return false;
+    try {
+      const parsed = JSON.parse(saved) as {
+        tripDate: string;
+        alertHour: number;
+      };
+      const initialDate = new Date(Date.now() + 86400000)
+        .toISOString()
+        .split("T")[0];
+      return parsed.tripDate === initialDate && parsed.alertHour === 14;
+    } catch (e) {
+      console.error("biteLog_tripAlert parse error", e);
+      return false;
+    }
+  });
 
   const handleGenerate = async () => {
     if (!form.species || !form.location || !form.date) return;
@@ -200,6 +217,13 @@ export default function TripPlanPage() {
     const delay = alertTime.getTime() - now.getTime();
 
     setAlertSet(true);
+    localStorage.setItem(
+      "biteLog_tripAlert",
+      JSON.stringify({
+        tripDate: briefing.tripPlan.date,
+        alertHour: briefing.tripPlan.alertHour,
+      }),
+    );
 
     const notificationPayload = [
       `${briefing.tripPlan.species} 출조 브리핑`,
