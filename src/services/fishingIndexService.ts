@@ -216,13 +216,27 @@ function extractItems(data: any): KhoaFishingItem[] {
   );
 }
 
+export const REGIONS = ["서해", "남해", "동해", "제주"] as const;
+export type FishingRegion = (typeof REGIONS)[number];
+
+export function getLocationsByRegion(region: FishingRegion) {
+  return FISHING_LOCATIONS.filter((l) => l.region === region);
+}
+
+export function getLocationByCode(code: string) {
+  return FISHING_LOCATIONS.find((l) => l.code === code) ?? null;
+}
+
 export async function fetchFishingIndex(
   lat: number,
   lng: number,
   gubun: "갯바위" | "선상" = "갯바위",
   date?: string,
+  locationCode?: string,
 ): Promise<FishingIndexData | null> {
-  const location = findNearestFishingLocation(lat, lng);
+  const location = locationCode
+    ? (getLocationByCode(locationCode) ?? findNearestFishingLocation(lat, lng))
+    : findNearestFishingLocation(lat, lng);
   const reqDate =
     date || new Date().toISOString().split("T")[0].replace(/-/g, "");
 

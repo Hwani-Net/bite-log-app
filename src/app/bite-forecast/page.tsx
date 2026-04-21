@@ -29,6 +29,9 @@ import {
   fetchFishingIndex,
   FishingIndexData,
   FISHING_GRADE_CONFIG,
+  REGIONS,
+  FishingRegion,
+  getLocationsByRegion,
 } from "@/services/fishingIndexService";
 import {
   fetchBiteIndexWithMeta,
@@ -568,16 +571,14 @@ function FishingTips({ biteTime }: { biteTime: BiteTimePrediction }) {
   );
 }
 
-// ─── Fishing Index Section (KHOA 바다낚시지수) ────────────────────────────────
-function FishingIndexSection({ data }: { data: FishingIndexData }) {
-  // Group by timePeriod → show morning + afternoon side-by-side
+// ─── Fishing Index Card (내부 표시용) ────────────────────────────────────────
+function FishingIndexCard({ data }: { data: FishingIndexData }) {
   const grouped: Record<string, typeof data.spots> = {};
   for (const s of data.spots) {
     grouped[s.timePeriod] = grouped[s.timePeriod] || [];
     grouped[s.timePeriod].push(s);
   }
 
-  // Best overall grade (from all spots)
   const allGrades = data.spots.map((s) => s.totalIndex);
   const gradeScores = allGrades.map(
     (g) => FISHING_GRADE_CONFIG[g]?.score ?? 50,
@@ -587,27 +588,14 @@ function FishingIndexSection({ data }: { data: FishingIndexData }) {
     "보통";
   const gradeConf = FISHING_GRADE_CONFIG[bestGrade];
 
-  // Unique species
   const species = [...new Set(data.spots.map((s) => s.targetFish))].filter(
     (s) => s && s !== "미상",
   );
 
-  // Representative conditions from first spot
   const rep = data.spots[0];
 
   return (
-    <div className="glass-morphism rounded-2xl border border-white/5 p-4 space-y-3">
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <DynamicIcon name="waves" size={16} className="text-[#7dd3fc]" />
-        <h3 className="text-sm font-bold text-white uppercase tracking-[0.15em]">
-          바다낚시지수
-        </h3>
-        <span className="text-[10px] text-white/50 ml-auto">
-          {data.location}
-        </span>
-      </div>
-
+    <div className="space-y-3">
       {/* Grade banner */}
       <div
         className="flex items-center gap-3 rounded-xl px-4 py-3 border"
@@ -719,6 +707,188 @@ function FishingIndexSection({ data }: { data: FishingIndexData }) {
               </p>
             </div>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Fishing Index Section (KHOA 바다낚시지수 + 지역 탭) ──────────────────────
+function FishingIndexSection({
+  initialLat,
+  initialLng,
+}: {
+  initialLat: number;
+  initialLng: number;
+}) {
+  const [selectedRegion, setSelectedRegion] = useState<FishingRegion>("서해");
+  const [selectedLocationCode, setSelectedLocationCode] = useState<string>(
+    () => getLocationsByRegion("서해")[0]?.code ?? "",
+  );
+  const [gubun, setGubun] = useState<"갯바위" | "선상">("갯바위");
+  // undefined = 아직 로딩 중, null = 로드 완료(데이터 없음), FishingIndexData = 데이터 있음
+  const [data, setData] = useState<FishingIndexData | null | undefined>(
+    undefined,
+  );
+
+  const locationsByRegion = getLocationsByRegion(selectedRegion);
+
+  // 지역 탭 변경 시 첫 번째 location 자동 선택
+  function handleRegionChange(region: FishingRegion) {
+    setSelectedRegion(region);
+    const first = getLocationsByRegion(region)[0];
+    if (first) setSelectedLocationCode(first.code);
+  }
+
+  useEffect(() => {
+    if (!selectedLocationCode) return;
+    let cancelled = false;
+    fetchFishingIndex(
+      initialLat,
+      initialLng,
+      gubun,
+      undefined,
+      selectedLocationCode,
+    )
+      .then((res) => {
+        if (cancelled) return;
+        setData(res ?? null);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error("[FishingIndexSection] fetch failed:", err);
+        setData(null);
+      });
+    // 새 쿼리 시작 시 undefined로 리셋 (로딩 상태)
+    return () => {
+      cancelled = true;
+      setData(undefined);
+    };
+  }, [selectedLocationCode, gubun, initialLat, initialLng]);
+
+  const regionColors: Record<FishingRegion, string> = {
+    서해: "#7dd3fc",
+    남해: "#4ade80",
+    동해: "#c9a84c",
+    제주: "#f472b6",
+  };
+  const activeColor = regionColors[selectedRegion];
+
+  return (
+    <div className="glass-morphism rounded-2xl border border-white/5 p-4 space-y-3">
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <DynamicIcon name="waves" size={16} className="text-[#7dd3fc]" />
+        <h3 className="text-sm font-bold text-white uppercase tracking-[0.15em]">
+          바다낚시지수
+        </h3>
+        <span className="text-[9px] bg-white/10 border border-white/10 text-white/50 px-1.5 py-0.5 rounded font-bold ml-1">
+          KHOA
+        </span>
+      </div>
+
+      {/* Region tabs: 서해 / 남해 / 동해 / 제주 */}
+      <div className="flex gap-1.5">
+        {REGIONS.map((region) => {
+          const color = regionColors[region];
+          const active = selectedRegion === region;
+          return (
+            <button
+              key={region}
+              type="button"
+              onClick={() => handleRegionChange(region)}
+              className="flex-1 py-1.5 rounded-xl text-[11px] font-bold transition-colors"
+              style={
+                active
+                  ? {
+                      backgroundColor: `${color}20`,
+                      border: `1px solid ${color}50`,
+                      color,
+                    }
+                  : {
+                      backgroundColor: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      color: "rgba(255,255,255,0.45)",
+                    }
+              }
+            >
+              {region}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Location selector within region */}
+      <div className="flex flex-wrap gap-1.5">
+        {locationsByRegion.map((loc) => {
+          const active = selectedLocationCode === loc.code;
+          return (
+            <button
+              key={loc.code}
+              type="button"
+              onClick={() => setSelectedLocationCode(loc.code)}
+              className="px-2.5 py-1 rounded-full text-[10px] font-bold transition-colors"
+              style={
+                active
+                  ? {
+                      backgroundColor: `${activeColor}20`,
+                      border: `1px solid ${activeColor}40`,
+                      color: activeColor,
+                    }
+                  : {
+                      backgroundColor: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      color: "rgba(255,255,255,0.45)",
+                    }
+              }
+            >
+              {loc.name}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Gubun toggle: 갯바위 / 선상 */}
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setGubun("갯바위")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors ${
+            gubun === "갯바위"
+              ? "bg-[#c9a84c]/20 border border-[#c9a84c]/40 text-[#c9a84c]"
+              : "bg-white/5 border border-white/10 text-white/60"
+          }`}
+        >
+          <Anchor size={12} />
+          갯바위
+        </button>
+        <button
+          type="button"
+          onClick={() => setGubun("선상")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors ${
+            gubun === "선상"
+              ? "bg-[#7dd3fc]/20 border border-[#7dd3fc]/40 text-[#7dd3fc]"
+              : "bg-white/5 border border-white/10 text-white/60"
+          }`}
+        >
+          <Ship size={12} />
+          선상
+        </button>
+      </div>
+
+      {/* Content */}
+      {data === undefined ? (
+        <div className="space-y-2">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="h-10 bg-white/5 rounded-xl animate-pulse" />
+          ))}
+        </div>
+      ) : data && data.spots.length > 0 ? (
+        <FishingIndexCard data={data} />
+      ) : (
+        <div className="flex flex-col items-center gap-2 py-6">
+          <DynamicIcon name="waves" size={24} className="text-white/20" />
+          <p className="text-xs text-white/40">데이터 수신 중</p>
         </div>
       )}
 
@@ -882,9 +1052,10 @@ export default function BiteForecastPage() {
   const [tideData, setTideData] = useState<TideData | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [marine, setMarine] = useState<MarineData | null>(null);
-  const [fishingIndex, setFishingIndex] = useState<FishingIndexData | null>(
-    null,
-  );
+  const [coords, setCoords] = useState<{ lat: number; lng: number }>({
+    lat: 33.4996,
+    lng: 126.5312,
+  });
   const [loading, setLoading] = useState(true);
   const [locationResolved, setLocationResolved] = useState(false);
   const [locationName, setLocationName] = useState("현재 위치");
@@ -909,20 +1080,19 @@ export default function BiteForecastPage() {
       }
 
       // Use allSettled so a single slow/failing API does not block the rest.
-      const [wRes, tRes, mRes, fiRes] = await Promise.allSettled([
+      const [wRes, tRes, mRes] = await Promise.allSettled([
         fetchWeather(lat, lng),
         fetchTideData(lat, lng),
         fetchMarineData(lat, lng),
-        fetchFishingIndex(lat, lng),
       ]);
       const w = wRes.status === "fulfilled" ? wRes.value : null;
       const t = tRes.status === "fulfilled" ? tRes.value : null;
       const m = mRes.status === "fulfilled" ? mRes.value : null;
-      const fi = fiRes.status === "fulfilled" ? fiRes.value : null;
+      // Store resolved coords so FishingIndexSection can query by region
+      setCoords({ lat, lng });
       setWeather(w);
       setTideData(t);
       setMarine(m);
-      setFishingIndex(fi);
       setBiteTime(calculateBiteTime(w, t, m));
       if (!isFallback && t) {
         setLocationName(t.stationName || "현재 위치");
@@ -1212,8 +1382,11 @@ export default function BiteForecastPage() {
           </div>
 
           {/* ── KHOA 바다낚시지수 ── */}
-          {fishingIndex && fishingIndex.spots.length > 0 && (
-            <FishingIndexSection data={fishingIndex} />
+          {true && (
+            <FishingIndexSection
+              initialLat={coords.lat}
+              initialLng={coords.lng}
+            />
           )}
 
           {/* ── Tide Timeline ── */}
