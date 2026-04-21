@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import {
   Search,
@@ -10,6 +10,7 @@ import {
   X,
   ChevronRight,
   Send,
+  BookOpen,
 } from "lucide-react";
 import {
   FISH_DEX_DB,
@@ -187,6 +188,12 @@ function ReportForm({
   );
 }
 
+interface LiveDialect {
+  word: string;
+  region: string;
+  definition: string;
+}
+
 function DetailSheet({
   entry,
   onClose,
@@ -195,6 +202,33 @@ function DetailSheet({
   onClose: () => void;
 }) {
   const [showReportForm, setShowReportForm] = useState(false);
+  const [liveDialects, setLiveDialects] = useState<LiveDialect[]>([]);
+  const [liveLoading, setLiveLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchLive() {
+      setLiveLoading(true);
+      setLiveDialects([]);
+      try {
+        const r = await fetch(
+          `/api/fishdex-dialect?q=${encodeURIComponent(entry.name)}`,
+        );
+        const data = r.ok ? await r.json() : null;
+        if (!cancelled && data?.ok && Array.isArray(data.dialects)) {
+          setLiveDialects(data.dialects);
+        }
+      } catch (err) {
+        console.error("[FishDex] 우리말샘 API 오류:", err);
+      } finally {
+        if (!cancelled) setLiveLoading(false);
+      }
+    }
+    fetchLive();
+    return () => {
+      cancelled = true;
+    };
+  }, [entry.name]);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
@@ -277,6 +311,37 @@ function DetailSheet({
               ))}
             </div>
           </div>
+
+          {/* 우리말샘 실시간 조회 결과 */}
+          {(liveLoading || liveDialects.length > 0) && (
+            <div className="bg-white/5 rounded-xl p-3">
+              <div className="flex items-center gap-1.5 mb-2">
+                <BookOpen size={11} className="text-[#c9a84c]" />
+                <p className="text-[10px] text-[#c9a84c] font-semibold">
+                  우리말샘 공식 검색 결과
+                </p>
+              </div>
+              {liveLoading ? (
+                <div className="flex gap-1.5">
+                  <div className="h-5 w-20 rounded-full bg-white/10 animate-pulse" />
+                  <div className="h-5 w-16 rounded-full bg-white/10 animate-pulse" />
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-1.5">
+                  {liveDialects.map((d, i) => (
+                    <span
+                      key={i}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#c9a84c]/10 border border-[#c9a84c]/30 text-[#c9a84c] text-[10px] font-medium"
+                      title={d.definition}
+                    >
+                      <BookOpen size={8} className="shrink-0" />
+                      {d.region}: {d.word}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {showReportForm ? (
             <ReportForm

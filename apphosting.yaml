@@ -39,3 +39,9 @@ env:
 
   - variable: BITE_INDEX_API_KEY
     secret: BITE_INDEX_API_KEY
+
+  - variable: URIMALS_API_KEY
+    secret: URIMALS_API_KEY
+
+  - variable: CATCH_VALUE_API_KEY
+    secret: CATCH_VALUE_API_KEY
