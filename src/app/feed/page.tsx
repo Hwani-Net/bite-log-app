@@ -215,7 +215,7 @@ export default function FeedPage() {
         )}
       </header>
 
-      <main className="max-w-lg mx-auto px-4 py-4 space-y-4">
+      <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
         {/* Loading skeleton */}
         {loading && (
           <div className="space-y-4">
@@ -427,7 +427,7 @@ export default function FeedPage() {
             </article>
           );
         })}
-      </main>
+      </div>
     </div>
   );
 }

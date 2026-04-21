@@ -266,7 +266,7 @@ export default function SeasonForecastPage() {
   const isKo = locale === "ko";
 
   return (
-    <main className="mx-auto max-w-md min-h-screen bg-[#080d14] pb-24">
+    <div className="mx-auto max-w-md min-h-screen bg-[#080d14] pb-24">
       {/* Header */}
       <header className="sticky top-0 z-30 bg-[#080d14]/60 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-lg mx-auto px-4 py-3">
@@ -345,6 +345,6 @@ export default function SeasonForecastPage() {
       </div>
 
       <BottomNav />
-    </main>
+    </div>
   );
 }

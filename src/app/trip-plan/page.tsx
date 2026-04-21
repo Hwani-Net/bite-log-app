@@ -243,7 +243,7 @@ export default function TripPlanPage() {
         </div>
       </header>
 
-      <main className="flex-1 px-5 mt-4 space-y-4">
+      <div className="flex-1 px-5 mt-4 space-y-4">
         {/* ── 출조 계획 입력 ── */}
         <section className="rounded-2xl bg-white/5 backdrop-blur-[12px] border border-white/10 p-5 space-y-4">
           <h2 className="text-base font-bold text-white flex items-center gap-2">
@@ -667,7 +667,7 @@ export default function TripPlanPage() {
             </section>
           </>
         )}
-      </main>
+      </div>
     </div>
   );
 }

@@ -31,6 +31,7 @@ import SeasonAlertBanner from "@/components/SeasonAlertBanner";
 import MonthlyFishCard from "@/components/MonthlyFishCard";
 import MonthlySummaryCard from "@/components/MonthlySummaryCard";
 import DailyFishingTip from "@/components/DailyFishingTip";
+import { DynamicIcon } from "@/lib/iconMap";
 
 // Fish species default image/color mapping
 const FISH_COLORS: Record<string, { gradient: string }> = {
@@ -594,7 +595,7 @@ export default function HomePage() {
       </header>
 
       {/* ── Main Content ── */}
-      <main className="pt-14 pb-32 w-full max-w-[412px] mx-auto min-h-screen relative">
+      <div className="pt-14 pb-32 w-full max-w-[412px] mx-auto min-h-screen relative">
         {/* Precision Index Gauge */}
         <PrecisionGauge biteTime={biteTime} loading={biteLoading} />
 
@@ -677,8 +678,46 @@ export default function HomePage() {
 
           {/* Windy 출항 날씨 */}
           <WindySection />
+
+          {/* Quick Menu — orphan routes */}
+          <section className="rounded-2xl bg-white/5 border border-white/10 p-4">
+            <h2 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3">
+              더보기
+            </h2>
+            <div className="grid grid-cols-3 gap-2">
+              {(
+                [
+                  { href: "/stats", icon: "bar_chart", label: "낚시 통계" },
+                  {
+                    href: "/season-forecast",
+                    icon: "calendar_month",
+                    label: "시즌 예보",
+                  },
+                  { href: "/feed", icon: "rss_feed", label: "조황 피드" },
+                  { href: "/fleet-radar", icon: "radar", label: "함대 레이더" },
+                  { href: "/settings", icon: "settings", label: "설정" },
+                  { href: "/live-dashboard", icon: "sensors", label: "라이브" },
+                ] as { href: string; icon: string; label: string }[]
+              ).map(({ href, icon, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="flex flex-col items-center gap-1.5 py-3 rounded-xl bg-white/5 border border-white/10 hover:border-[#c9a84c]/30 hover:bg-white/[0.08] transition-all active:scale-95"
+                >
+                  <DynamicIcon
+                    name={icon}
+                    size={20}
+                    className="text-[#c9a84c]"
+                  />
+                  <span className="text-[10px] text-white/60 font-medium text-center leading-tight">
+                    {label}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
         </div>
-      </main>
+      </div>
 
       {/* ── FAB — glass circle ── */}
       <Link

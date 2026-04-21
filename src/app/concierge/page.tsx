@@ -224,7 +224,7 @@ export default function ConciergePage() {
         </div>
       </header>
 
-      <main
+      <div
         className={`flex-1 px-5 pt-5 ${activeTab === "chat" ? "pb-20 flex flex-col" : "pb-20"}`}
         style={
           activeTab === "chat" ? { height: "calc(100dvh - 175px)" } : undefined
@@ -257,7 +257,7 @@ export default function ConciergePage() {
         {activeTab === "gear" && (
           <GearTab locale={locale} recommendedGear={affiliateGear} />
         )}
-      </main>
+      </div>
 
       {/* Floating Action Buttons — hidden in chat tab */}
       {activeTab !== "chat" && (

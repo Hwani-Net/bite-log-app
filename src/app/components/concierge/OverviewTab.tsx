@@ -102,7 +102,13 @@ export default function OverviewTab({
         </h3>
         {loading ? (
           <div className="bg-white/5 rounded-2xl p-4 border border-white/10 animate-pulse h-32" />
-        ) : recommendation ? (
+        ) : !recommendation ? (
+          <p className="text-xs text-white/40 text-center py-4">
+            {locale === "ko"
+              ? "추천 데이터를 불러오는 중입니다..."
+              : "Loading recommendation..."}
+          </p>
+        ) : (
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 transition-all duration-300 hover:bg-white/[0.07] hover:-translate-y-1">
             <div className="flex gap-4">
               <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary/10 to-cyan-400/10 flex items-center justify-center overflow-hidden shrink-0 border border-primary/10">
@@ -185,7 +191,7 @@ export default function OverviewTab({
               </div>
             )}
           </div>
-        ) : null}
+        )}
       </section>
 
       {/* Secret Hotspot Section */}
