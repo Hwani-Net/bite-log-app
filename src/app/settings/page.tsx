@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAppStore } from "@/store/appStore";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
@@ -17,39 +17,49 @@ import {
 } from "lucide-react";
 
 const NOTIF_KEYS = {
-  bite: "biteLog_notif_bite",
-  community: "biteLog_notif_community",
-  weather: "biteLog_notif_weather",
+  biteTimeAlert: "biteLog_notif_biteTime",
+  newsAlert: "biteLog_notif_news",
+  badgeAlert: "biteLog_notif_badge",
 } as const;
 
 export default function SettingsPage() {
   const { t, theme, setTheme, locale, setLocale } = useAppStore();
   const { user, isLoggedIn, signInWithGoogle, signOut, loading } = useAuth();
 
-  const [notifBite, setNotifBite] = useState(true);
-  const [notifCommunity, setNotifCommunity] = useState(true);
-  const [notifWeather, setNotifWeather] = useState(true);
-
-  useEffect(() => {
-    setNotifBite(localStorage.getItem(NOTIF_KEYS.bite) !== "false");
-    setNotifCommunity(localStorage.getItem(NOTIF_KEYS.community) !== "false");
-    setNotifWeather(localStorage.getItem(NOTIF_KEYS.weather) !== "false");
-  }, []);
+  const [notifBiteTime, setNotifBiteTime] = useState(
+    () =>
+      typeof window === "undefined" ||
+      localStorage.getItem(NOTIF_KEYS.biteTimeAlert) !== "false",
+  );
+  const [notifNews, setNotifNews] = useState(
+    () =>
+      typeof window === "undefined" ||
+      localStorage.getItem(NOTIF_KEYS.newsAlert) !== "false",
+  );
+  const [notifBadge, setNotifBadge] = useState(
+    () =>
+      typeof window === "undefined" ||
+      localStorage.getItem(NOTIF_KEYS.badgeAlert) !== "false",
+  );
 
   const notifStates: Record<
     string,
     { value: boolean; setter: (v: boolean) => void; key: string }
   > = {
-    biteAlert: { value: notifBite, setter: setNotifBite, key: NOTIF_KEYS.bite },
-    communityAlert: {
-      value: notifCommunity,
-      setter: setNotifCommunity,
-      key: NOTIF_KEYS.community,
+    biteTimeAlert: {
+      value: notifBiteTime,
+      setter: setNotifBiteTime,
+      key: NOTIF_KEYS.biteTimeAlert,
     },
     newsAlert: {
-      value: notifWeather,
-      setter: setNotifWeather,
-      key: NOTIF_KEYS.weather,
+      value: notifNews,
+      setter: setNotifNews,
+      key: NOTIF_KEYS.newsAlert,
+    },
+    badgeAlert: {
+      value: notifBadge,
+      setter: setNotifBadge,
+      key: NOTIF_KEYS.badgeAlert,
     },
   };
 
