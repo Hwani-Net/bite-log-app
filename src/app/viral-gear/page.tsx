@@ -68,7 +68,7 @@ function TrendIcon({ icon, className }: { icon: string; className?: string }) {
 
 function TrendBar({ score }: { score: number }) {
   return (
-    <div className="w-full bg-gray-100 rounded-full h-1.5 mt-2">
+    <div className="w-full bg-white/10 rounded-full h-1.5 mt-2">
       <div
         className="h-1.5 rounded-full bg-gradient-to-r from-sky-400 to-cyan-300 transition-all duration-700"
         style={{ width: `${score}%` }}
@@ -83,13 +83,13 @@ function GearCard({ item, locale }: { item: ViralGearItem; locale: string }) {
     "bg-amber-400",
     "bg-gray-300",
     "bg-amber-600",
-    "bg-gray-200",
-    "bg-gray-200",
+    "bg-white/20",
+    "bg-white/20",
   ];
-  const rankColor = rankColors[item.rank - 1] ?? "bg-gray-100";
+  const rankColor = rankColors[item.rank - 1] ?? "bg-white/10";
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+    <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
       {/* Rank + Name */}
       <div className="flex items-start gap-3">
         <span
@@ -99,7 +99,7 @@ function GearCard({ item, locale }: { item: ViralGearItem; locale: string }) {
         </span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-sm font-bold text-gray-900 truncate">
+            <h3 className="text-sm font-bold text-white truncate">
               {item.gearName}
             </h3>
             <span
@@ -110,17 +110,17 @@ function GearCard({ item, locale }: { item: ViralGearItem; locale: string }) {
             </span>
           </div>
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+            <span className="text-xs text-white/50 bg-white/10 px-2 py-0.5 rounded-full">
               {item.category}
             </span>
-            <span className="text-xs text-sky-600 font-medium">
+            <span className="text-xs text-[#c9a84c] font-medium">
               {item.species}
             </span>
           </div>
         </div>
         <div className="text-right flex-shrink-0">
-          <p className="text-lg font-black text-sky-600">{item.viralScore}</p>
-          <p className="text-[10px] text-gray-400">바이럴 점수</p>
+          <p className="text-lg font-black text-[#c9a84c]">{item.viralScore}</p>
+          <p className="text-[10px] text-white/40">바이럴 점수</p>
         </div>
       </div>
 
@@ -128,13 +128,13 @@ function GearCard({ item, locale }: { item: ViralGearItem; locale: string }) {
       <TrendBar score={item.viralScore} />
 
       {/* Summary */}
-      <p className="text-xs text-gray-600 leading-relaxed">
+      <p className="text-xs text-white/60 leading-relaxed">
         {item.summaryText}
       </p>
 
       {/* Mention count + CTA */}
       <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-400">
+        <span className="text-xs text-white/40">
           {item.mentionCount}
           {L.mentionCount}
         </span>
@@ -142,7 +142,7 @@ function GearCard({ item, locale }: { item: ViralGearItem; locale: string }) {
           href={item.coupangSearchUrl}
           target="_blank"
           rel="noopener noreferrer sponsored"
-          className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-amber-100 transition-colors"
+          className="flex items-center gap-1.5 bg-[#c9a84c]/10 border border-[#c9a84c]/30 text-[#c9a84c] text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-[#c9a84c]/20 transition-colors"
         >
           <ShoppingCart size={14} />
           {L.buy}
@@ -159,15 +159,18 @@ export default function ViralGearPage() {
   const [report, setReport] = useState<ViralGearReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastFetch, setLastFetch] = useState<number>(0);
+  const [fetchError, setFetchError] = useState(false);
 
   const fetchReport = async () => {
     setLoading(true);
+    setFetchError(false);
     try {
       const result = await getViralGearReport();
       setReport(result);
       setLastFetch(Date.now());
-    } catch {
-      // silently fail — mock always works
+    } catch (err) {
+      console.error("[viral-gear]", err);
+      setFetchError(true);
     } finally {
       setLoading(false);
     }
@@ -180,25 +183,25 @@ export default function ViralGearPage() {
   const canRefresh = Date.now() - lastFetch > 60_000; // 1분 쿨다운
 
   return (
-    <div className="min-h-dvh min-h-screen bg-gradient-to-b from-orange-50 to-white pb-24">
+    <div className="min-h-dvh min-h-screen bg-[#080d14] pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-sm border-b border-gray-100">
+      <div className="sticky top-0 z-10 bg-[#080d14]/90 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center gap-3">
           <Link
             href="/"
-            className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-xl hover:bg-white/10 transition-colors"
           >
-            <ArrowLeft size={20} className="text-gray-600" />
+            <ArrowLeft size={20} className="text-white/70" />
           </Link>
           <div className="flex-1">
-            <h1 className="text-base font-bold text-gray-900">{L.title}</h1>
-            <p className="text-xs text-gray-500">{L.subtitle}</p>
+            <h1 className="text-base font-bold text-white">{L.title}</h1>
+            <p className="text-xs text-white/50">{L.subtitle}</p>
           </div>
           <button
             id="viral-refresh-btn"
             onClick={fetchReport}
             disabled={loading || !canRefresh}
-            className="flex items-center gap-1.5 text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-xl disabled:opacity-40 hover:bg-sky-100 transition-colors"
+            className="flex items-center gap-1.5 text-xs font-semibold text-[#c9a84c] bg-[#c9a84c]/10 px-3 py-1.5 rounded-xl disabled:opacity-40 hover:bg-[#c9a84c]/20 transition-colors"
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
             {loading ? L.loading : L.refresh}
@@ -207,6 +210,13 @@ export default function ViralGearPage() {
       </div>
 
       <div className="max-w-lg mx-auto px-4 py-5 space-y-4">
+        {/* Error state */}
+        {fetchError && !loading && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 text-center text-sm text-red-400">
+            데이터를 불러올 수 없습니다. 새로고침해 주세요.
+          </div>
+        )}
+
         {/* Summary Strip */}
         {report && !loading && (
           <div className="bg-gradient-to-r from-orange-500 to-amber-400 rounded-2xl p-4 text-white">
@@ -246,17 +256,17 @@ export default function ViralGearPage() {
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="bg-white rounded-2xl border border-gray-100 p-4 animate-pulse space-y-3"
+                className="bg-white/5 border border-white/10 rounded-2xl p-4 animate-pulse space-y-3"
               >
                 <div className="flex gap-3">
-                  <div className="w-7 h-7 rounded-full bg-gray-200" />
+                  <div className="w-7 h-7 rounded-full bg-white/10" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-3/4" />
-                    <div className="h-3 bg-gray-200 rounded w-1/2" />
+                    <div className="h-4 bg-white/10 rounded w-3/4" />
+                    <div className="h-3 bg-white/10 rounded w-1/2" />
                   </div>
                 </div>
-                <div className="h-2 bg-gray-100 rounded-full" />
-                <div className="h-8 bg-gray-100 rounded" />
+                <div className="h-2 bg-white/5 rounded-full" />
+                <div className="h-8 bg-white/5 rounded" />
               </div>
             ))}
           </div>
@@ -273,7 +283,7 @@ export default function ViralGearPage() {
 
         {/* Affiliate Disclaimer */}
         {!loading && report && (
-          <p className="text-[10px] text-gray-400 text-center px-4 leading-relaxed">
+          <p className="text-[10px] text-white/30 text-center px-4 leading-relaxed">
             {L.disclaimer}
           </p>
         )}

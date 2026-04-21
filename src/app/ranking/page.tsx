@@ -444,10 +444,10 @@ export default function RankingPage() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold truncate">
+              <p className="text-[13px] font-bold truncate">
                 {user.displayName || data.myRank.user.displayName}
               </p>
-              <p className="text-[11px] opacity-70">
+              <p className="text-[11px] opacity-70 truncate">
                 {data.myRank.rank <= 3
                   ? locale === "ko"
                     ? "TOP 3!"

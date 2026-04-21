@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useAppStore } from "@/store/appStore";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
@@ -15,9 +16,42 @@ import {
   Heart,
 } from "lucide-react";
 
+const NOTIF_KEYS = {
+  bite: "biteLog_notif_bite",
+  community: "biteLog_notif_community",
+  weather: "biteLog_notif_weather",
+} as const;
+
 export default function SettingsPage() {
   const { t, theme, setTheme, locale, setLocale } = useAppStore();
   const { user, isLoggedIn, signInWithGoogle, signOut, loading } = useAuth();
+
+  const [notifBite, setNotifBite] = useState(true);
+  const [notifCommunity, setNotifCommunity] = useState(true);
+  const [notifWeather, setNotifWeather] = useState(true);
+
+  useEffect(() => {
+    setNotifBite(localStorage.getItem(NOTIF_KEYS.bite) !== "false");
+    setNotifCommunity(localStorage.getItem(NOTIF_KEYS.community) !== "false");
+    setNotifWeather(localStorage.getItem(NOTIF_KEYS.weather) !== "false");
+  }, []);
+
+  const notifStates: Record<
+    string,
+    { value: boolean; setter: (v: boolean) => void; key: string }
+  > = {
+    biteAlert: { value: notifBite, setter: setNotifBite, key: NOTIF_KEYS.bite },
+    communityAlert: {
+      value: notifCommunity,
+      setter: setNotifCommunity,
+      key: NOTIF_KEYS.community,
+    },
+    newsAlert: {
+      value: notifWeather,
+      setter: setNotifWeather,
+      key: NOTIF_KEYS.weather,
+    },
+  };
 
   const themes = [
     {
@@ -252,10 +286,15 @@ export default function SettingsPage() {
                 </span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <span className="sr-only">{item.label}</span>
-                  {/* @mock-data — 알림 토글 UI 전용. 실제 알림 구독 로직 미구현 */}
                   <input
                     type="checkbox"
-                    defaultChecked
+                    checked={notifStates[item.key]?.value ?? true}
+                    onChange={(e) => {
+                      const s = notifStates[item.key];
+                      if (!s) return;
+                      s.setter(e.target.checked);
+                      localStorage.setItem(s.key, String(e.target.checked));
+                    }}
                     className="sr-only peer"
                   />
                   <div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#c9a84c]" />
