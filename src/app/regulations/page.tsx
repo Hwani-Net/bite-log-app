@@ -17,6 +17,7 @@ import {
   AlertTriangle,
   Fish,
   BookOpen,
+  TrendingUp,
 } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
@@ -433,6 +434,25 @@ export default function RegulationsPage() {
             </p>
             <p className="text-xs text-white/50 mt-0.5">
               방언·지역명으로 어종 검색
+            </p>
+          </div>
+          <ChevronRight size={16} className="text-white/30 shrink-0" />
+        </Link>
+
+        {/* Catch Value link card */}
+        <Link
+          href="/catch-value"
+          className="flex items-center gap-3 bg-surface rounded-2xl p-4 mb-4 hover:bg-white/5 transition-colors"
+        >
+          <div className="w-10 h-10 rounded-xl bg-[#c9a84c]/20 flex items-center justify-center">
+            <TrendingUp size={20} className="text-[#c9a84c]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-white text-sm">
+              수산물 시세 (Catch Value)
+            </p>
+            <p className="text-xs text-white/50 mt-0.5">
+              수협 위판 실시간 시세 확인
             </p>
           </div>
           <ChevronRight size={16} className="text-white/30 shrink-0" />
