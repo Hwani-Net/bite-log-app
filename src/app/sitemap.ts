@@ -8,11 +8,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       path: "/bite-forecast",
       changeFrequency: "daily" as const,
-      priority: 0.9 },
+      priority: 0.9,
+    },
     { path: "/record", changeFrequency: "weekly" as const, priority: 0.8 },
     { path: "/records", changeFrequency: "daily" as const, priority: 0.8 },
     { path: "/stats", changeFrequency: "weekly" as const, priority: 0.7 },
-    { path: "/fleet-radar", changeFrequency: "daily" as const, priority: 0.8 },
     { path: "/concierge", changeFrequency: "weekly" as const, priority: 0.7 },
     { path: "/ranking", changeFrequency: "daily" as const, priority: 0.7 },
     { path: "/news", changeFrequency: "daily" as const, priority: 0.7 },
@@ -20,11 +20,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       path: "/season-forecast",
       changeFrequency: "monthly" as const,
-      priority: 0.6 },
+      priority: 0.6,
+    },
     {
       path: "/regulations",
       changeFrequency: "monthly" as const,
-      priority: 0.6 },
+      priority: 0.6,
+    },
     { path: "/booking", changeFrequency: "weekly" as const, priority: 0.5 },
     { path: "/settings", changeFrequency: "monthly" as const, priority: 0.3 },
     { path: "/privacy", changeFrequency: "yearly" as const, priority: 0.1 },
@@ -35,5 +37,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     url: `${BASE_URL}${route.path}`,
     lastModified: new Date(),
     changeFrequency: route.changeFrequency,
-    priority: route.priority }));
+    priority: route.priority,
+  }));
 }

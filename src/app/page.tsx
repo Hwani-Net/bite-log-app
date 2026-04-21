@@ -25,7 +25,6 @@ import {
   Newspaper,
   Users,
   PenLine,
-  Radar,
   Trophy,
   CalendarDays,
   Map,
@@ -621,13 +620,6 @@ export default function HomePage() {
               출항 날씨
             </a>
             <Link
-              href="/fleet-radar"
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white/60 hover:border-[#c9a84c]/30 transition-all"
-            >
-              <Radar size={14} className="text-[#c9a84c]" />
-              선단 레이더
-            </Link>
-            <Link
               href="/ranking"
               className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white/60 hover:border-[#c9a84c]/30 transition-all"
             >
@@ -718,7 +710,6 @@ export default function HomePage() {
                     label: "시즌 예보",
                   },
                   { href: "/feed", icon: "rss_feed", label: "조황 피드" },
-                  { href: "/fleet-radar", icon: "radar", label: "함대 레이더" },
                   { href: "/settings", icon: "settings", label: "설정" },
                   { href: "/live-dashboard", icon: "sensors", label: "라이브" },
                   {

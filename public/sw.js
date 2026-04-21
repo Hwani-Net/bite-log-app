@@ -16,7 +16,6 @@ const STATIC_PAGES = [
   "/settings",
   "/bite-forecast",
   "/concierge",
-  "/fleet-radar",
   "/news",
   "/regulations",
   "/season-forecast",

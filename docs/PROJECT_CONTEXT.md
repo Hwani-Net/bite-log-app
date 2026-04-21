@@ -106,69 +106,10 @@
 
 ---
 
-## 🛳️ API 엔드포인트: `/api/fleet`
+## 🛳️ API 엔드포인트: `/api/fleet` — 제거됨 (2026-04-21)
 
-> **파일**: `src/app/api/fleet/route.ts` | `export const dynamic = 'force-dynamic'`
-
-### 개요
-ODCloud AIS 동적·정적 데이터를 MMSI 기준으로 조인하여 선박 위치·톤수 통합 JSON을 반환하는 서버 사이드 프록시.
-
-### 데이터 소스 (3-tier fallback)
-
-| 순위 | 소스 | 엔드포인트 | 환경 변수 |
-|------|------|-----------|----------|
-| Primary (동적) | ODCloud 선박AIS동적정보 | `api.odcloud.kr/api/15129186/v1/uddi:2762dfc8-b8ae-4e17-8a44-86f39f480203` | `FLEET_API_KEY` |
-| Primary (정적) | data.go.kr VesselAisStatic | `apis.data.go.kr/1192000/VesselAisStatic/getStatic` | `FLEET_API_KEY` |
-| Fallback | KHOA OceanGrid 실시간 선박위치 | `www.khoa.go.kr/api/oceangrid/tsrtShipPos/search.do` | `NEXT_PUBLIC_KHOA_API_KEY` |
-| Mock | 빈 배열 (FLEET_USE_MOCK=true) | — | `FLEET_USE_MOCK` |
-
-### GET 파라미터
-
-| 파라미터 | 타입 | 설명 | 예시 |
-|---------|------|------|------|
-| `size` | `'small' \| 'large'` (선택) | 톤수 분류 필터. `TONNAGE_THRESHOLD`(기본 3GT) 미만=small | `?size=small` |
-| `minTonnage` | 숫자 문자열 (선택) | 최소 총톤수 필터 | `?minTonnage=5` |
-| `maxTonnage` | 숫자 문자열 (선택) | 최대 총톤수 필터 | `?maxTonnage=10` |
-
-### 응답 스키마
-
-```jsonc
-{
-  "ok": true,
-  "data": [
-    {
-      "mmsi": "440123456",
-      "lat": 34.52,
-      "lon": 126.58,
-      "speed": 1.2,       // knots
-      "course": 270,      // degrees
-      "timestamp": "2026-03-15T06:00:00Z",
-      "shipName": "행복호",
-      "shipType": "fishing",
-      "tonnage": 2.5,     // gross tonnage
-      "length": 9.8,      // metres
-      "sizeClass": "small" // < TONNAGE_THRESHOLD → small, ≥ → large
-    }
-  ],
-  "count": 1,
-  "timestamp": "2026-03-15T06:00:01Z",
-  "mock": false,          // true = 외부 API 전부 실패, 빈 배열 반환
-  "dataSource": "primary" // "primary" | "khoa" | "mock"
-}
-```
-
-### 에러 응답
-
-| HTTP | 조건 | 응답 |
-|------|------|------|
-| 400 | 쿼리 파라미터 유효성 실패 | `{ "ok": false, "error": "<Zod 메시지>" }` |
-| 500 | 핸들러 미처리 예외 | `{ "ok": false, "error": "Internal server error", "mock": true, "data": [], "count": 0 }` |
-
-### 주요 구현 메모
-- **serviceKey 이중 인코딩 방지**: `URLSearchParams.set()` 대신 template string 직접 삽입 (`buildOdcloudUrl`)
-- **좌표 정규화**: raw 값 > 1000 이면 ÷ 600000 → 도 단위 변환 (`normalizeCoord`)
-- **MMSI 마스킹 감지**: ODCloud가 `"440******"` 형식으로 반환하면 경고 로그 후 fallback
-- **톤수 임계값**: 환경 변수 `TONNAGE_THRESHOLD`(기본값 3)로 재정의 가능
+> Fleet Radar 기능 폐기. 한국 낚시배 실시간 위치 공공 데이터 부재로 가치 없음.
+> 관련 결정 근거와 구 구현 내용은 `docs/archived/PRD-fleet-radar.md` 및 git history 참조.
 
 ---
 
@@ -268,12 +209,12 @@ ODCloud AIS 동적·정적 데이터를 MMSI 기준으로 조인하여 선박 �
 - [x] Firebase Analytics 이벤트 로깅 (paywall_impression, cta_click, dismiss)
 
 ### Phase 9: 실시간 함대 레이더 (2026-03-15) ✅ Live API 통합 완료
-- [x] AIS 동적 위치 + 정적 톤수 MMSI 조인 API (`/api/fleet`) — ODCloud 실서버 연동
+- [x] AIS 동적 위치 + 정적 톤수 MMSI 조인 API (`/api/fleet`) — ODCloud 실서버 연동 (기능 제거됨 2026-04-21)
 - [x] Heatmap & Tonnage Marker 시각화 + 프리미엄 상세 시트 (2x2 그리드, 스피드 게이지)
 - [x] 대형선 반경 500m 회피 소형선 밀집지 추출 알고리즘
 - [x] GPS 기반 대형선 근접 푸시 알림 (프론트엔드 목업)
 - [x] 3-tier 데이터 소스 체계: ODCloud primary → KHOA OceanGrid fallback → DEMO Mock 데이터
 - [x] Zod 쿼리 유효성 검사 + 함수형 필터 체이닝 (size / minTonnage / maxTonnage)
-- [x] FleetRadar 데스크탑 해상도 폭 제한(max-w-md) 버그 패치 및 BottomNav 진입점 추가
+- [x] FleetRadar 데스크탑 해상도 폭 제한(max-w-md) 버그 패치 및 BottomNav 진입점 추가 (기능 제거됨 2026-04-21)
 
 </details>

@@ -27,12 +27,6 @@ test.describe("Core navigation flows", () => {
     await expect(page.locator("header")).toBeVisible({ timeout: 10000 });
   });
 
-  test("home → fleet radar loads", async ({ page }) => {
-    await page.goto("/fleet-radar");
-    await page.waitForTimeout(5000);
-    await expect(page.getByText("Fleet Radar")).toBeVisible({ timeout: 15000 });
-  });
-
   test("home → settings page loads", async ({ page }) => {
     await page.goto("/settings");
     await page.waitForTimeout(3000);

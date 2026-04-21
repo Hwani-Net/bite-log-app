@@ -65,7 +65,6 @@ src/app/
 ├── booking/         # 예약
 ├── concierge/       # 컨시어지
 ├── feed/            # 피드
-├── fleet-radar/     # 선단 레이더
 ├── live-dashboard/  # 라이브 대시보드
 ├── news/            # 뉴스
 ├── ranking/         # 랭킹
