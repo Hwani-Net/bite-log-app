@@ -7,7 +7,6 @@ import {
   Home,
   BookOpen,
   Trophy,
-  Fish,
   Menu,
   BarChart2,
   type LucideIcon,
