@@ -17,6 +17,11 @@ import { WeatherData } from "@/services/weatherService";
 import PeakTimeline from "@/app/components/concierge/PeakTimeline";
 import { ArrowLeft, Lock, MapPin, ChevronRight } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
+import {
+  fetchFishingIndex,
+  FishingIndexData,
+  FISHING_GRADE_CONFIG,
+} from "@/services/fishingIndexService";
 
 // ─── Secret Spots Section ─────────────────────────────────────────────────────
 function SecretSpotsSection({
@@ -545,6 +550,167 @@ function FishingTips({ biteTime }: { biteTime: BiteTimePrediction }) {
   );
 }
 
+// ─── Fishing Index Section (KHOA 바다낚시지수) ────────────────────────────────
+function FishingIndexSection({ data }: { data: FishingIndexData }) {
+  // Group by timePeriod → show morning + afternoon side-by-side
+  const grouped: Record<string, typeof data.spots> = {};
+  for (const s of data.spots) {
+    grouped[s.timePeriod] = grouped[s.timePeriod] || [];
+    grouped[s.timePeriod].push(s);
+  }
+
+  // Best overall grade (from all spots)
+  const allGrades = data.spots.map((s) => s.totalIndex);
+  const gradeScores = allGrades.map(
+    (g) => FISHING_GRADE_CONFIG[g]?.score ?? 50,
+  );
+  const bestGrade =
+    data.spots[gradeScores.indexOf(Math.max(...gradeScores))]?.totalIndex ??
+    "보통";
+  const gradeConf = FISHING_GRADE_CONFIG[bestGrade];
+
+  // Unique species
+  const species = [...new Set(data.spots.map((s) => s.targetFish))].filter(
+    (s) => s && s !== "미상",
+  );
+
+  // Representative conditions from first spot
+  const rep = data.spots[0];
+
+  return (
+    <div className="glass-morphism rounded-2xl border border-white/5 p-4 space-y-3">
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <DynamicIcon name="waves" size={16} className="text-[#7dd3fc]" />
+        <h3 className="text-sm font-bold text-white uppercase tracking-[0.15em]">
+          바다낚시지수
+        </h3>
+        <span className="text-[10px] text-white/50 ml-auto">
+          {data.location}
+        </span>
+      </div>
+
+      {/* Grade banner */}
+      <div
+        className="flex items-center gap-3 rounded-xl px-4 py-3 border"
+        style={{
+          backgroundColor: `${gradeConf.color}18`,
+          borderColor: `${gradeConf.color}30`,
+        }}
+      >
+        <div
+          className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-xl font-black"
+          style={{
+            backgroundColor: `${gradeConf.color}25`,
+            color: gradeConf.color,
+          }}
+        >
+          {gradeConf.score}
+        </div>
+        <div>
+          <p className="text-sm font-bold" style={{ color: gradeConf.color }}>
+            {gradeConf.label}
+          </p>
+          {species.length > 0 && (
+            <p className="text-[10px] text-white/60 mt-0.5">
+              주요 어종: {species.slice(0, 4).join(", ")}
+            </p>
+          )}
+          {rep?.tidalInfo && (
+            <p className="text-[10px] text-white/50">{rep.tidalInfo}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Per time-period breakdown */}
+      {Object.entries(grouped).map(([period, spots]) => {
+        const best = spots.reduce((a, b) =>
+          (FISHING_GRADE_CONFIG[a.totalIndex]?.score ?? 0) >=
+          (FISHING_GRADE_CONFIG[b.totalIndex]?.score ?? 0)
+            ? a
+            : b,
+        );
+        const conf = FISHING_GRADE_CONFIG[best.totalIndex];
+        return (
+          <div
+            key={period}
+            className="flex items-center gap-3 bg-white/5 rounded-xl px-3 py-2.5"
+          >
+            <span className="text-xs text-white/60 font-bold w-8 shrink-0">
+              {period}
+            </span>
+            <div
+              className="text-xs font-bold px-2 py-0.5 rounded-full"
+              style={{ backgroundColor: `${conf.color}25`, color: conf.color }}
+            >
+              {conf.label}
+            </div>
+            {best.waveHeightMax > 0 && (
+              <span className="text-[10px] text-white/50">
+                파고 {best.waveHeightMin}~{best.waveHeightMax}m
+              </span>
+            )}
+            {best.waterTempMax > 0 && (
+              <span className="text-[10px] text-white/50 ml-auto">
+                수온 {best.waterTempMin}~{best.waterTempMax}℃
+              </span>
+            )}
+          </div>
+        );
+      })}
+
+      {/* Env summary row */}
+      {rep && (
+        <div className="grid grid-cols-3 gap-2">
+          {rep.waveHeightMax > 0 && (
+            <div className="flex flex-col items-center bg-white/5 rounded-xl py-2">
+              <DynamicIcon
+                name="waves"
+                size={14}
+                className="text-[#7dd3fc] mb-1"
+              />
+              <p className="text-[9px] text-white/50">파고</p>
+              <p className="text-xs font-bold text-white">
+                {rep.waveHeightMin}~{rep.waveHeightMax}m
+              </p>
+            </div>
+          )}
+          {rep.waterTempMax > 0 && (
+            <div className="flex flex-col items-center bg-white/5 rounded-xl py-2">
+              <DynamicIcon
+                name="thermostat"
+                size={14}
+                className="text-orange-400 mb-1"
+              />
+              <p className="text-[9px] text-white/50">수온</p>
+              <p className="text-xs font-bold text-white">
+                {rep.waterTempMin}~{rep.waterTempMax}℃
+              </p>
+            </div>
+          )}
+          {rep.windSpeedMax > 0 && (
+            <div className="flex flex-col items-center bg-white/5 rounded-xl py-2">
+              <DynamicIcon
+                name="air"
+                size={14}
+                className="text-[#7dd3fc] mb-1"
+              />
+              <p className="text-[9px] text-white/50">풍속</p>
+              <p className="text-xs font-bold text-white">
+                {rep.windSpeedMin}~{rep.windSpeedMax}m/s
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      <p className="text-[9px] text-white/20 text-right">
+        출처: KHOA 바다누리 바다낚시지수
+      </p>
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function BiteForecastPage() {
   const locale = useAppStore((s) => s.locale);
@@ -555,6 +721,9 @@ export default function BiteForecastPage() {
   const [tideData, setTideData] = useState<TideData | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [marine, setMarine] = useState<MarineData | null>(null);
+  const [fishingIndex, setFishingIndex] = useState<FishingIndexData | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [locationName, setLocationName] = useState("현재 위치");
 
@@ -567,14 +736,16 @@ export default function BiteForecastPage() {
             async (pos) => {
               const lat = pos.coords.latitude;
               const lng = pos.coords.longitude;
-              const [w, t, m] = await Promise.all([
+              const [w, t, m, fi] = await Promise.all([
                 fetchWeather(lat, lng),
                 fetchTideData(lat, lng),
                 fetchMarineData(lat, lng),
+                fetchFishingIndex(lat, lng),
               ]);
               setWeather(w);
               setTideData(t);
               setMarine(m);
+              setFishingIndex(fi);
               setBiteTime(calculateBiteTime(w, t, m));
               if (t) setLocationName(t.stationName || "현재 위치");
               setLoading(false);
@@ -824,6 +995,11 @@ export default function BiteForecastPage() {
               ))}
             </div>
           </div>
+
+          {/* ── KHOA 바다낚시지수 ── */}
+          {fishingIndex && fishingIndex.spots.length > 0 && (
+            <FishingIndexSection data={fishingIndex} />
+          )}
 
           {/* ── Tide Timeline ── */}
           {tideData && tideData.tides.length > 0 && (
