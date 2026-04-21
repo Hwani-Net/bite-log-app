@@ -721,7 +721,6 @@ export default function HomePage() {
                   },
                   { href: "/feed", icon: "rss_feed", label: "조황 피드" },
                   { href: "/settings", icon: "settings", label: "설정" },
-                  { href: "/live-dashboard", icon: "sensors", label: "라이브" },
                   {
                     href: "/alerts",
                     icon: "notifications",
