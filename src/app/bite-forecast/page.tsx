@@ -26,14 +26,6 @@ import {
 } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 import {
-  fetchFishingIndex,
-  FishingIndexData,
-  FISHING_GRADE_CONFIG,
-  REGIONS,
-  FishingRegion,
-  getLocationsByRegion,
-} from "@/services/fishingIndexService";
-import {
   fetchBiteIndexWithMeta,
   FishingIndex as BiteIndexRow,
   BITE_INDEX_CONFIG,
@@ -571,344 +563,30 @@ function FishingTips({ biteTime }: { biteTime: BiteTimePrediction }) {
   );
 }
 
-// ─── Fishing Index Card (내부 표시용) ────────────────────────────────────────
-function FishingIndexCard({ data }: { data: FishingIndexData }) {
-  const grouped: Record<string, typeof data.spots> = {};
-  for (const s of data.spots) {
-    grouped[s.timePeriod] = grouped[s.timePeriod] || [];
-    grouped[s.timePeriod].push(s);
-  }
-
-  const allGrades = data.spots.map((s) => s.totalIndex);
-  const gradeScores = allGrades.map(
-    (g) => FISHING_GRADE_CONFIG[g]?.score ?? 50,
-  );
-  const bestGrade =
-    data.spots[gradeScores.indexOf(Math.max(...gradeScores))]?.totalIndex ??
-    "보통";
-  const gradeConf = FISHING_GRADE_CONFIG[bestGrade];
-
-  const species = [...new Set(data.spots.map((s) => s.targetFish))].filter(
-    (s) => s && s !== "미상",
-  );
-
-  const rep = data.spots[0];
-
-  return (
-    <div className="space-y-3">
-      {/* Grade banner */}
-      <div
-        className="flex items-center gap-3 rounded-xl px-4 py-3 border"
-        style={{
-          backgroundColor: `${gradeConf.color}18`,
-          borderColor: `${gradeConf.color}30`,
-        }}
-      >
-        <div
-          className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-xl font-black"
-          style={{
-            backgroundColor: `${gradeConf.color}25`,
-            color: gradeConf.color,
-          }}
-        >
-          {gradeConf.score}
-        </div>
-        <div>
-          <p className="text-sm font-bold" style={{ color: gradeConf.color }}>
-            {gradeConf.label}
-          </p>
-          {species.length > 0 && (
-            <p className="text-[10px] text-white/60 mt-0.5">
-              주요 어종: {species.slice(0, 4).join(", ")}
-            </p>
-          )}
-          {rep?.tidalInfo && (
-            <p className="text-[10px] text-white/50">{rep.tidalInfo}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Per time-period breakdown */}
-      {Object.entries(grouped).map(([period, spots]) => {
-        const best = spots.reduce((a, b) =>
-          (FISHING_GRADE_CONFIG[a.totalIndex]?.score ?? 0) >=
-          (FISHING_GRADE_CONFIG[b.totalIndex]?.score ?? 0)
-            ? a
-            : b,
-        );
-        const conf = FISHING_GRADE_CONFIG[best.totalIndex];
-        return (
-          <div
-            key={period}
-            className="flex items-center gap-3 bg-white/5 rounded-xl px-3 py-2.5"
-          >
-            <span className="text-xs text-white/60 font-bold w-8 shrink-0">
-              {period}
-            </span>
-            <div
-              className="text-xs font-bold px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: `${conf.color}25`, color: conf.color }}
-            >
-              {conf.label}
-            </div>
-            {best.waveHeightMax > 0 && (
-              <span className="text-[10px] text-white/50">
-                파고 {best.waveHeightMin}~{best.waveHeightMax}m
-              </span>
-            )}
-            {best.waterTempMax > 0 && (
-              <span className="text-[10px] text-white/50 ml-auto">
-                수온 {best.waterTempMin}~{best.waterTempMax}℃
-              </span>
-            )}
-          </div>
-        );
-      })}
-
-      {/* Env summary row */}
-      {rep && (
-        <div className="grid grid-cols-3 gap-2">
-          {rep.waveHeightMax > 0 && (
-            <div className="flex flex-col items-center bg-white/5 rounded-xl py-2">
-              <DynamicIcon
-                name="waves"
-                size={14}
-                className="text-[#7dd3fc] mb-1"
-              />
-              <p className="text-[9px] text-white/50">파고</p>
-              <p className="text-xs font-bold text-white">
-                {rep.waveHeightMin}~{rep.waveHeightMax}m
-              </p>
-            </div>
-          )}
-          {rep.waterTempMax > 0 && (
-            <div className="flex flex-col items-center bg-white/5 rounded-xl py-2">
-              <DynamicIcon
-                name="thermostat"
-                size={14}
-                className="text-orange-400 mb-1"
-              />
-              <p className="text-[9px] text-white/50">수온</p>
-              <p className="text-xs font-bold text-white">
-                {rep.waterTempMin}~{rep.waterTempMax}℃
-              </p>
-            </div>
-          )}
-          {rep.windSpeedMax > 0 && (
-            <div className="flex flex-col items-center bg-white/5 rounded-xl py-2">
-              <DynamicIcon
-                name="air"
-                size={14}
-                className="text-[#7dd3fc] mb-1"
-              />
-              <p className="text-[9px] text-white/50">풍속</p>
-              <p className="text-xs font-bold text-white">
-                {rep.windSpeedMin}~{rep.windSpeedMax}m/s
-              </p>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Fishing Index Section (KHOA 바다낚시지수 + 지역 탭) ──────────────────────
-function FishingIndexSection({
-  initialLat,
-  initialLng,
-}: {
-  initialLat: number;
-  initialLng: number;
-}) {
-  const [selectedRegion, setSelectedRegion] = useState<FishingRegion>("서해");
-  const [selectedLocationCode, setSelectedLocationCode] = useState<string>(
-    () => getLocationsByRegion("서해")[0]?.code ?? "",
-  );
-  const [gubun, setGubun] = useState<"갯바위" | "선상">("갯바위");
-  // undefined = 아직 로딩 중, null = 로드 완료(데이터 없음), FishingIndexData = 데이터 있음
-  const [data, setData] = useState<FishingIndexData | null | undefined>(
-    undefined,
-  );
-
-  const locationsByRegion = getLocationsByRegion(selectedRegion);
-
-  // 지역 탭 변경 시 첫 번째 location 자동 선택
-  function handleRegionChange(region: FishingRegion) {
-    setSelectedRegion(region);
-    const first = getLocationsByRegion(region)[0];
-    if (first) setSelectedLocationCode(first.code);
-  }
-
-  useEffect(() => {
-    if (!selectedLocationCode) return;
-    let cancelled = false;
-    fetchFishingIndex(
-      initialLat,
-      initialLng,
-      gubun,
-      undefined,
-      selectedLocationCode,
-    )
-      .then((res) => {
-        if (cancelled) return;
-        setData(res ?? null);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        console.error("[FishingIndexSection] fetch failed:", err);
-        setData(null);
-      });
-    // 새 쿼리 시작 시 undefined로 리셋 (로딩 상태)
-    return () => {
-      cancelled = true;
-      setData(undefined);
-    };
-  }, [selectedLocationCode, gubun, initialLat, initialLng]);
-
-  const regionColors: Record<FishingRegion, string> = {
-    서해: "#7dd3fc",
-    남해: "#4ade80",
-    동해: "#c9a84c",
-    제주: "#f472b6",
-  };
-  const activeColor = regionColors[selectedRegion];
-
-  return (
-    <div className="glass-morphism rounded-2xl border border-white/5 p-4 space-y-3">
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <DynamicIcon name="waves" size={16} className="text-[#7dd3fc]" />
-        <h3 className="text-sm font-bold text-white uppercase tracking-[0.15em]">
-          바다낚시지수
-        </h3>
-        <span className="text-[9px] bg-white/10 border border-white/10 text-white/50 px-1.5 py-0.5 rounded font-bold ml-1">
-          KHOA
-        </span>
-      </div>
-
-      {/* Region tabs: 서해 / 남해 / 동해 / 제주 */}
-      <div className="flex gap-1.5">
-        {REGIONS.map((region) => {
-          const color = regionColors[region];
-          const active = selectedRegion === region;
-          return (
-            <button
-              key={region}
-              type="button"
-              onClick={() => handleRegionChange(region)}
-              className="flex-1 py-1.5 rounded-xl text-[11px] font-bold transition-colors"
-              style={
-                active
-                  ? {
-                      backgroundColor: `${color}20`,
-                      border: `1px solid ${color}50`,
-                      color,
-                    }
-                  : {
-                      backgroundColor: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      color: "rgba(255,255,255,0.45)",
-                    }
-              }
-            >
-              {region}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Location selector within region */}
-      <div className="flex flex-wrap gap-1.5">
-        {locationsByRegion.map((loc) => {
-          const active = selectedLocationCode === loc.code;
-          return (
-            <button
-              key={loc.code}
-              type="button"
-              onClick={() => setSelectedLocationCode(loc.code)}
-              className="px-2.5 py-1 rounded-full text-[10px] font-bold transition-colors"
-              style={
-                active
-                  ? {
-                      backgroundColor: `${activeColor}20`,
-                      border: `1px solid ${activeColor}40`,
-                      color: activeColor,
-                    }
-                  : {
-                      backgroundColor: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      color: "rgba(255,255,255,0.45)",
-                    }
-              }
-            >
-              {loc.name}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Gubun toggle: 갯바위 / 선상 */}
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => setGubun("갯바위")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors ${
-            gubun === "갯바위"
-              ? "bg-[#c9a84c]/20 border border-[#c9a84c]/40 text-[#c9a84c]"
-              : "bg-white/5 border border-white/10 text-white/60"
-          }`}
-        >
-          <Anchor size={12} />
-          갯바위
-        </button>
-        <button
-          type="button"
-          onClick={() => setGubun("선상")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors ${
-            gubun === "선상"
-              ? "bg-[#7dd3fc]/20 border border-[#7dd3fc]/40 text-[#7dd3fc]"
-              : "bg-white/5 border border-white/10 text-white/60"
-          }`}
-        >
-          <Ship size={12} />
-          선상
-        </button>
-      </div>
-
-      {/* Content */}
-      {data === undefined ? (
-        <div className="space-y-2">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="h-10 bg-white/5 rounded-xl animate-pulse" />
-          ))}
-        </div>
-      ) : data && data.spots.length > 0 ? (
-        <FishingIndexCard data={data} />
-      ) : (
-        <div className="flex flex-col items-center gap-2 py-6">
-          <DynamicIcon name="waves" size={24} className="text-white/20" />
-          <p className="text-xs text-white/40">데이터 수신 중</p>
-        </div>
-      )}
-
-      <p className="text-[9px] text-white/20 text-right">
-        출처: KHOA 바다누리 바다낚시지수
-      </p>
-    </div>
-  );
-}
-
 // ─── Bite Index Section (해양수산부 공식 바다낚시지수 v2) ─────────────────────
+function getRegionForCoords(
+  lat?: number,
+  lon?: number,
+): "서해" | "남해" | "동해" | "제주" | "기타" {
+  if (lat == null || lon == null) return "기타";
+  if (lat < 33.9) return "제주";
+  if (lon < 127.2) return "서해";
+  if (lon > 128.8) return "동해";
+  return "남해";
+}
+
 function BiteIndexOfficialSection() {
   const [gubun, setGubun] = useState<BiteIndexGubun>("shore");
   const [rows, setRows] = useState<BiteIndexRow[]>([]);
   const [mocked, setMocked] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedRegion, setSelectedRegion] = useState<
+    "전체" | "서해" | "남해" | "동해" | "제주"
+  >("전체");
 
   useEffect(() => {
     let cancelled = false;
-    fetchBiteIndexWithMeta({ gubun, numOfRows: 10 })
+    fetchBiteIndexWithMeta({ gubun, numOfRows: 100 })
       .then((res) => {
         if (cancelled) return;
         setRows(res.items);
@@ -924,6 +602,13 @@ function BiteIndexOfficialSection() {
       cancelled = true;
     };
   }, [gubun]);
+
+  const displayedRows =
+    selectedRegion === "전체"
+      ? rows.slice(0, 10)
+      : rows
+          .filter((r) => getRegionForCoords(r.lat, r.lon) === selectedRegion)
+          .slice(0, 10);
 
   const renderScore = (score: 1 | 2 | 3 | 4 | 5) => {
     const conf = BITE_INDEX_CONFIG[score];
@@ -991,6 +676,44 @@ function BiteIndexOfficialSection() {
         </button>
       </div>
 
+      {/* Region tabs: 전체 / 서해 / 남해 / 동해 / 제주 */}
+      <div className="flex gap-1.5">
+        {(
+          [
+            { key: "전체", color: "rgba(255,255,255,0.5)" },
+            { key: "서해", color: "#7dd3fc" },
+            { key: "남해", color: "#4ade80" },
+            { key: "동해", color: "#c9a84c" },
+            { key: "제주", color: "#f472b6" },
+          ] as const
+        ).map(({ key, color }) => {
+          const active = selectedRegion === key;
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setSelectedRegion(key)}
+              className="flex-1 py-1.5 rounded-xl text-[11px] font-bold transition-colors"
+              style={
+                active
+                  ? {
+                      backgroundColor: `${color}20`,
+                      border: `1px solid ${color}50`,
+                      color,
+                    }
+                  : {
+                      backgroundColor: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      color: "rgba(255,255,255,0.45)",
+                    }
+              }
+            >
+              {key}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Content */}
       {loading ? (
         <div className="space-y-2">
@@ -1005,7 +728,7 @@ function BiteIndexOfficialSection() {
         </div>
       ) : (
         <div className="space-y-2">
-          {rows.map((row, i) => (
+          {displayedRows.map((row, i) => (
             <div
               key={`${row.placeName}-${row.targetFish}-${i}`}
               className="bg-white/5 rounded-xl px-3 py-2.5 space-y-1.5"
@@ -1195,9 +918,6 @@ export default function BiteForecastPage() {
               </p>
             </div>
           </div>
-
-          {/* Location-independent: 해양수산부 공식 바다낚시지수 renders immediately */}
-          <BiteIndexOfficialSection />
         </div>
       ) : biteTime ? (
         <div className="space-y-4 px-4 pt-4">
@@ -1380,14 +1100,6 @@ export default function BiteForecastPage() {
               ))}
             </div>
           </div>
-
-          {/* ── KHOA 바다낚시지수 ── */}
-          {true && (
-            <FishingIndexSection
-              initialLat={coords.lat}
-              initialLng={coords.lng}
-            />
-          )}
 
           {/* ── Tide Timeline ── */}
           {tideData && tideData.tides.length > 0 && (
