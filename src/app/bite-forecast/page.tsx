@@ -886,6 +886,7 @@ export default function BiteForecastPage() {
     null,
   );
   const [loading, setLoading] = useState(true);
+  const [locationResolved, setLocationResolved] = useState(false);
   const [locationName, setLocationName] = useState("현재 위치");
 
   useEffect(() => {
@@ -899,6 +900,14 @@ export default function BiteForecastPage() {
       lng: number,
       isFallback: boolean,
     ) {
+      // Signal that coordinates are known — the loading banner swaps copy to
+      // "실시간 데이터 수신 중" so users get feedback that the geolocation
+      // permission step already succeeded and only API fan-out remains.
+      setLocationResolved(true);
+      if (isFallback) {
+        setLocationName("제주도 (기본)");
+      }
+
       // Use allSettled so a single slow/failing API does not block the rest.
       const [wRes, tRes, mRes, fiRes] = await Promise.allSettled([
         fetchWeather(lat, lng),
@@ -915,11 +924,12 @@ export default function BiteForecastPage() {
       setMarine(m);
       setFishingIndex(fi);
       setBiteTime(calculateBiteTime(w, t, m));
-      if (isFallback) {
-        setLocationName("제주도 (기본)");
-      } else if (t) {
+      if (!isFallback && t) {
         setLocationName(t.stationName || "현재 위치");
       }
+      // Always dismiss the loading banner once allSettled resolves — even if
+      // every API failed, the page shows a "위치 권한을 허용하면..." hint
+      // instead of hanging on the loader.
       setLoading(false);
     }
 
@@ -934,13 +944,13 @@ export default function BiteForecastPage() {
     }
 
     // Safety net: if the browser never calls back (some environments silently
-    // drop geolocation callbacks), force-resolve with fallback after 5s.
+    // drop geolocation callbacks), force-resolve with fallback after ~6s.
     let resolved = false;
     const fallbackTimer = setTimeout(() => {
       if (resolved) return;
       resolved = true;
       loadWithCoords(DEFAULT_LAT, DEFAULT_LNG, true);
-    }, 5500);
+    }, 6000);
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -1004,10 +1014,14 @@ export default function BiteForecastPage() {
             <div className="w-10 h-10 border-2 border-[#c9a84c]/20 border-t-[#c9a84c] rounded-full animate-spin shrink-0" />
             <div>
               <p className="text-sm font-bold text-white">
-                위치 기반 데이터 분석 중
+                {locationResolved
+                  ? "실시간 데이터 수신 중"
+                  : "위치 기반 데이터 분석 중"}
               </p>
               <p className="text-[11px] text-white/50 mt-0.5">
-                위치 권한이 없어도 아래 바다낚시지수는 볼 수 있습니다
+                {locationResolved
+                  ? "날씨·조석·파고 정보를 불러오고 있습니다"
+                  : "위치 권한이 없어도 아래 바다낚시지수는 볼 수 있습니다"}
               </p>
             </div>
           </div>

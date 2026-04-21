@@ -261,7 +261,7 @@ export default function ConciergePage() {
 
       {/* Floating Action Buttons — hidden in chat tab */}
       {activeTab !== "chat" && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-md px-4 flex gap-2 justify-center pointer-events-none z-30">
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-md px-4 flex gap-2 justify-center pointer-events-none z-40">
           <button
             onClick={() => router.push("/bite-forecast")}
             className="pointer-events-auto bg-[#c9a84c] text-[#080d14] px-4 py-2.5 rounded-full text-xs font-bold shadow-xl shadow-[#c9a84c]/30 flex items-center gap-1 hover:scale-105 transition-transform active:scale-95"
