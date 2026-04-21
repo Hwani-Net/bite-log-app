@@ -155,7 +155,8 @@ function resolveGubun(raw?: string): "갯바위" | "선상" {
 function extractItems(json: unknown): Array<Record<string, unknown>> {
   if (json == null || typeof json !== "object") return [];
   const obj = json as Record<string, unknown>;
-  const resp = obj["response"] as Record<string, unknown> | undefined;
+  // Accept both envelopes: {response:{header,body}} and flat {header,body}
+  const resp = (obj["response"] as Record<string, unknown> | undefined) ?? obj;
   const body = resp?.["body"] as Record<string, unknown> | undefined;
   const items = body?.["items"] as Record<string, unknown> | undefined;
   const item = items?.["item"];
@@ -284,7 +285,7 @@ function mapBiteIndexItem(
 function checkApiError(json: unknown): string | null {
   if (json == null || typeof json !== "object") return null;
   const obj = json as Record<string, unknown>;
-  const resp = obj["response"] as Record<string, unknown> | undefined;
+  const resp = (obj["response"] as Record<string, unknown> | undefined) ?? obj;
   const header = resp?.["header"] as Record<string, unknown> | undefined;
   const code = String(header?.["resultCode"] ?? "");
   const msg = String(header?.["resultMsg"] ?? "");
