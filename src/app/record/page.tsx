@@ -343,6 +343,7 @@ export default function RecordPage() {
               ? setStep("photo")
               : router.back()
           }
+          aria-label="뒤로가기"
           className="text-white/70 flex size-11 shrink-0 items-center justify-center hover:bg-white/10 rounded-full transition-colors"
         >
           <ArrowLeft size={20} />
