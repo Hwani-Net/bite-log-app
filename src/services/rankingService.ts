@@ -5,7 +5,6 @@ import { RankingCategory, RankingData, RankingEntry } from "@/types/ranking";
 // ====================================================================
 // Firebase Ranking Service
 // Reads from publicFeed collection and aggregates real data
-// Falls back to mock data when Firebase is unavailable
 // ====================================================================
 
 // --------------- Types ---------------
@@ -27,91 +26,6 @@ interface UserAggregate {
   totalCount: number;
   maxSizeCm: number;
   speciesSet: Set<string>;
-}
-
-// --------------- Mock data (fallback) ---------------
-// @mock-data — No emoji avatars; photoURL left undefined so UI falls back to displayName initial
-
-// @mock-data — Replace with real Firestore ranking (used when Firestore has no data)
-const MOCK_DATA = {
-  catch: [
-    { uid: "u1", displayName: "바다의전설", value: 58, label: "58마리" },
-    { uid: "u2", displayName: "도시어부K", value: 42, label: "42마리" },
-    { uid: "u3", displayName: "강태공언니", value: 39, label: "39마리" },
-    { uid: "u4", displayName: "울진의아들", value: 35, label: "35마리" },
-    { uid: "u5", displayName: "낚시광마크", value: 31, label: "31마리" },
-    { uid: "u6", displayName: "보리보리쌀", value: 28, label: "28마리" },
-    { uid: "u7", displayName: "캐스팅마스터", value: 26, label: "26마리" },
-    { uid: "u8", displayName: "포항물개", value: 23, label: "23마리" },
-    { uid: "u9", displayName: "목포바지락", value: 18, label: "18마리" },
-    { uid: "u10", displayName: "여수밤바다", value: 12, label: "12마리" },
-  ],
-  size: [
-    { uid: "u1", displayName: "바다의전설", value: 72, label: "72cm" },
-    { uid: "u2", displayName: "도시어부K", value: 68, label: "68cm" },
-    { uid: "u3", displayName: "강태공언니", value: 65, label: "65cm" },
-    { uid: "u4", displayName: "울진의아들", value: 61, label: "61cm" },
-    { uid: "u5", displayName: "낚시광마크", value: 58, label: "58cm" },
-    { uid: "u6", displayName: "보리보리쌀", value: 55, label: "55cm" },
-    { uid: "u7", displayName: "캐스팅마스터", value: 52, label: "52cm" },
-    { uid: "u8", displayName: "포항물개", value: 48, label: "48cm" },
-    { uid: "u9", displayName: "목포바지락", value: 42, label: "42cm" },
-    { uid: "u10", displayName: "여수밤바다", value: 38, label: "38cm" },
-  ],
-  variety: [
-    { uid: "u1", displayName: "바다의전설", value: 18, label: "18종" },
-    { uid: "u2", displayName: "도시어부K", value: 15, label: "15종" },
-    { uid: "u3", displayName: "강태공언니", value: 14, label: "14종" },
-    { uid: "u4", displayName: "울진의아들", value: 12, label: "12종" },
-    { uid: "u5", displayName: "낚시광마크", value: 11, label: "11종" },
-    { uid: "u6", displayName: "보리보리쌀", value: 10, label: "10종" },
-    { uid: "u7", displayName: "캐스팅마스터", value: 7, label: "7종" },
-    { uid: "u8", displayName: "포항물개", value: 6, label: "6종" },
-    { uid: "u9", displayName: "목포바지락", value: 5, label: "5종" },
-    { uid: "u10", displayName: "여수밤바다", value: 4, label: "4종" },
-  ],
-};
-
-function getMockRanking(
-  category: RankingCategory,
-  myUid?: string,
-): RankingData {
-  const list = MOCK_DATA[category];
-  const entries: RankingEntry[] = list.map((item, i) => ({
-    rank: i + 1,
-    user: {
-      id: item.uid,
-      uid: item.uid,
-      displayName: item.displayName,
-      photoURL: undefined,
-      level: 10,
-      totalCatch: 0,
-      badges: [],
-      createdAt: "",
-      updatedAt: "",
-    },
-    value: item.value,
-    label: item.label,
-  }));
-
-  const topThree = entries.slice(0, 3);
-  const rest = entries.slice(3, 10);
-  const myRank = myUid
-    ? (entries.find((e) => e.user.uid === myUid) ?? null)
-    : null;
-
-  const now = new Date();
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-
-  return {
-    category,
-    seasonLabel: `${now.getFullYear()}년 ${now.getMonth() + 1}월 시즌`,
-    seasonEndDate: end.toISOString(),
-    myRank,
-    topThree,
-    rest,
-    isRealData: false,
-  };
 }
 
 // --------------- Empty ranking (no real data) ---------------
@@ -277,9 +191,3 @@ export async function getFirebaseRanking(
 
   return getEmptyRanking(category);
 }
-
-// Legacy mock export kept for backward compatibility
-export const mockRankingService = {
-  getRanking: (category: RankingCategory) =>
-    Promise.resolve(getMockRanking(category)),
-};
