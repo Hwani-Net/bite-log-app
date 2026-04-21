@@ -43,5 +43,8 @@ env:
   - variable: URIMALS_API_KEY
     secret: URIMALS_API_KEY
 
-  - variable: CATCH_VALUE_API_KEY
-    secret: CATCH_VALUE_API_KEY
+  - variable: KAMIS_CERT_KEY
+    secret: KAMIS_CERT_KEY
+
+  - variable: KAMIS_CERT_ID
+    secret: KAMIS_CERT_ID
