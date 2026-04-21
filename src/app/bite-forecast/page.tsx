@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   Anchor,
   Ship,
+  Thermometer,
 } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 import {
@@ -487,6 +488,285 @@ function WeatherDetail({ weather }: { weather: WeatherData }) {
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Water Temp Timeline ──────────────────────────────────────────────────────
+function WaterTempTimeline({ marine }: { marine: MarineData }) {
+  const OPTIMAL_MIN = 16.0;
+  const OPTIMAL_MAX = 22.0;
+  const HOURS_TO_SHOW = 24;
+
+  // Find current hour index in hourlyTimes
+  const now = new Date();
+  const hourlyTimes = marine.hourlyTimes ?? [];
+  const hourlySst = marine.hourlySst ?? [];
+  const hourlyWaveHeight = marine.hourlyWaveHeight ?? [];
+
+  let startIdx = 0;
+  if (hourlyTimes.length > 0) {
+    // Find the index closest to current hour
+    const nowMs = now.getTime();
+    let minDiff = Infinity;
+    for (let i = 0; i < hourlyTimes.length; i++) {
+      const diff = Math.abs(new Date(hourlyTimes[i]).getTime() - nowMs);
+      if (diff < minDiff) {
+        minDiff = diff;
+        startIdx = i;
+      }
+    }
+  }
+
+  const hourlyTimesSlice = hourlyTimes.slice(
+    startIdx,
+    startIdx + HOURS_TO_SHOW,
+  );
+  const hourlySlice = hourlySst
+    .slice(startIdx, startIdx + HOURS_TO_SHOW)
+    .map((v) => (v == null ? NaN : v));
+  const waveSlice = hourlyWaveHeight
+    .slice(startIdx, startIdx + HOURS_TO_SHOW)
+    .map((v) => (v == null ? NaN : v));
+
+  // Valid temps only
+  const validTemps = hourlySlice.filter((t) => !isNaN(t));
+  const minTemp = validTemps.length > 0 ? Math.min(...validTemps) - 1 : 10;
+  const maxTemp = validTemps.length > 0 ? Math.max(...validTemps) + 1 : 30;
+  const tempRange = maxTemp - minTemp || 1;
+
+  // SVG dimensions
+  const svgW = 320;
+  const svgH = 80;
+  const padL = 28;
+  const padR = 8;
+  const padT = 8;
+  const padB = 16;
+  const chartW = svgW - padL - padR;
+  const chartH = svgH - padT - padB;
+
+  const toX = (i: number) => padL + (i / (HOURS_TO_SHOW - 1)) * chartW;
+  const toY = (temp: number) =>
+    padT + chartH - ((temp - minTemp) / tempRange) * chartH;
+
+  // Optimal zone band Y coordinates (clamp to chart bounds)
+  const optBandTop = Math.max(padT, toY(Math.min(OPTIMAL_MAX, maxTemp)));
+  const optBandBot = Math.min(
+    padT + chartH,
+    toY(Math.max(OPTIMAL_MIN, minTemp)),
+  );
+  const showOptBand = OPTIMAL_MAX >= minTemp && OPTIMAL_MIN <= maxTemp;
+
+  // Build SVG path
+  const pathPoints: string[] = [];
+  for (let i = 0; i < hourlySlice.length; i++) {
+    const t = hourlySlice[i];
+    if (isNaN(t)) continue;
+    const x = toX(i);
+    const y = toY(t);
+    pathPoints.push(pathPoints.length === 0 ? `M ${x} ${y}` : `L ${x} ${y}`);
+  }
+  const pathD = pathPoints.join(" ");
+
+  // Current time marker (index 0 = now)
+  const nowX = toX(0);
+
+  // X-axis labels every 6 hours
+  const xLabels: { x: number; label: string }[] = [];
+  for (let i = 0; i < hourlySlice.length; i++) {
+    if (hourlyTimesSlice[i] && i % 6 === 0) {
+      const d = new Date(hourlyTimesSlice[i]);
+      const hh = d.getHours().toString().padStart(2, "0");
+      xLabels.push({ x: toX(i), label: `${hh}:00` });
+    }
+  }
+
+  // Find first optimal temperature entry
+  const optimalIdx = hourlySlice.findIndex(
+    (t) => !isNaN(t) && t >= OPTIMAL_MIN,
+  );
+  let optimalLabel = "48시간 이내 없음";
+  if (optimalIdx >= 0 && hourlyTimesSlice[optimalIdx]) {
+    const od = new Date(hourlyTimesSlice[optimalIdx]);
+    const month = od.getMonth() + 1;
+    const day = od.getDate();
+    const hh = od.getHours().toString().padStart(2, "0");
+    const mm = od.getMinutes().toString().padStart(2, "0");
+    optimalLabel = `${month}월 ${day}일 ${hh}:${mm}`;
+  }
+
+  // Current SST color
+  const currentSst =
+    validTemps.length > 0
+      ? (hourlySlice.find((t) => !isNaN(t)) ?? marine.seaSurfaceTemp)
+      : marine.seaSurfaceTemp;
+  const sstColor =
+    currentSst < 14
+      ? "#7dd3fc"
+      : currentSst < 16
+        ? "#93c5fd"
+        : currentSst <= 22
+          ? "#4ade80"
+          : "#f59e0b";
+
+  // Wave summary (avg of slice)
+  const validWaves = waveSlice.filter((w) => !isNaN(w));
+  const avgWave =
+    validWaves.length > 0
+      ? validWaves.reduce((a, b) => a + b, 0) / validWaves.length
+      : null;
+
+  return (
+    <div className="glass-morphism rounded-2xl border border-white/5 p-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Thermometer size={16} className="text-[#c9a84c]" />
+          <h3 className="text-sm font-bold text-white uppercase tracking-[0.15em]">
+            수온 예보 (72시간)
+          </h3>
+        </div>
+        <div className="flex items-center gap-2">
+          {avgWave !== null && (
+            <span className="text-[10px] text-white/50">
+              파고 avg {avgWave.toFixed(1)}m
+            </span>
+          )}
+          <span
+            className="text-sm font-black px-2 py-0.5 rounded-lg"
+            style={{ color: sstColor, background: `${sstColor}18` }}
+          >
+            {marine.seaSurfaceTemp.toFixed(1)}°C
+          </span>
+        </div>
+      </div>
+
+      {/* SVG Chart */}
+      <div className="w-full overflow-hidden rounded-xl bg-white/5 mb-3">
+        <svg
+          viewBox={`0 0 ${svgW} ${svgH}`}
+          className="w-full"
+          style={{ height: svgH }}
+          aria-hidden="true"
+        >
+          {/* Optimal zone band */}
+          {showOptBand && (
+            <rect
+              x={padL}
+              y={optBandTop}
+              width={chartW}
+              height={Math.max(0, optBandBot - optBandTop)}
+              fill="rgba(74,222,128,0.12)"
+            />
+          )}
+
+          {/* Grid lines */}
+          {[0, 0.25, 0.5, 0.75, 1].map((frac) => {
+            const y = padT + frac * chartH;
+            return (
+              <line
+                key={frac}
+                x1={padL}
+                y1={y}
+                x2={padL + chartW}
+                y2={y}
+                stroke="rgba(255,255,255,0.05)"
+                strokeWidth="1"
+              />
+            );
+          })}
+
+          {/* Y-axis labels */}
+          {[minTemp + tempRange * 0.75, minTemp + tempRange * 0.25].map(
+            (t, i) => (
+              <text
+                key={i}
+                x={padL - 3}
+                y={toY(t) + 3}
+                textAnchor="end"
+                fontSize="7"
+                fill="rgba(255,255,255,0.3)"
+              >
+                {Math.round(t)}
+              </text>
+            ),
+          )}
+
+          {/* Optimal zone label */}
+          {showOptBand && (
+            <text
+              x={padL + 3}
+              y={optBandTop + 8}
+              fontSize="7"
+              fill="rgba(74,222,128,0.6)"
+            >
+              최적
+            </text>
+          )}
+
+          {/* SST line */}
+          {pathD && (
+            <path
+              d={pathD}
+              fill="none"
+              stroke={sstColor}
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
+
+          {/* Current time vertical marker */}
+          <line
+            x1={nowX}
+            y1={padT}
+            x2={nowX}
+            y2={padT + chartH}
+            stroke="rgba(249,115,22,0.7)"
+            strokeWidth="1"
+            strokeDasharray="3,2"
+          />
+          <text
+            x={nowX + 2}
+            y={padT + 7}
+            fontSize="7"
+            fill="rgba(249,115,22,0.8)"
+          >
+            현재
+          </text>
+
+          {/* X-axis labels */}
+          {xLabels.map(({ x, label }) => (
+            <text
+              key={label}
+              x={x}
+              y={svgH - 2}
+              textAnchor="middle"
+              fontSize="7"
+              fill="rgba(255,255,255,0.3)"
+            >
+              {label}
+            </text>
+          ))}
+        </svg>
+      </div>
+
+      {/* Optimal fishing window */}
+      <div className="flex items-center justify-between bg-white/5 rounded-xl px-3 py-2">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-emerald-400" />
+          <span className="text-[10px] text-white/60">
+            최적 수온 도달 ({OPTIMAL_MIN}°C+)
+          </span>
+        </div>
+        <span
+          className={`text-[11px] font-bold ${
+            optimalIdx >= 0 ? "text-emerald-400" : "text-white/40"
+          }`}
+        >
+          {optimalLabel}
+        </span>
       </div>
     </div>
   );
@@ -1080,6 +1360,11 @@ export default function BiteForecastPage() {
             <p className="text-xs text-white/40 text-center py-2">
               위치 권한을 허용하면 실시간 데이터를 제공합니다
             </p>
+          )}
+
+          {/* ── Water Temp Timeline ── */}
+          {marine?.hourlySst && marine.hourlySst.length > 0 && (
+            <WaterTempTimeline marine={marine} />
           )}
 
           {/* ── Factor Detail Cards ── */}
