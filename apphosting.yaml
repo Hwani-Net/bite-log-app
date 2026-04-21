@@ -36,3 +36,6 @@ env:
 
   - variable: NEXT_PUBLIC_YOUTUBE_API_KEY
     secret: NEXT_PUBLIC_YOUTUBE_API_KEY
+
+  - variable: BITE_INDEX_API_KEY
+    secret: BITE_INDEX_API_KEY

@@ -15,13 +15,27 @@ import {
 import { TideData, getCurrentPhase, TidePhase } from "@/services/tideService";
 import { WeatherData } from "@/services/weatherService";
 import PeakTimeline from "@/app/components/concierge/PeakTimeline";
-import { ArrowLeft, Lock, MapPin, ChevronRight } from "lucide-react";
+import {
+  ArrowLeft,
+  Lock,
+  MapPin,
+  ChevronRight,
+  ShieldCheck,
+  Anchor,
+  Ship,
+} from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 import {
   fetchFishingIndex,
   FishingIndexData,
   FISHING_GRADE_CONFIG,
 } from "@/services/fishingIndexService";
+import {
+  fetchBiteIndexWithMeta,
+  FishingIndex as BiteIndexRow,
+  BITE_INDEX_CONFIG,
+  BiteIndexGubun,
+} from "@/services/biteIndexService";
 
 // ─── Secret Spots Section ─────────────────────────────────────────────────────
 function SecretSpotsSection({
@@ -715,6 +729,149 @@ function FishingIndexSection({ data }: { data: FishingIndexData }) {
   );
 }
 
+// ─── Bite Index Section (해양수산부 공식 바다낚시지수 v2) ─────────────────────
+function BiteIndexOfficialSection() {
+  const [gubun, setGubun] = useState<BiteIndexGubun>("shore");
+  const [rows, setRows] = useState<BiteIndexRow[]>([]);
+  const [mocked, setMocked] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchBiteIndexWithMeta({ gubun, numOfRows: 10 })
+      .then((res) => {
+        if (cancelled) return;
+        setRows(res.items);
+        setMocked(res.mocked);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error("[BiteIndexOfficialSection] fetch failed:", err);
+        setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [gubun]);
+
+  const renderScore = (score: 1 | 2 | 3 | 4 | 5) => {
+    const conf = BITE_INDEX_CONFIG[score];
+    return (
+      <div className="flex items-center gap-2">
+        <span className={`text-base font-black ${conf.textClass}`}>
+          {score}
+        </span>
+        <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden min-w-[56px]">
+          <div
+            className={`h-full rounded-full ${conf.barClass}`}
+            style={{ width: `${(score / 5) * 100}%` }}
+          />
+        </div>
+        <span className={`text-[10px] font-bold ${conf.textClass} shrink-0`}>
+          {conf.label}
+        </span>
+      </div>
+    );
+  };
+
+  return (
+    <div className="glass-morphism rounded-2xl border border-white/5 p-4 space-y-3">
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <ShieldCheck size={16} className="text-[#7dd3fc]" />
+        <h3 className="text-sm font-bold text-white uppercase tracking-[0.15em]">
+          해양수산부 공식 낚시지수
+        </h3>
+        <span className="text-[9px] bg-[#7dd3fc]/20 border border-[#7dd3fc]/30 text-[#7dd3fc] px-1.5 py-0.5 rounded font-bold ml-1">
+          해수부 공식
+        </span>
+        {mocked && !loading && (
+          <span className="text-[9px] bg-white/10 border border-white/10 text-white/50 px-1.5 py-0.5 rounded font-bold ml-auto">
+            샘플
+          </span>
+        )}
+      </div>
+
+      {/* Gubun toggle */}
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setGubun("shore")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors ${
+            gubun === "shore"
+              ? "bg-[#7dd3fc]/20 border border-[#7dd3fc]/40 text-[#7dd3fc]"
+              : "bg-white/5 border border-white/10 text-white/60 hover:bg-white/10"
+          }`}
+        >
+          <Anchor size={12} />
+          갯바위
+        </button>
+        <button
+          type="button"
+          onClick={() => setGubun("boat")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors ${
+            gubun === "boat"
+              ? "bg-[#c9a84c]/20 border border-[#c9a84c]/40 text-[#c9a84c]"
+              : "bg-white/5 border border-white/10 text-white/60 hover:bg-white/10"
+          }`}
+        >
+          <Ship size={12} />
+          선상
+        </button>
+      </div>
+
+      {/* Content */}
+      {loading ? (
+        <div className="space-y-2">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="h-12 bg-white/5 rounded-xl animate-pulse" />
+          ))}
+        </div>
+      ) : rows.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 py-8">
+          <Anchor size={24} className="text-white/20" />
+          <p className="text-xs text-white/40">데이터 수신 중</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {rows.map((row, i) => (
+            <div
+              key={`${row.placeName}-${row.targetFish}-${i}`}
+              className="bg-white/5 rounded-xl px-3 py-2.5 space-y-1.5"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-white truncate">
+                    {row.placeName || "—"}
+                  </p>
+                  <p className="text-[10px] text-white/60 truncate">
+                    대상 어종: {row.targetFish}
+                    {row.tideInfo ? ` · ${row.tideInfo}` : ""}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0 text-[10px] text-white/50">
+                  {row.waterTemp != null && (
+                    <span>수온 {row.waterTemp.toFixed(1)}℃</span>
+                  )}
+                  {row.waveHeight != null && (
+                    <span>파고 {row.waveHeight.toFixed(1)}m</span>
+                  )}
+                </div>
+              </div>
+              {renderScore(row.indexScore)}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <p className="text-[9px] text-white/20 text-right">
+        출처: 해양수산부 바다낚시지수 v2 (data.go.kr)
+      </p>
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function BiteForecastPage() {
   const locale = useAppStore((s) => s.locale);
@@ -979,6 +1136,9 @@ export default function BiteForecastPage() {
               </div>
             );
           })()}
+
+          {/* ── 해양수산부 공식 바다낚시지수 (data.go.kr v2) ── */}
+          <BiteIndexOfficialSection />
 
           {/* ── GPS permission banner ── */}
           {!weather && !tideData && (
