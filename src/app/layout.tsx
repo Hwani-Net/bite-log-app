@@ -39,19 +39,25 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "BITE Log — AI 낚시 일지 앱" },
-    ] },
+        alt: "BITE Log — AI 낚시 일지 앱",
+      },
+    ],
+  },
   twitter: {
     card: "summary_large_image",
     title: "BITE Log — 바이트로그",
     description: "입질의 순간을 기록하다. AI 낚시 일지 앱.",
-    images: ["/og-image.png"] },
+    images: ["/og-image.png"],
+  },
   robots: {
     index: true,
-    follow: true } };
+    follow: true,
+  },
+};
 
 export default function RootLayout({
-  children }: Readonly<{
+  children,
+}: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
@@ -60,7 +66,8 @@ export default function RootLayout({
         {/* Dark mode flash prevention — must be first in <head> */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('fishlog_theme')||'dark';if(t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');}catch(e){document.documentElement.classList.add('dark');}` }}
+            __html: `try{var t=localStorage.getItem('fishlog_theme')||'dark';if(t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');}catch(e){document.documentElement.classList.add('dark');}`,
+          }}
         />
         {/* Preconnect for font loading performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -92,7 +99,14 @@ export default function RootLayout({
       <body className="bg-[#080d14] text-slate-900 dark:text-slate-100 antialiased">
         <AppInitializer />
         <SplashWrapper>
-          <main className="mx-auto max-w-md min-h-dvh pb-20 relative wave-bg overflow-x-hidden bg-[#080d14]">
+          {/* BottomNav is fixed h-16 (64px) with safe-bottom. Reserve 96px total so
+              long pages (concierge/stats/settings) do not render content beneath it. */}
+          <main
+            className="mx-auto max-w-md min-h-dvh relative wave-bg overflow-x-hidden bg-[#080d14]"
+            style={{
+              paddingBottom: "calc(6rem + env(safe-area-inset-bottom))",
+            }}
+          >
             {children}
           </main>
           <BottomNav />

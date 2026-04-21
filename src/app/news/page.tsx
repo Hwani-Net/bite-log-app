@@ -101,10 +101,10 @@ function NewsCard({ item }: { item: FishingNewsItem }) {
       className="bg-white/5 backdrop-blur-[12px] border border-white/10 rounded-2xl p-4 block hover:scale-[1.01] hover:border-white/20 transition-all duration-200"
       style={{ animationDelay: "0.05s" }}
     >
-      <div className="flex gap-3">
+      <div className="flex gap-4">
         {/* Thumbnail for YouTube */}
         {item.thumbnail && (
-          <div className="relative flex-shrink-0 w-28 h-20 rounded-xl overflow-hidden bg-white/5">
+          <div className="relative flex-shrink-0 w-28 h-24 rounded-xl overflow-hidden bg-white/5">
             <img
               src={item.thumbnail}
               alt={item.title}
@@ -122,7 +122,7 @@ function NewsCard({ item }: { item: FishingNewsItem }) {
 
         <div className="flex-1 min-w-0">
           {/* Header: source + freshness */}
-          <div className="flex items-center gap-2 mb-1.5">
+          <div className="flex items-center gap-2 mb-2">
             <SourceIcon source={item.source} />
             <span className="text-[11px] font-medium text-white/50">
               {item.sourceLabel}
@@ -131,18 +131,18 @@ function NewsCard({ item }: { item: FishingNewsItem }) {
             <ReliabilityBadge reliability={item.reliability} />
           </div>
 
-          {/* Title */}
-          <h3 className="text-sm font-bold text-white line-clamp-2 leading-snug">
+          {/* Title — 본문 우선순위 상향 (text-base + leading-snug) */}
+          <h3 className="text-base font-bold text-white line-clamp-2 leading-snug">
             {item.title}
           </h3>
 
           {/* Description */}
-          <p className="text-xs text-white/50 mt-1 line-clamp-2 leading-relaxed">
+          <p className="text-xs text-white/60 mt-1.5 line-clamp-2 leading-relaxed">
             {item.description}
           </p>
 
           {/* Footer: tags + time */}
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex items-center gap-2 mt-2.5">
             {item.region && (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a84c]/15 text-[#c9a84c] font-medium">
                 {REGION_TABS.find((r) => r.key === item.region)?.label ||
@@ -261,9 +261,9 @@ export default function NewsPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-lg mx-auto px-4 py-4 space-y-3">
+      <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
         {loading ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {[1, 2, 3, 4, 5].map((i) => (
               <div
                 key={i}
@@ -305,7 +305,7 @@ export default function NewsPage() {
                     ? "실시간 — 1시간 이내"
                     : "예시 뉴스 — 1시간 이내"}
                 </h2>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {news
                     .filter((n) => n.freshness === "realtime")
                     .map((item) => (
@@ -322,7 +322,7 @@ export default function NewsPage() {
                   <span className="w-2 h-2 bg-[#c9a84c] rounded-full" />
                   오늘의 조과
                 </h2>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {news
                     .filter((n) => n.freshness === "today")
                     .map((item) => (
@@ -339,7 +339,7 @@ export default function NewsPage() {
                   <span className="w-2 h-2 bg-white/20 rounded-full" />
                   이번주
                 </h2>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {news
                     .filter((n) => n.freshness === "week")
                     .map((item) => (

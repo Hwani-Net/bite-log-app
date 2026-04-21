@@ -889,59 +889,78 @@ export default function BiteForecastPage() {
   const [locationName, setLocationName] = useState("현재 위치");
 
   useEffect(() => {
-    async function load() {
-      setLoading(true);
-      try {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            async (pos) => {
-              const lat = pos.coords.latitude;
-              const lng = pos.coords.longitude;
-              const [w, t, m, fi] = await Promise.all([
-                fetchWeather(lat, lng),
-                fetchTideData(lat, lng),
-                fetchMarineData(lat, lng),
-                fetchFishingIndex(lat, lng),
-              ]);
-              setWeather(w);
-              setTideData(t);
-              setMarine(m);
-              setFishingIndex(fi);
-              setBiteTime(calculateBiteTime(w, t, m));
-              if (t) setLocationName(t.stationName || "현재 위치");
-              setLoading(false);
-            },
-            async () => {
-              // No location permission — fallback to nearest coast from Seoul
-              const DEFAULT_LAT = 37.45; // 인천 앞바다
-              const DEFAULT_LNG = 126.4;
-              const [w, m] = await Promise.allSettled([
-                fetchWeather(DEFAULT_LAT, DEFAULT_LNG),
-                fetchMarineData(DEFAULT_LAT, DEFAULT_LNG),
-              ]);
-              const fallbackWeather = w.status === "fulfilled" ? w.value : null;
-              const fallbackMarine = m.status === "fulfilled" ? m.value : null;
-              setWeather(fallbackWeather);
-              setTideData(null);
-              setMarine(fallbackMarine);
-              setBiteTime(
-                calculateBiteTime(fallbackWeather, null, fallbackMarine),
-              );
-              setLocationName("인천 앞바다 (기본)");
-              setLoading(false);
-            },
-            { timeout: 8000, maximumAge: 300000 },
-          );
-        } else {
-          setBiteTime(calculateBiteTime(null, null));
-          setLoading(false);
-        }
-      } catch {
-        setBiteTime(calculateBiteTime(null, null));
-        setLoading(false);
+    // Fallback coordinates (제주도 중심) — used when geolocation fails or times out.
+    // Keeps the page renderable even without location permission.
+    const DEFAULT_LAT = 33.4996;
+    const DEFAULT_LNG = 126.5312;
+
+    async function loadWithCoords(
+      lat: number,
+      lng: number,
+      isFallback: boolean,
+    ) {
+      // Use allSettled so a single slow/failing API does not block the rest.
+      const [wRes, tRes, mRes, fiRes] = await Promise.allSettled([
+        fetchWeather(lat, lng),
+        fetchTideData(lat, lng),
+        fetchMarineData(lat, lng),
+        fetchFishingIndex(lat, lng),
+      ]);
+      const w = wRes.status === "fulfilled" ? wRes.value : null;
+      const t = tRes.status === "fulfilled" ? tRes.value : null;
+      const m = mRes.status === "fulfilled" ? mRes.value : null;
+      const fi = fiRes.status === "fulfilled" ? fiRes.value : null;
+      setWeather(w);
+      setTideData(t);
+      setMarine(m);
+      setFishingIndex(fi);
+      setBiteTime(calculateBiteTime(w, t, m));
+      if (isFallback) {
+        setLocationName("제주도 (기본)");
+      } else if (t) {
+        setLocationName(t.stationName || "현재 위치");
       }
+      setLoading(false);
     }
-    load();
+
+    // Initial loading=true is already set by useState — no need to re-set here.
+    // Location-independent sections (e.g. 해양수산부 바다낚시지수) render via the
+    // loading branch below while geolocation is still resolving.
+
+    if (!navigator.geolocation) {
+      // No geolocation support — fall back to default coords directly.
+      loadWithCoords(DEFAULT_LAT, DEFAULT_LNG, true);
+      return;
+    }
+
+    // Safety net: if the browser never calls back (some environments silently
+    // drop geolocation callbacks), force-resolve with fallback after 5s.
+    let resolved = false;
+    const fallbackTimer = setTimeout(() => {
+      if (resolved) return;
+      resolved = true;
+      loadWithCoords(DEFAULT_LAT, DEFAULT_LNG, true);
+    }, 5500);
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(fallbackTimer);
+        loadWithCoords(pos.coords.latitude, pos.coords.longitude, false);
+      },
+      () => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(fallbackTimer);
+        loadWithCoords(DEFAULT_LAT, DEFAULT_LNG, true);
+      },
+      { timeout: 5000, maximumAge: 60000 },
+    );
+
+    return () => {
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   const phase = tideData ? getCurrentPhase(tideData) : null;
@@ -976,13 +995,25 @@ export default function BiteForecastPage() {
         </div>
       </header>
 
-      {/* Loading state */}
+      {/* Loading state — non-blocking: show skeleton for location-dependent widgets
+          while keeping location-independent sections (official bite index) visible. */}
       {loading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-16 h-16 border-4 border-[#c9a84c]/20 border-t-[#c9a84c] rounded-full animate-spin" />
-            <p className="text-sm text-white/60">위치 기반 데이터 분석 중...</p>
+        <div className="space-y-4 px-4 pt-4">
+          {/* Compact inline loader (does NOT cover the page) */}
+          <div className="glass-morphism rounded-2xl border border-white/5 p-5 flex items-center gap-4">
+            <div className="w-10 h-10 border-2 border-[#c9a84c]/20 border-t-[#c9a84c] rounded-full animate-spin shrink-0" />
+            <div>
+              <p className="text-sm font-bold text-white">
+                위치 기반 데이터 분석 중
+              </p>
+              <p className="text-[11px] text-white/50 mt-0.5">
+                위치 권한이 없어도 아래 바다낚시지수는 볼 수 있습니다
+              </p>
+            </div>
           </div>
+
+          {/* Location-independent: 해양수산부 공식 바다낚시지수 renders immediately */}
+          <BiteIndexOfficialSection />
         </div>
       ) : biteTime ? (
         <div className="space-y-4 px-4 pt-4">

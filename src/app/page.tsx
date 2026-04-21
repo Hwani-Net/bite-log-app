@@ -169,35 +169,40 @@ function StatBar({
   totalCatch,
   thisMonth,
   maxSize,
+  loading,
 }: {
   totalCatch: number;
   thisMonth: number;
   maxSize: number;
+  loading?: boolean;
 }) {
+  // Show "--" placeholder while loading so users don't misread unlabeled "0".
+  // Numbers only render once records have actually been fetched.
+  const fmt = (n: number) => (loading ? "--" : n === 0 ? "0" : n);
   return (
     <section className="grid grid-cols-3 gap-0.5 p-[1px]">
       <div className="glass-morphism py-6 flex flex-col items-center">
         <span className="text-4xl font-extrabold text-white mb-1">
-          {totalCatch}
+          {fmt(totalCatch)}
         </span>
-        <span className="text-[0.5rem] font-thin uppercase tracking-[0.3em] text-white/60">
-          조과
+        <span className="text-[0.6rem] font-medium uppercase tracking-[0.25em] text-white/70">
+          조과 (마리)
         </span>
       </div>
       <div className="glass-morphism py-6 flex flex-col items-center border-x border-white/5">
         <span className="text-4xl font-extrabold text-[#c9a84c] mb-1 gold-glow">
-          {thisMonth}
+          {fmt(thisMonth)}
         </span>
-        <span className="text-[0.5rem] font-thin uppercase tracking-[0.3em] text-white/60">
-          이번 달
+        <span className="text-[0.6rem] font-medium uppercase tracking-[0.25em] text-white/70">
+          이번 달 (마리)
         </span>
       </div>
       <div className="glass-morphism py-6 flex flex-col items-center">
         <span className="text-4xl font-extrabold text-[#7dd3fc] mb-1 blue-glow">
-          {maxSize || "--"}
+          {loading ? "--" : maxSize || "--"}
         </span>
-        <span className="text-[0.5rem] font-thin uppercase tracking-[0.3em] text-white/60">
-          최대(cm)
+        <span className="text-[0.6rem] font-medium uppercase tracking-[0.25em] text-white/70">
+          최대 사이즈 (cm)
         </span>
       </div>
     </section>
@@ -647,6 +652,7 @@ export default function HomePage() {
             totalCatch={totalCatch}
             thisMonth={thisMonthCatch}
             maxSize={maxSize}
+            loading={recordsLoading}
           />
 
           {/* Daily Fishing Tip */}
