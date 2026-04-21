@@ -1,4 +1,4 @@
-# Updated: 2026-04-21 — Naver API keys activated
+# Updated: 2026-04-21 — Naver + KHOA API keys activated
 runConfig:
   cpu: 1
   memoryMiB: 512
