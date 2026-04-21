@@ -122,10 +122,8 @@ export async function fetchTideData(
       date || new Date().toISOString().split("T")[0].replace(/-/g, ""); // YYYYMMDD
 
     const params = new URLSearchParams({
-      pageNo: "1",
-      numOfRows: "10",
-      obs_post_id: nearest.code,
-      date: targetDate,
+      obsCode: nearest.code,
+      reqDate: targetDate,
     });
     const apiUrl = `/api/tide?${params.toString()}`;
 
@@ -158,27 +156,42 @@ export async function fetchTideData(
     }
 
     interface KhoaTideItem {
+      // New API (GetTideFcstHghLwApiService, 2026.4+)
+      predcDt?: string; // "2026-04-21 01:30"
+      predcTdlvVl?: number; // 183.0 (cm)
+      extrSe?: number; // 1=오전고조 2=오전저조 3=오후고조 4=오후저조
+      obsvtrNm?: string; // 예보지점명
+      // Legacy fields (fallback)
       tph_time?: string;
       obs_time?: string;
       hl_code?: string;
       tph_level?: string;
       tide_level?: string;
-      obs_level?: string;
     }
+
     const tides = items
       .map((item: KhoaTideItem) => {
-        // time format: "2026-03-01 04:54:00" -> "04:54"
-        const timeStr = item.tph_time || item.obs_time || "";
+        // New API: predcDt "2026-04-21 01:30" → "01:30"
+        const timeStr = item.predcDt || item.tph_time || item.obs_time || "";
         const time = timeStr.split(" ")[1]?.substring(0, 5) || "";
 
-        return {
-          type: (item.hl_code === "고조" || item.hl_code === "H"
-            ? "High"
-            : "Low") as "High" | "Low",
-          time,
-          level: parseInt(item.tph_level || item.tide_level || "0", 10),
-        };
+        // extrSe: 1=오전고조, 3=오후고조 → High; 2=오전저조, 4=오후저조 → Low
+        let type: "High" | "Low";
+        if (item.extrSe !== undefined) {
+          type = item.extrSe === 1 || item.extrSe === 3 ? "High" : "Low";
+        } else {
+          type =
+            item.hl_code === "고조" || item.hl_code === "H" ? "High" : "Low";
+        }
+
+        const level =
+          item.predcTdlvVl !== undefined
+            ? Math.round(item.predcTdlvVl)
+            : parseInt(item.tph_level || item.tide_level || "0", 10);
+
+        return { type, time, level };
       })
+      .filter((t: TideInfo) => t.time !== "")
       .sort((a: TideInfo, b: TideInfo) => a.time.localeCompare(b.time));
 
     if (tides.length === 0) return getMockTideData(nearest.name);
