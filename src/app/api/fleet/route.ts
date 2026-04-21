@@ -153,6 +153,30 @@ const MOCK_DYNAMIC: DynamicRecord[] = [
     course: 45,
     timestamp: new Date().toISOString(),
   },
+  {
+    mmsi: "666666666",
+    lat: 34.88,
+    lon: 128.55,
+    speed: 1,
+    course: 10,
+    timestamp: new Date().toISOString(),
+  },
+  {
+    mmsi: "777777777",
+    lat: 34.83,
+    lon: 128.7,
+    speed: 8,
+    course: 315,
+    timestamp: new Date().toISOString(),
+  },
+  {
+    mmsi: "888888888",
+    lat: 34.95,
+    lon: 128.63,
+    speed: 0,
+    course: 0,
+    timestamp: new Date().toISOString(),
+  },
 ];
 
 const MOCK_STATIC: StaticRecord[] = [
@@ -190,6 +214,27 @@ const MOCK_STATIC: StaticRecord[] = [
     shipType: "fishing",
     tonnage: 9,
     length: 15,
+  },
+  {
+    mmsi: "666666666",
+    shipName: "청해호",
+    shipType: "fishing",
+    tonnage: 2,
+    length: 9,
+  },
+  {
+    mmsi: "777777777",
+    shipName: "한려수도호",
+    shipType: "cargo",
+    tonnage: 120,
+    length: 52,
+  },
+  {
+    mmsi: "888888888",
+    shipName: "남해별",
+    shipType: "fishing",
+    tonnage: 1,
+    length: 7,
   },
 ];
 
@@ -979,43 +1024,93 @@ export async function GET(request: NextRequest) {
     }
     const params = parsed.data;
 
-    // 2. Dynamic + Static 데이터 병렬 fetch (primary: odcloud/data.go.kr)
-    const [dynamicResult, staticResult] = await Promise.all([
-      fetchDynamic(),
-      fetchStatic(),
-    ]);
+    // 2. API 키 유무 확인 — 키가 없으면 외부 API/WebSocket 시도 없이 mock 즉시 반환
+    const hasFleetApiKey = !!process.env.FLEET_API_KEY;
+    const hasAisStreamKey = !!process.env.AISSTREAM_API_KEY;
+    const hasKhoaKey = !!process.env.NEXT_PUBLIC_KHOA_API_KEY;
+    const useMockFlag = process.env.FLEET_USE_MOCK === "true";
 
-    // 3. 데이터 소스 우선순위: AISStream → ODCloud → KHOA → Mock
+    // 데이터 소스 우선순위: AISStream → ODCloud → KHOA → Mock
     let rawFleet: FleetEntry[];
     let dataSource: "aisstream" | "primary" | "khoa" | "mock" = "primary";
 
-    // 1순위: AISStream.io (실시간 WebSocket)
-    const aisResult = await fetchFromAISStream();
-    if (aisResult && aisResult.dynamic.length > 0) {
-      rawFleet = joinFleetData(aisResult.dynamic, aisResult.staticMap);
-      dataSource = "aisstream";
-    } else if (dynamicResult.fallback && staticResult.fallback) {
-      // dynamic + static 모두 실패 시에만 KHOA로 fallback
-      // (static만 실패해도 dynamic 데이터는 그대로 사용 — joinFleetData가 static 없이도 동작)
+    if (useMockFlag || (!hasFleetApiKey && !hasAisStreamKey && !hasKhoaKey)) {
+      // 모든 API 키가 없는 환경 (로컬 개발, 키 미설정) → mock 즉시 반환
+      rawFleet = joinFleetData(
+        MOCK_DYNAMIC,
+        new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
+      );
+      dataSource = "mock";
+      structuredLog("info", {
+        timestamp: new Date().toISOString(),
+        event: "fleet.mock.immediate",
+        reason: useMockFlag ? "FLEET_USE_MOCK=true" : "no API keys configured",
+      });
+    } else if (hasAisStreamKey) {
+      // 1순위: AISStream.io (실시간 WebSocket)
+      const aisResult = await fetchFromAISStream();
+      if (aisResult && aisResult.dynamic.length > 0) {
+        rawFleet = joinFleetData(aisResult.dynamic, aisResult.staticMap);
+        dataSource = "aisstream";
+      } else {
+        // AISStream 실패 → ODCloud 또는 mock
+        if (hasFleetApiKey) {
+          const [dynamicResult, staticResult] = await Promise.all([
+            fetchDynamic(),
+            fetchStatic(),
+          ]);
+          rawFleet = joinFleetData(dynamicResult.data, staticResult.data);
+          dataSource = dynamicResult.fallback ? "mock" : "primary";
+        } else {
+          rawFleet = joinFleetData(
+            MOCK_DYNAMIC,
+            new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
+          );
+          dataSource = "mock";
+        }
+      }
+    } else if (hasFleetApiKey) {
+      // 2순위: ODCloud AIS API (data.go.kr)
+      const [dynamicResult, staticResult] = await Promise.all([
+        fetchDynamic(),
+        fetchStatic(),
+      ]);
+
+      if (dynamicResult.fallback && staticResult.fallback && hasKhoaKey) {
+        // dynamic + static 모두 실패 시 KHOA로 fallback
+        const khoaData = await fetchFromKhoa();
+        if (khoaData && khoaData.dynamic.length > 0) {
+          rawFleet = joinFleetData(khoaData.dynamic, khoaData.staticMap);
+          dataSource = "khoa";
+          structuredLog("info", {
+            timestamp: new Date().toISOString(),
+            event: "fleet.khoa.success",
+            count: rawFleet.length,
+          });
+        } else {
+          rawFleet = joinFleetData(
+            MOCK_DYNAMIC,
+            new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
+          );
+          dataSource = "mock";
+        }
+      } else {
+        rawFleet = joinFleetData(dynamicResult.data, staticResult.data);
+        dataSource = dynamicResult.fallback ? "mock" : "primary";
+      }
+    } else {
+      // 3순위: KHOA만 있는 경우
       const khoaData = await fetchFromKhoa();
       if (khoaData && khoaData.dynamic.length > 0) {
         rawFleet = joinFleetData(khoaData.dynamic, khoaData.staticMap);
         dataSource = "khoa";
-        structuredLog("info", {
-          timestamp: new Date().toISOString(),
-          event: "fleet.khoa.success",
-          count: rawFleet.length,
-        });
       } else {
-        // 모든 외부 소스 실패 → mock 데이터 사용
         rawFleet = joinFleetData(
           MOCK_DYNAMIC,
           new Map(MOCK_STATIC.map((s) => [s.mmsi, s])),
         );
         dataSource = "mock";
       }
-    } else {
-      rawFleet = joinFleetData(dynamicResult.data, staticResult.data);
     }
 
     // 4. 필터 적용
