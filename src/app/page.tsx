@@ -471,9 +471,9 @@ function CommunityFeedBanner() {
       <div className="flex items-center gap-3">
         <Users size={18} className="text-[#c9a84c]/70" />
         <div>
-          <p className="text-[0.65rem] font-bold text-white/80 uppercase tracking-[0.15em]">
+          <h3 className="text-[0.65rem] font-bold text-white/80 uppercase tracking-[0.15em]">
             최신 조과 피드
-          </p>
+          </h3>
           <p className="text-[0.5rem] text-white/30 mt-0.5">
             다른 낚시인의 오늘 조과 보기
           </p>
@@ -697,6 +697,13 @@ export default function HomePage() {
                   { href: "/fleet-radar", icon: "radar", label: "함대 레이더" },
                   { href: "/settings", icon: "settings", label: "설정" },
                   { href: "/live-dashboard", icon: "sensors", label: "라이브" },
+                  {
+                    href: "/alerts",
+                    icon: "notifications",
+                    label: "알림",
+                  },
+                  { href: "/news", icon: "newspaper", label: "낚시 뉴스" },
+                  { href: "/regulations", icon: "shield", label: "낚시 규정" },
                 ] as { href: string; icon: string; label: string }[]
               ).map(({ href, icon, label }) => (
                 <Link
