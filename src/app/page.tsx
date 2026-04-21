@@ -28,6 +28,7 @@ import {
   Trophy,
   CalendarDays,
   Map,
+  ChevronRight,
 } from "lucide-react";
 import SeasonAlertBanner from "@/components/SeasonAlertBanner";
 import SafeZoneBanner from "@/components/SafeZoneBanner";
@@ -487,9 +488,7 @@ function CommunityFeedBanner() {
           </p>
         </div>
       </div>
-      <span className="text-[0.5rem] text-white/20 uppercase tracking-widest">
-        →
-      </span>
+      <ChevronRight size={14} className="text-white/20" />
     </a>
   );
 }
