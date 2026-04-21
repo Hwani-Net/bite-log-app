@@ -26,6 +26,9 @@ import {
   Users,
   PenLine,
   Radar,
+  Trophy,
+  CalendarDays,
+  Map,
 } from "lucide-react";
 import SeasonAlertBanner from "@/components/SeasonAlertBanner";
 import MonthlyFishCard from "@/components/MonthlyFishCard";
@@ -623,6 +626,27 @@ export default function HomePage() {
             >
               <Radar size={14} className="text-[#c9a84c]" />
               선단 레이더
+            </Link>
+            <Link
+              href="/ranking"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white/60 hover:border-[#c9a84c]/30 transition-all"
+            >
+              <Trophy size={14} className="text-[#c9a84c]" />
+              랭킹
+            </Link>
+            <Link
+              href="/booking"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white/60 hover:border-[#c9a84c]/30 transition-all"
+            >
+              <CalendarDays size={14} className="text-[#7dd3fc]" />
+              예약
+            </Link>
+            <Link
+              href="/trip-plan"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white/60 hover:border-[#c9a84c]/30 transition-all"
+            >
+              <Map size={14} className="text-[#c9a84c]" />
+              조행 계획
             </Link>
           </div>
 

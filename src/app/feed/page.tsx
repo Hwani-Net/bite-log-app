@@ -21,6 +21,7 @@ export default function FeedPage() {
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [commentInputId, setCommentInputId] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
+  const [feedError, setFeedError] = useState<string | null>(null);
 
   // Filter state
   const [filterType, setFilterType] = useState<FilterType>("all");
@@ -30,6 +31,7 @@ export default function FeedPage() {
   useEffect(() => {
     getPublicFeed()
       .then((items) => setFeed(items))
+      .catch(() => setFeedError("피드를 불러올 수 없습니다."))
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLikedIds(getLikedSet());
@@ -237,8 +239,15 @@ export default function FeedPage() {
           </div>
         )}
 
+        {/* Error state */}
+        {!loading && feedError && (
+          <div className="text-center py-20">
+            <p className="text-white/40 text-sm">{feedError}</p>
+          </div>
+        )}
+
         {/* Empty state */}
-        {!loading && filteredFeed.length === 0 && (
+        {!loading && !feedError && filteredFeed.length === 0 && (
           <div className="text-center py-20">
             <DynamicIcon
               name={filterType === "all" ? "explore" : "filter_list"}
@@ -275,158 +284,161 @@ export default function FeedPage() {
         )}
 
         {/* Feed cards */}
-        {filteredFeed.map((item) => {
-          const isLiked = likedIds.has(item.id);
-          const showComments = commentInputId === item.id;
+        {!feedError &&
+          filteredFeed.map((item) => {
+            const isLiked = likedIds.has(item.id);
+            const showComments = commentInputId === item.id;
 
-          return (
-            <article
-              key={item.id}
-              className="bg-white/5 backdrop-blur-[12px] border border-white/10 rounded-2xl overflow-hidden"
-            >
-              {/* User header */}
-              <div className="px-4 pt-4 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#c9a84c] to-[#7dd3fc] flex items-center justify-center text-[#080d14] text-sm font-bold">
-                  {item.userDisplayName.charAt(0)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">
-                    {item.userDisplayName}
-                  </p>
-                  <p className="text-[10px] text-white/30">
-                    {item.date} · {item.location.name}
-                  </p>
-                </div>
-                {/* Region badge */}
-                {item.location.region && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/60 font-medium">
-                    {item.location.region}
-                  </span>
-                )}
-              </div>
-
-              {/* Photo */}
-              {item.photos.length > 0 && (
-                <div className="px-4 pt-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={item.photos[0]}
-                    alt={`${item.species} catch`}
-                    className="w-full h-48 object-cover rounded-xl"
-                  />
-                </div>
-              )}
-
-              {/* Catch info */}
-              <div className="px-4 pt-3 pb-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-bold text-[#7dd3fc] w-8 text-center">
-                    {item.species.slice(0, 2)}
-                  </span>
-                  <div>
-                    <p className="text-base font-bold text-white">
-                      {item.species}
-                      <span className="text-sm font-normal text-[#c9a84c] ml-1.5">
-                        {item.count}
-                        {locale === "ko" ? "마리" : " fish"}
-                      </span>
+            return (
+              <article
+                key={item.id}
+                className="bg-white/5 backdrop-blur-[12px] border border-white/10 rounded-2xl overflow-hidden"
+              >
+                {/* User header */}
+                <div className="px-4 pt-4 flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#c9a84c] to-[#7dd3fc] flex items-center justify-center text-[#080d14] text-sm font-bold">
+                    {item.userDisplayName.charAt(0)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">
+                      {item.userDisplayName}
                     </p>
-                    {item.sizeCm && (
-                      <p className="text-xs text-white/50">{item.sizeCm}cm</p>
+                    <p className="text-[10px] text-white/30">
+                      {item.date} · {item.location.name}
+                    </p>
+                  </div>
+                  {/* Region badge */}
+                  {item.location.region && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/60 font-medium">
+                      {item.location.region}
+                    </span>
+                  )}
+                </div>
+
+                {/* Photo */}
+                {item.photos.length > 0 && (
+                  <div className="px-4 pt-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.photos[0]}
+                      alt={`${item.species} catch`}
+                      className="w-full h-48 object-cover rounded-xl"
+                    />
+                  </div>
+                )}
+
+                {/* Catch info */}
+                <div className="px-4 pt-3 pb-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-bold text-[#7dd3fc] w-8 text-center">
+                      {item.species.slice(0, 2)}
+                    </span>
+                    <div>
+                      <p className="text-base font-bold text-white">
+                        {item.species}
+                        <span className="text-sm font-normal text-[#c9a84c] ml-1.5">
+                          {item.count}
+                          {locale === "ko" ? "마리" : " fish"}
+                        </span>
+                      </p>
+                      {item.sizeCm && (
+                        <p className="text-xs text-white/50">{item.sizeCm}cm</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {item.weather && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a84c]/10 text-[#c9a84c] font-medium">
+                        {item.weather.condition} {item.weather.tempC}°C
+                      </span>
+                    )}
+                    {item.tide && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#7dd3fc]/10 text-[#7dd3fc] font-medium">
+                        {item.tide.stationName}
+                      </span>
                     )}
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                  {item.weather && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a84c]/10 text-[#c9a84c] font-medium">
-                      {item.weather.condition} {item.weather.tempC}°C
+
+                {/* Action bar */}
+                <div className="border-t border-white/5 px-4 py-2 flex items-center gap-4">
+                  <button
+                    onClick={() => handleLike(item.id)}
+                    aria-label={`${locale === "ko" ? "좋아요" : "Like"} ${item.likeCount > 0 ? item.likeCount : ""}`}
+                    className={`flex items-center gap-1.5 text-sm font-medium transition-all ${isLiked ? "text-red-400 scale-110" : "text-white/30 hover:text-red-400"}`}
+                  >
+                    <Heart
+                      size={20}
+                      fill={isLiked ? "#f87171" : "none"}
+                      color={isLiked ? "#f87171" : "currentColor"}
+                    />
+                    <span>{item.likeCount > 0 ? item.likeCount : ""}</span>
+                  </button>
+                  <button
+                    onClick={() =>
+                      setCommentInputId(showComments ? null : item.id)
+                    }
+                    aria-label={`${locale === "ko" ? "댓글" : "Comment"} ${item.commentCount > 0 ? item.commentCount : ""}`}
+                    className="flex items-center gap-1.5 text-sm font-medium text-white/30 hover:text-[#7dd3fc] transition-colors"
+                  >
+                    <MessageCircle size={20} />
+                    <span>
+                      {item.commentCount > 0 ? item.commentCount : ""}
                     </span>
-                  )}
-                  {item.tide && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#7dd3fc]/10 text-[#7dd3fc] font-medium">
-                      {item.tide.stationName}
-                    </span>
-                  )}
+                  </button>
                 </div>
-              </div>
 
-              {/* Action bar */}
-              <div className="border-t border-white/5 px-4 py-2 flex items-center gap-4">
-                <button
-                  onClick={() => handleLike(item.id)}
-                  aria-label={`${locale === "ko" ? "좋아요" : "Like"} ${item.likeCount > 0 ? item.likeCount : ""}`}
-                  className={`flex items-center gap-1.5 text-sm font-medium transition-all ${isLiked ? "text-red-400 scale-110" : "text-white/30 hover:text-red-400"}`}
-                >
-                  <Heart
-                    size={20}
-                    fill={isLiked ? "#f87171" : "none"}
-                    color={isLiked ? "#f87171" : "currentColor"}
-                  />
-                  <span>{item.likeCount > 0 ? item.likeCount : ""}</span>
-                </button>
-                <button
-                  onClick={() =>
-                    setCommentInputId(showComments ? null : item.id)
-                  }
-                  aria-label={`${locale === "ko" ? "댓글" : "Comment"} ${item.commentCount > 0 ? item.commentCount : ""}`}
-                  className="flex items-center gap-1.5 text-sm font-medium text-white/30 hover:text-[#7dd3fc] transition-colors"
-                >
-                  <MessageCircle size={20} />
-                  <span>{item.commentCount > 0 ? item.commentCount : ""}</span>
-                </button>
-              </div>
-
-              {/* Comments section */}
-              {(showComments ||
-                (item.comments && item.comments.length > 0)) && (
-                <div className="px-4 pb-3 space-y-2">
-                  {item.comments?.map((c) => (
-                    <div key={c.id} className="flex items-start gap-2">
-                      <div className="w-6 h-6 rounded-full bg-[#c9a84c]/20 flex items-center justify-center text-[10px] font-bold text-[#c9a84c] shrink-0 mt-0.5">
-                        {c.userDisplayName.charAt(0)}
+                {/* Comments section */}
+                {(showComments ||
+                  (item.comments && item.comments.length > 0)) && (
+                  <div className="px-4 pb-3 space-y-2">
+                    {item.comments?.map((c) => (
+                      <div key={c.id} className="flex items-start gap-2">
+                        <div className="w-6 h-6 rounded-full bg-[#c9a84c]/20 flex items-center justify-center text-[10px] font-bold text-[#c9a84c] shrink-0 mt-0.5">
+                          {c.userDisplayName.charAt(0)}
+                        </div>
+                        <div className="flex-1 bg-white/5 rounded-xl px-3 py-2">
+                          <p className="text-[10px] font-semibold text-white/50">
+                            {c.userDisplayName}
+                          </p>
+                          <p className="text-xs text-white/70">{c.content}</p>
+                        </div>
                       </div>
-                      <div className="flex-1 bg-white/5 rounded-xl px-3 py-2">
-                        <p className="text-[10px] font-semibold text-white/50">
-                          {c.userDisplayName}
-                        </p>
-                        <p className="text-xs text-white/70">{c.content}</p>
-                      </div>
-                    </div>
-                  ))}
-                  {showComments && (
-                    <div className="flex items-center gap-2 mt-1">
-                      <input
-                        type="text"
-                        value={commentText}
-                        onChange={(e) => setCommentText(e.target.value)}
-                        onKeyDown={(e) =>
-                          e.key === "Enter" && handleComment(item)
-                        }
-                        placeholder={
-                          locale === "ko"
-                            ? "댓글을 입력하세요..."
-                            : "Add a comment..."
-                        }
-                        className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-xs text-white placeholder:text-white/30 outline-none focus:border-[#c9a84c]/50"
-                      />
-                      <button
-                        onClick={() => handleComment(item)}
-                        disabled={!commentText.trim()}
-                        className="w-8 h-8 rounded-full bg-[#c9a84c] flex items-center justify-center disabled:opacity-40"
-                      >
-                        <DynamicIcon
-                          name="send"
-                          size={16}
-                          className="text-[#080d14]"
+                    ))}
+                    {showComments && (
+                      <div className="flex items-center gap-2 mt-1">
+                        <input
+                          type="text"
+                          value={commentText}
+                          onChange={(e) => setCommentText(e.target.value)}
+                          onKeyDown={(e) =>
+                            e.key === "Enter" && handleComment(item)
+                          }
+                          placeholder={
+                            locale === "ko"
+                              ? "댓글을 입력하세요..."
+                              : "Add a comment..."
+                          }
+                          className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-xs text-white placeholder:text-white/30 outline-none focus:border-[#c9a84c]/50"
                         />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </article>
-          );
-        })}
+                        <button
+                          onClick={() => handleComment(item)}
+                          disabled={!commentText.trim()}
+                          className="w-8 h-8 rounded-full bg-[#c9a84c] flex items-center justify-center disabled:opacity-40"
+                        >
+                          <DynamicIcon
+                            name="send"
+                            size={16}
+                            className="text-[#080d14]"
+                          />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </article>
+            );
+          })}
       </div>
     </div>
   );

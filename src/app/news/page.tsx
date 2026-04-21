@@ -29,7 +29,7 @@ function FreshnessBadge({ freshness }: { freshness: string }) {
     realtime: {
       bg: "bg-red-500",
       text: "text-white",
-      label: "실시간",
+      label: process.env.NEXT_PUBLIC_NAVER_CLIENT_ID ? "실시간" : "예시",
       dotCls: "bg-white",
     },
     today: {
@@ -301,7 +301,9 @@ export default function NewsPage() {
               <div className="mb-4">
                 <h2 className="text-xs font-bold text-red-400 mb-2 flex items-center gap-1">
                   <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                  실시간 — 1시간 이내
+                  {process.env.NEXT_PUBLIC_NAVER_CLIENT_ID
+                    ? "실시간 — 1시간 이내"
+                    : "예시 뉴스 — 1시간 이내"}
                 </h2>
                 <div className="space-y-3">
                   {news
