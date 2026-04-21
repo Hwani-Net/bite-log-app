@@ -684,13 +684,19 @@ export default function HomePage() {
           {!recordsLoading && !hasRecords && (
             <section className="py-10 flex flex-col items-center gap-4 text-center">
               <Fish size={48} className="text-[#c9a84c]/40" />
-              <p className="text-sm font-bold text-white/60 uppercase tracking-widest">
-                첫 조과를 기록해보세요!
-              </p>
+              <div className="space-y-1">
+                <p className="text-sm text-white/40">
+                  아직 조과 기록이 없습니다.
+                </p>
+                <p className="text-sm font-bold text-white/60 uppercase tracking-widest">
+                  첫 번째 조과를 기록해보세요!
+                </p>
+              </div>
               <Link
                 href="/record"
-                className="mt-2 px-6 py-2.5 rounded-full border border-[#c9a84c]/40 text-[#c9a84c] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[#c9a84c]/10 transition-colors"
+                className="mt-2 px-6 py-2.5 rounded-full border border-[#c9a84c]/40 text-[#c9a84c] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[#c9a84c]/10 transition-colors flex items-center gap-2"
               >
+                <Fish size={14} />
                 기록하기
               </Link>
             </section>
