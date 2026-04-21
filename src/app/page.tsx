@@ -30,6 +30,7 @@ import {
   Map,
 } from "lucide-react";
 import SeasonAlertBanner from "@/components/SeasonAlertBanner";
+import SafeZoneBanner from "@/components/SafeZoneBanner";
 import MonthlyFishCard from "@/components/MonthlyFishCard";
 import MonthlySummaryCard from "@/components/MonthlySummaryCard";
 import DailyFishingTip from "@/components/DailyFishingTip";
@@ -654,6 +655,9 @@ export default function HomePage() {
             maxSize={maxSize}
             loading={recordsLoading}
           />
+
+          {/* SafeZone 금어기 알림 */}
+          <SafeZoneBanner />
 
           {/* Daily Fishing Tip */}
           <DailyFishingTip />

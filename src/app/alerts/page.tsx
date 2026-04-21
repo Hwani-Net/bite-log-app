@@ -20,6 +20,7 @@ import {
   getNotificationPermission,
   isPushSupported,
 } from "@/services/pushNotificationService";
+import SafeZoneBanner from "@/components/SafeZoneBanner";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -521,6 +522,11 @@ export default function AlertsPage() {
       </div>
 
       <div className="max-w-lg mx-auto space-y-4">
+        {/* SafeZone 금어기 배너 */}
+        <div className="px-4 pt-4">
+          <SafeZoneBanner />
+        </div>
+
         {/* 알림 권한 배너 */}
         <PermissionBanner
           permission={permission}
