@@ -20,7 +20,6 @@ import {
 import {
   FleetEntry,
   SafeHarborZone,
-  fetchFleetData,
   computeSafeHarbors,
   checkProximityAlert,
 } from "@/services/fleetRadarService";
@@ -36,11 +35,101 @@ interface UserPosition {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const REFRESH_INTERVAL_MS = 30_000;
 const DEFAULT_CENTER: [number, number] = [34.89, 128.62]; // 남해 중심부
 const DEFAULT_ZOOM = 10;
 
 const KOREA_SEA_TILES = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+
+const AISSTREAM_URL = "wss://stream.aisstream.io/v0/stream";
+const AISSTREAM_API_KEY = "3e4e0258e0fcfa31209ea2eb45b8a1a3baff6471";
+
+/** 총톤수 기준 미만 → small, 이상 → large */
+const TONNAGE_THRESHOLD = 3;
+
+// ─── Mock fallback data (한국 어선 5척) @mock-data — AISStream 연결 실패 시 fallback ──
+
+const MOCK_FLEET: FleetEntry[] = [
+  {
+    mmsi: "111111111",
+    lat: 34.89,
+    lon: 128.62,
+    speed: 10,
+    course: 90,
+    timestamp: new Date().toISOString(),
+    shipName: "풍어호",
+    shipType: "fishing",
+    tonnage: 5,
+    length: 12,
+    sizeClass: "large",
+  },
+  {
+    mmsi: "222222222",
+    lat: 34.86,
+    lon: 128.65,
+    speed: 0,
+    course: 0,
+    timestamp: new Date().toISOString(),
+    shipName: "만선호",
+    shipType: "fishing",
+    tonnage: 2,
+    length: 8,
+    sizeClass: "small",
+  },
+  {
+    mmsi: "333333333",
+    lat: 34.92,
+    lon: 128.58,
+    speed: 15,
+    course: 180,
+    timestamp: new Date().toISOString(),
+    shipName: "갈매기호",
+    shipType: "fishing",
+    tonnage: 9,
+    length: 15,
+    sizeClass: "large",
+  },
+  {
+    mmsi: "444444444",
+    lat: 34.91,
+    lon: 128.68,
+    speed: 5,
+    course: 270,
+    timestamp: new Date().toISOString(),
+    shipName: "청해호",
+    shipType: "fishing",
+    tonnage: 2,
+    length: 9,
+    sizeClass: "small",
+  },
+  {
+    mmsi: "555555555",
+    lat: 34.85,
+    lon: 128.6,
+    speed: 2,
+    course: 45,
+    timestamp: new Date().toISOString(),
+    shipName: "남해별",
+    shipType: "fishing",
+    tonnage: 1,
+    length: 7,
+    sizeClass: "small",
+  },
+];
+
+// ─── AISStream helpers ────────────────────────────────────────────────────────
+
+function inferShipType(aisType: number): string {
+  if (aisType >= 30 && aisType <= 39) return "fishing";
+  if (aisType >= 60 && aisType <= 69) return "passenger";
+  if (aisType >= 70 && aisType <= 79) return "cargo";
+  if (aisType >= 80 && aisType <= 89) return "tanker";
+  if (aisType === 36 || aisType === 37) return "leisure";
+  return "other";
+}
+
+function classifySize(tonnage: number): "small" | "large" {
+  return tonnage < TONNAGE_THRESHOLD ? "small" : "large";
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -79,10 +168,10 @@ function courseDirection(deg: number): string {
 }
 
 function speedCategory(kt: number): { label: string; color: string } {
-  if (kt <= 1) return { label: "정박/대기", color: "#10b981" }; // Emerald
-  if (kt <= 5) return { label: "저속 운항", color: "#fbbf24" }; // Amber
-  if (kt <= 12) return { label: "정상 운항", color: "#00d4ff" }; // Cyan
-  return { label: "고속 운항", color: "#ef4444" }; // Red
+  if (kt <= 1) return { label: "정박/대기", color: "#10b981" };
+  if (kt <= 5) return { label: "저속 운항", color: "#fbbf24" };
+  if (kt <= 12) return { label: "정상 운항", color: "#00d4ff" };
+  return { label: "고속 운항", color: "#ef4444" };
 }
 
 // ─── Main Component ──────────────────────────────────────────────────────────
@@ -102,6 +191,28 @@ export default function FleetRadar() {
   const [selectedShip, setSelectedShip] = useState<FleetEntry | null>(null);
   const [mapReady, setMapReady] = useState(false);
 
+  // AISStream state
+  const wsRef = useRef<WebSocket | null>(null);
+  // Live maps accumulate data while WebSocket is open
+  const dynamicMapRef = useRef<
+    Map<
+      string,
+      {
+        lat: number;
+        lon: number;
+        speed: number;
+        course: number;
+        timestamp: string;
+      }
+    >
+  >(new Map());
+  const staticMapRef = useRef<
+    Map<
+      string,
+      { shipName: string; shipType: string; tonnage: number; length: number }
+    >
+  >(new Map());
+
   // Leaflet refs
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef = useRef<any>(null);
@@ -117,41 +228,206 @@ export default function FleetRadar() {
     );
   }, []);
 
-  // ── Data Fetching ──────────────────────────────────────────────────────────
-  const fetchAndProcess = useCallback(async () => {
-    try {
-      const options =
-        sizeFilter !== "all"
-          ? { size: sizeFilter as "small" | "large" }
-          : undefined;
-      const res = await fetchFleetData(options);
-      if (!res.ok) {
-        setError(res.error ?? "로드 실패");
-        return;
-      }
+  // ── Fleet snapshot builder (called periodically while WS is open) ──────────
+  const buildFleetSnapshot = useCallback(() => {
+    const entries: FleetEntry[] = [];
+    for (const [mmsi, dyn] of dynamicMapRef.current.entries()) {
+      const stat = staticMapRef.current.get(mmsi);
+      const tonnage = stat?.tonnage ?? 0;
+      entries.push({
+        mmsi,
+        lat: dyn.lat,
+        lon: dyn.lon,
+        speed: dyn.speed,
+        course: dyn.course,
+        timestamp: dyn.timestamp,
+        shipName: stat?.shipName ?? `선박 ${mmsi.slice(-4)}`,
+        shipType: stat?.shipType ?? "fishing",
+        tonnage,
+        length: stat?.length ?? 0,
+        sizeClass: classifySize(tonnage),
+      });
+    }
+    return entries;
+  }, []);
 
-      setFleet(res.data);
-      setSafeHarbors(computeSafeHarbors(res.data));
-      setIsMock(res.dataSource !== "aisstream");
-      setIsFallback(res.fallback ?? false);
+  // ── Apply sizeFilter + push to state ─────────────────────────────────────
+  const applyFilterAndUpdate = useCallback(
+    (rawFleet: FleetEntry[]) => {
+      const filtered =
+        sizeFilter === "all"
+          ? rawFleet
+          : rawFleet.filter((s) => s.sizeClass === sizeFilter);
+
+      setFleet(filtered);
+      setSafeHarbors(computeSafeHarbors(filtered));
       setLastUpdate(new Date().toLocaleTimeString("ko-KR"));
       setError(null);
 
       if (userPos) {
-        setAlerts(checkProximityAlert(res.data, userPos.lat, userPos.lon));
+        setAlerts(checkProximityAlert(filtered, userPos.lat, userPos.lon));
       }
-    } catch {
-      setError("네트워크 오류");
-    } finally {
-      setLoading(false);
-    }
-  }, [sizeFilter, userPos]);
+    },
+    [sizeFilter, userPos],
+  );
 
+  // ── AISStream WebSocket connection ────────────────────────────────────────
   useEffect(() => {
-    fetchAndProcess();
-    const id = setInterval(fetchAndProcess, REFRESH_INTERVAL_MS);
-    return () => clearInterval(id);
-  }, [fetchAndProcess]);
+    let ws: WebSocket;
+    let snapshotTimer: ReturnType<typeof setInterval>;
+    let fallbackTimer: ReturnType<typeof setTimeout>;
+    let closed = false;
+
+    const activateFallback = () => {
+      if (closed) return;
+      setIsMock(true);
+      setIsFallback(true);
+      setLoading(false);
+      applyFilterAndUpdate(MOCK_FLEET);
+    };
+
+    const connect = () => {
+      try {
+        ws = new WebSocket(AISSTREAM_URL);
+      } catch (err) {
+        console.error(
+          "[FleetRadar] WebSocket 생성 실패, mock fallback 사용:",
+          err,
+        );
+        activateFallback();
+        return;
+      }
+
+      wsRef.current = ws;
+
+      // If no open within 8s → fallback
+      fallbackTimer = setTimeout(() => {
+        if (dynamicMapRef.current.size === 0) {
+          activateFallback();
+        }
+      }, 8000);
+
+      ws.onopen = () => {
+        ws.send(
+          JSON.stringify({
+            APIKey: AISSTREAM_API_KEY,
+            BoundingBoxes: [
+              [
+                [33, 124],
+                [38, 131],
+              ],
+            ],
+            FilterMessageTypes: ["PositionReport", "ShipStaticData"],
+          }),
+        );
+
+        // Publish snapshot every 5 s while WS is alive
+        snapshotTimer = setInterval(() => {
+          const raw = buildFleetSnapshot();
+          if (raw.length > 0) {
+            setIsMock(false);
+            setIsFallback(false);
+            setLoading(false);
+            applyFilterAndUpdate(raw);
+          }
+        }, 5000);
+      };
+
+      ws.onmessage = (event: MessageEvent) => {
+        try {
+          const msg = JSON.parse(event.data as string) as Record<
+            string,
+            unknown
+          >;
+          const meta = msg["MetaData"] as Record<string, unknown> | undefined;
+          const mmsi = String(meta?.["MMSI"] ?? "");
+          if (!mmsi) return;
+
+          if (msg["MessageType"] === "PositionReport") {
+            const posMsg = msg["Message"] as
+              | Record<string, unknown>
+              | undefined;
+            const p = posMsg?.["PositionReport"] as
+              | Record<string, unknown>
+              | undefined;
+            if (!p) return;
+
+            dynamicMapRef.current.set(mmsi, {
+              lat: Number(meta?.["latitude"] ?? p["Latitude"] ?? 0),
+              lon: Number(meta?.["longitude"] ?? p["Longitude"] ?? 0),
+              speed: Number(p["Sog"] ?? 0),
+              course: Number(p["Cog"] ?? 0),
+              timestamp: new Date().toISOString(),
+            });
+
+            // First message → clear fallback timer, show data
+            clearTimeout(fallbackTimer);
+            if (loading) {
+              const raw = buildFleetSnapshot();
+              if (raw.length > 0) {
+                setIsMock(false);
+                setIsFallback(false);
+                setLoading(false);
+                applyFilterAndUpdate(raw);
+              }
+            }
+          } else if (msg["MessageType"] === "ShipStaticData") {
+            const staticMsg = msg["Message"] as
+              | Record<string, unknown>
+              | undefined;
+            const s = staticMsg?.["ShipStaticData"] as
+              | Record<string, unknown>
+              | undefined;
+            if (!s) return;
+
+            const dim = s["Dimension"] as Record<string, unknown> | undefined;
+            const rawName = String(
+              meta?.["ShipName"] ?? s["Name"] ?? "",
+            ).trim();
+
+            staticMapRef.current.set(mmsi, {
+              shipName: rawName || `선박 ${mmsi.slice(-4)}`,
+              shipType: inferShipType(Number(s["Type"] ?? 0)),
+              tonnage: 0,
+              length: Number(dim?.["A"] ?? 0) + Number(dim?.["B"] ?? 0),
+            });
+          }
+        } catch {
+          // ignore malformed messages
+        }
+      };
+
+      ws.onerror = () => {
+        clearTimeout(fallbackTimer);
+        clearInterval(snapshotTimer);
+        if (!closed) activateFallback();
+      };
+
+      ws.onclose = () => {
+        clearTimeout(fallbackTimer);
+        clearInterval(snapshotTimer);
+        if (!closed && dynamicMapRef.current.size === 0) activateFallback();
+      };
+    };
+
+    connect();
+
+    return () => {
+      closed = true;
+      clearTimeout(fallbackTimer);
+      clearInterval(snapshotTimer);
+      wsRef.current?.close();
+      wsRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Re-apply filter when sizeFilter or userPos changes
+  useEffect(() => {
+    if (fleet.length === 0 && !loading) return;
+    const raw = isMock ? MOCK_FLEET : buildFleetSnapshot();
+    applyFilterAndUpdate(raw);
+  }, [sizeFilter, userPos]); // intentionally limited deps
 
   // ── Leaflet initialization ───────────────────────────────────────────────
   useEffect(() => {
@@ -251,7 +527,7 @@ export default function FleetRadar() {
           <div style="font-size:11px;color:#666;margin-bottom:8px">
             ${shipTypeLabel(ship.shipType)} · ${ship.tonnage}GT · ${ship.speed}kt
           </div>
-          <button 
+          <button
             onclick="window.openShipDetail('${ship.mmsi}')"
             style="width:100%;padding:6px;background:#00d4ff;color:white;border:none;border-radius:6px;font-size:11px;font-weight:bold;cursor:pointer"
           >
@@ -277,6 +553,25 @@ export default function FleetRadar() {
       L.marker([userPos.lat, userPos.lon], { icon: userIcon }).addTo(map);
     }
   }, [fleet, safeHarbors, userPos, mapReady]);
+
+  // ── Manual refresh ────────────────────────────────────────────────────────
+  const handleRefresh = useCallback(() => {
+    setLoading(true);
+    // Re-snapshot current live data (or show fallback immediately)
+    const raw = buildFleetSnapshot();
+    if (raw.length > 0) {
+      setIsMock(false);
+      setIsFallback(false);
+      applyFilterAndUpdate(raw);
+      setLoading(false);
+    } else {
+      // No live data yet — show fallback while WS accumulates
+      applyFilterAndUpdate(MOCK_FLEET);
+      setIsMock(true);
+      setIsFallback(true);
+      setLoading(false);
+    }
+  }, [buildFleetSnapshot, applyFilterAndUpdate]);
 
   // ── Derived stats ─────────────────────────────────────────────────────────
   const smallCount = fleet.filter((s) => s.sizeClass === "small").length;
@@ -318,19 +613,15 @@ export default function FleetRadar() {
             </span>
           </h1>
           <div className="flex items-center gap-1.5 justify-center mt-0.5">
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse bg-emerald-500" />
+            <span
+              className={`w-1.5 h-1.5 rounded-full animate-pulse ${isMock ? "bg-amber-400" : "bg-emerald-500"}`}
+            />
             <span className="text-[10px] text-slate-400">
-              LIVE · {lastUpdate || "데이터 수신 중..."}
+              {isMock ? "MOCK" : "LIVE"} · {lastUpdate || "데이터 수신 중..."}
             </span>
           </div>
         </div>
-        <button
-          onClick={() => {
-            setLoading(true);
-            fetchAndProcess();
-          }}
-          className="p-2 text-cyan-400"
-        >
+        <button onClick={handleRefresh} className="p-2 text-cyan-400">
           <Activity size={18} />
         </button>
       </div>
@@ -390,7 +681,7 @@ export default function FleetRadar() {
         )}
       </div>
 
-      {/* Stats Panel (Clipped bottom) */}
+      {/* Stats Panel */}
       <div className="shrink-0 p-4 bg-slate-900/95 backdrop-blur-xl border-t border-white/5 z-20">
         <div className="grid grid-cols-4 gap-2 mb-3">
           <SimpleStat label="전체" value={fleet.length} />

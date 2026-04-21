@@ -1,4 +1,4 @@
-// Fleet Radar Service - fetches ship AIS data from /api/fleet proxy
+// Fleet Radar Service - shared types and algorithms for client-side AIS data
 
 export interface FleetEntry {
   mmsi: string;
@@ -14,58 +14,12 @@ export interface FleetEntry {
   sizeClass: "small" | "large";
 }
 
-export interface FleetResponse {
-  ok: boolean;
-  data: FleetEntry[];
-  count: number;
-  timestamp: string;
-  mock: boolean;
-  dataSource?: "aisstream" | "primary" | "khoa" | "mock";
-  fallback?: boolean;
-  error?: string;
-}
-
 export interface SafeHarborZone {
   centerLat: number;
   centerLon: number;
   ships: FleetEntry[];
   avgSpeed: number;
   label: string;
-}
-
-interface FetchFleetOptions {
-  size?: "small" | "large";
-  minTonnage?: number;
-  maxTonnage?: number;
-}
-
-/**
- * Fetch fleet data from the proxy API route
- */
-export async function fetchFleetData(
-  options?: FetchFleetOptions,
-): Promise<FleetResponse> {
-  const params = new URLSearchParams();
-  if (options?.size) params.set("size", options.size);
-  if (options?.minTonnage != null)
-    params.set("minTonnage", String(options.minTonnage));
-  if (options?.maxTonnage != null)
-    params.set("maxTonnage", String(options.maxTonnage));
-
-  const qs = params.toString();
-  const url = `/api/fleet${qs ? `?${qs}` : ""}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) {
-    return {
-      ok: false,
-      data: [],
-      count: 0,
-      timestamp: new Date().toISOString(),
-      mock: false,
-      error: `HTTP ${res.status}` };
-  }
-  return res.json();
 }
 
 // --- Safe Harbor Algorithm ---
@@ -143,7 +97,8 @@ export function computeSafeHarbors(fleet: FleetEntry[]): SafeHarborZone[] {
       centerLon,
       ships: cluster,
       avgSpeed,
-      label: `${cluster.length}척 소형선 밀집 (평균 ${avgSpeed.toFixed(1)}kt)` });
+      label: `${cluster.length}척 소형선 밀집 (평균 ${avgSpeed.toFixed(1)}kt)`,
+    });
   }
 
   return safeZones;
