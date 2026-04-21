@@ -16,6 +16,7 @@ import {
   ChevronRight,
   AlertTriangle,
   Fish,
+  BookOpen,
 } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
@@ -417,6 +418,25 @@ export default function RegulationsPage() {
             </div>
           </div>
         )}
+
+        {/* FishDex link card */}
+        <Link
+          href="/fishdex"
+          className="flex items-center gap-3 bg-surface rounded-2xl p-4 mb-4 hover:bg-white/5 transition-colors"
+        >
+          <div className="w-10 h-10 rounded-xl bg-[#c9a84c]/20 flex items-center justify-center">
+            <BookOpen size={20} className="text-[#c9a84c]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-white text-sm">
+              물고기 사전 (FishDex)
+            </p>
+            <p className="text-xs text-white/50 mt-0.5">
+              방언·지역명으로 어종 검색
+            </p>
+          </div>
+          <ChevronRight size={16} className="text-white/30 shrink-0" />
+        </Link>
 
         {/* Search */}
         <div className="relative">
