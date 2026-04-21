@@ -228,14 +228,6 @@ export async function fetchNaverNews(
   display: number = 10,
   sort: string = "date",
 ): Promise<FishingNewsItem[]> {
-  const clientId = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID || "";
-  const clientSecret = process.env.NEXT_PUBLIC_NAVER_CLIENT_SECRET || "";
-
-  if (!clientId || !clientSecret) {
-    console.warn("Naver API keys not set, using mock data");
-    return getMockNews();
-  }
-
   try {
     const [blogRes, newsRes] = await Promise.allSettled([
       fetch(
@@ -335,14 +327,6 @@ export async function fetchNaverCafeArticles(
   display: number = 10,
   sort: string = "date",
 ): Promise<FishingNewsItem[]> {
-  const clientId = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID || "";
-  const clientSecret = process.env.NEXT_PUBLIC_NAVER_CLIENT_SECRET || "";
-
-  if (!clientId || !clientSecret) {
-    console.warn("Naver API keys not set for cafe search");
-    return [];
-  }
-
   try {
     const res = await fetch(
       `/api/naver?type=cafearticle&query=${encodeURIComponent(query)}&display=${display}&sort=${sort}`,

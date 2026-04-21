@@ -85,17 +85,10 @@ export async function chatWithExpert(
   userMessage: string,
   selectedSpecies: string | null,
 ): Promise<string> {
-  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-
   // Build context hint for selected species
   const contextHint = selectedSpecies
     ? `[현재 선택한 어종: ${selectedSpecies}] 이 어종에 대한 질문일 가능성이 높습니다.\n질문: `
     : "";
-
-  if (!apiKey) {
-    await new Promise((r) => setTimeout(r, 800));
-    return getMockAnswer(selectedSpecies, userMessage);
-  }
 
   try {
     // Keep only last 10 turns to manage context window
@@ -113,6 +106,7 @@ export async function chatWithExpert(
     ];
 
     const requestBody = {
+      model: "gemini-2.0-flash",
       contents,
       systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
       generationConfig: {
@@ -123,14 +117,17 @@ export async function chatWithExpert(
       },
     };
 
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      },
-    );
+    const res = await fetch("/api/gemini", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody),
+    });
+
+    // 503 = key not configured on server → fall back to mock
+    if (res.status === 503) {
+      await new Promise((r) => setTimeout(r, 800));
+      return getMockAnswer(selectedSpecies, userMessage);
+    }
 
     if (!res.ok) {
       console.error("Gemini Chat API error:", res.status);

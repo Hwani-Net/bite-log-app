@@ -146,20 +146,9 @@ interface NaverSearchItem {
 }
 
 async function searchNaverBlog(query: string): Promise<NaverSearchItem[]> {
-  const clientId = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID || "";
-  const clientSecret = process.env.NEXT_PUBLIC_NAVER_CLIENT_SECRET || "";
-  if (!clientId || !clientSecret) return [];
-
   try {
-    const url = `https://openapi.naver.com/v1/search/blog.json?query=${encodeURIComponent(query)}&display=10&sort=date`;
     const res = await fetch(
-      `https://corsproxy.io/?${encodeURIComponent(url)}`,
-      {
-        headers: {
-          "X-Naver-Client-Id": clientId,
-          "X-Naver-Client-Secret": clientSecret,
-        },
-      },
+      `/api/naver?type=blog&query=${encodeURIComponent(query)}&display=10&sort=date`,
     );
     if (!res.ok) return [];
     const data = await res.json();
@@ -225,40 +214,29 @@ async function fetchYouTubeTitles(): Promise<string[]> {
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 export async function getViralGearReport(): Promise<ViralGearReport> {
-  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-  const naverClientId = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID;
-
-  // Gemini 없으면 분석 불가 → Mock
-  if (!apiKey) {
-    console.warn("[ViralGear] No Gemini key — returning mock report.");
-    return getMockReport();
-  }
-
   // Step 1: 소스 수집 — Naver 우선, 없으면 YouTube RSS 폴백
   let inputText = "";
   let totalSources = 0;
 
-  if (naverClientId) {
-    const queryResults = await Promise.allSettled(
-      GEAR_SEARCH_QUERIES.slice(0, 5).map((q) => searchNaverBlog(q)),
-    );
-    const naverItems: NaverSearchItem[] = [];
-    for (const r of queryResults) {
-      if (r.status === "fulfilled") naverItems.push(...r.value);
-    }
-    if (naverItems.length > 0) {
-      const seen = new Set<string>();
-      const unique = naverItems.filter((it) => {
-        if (seen.has(it.title)) return false;
-        seen.add(it.title);
-        return true;
-      });
-      totalSources = unique.length;
-      inputText = unique
-        .slice(0, 30)
-        .map((it) => `- ${it.title}: ${it.description.slice(0, 80)}`)
-        .join("\n");
-    }
+  const queryResults = await Promise.allSettled(
+    GEAR_SEARCH_QUERIES.slice(0, 5).map((q) => searchNaverBlog(q)),
+  );
+  const naverItems: NaverSearchItem[] = [];
+  for (const r of queryResults) {
+    if (r.status === "fulfilled") naverItems.push(...r.value);
+  }
+  if (naverItems.length > 0) {
+    const seen = new Set<string>();
+    const unique = naverItems.filter((it) => {
+      if (seen.has(it.title)) return false;
+      seen.add(it.title);
+      return true;
+    });
+    totalSources = unique.length;
+    inputText = unique
+      .slice(0, 30)
+      .map((it) => `- ${it.title}: ${it.description.slice(0, 80)}`)
+      .join("\n");
   }
 
   // Naver 결과 없으면 YouTube RSS 폴백
@@ -272,29 +250,33 @@ export async function getViralGearReport(): Promise<ViralGearReport> {
     inputText = ytTitles.join("\n");
   }
 
-  // Step 2: Gemini 분석
+  // Step 2: Gemini 분석 (서버 프록시 경유)
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: `낚시 커뮤니티 최신 글 목록:\n${inputText}` }],
-            },
-          ],
-          systemInstruction: { parts: [{ text: VIRAL_SYSTEM_PROMPT }] },
-          generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 1024,
-            responseMimeType: "application/json",
+    const res = await fetch("/api/gemini", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "gemini-2.0-flash",
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: `낚시 커뮤니티 최신 글 목록:\n${inputText}` }],
           },
-        }),
-      },
-    );
+        ],
+        systemInstruction: { parts: [{ text: VIRAL_SYSTEM_PROMPT }] },
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 1024,
+          responseMimeType: "application/json",
+        },
+      }),
+    });
+
+    // 503 = server key not configured → mock
+    if (res.status === 503) {
+      console.warn("[ViralGear] No Gemini server key — returning mock report.");
+      return getMockReport();
+    }
 
     if (!res.ok) {
       console.warn("[ViralGear] Gemini API error:", res.status);

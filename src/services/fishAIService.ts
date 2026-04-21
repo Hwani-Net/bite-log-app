@@ -36,7 +36,7 @@ const GEMINI_PROMPT = `당신은 한국 연안 낚시 40년 경력의 어류 전
   "fishingTip": "이 어종을 잡기 위한 핵심 팁 1문장"
 }`;
 
-// @mock-data — Replace with real Gemini Vision API (needs NEXT_PUBLIC_GEMINI_API_KEY)
+// @mock-data — Replace with real Gemini Vision API (server proxy: /api/gemini)
 const MOCK_RESULTS: FishAIResult[] = [
   {
     species: "Red Sea Bream",
@@ -46,7 +46,8 @@ const MOCK_RESULTS: FishAIResult[] = [
     estimatedWeightKg: 1.8,
     description:
       "한국 연안에서 흔히 볼 수 있는 고급 어종입니다. 체장 30~50cm가 일반적이며, 봄~가을 시즌이 최적입니다.",
-    fishingTip: "바닥채비로 새우 미끼를 사용하면 효과적입니다." },
+    fishingTip: "바닥채비로 새우 미끼를 사용하면 효과적입니다.",
+  },
   {
     species: "Black Rockfish",
     koreanName: "우럭",
@@ -55,7 +56,8 @@ const MOCK_RESULTS: FishAIResult[] = [
     estimatedWeightKg: 0.7,
     description:
       "바위 지대에 서식하는 대표적인 선상 낚시 대상어입니다. 연중 낚이며, 특히 겨울철 조과가 좋습니다.",
-    fishingTip: "웜 리그로 바위틈을 공략하세요." },
+    fishingTip: "웜 리그로 바위틈을 공략하세요.",
+  },
   {
     species: "Flatfish",
     koreanName: "광어",
@@ -64,7 +66,8 @@ const MOCK_RESULTS: FishAIResult[] = [
     estimatedWeightKg: 1.2,
     description:
       "모래 바닥에 서식하는 저서어류로, 루어 낚시의 인기 대상어입니다.",
-    fishingTip: "바닥을 긁듯이 느린 리트리브가 핵심입니다." },
+    fishingTip: "바닥을 긁듯이 느린 리트리브가 핵심입니다.",
+  },
   {
     species: "Korean Rockfish",
     koreanName: "볼락",
@@ -72,7 +75,8 @@ const MOCK_RESULTS: FishAIResult[] = [
     estimatedSizeCm: 20,
     estimatedWeightKg: 0.15,
     description: "야간 낚시의 대표 어종으로, 라이트게임에 적합합니다.",
-    fishingTip: "1~2g 지그헤드 + 웜으로 슬로우 폴링하세요." },
+    fishingTip: "1~2g 지그헤드 + 웜으로 슬로우 폴링하세요.",
+  },
   {
     species: "Webfoot Octopus",
     koreanName: "주꾸미",
@@ -80,20 +84,16 @@ const MOCK_RESULTS: FishAIResult[] = [
     estimatedSizeCm: 15,
     estimatedWeightKg: 0.1,
     description: "가을 시즌의 대표 대상종으로, 에기 낚시로 많이 잡힙니다.",
-    fishingTip: "빨간색 에기로 바닥을 톡톡 쳐주세요." },
+    fishingTip: "빨간색 에기로 바닥을 톡톡 쳐주세요.",
+  },
 ];
 
 export async function identifyFish(
   photoBase64: string,
 ): Promise<FishAIResult | null> {
-  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-
-  // If no API key, use mock data for development
-  if (!apiKey) {
-    console.warn("[FishAI] No API key → Mock mode");
-    await new Promise((r) => setTimeout(r, 1500));
-    return MOCK_RESULTS[Math.floor(Math.random() * MOCK_RESULTS.length)];
-  }
+  // Check availability via a lightweight server-side probe (no key in client)
+  // If /api/gemini returns 503, fall back to mock.
+  // We detect "no backend key" by attempting the real call and catching 503.
 
   try {
     // Strip data URL prefix if present
@@ -107,6 +107,7 @@ export async function identifyFish(
     else if (photoBase64.startsWith("data:image/webp")) mimeType = "image/webp";
 
     const requestBody = {
+      model: "gemini-2.0-flash",
       contents: [
         {
           parts: [
@@ -114,21 +115,31 @@ export async function identifyFish(
             {
               inline_data: {
                 mime_type: mimeType,
-                data: base64Data } },
-          ] },
+                data: base64Data,
+              },
+            },
+          ],
+        },
       ],
       generationConfig: {
         temperature: 0.2,
         maxOutputTokens: 512,
-        responseMimeType: "application/json" } };
+        responseMimeType: "application/json",
+      },
+    };
 
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody) },
-    );
+    const res = await fetch("/api/gemini", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody),
+    });
+
+    // 503 = key not configured on server → fall back to mock
+    if (res.status === 503) {
+      console.warn("[FishAI] No server API key → Mock mode");
+      await new Promise((r) => setTimeout(r, 1500));
+      return MOCK_RESULTS[Math.floor(Math.random() * MOCK_RESULTS.length)];
+    }
 
     if (!res.ok) {
       const errText = await res.text();
@@ -160,7 +171,8 @@ export async function identifyFish(
       description: parsed.description || "",
       estimatedSizeCm: parsed.estimatedSizeCm || undefined,
       estimatedWeightKg: parsed.estimatedWeightKg || undefined,
-      fishingTip: parsed.fishingTip || undefined };
+      fishingTip: parsed.fishingTip || undefined,
+    };
   } catch (err) {
     console.error("[FishAI] Recognition failed:", err);
     // Return fallback instead of null for better UX
