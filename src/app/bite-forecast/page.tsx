@@ -863,6 +863,12 @@ function BiteIndexOfficialSection() {
   const [selectedRegion, setSelectedRegion] = useState<
     "전체" | "서해" | "남해" | "동해" | "제주"
   >("전체");
+  const [showAll, setShowAll] = useState(false);
+
+  // Reset show-all when filter changes
+  useEffect(() => {
+    setShowAll(false);
+  }, [gubun, selectedRegion]);
 
   useEffect(() => {
     let cancelled = false;
@@ -883,12 +889,11 @@ function BiteIndexOfficialSection() {
     };
   }, [gubun]);
 
-  const displayedRows =
+  const filteredRows =
     selectedRegion === "전체"
-      ? rows.slice(0, 10)
-      : rows
-          .filter((r) => getRegionForCoords(r.lat, r.lon) === selectedRegion)
-          .slice(0, 10);
+      ? rows
+      : rows.filter((r) => getRegionForCoords(r.lat, r.lon) === selectedRegion);
+  const displayedRows = showAll ? filteredRows : filteredRows.slice(0, 10);
 
   const renderScore = (score: 1 | 2 | 3 | 4 | 5) => {
     const conf = BITE_INDEX_CONFIG[score];
@@ -1035,6 +1040,17 @@ function BiteIndexOfficialSection() {
               {renderScore(row.indexScore)}
             </div>
           ))}
+          {filteredRows.length > 10 && (
+            <button
+              type="button"
+              onClick={() => setShowAll((prev) => !prev)}
+              className="w-full py-2.5 rounded-xl bg-white/5 border border-white/10 text-[11px] font-bold text-white/60 hover:bg-white/10 hover:text-white/80 transition-colors"
+            >
+              {showAll
+                ? `접기 (${filteredRows.length}개 중 10개 표시)`
+                : `전체 보기 · ${filteredRows.length}개 중 10개 표시`}
+            </button>
+          )}
         </div>
       )}
 
