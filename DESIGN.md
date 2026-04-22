@@ -156,11 +156,15 @@ border-radius: var(--radius-lg);
 - No spinners anywhere in the app
 
 ### Bottom Navigation
-- 5 items max: Home, Fleet, AI, Ranking, Settings
-- Height: 64px + safe area
-- Icons: Lucide React, 22px default, 24px active
-- Active: primary color + 1px dot indicator below
-- Background: `surface-glass` with `backdrop-blur-xl`
+- 5 tabs (fixed): 홈(Home `/`) · 기록(Records `/records`) · 통계(Stats `/stats`) · 랭킹(Ranking `/ranking`) · AI(Concierge `/concierge`)
+- Icons: Lucide React — Home, BookOpen, BarChart2, Trophy, Menu
+- Height: 64px + safe-bottom area
+- Icon size: 22px default → 24px active
+- Active state: `#c9a84c` color + 2.5 stroke + filled + 4px dot indicator below
+- Inactive state: `text-white/30`, 1.8 stroke
+- Background: `bg-[#080d14]/40` with `backdrop-blur-2xl`
+- Border: `border-t border-white/5`
+- Touch target: min 48×48px per tab
 
 ### FAB (Floating Action Button)
 ```css
