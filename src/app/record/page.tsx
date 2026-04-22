@@ -356,7 +356,7 @@ export default function RecordPage() {
 
       {/* ===== STEP: PHOTO (optional) ===== */}
       {step === "photo" && (
-        <div className="px-4 pt-6 pb-36 space-y-5 animate-fadeIn">
+        <div className="px-4 pt-6 pb-28 space-y-5 animate-fadeIn">
           <div
             onClick={() => fileRef.current?.click()}
             className="flex flex-col items-center gap-4 rounded-2xl border-2 border-dashed border-white/10 bg-white/5 px-6 py-14 transition-all hover:border-[#c9a84c]/40 cursor-pointer"
@@ -600,7 +600,7 @@ export default function RecordPage() {
         <form
           id="record-form"
           onSubmit={handleSubmit}
-          className="px-4 pt-4 pb-36 space-y-4 animate-fadeIn"
+          className="px-4 pt-4 pb-28 space-y-4 animate-fadeIn"
         >
           {/* Photo summary (if any) */}
           {photos.length > 0 && (
