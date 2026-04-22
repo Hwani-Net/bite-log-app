@@ -12,6 +12,8 @@ import {
   sendLocalNotification,
   requestNotificationPermission,
 } from "@/services/pushNotificationService";
+import { SPECIES_LIST } from "@/data/fishSpecies";
+import { LOCATION_COORDS } from "@/data/fishingLocations";
 import {
   ArrowLeft,
   PenLine,
@@ -104,36 +106,6 @@ function ItemIcon({ name, size = 16 }: { name: string; size?: number }) {
   if (!Icon) return null;
   return <Icon size={size} />;
 }
-
-// @mock-data — 하드코딩된 어종 목록. 실서비스 시 fishSeasonDB 또는 API로 교체
-const SPECIES_LIST = [
-  "볼락",
-  "감성돔",
-  "농어",
-  "우럭",
-  "방어",
-  "주꾸미",
-  "갈치",
-  "광어",
-  "참돔",
-];
-
-// @mock-data — 하드코딩된 지역-좌표 매핑. 실서비스 시 지도 API 검색으로 교체
-const LOCATION_COORDS: Record<string, { lat: number; lng: number }> = {
-  인천: { lat: 37.4563, lng: 126.7052 },
-  태안: { lat: 36.7485, lng: 126.2982 },
-  보령: { lat: 36.3325, lng: 126.6127 },
-  군산: { lat: 35.9675, lng: 126.7368 },
-  목포: { lat: 34.8118, lng: 126.3922 },
-  통영: { lat: 34.854, lng: 128.433 },
-  거제: { lat: 34.8802, lng: 128.6217 },
-  여수: { lat: 34.7604, lng: 127.6622 },
-  부산: { lat: 35.1796, lng: 129.0756 },
-  제주: { lat: 33.4996, lng: 126.5312 },
-  서귀포: { lat: 33.2541, lng: 126.5601 },
-  속초: { lat: 38.2048, lng: 128.5912 },
-  포항: { lat: 36.019, lng: 129.3435 },
-};
 
 const FISHING_TYPES = [
   { value: "breakwater", label: "방파제" },
