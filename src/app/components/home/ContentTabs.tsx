@@ -7,8 +7,9 @@ import { FishingNewsItem } from "@/services/fishingNewsService";
 import { BiteTimePrediction } from "@/services/biteTimeService";
 import {
   getSpeciesBiteScores,
-  SpeciesBiteScore } from "@/services/speciesBiteService";
-import { MapPin, ChevronRight, Loader2 } from "lucide-react";
+  SpeciesBiteScore,
+} from "@/services/speciesBiteService";
+import { MapPin, ChevronRight } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
 // ─── Fish color mapping ───────────────────────────────────────────────────────
@@ -21,7 +22,8 @@ const FISH_COLORS: Record<string, { gradient: string }> = {
   광어: { gradient: "from-yellow-400 to-amber-300" },
   고등어: { gradient: "from-indigo-500 to-blue-400" },
   방어: { gradient: "from-sky-500 to-cyan-400" },
-  주꾸미: { gradient: "from-red-400 to-orange-300" } };
+  주꾸미: { gradient: "from-red-400 to-orange-300" },
+};
 const DEFAULT_FISH = { gradient: "from-slate-400 to-slate-300" };
 
 const NEWS_GRADIENTS = [
@@ -45,7 +47,8 @@ export default function ContentTabs({
   recordsLoading,
   topNews,
   biteTime,
-  locale }: ContentTabsProps) {
+  locale,
+}: ContentTabsProps) {
   const [activeTab, setActiveTab] = useState<TabId>("catches");
   const isKo = locale === "ko";
 
@@ -55,7 +58,8 @@ export default function ContentTabs({
     {
       id: "forecast",
       label: isKo ? "입질 예보" : "Forecast",
-      icon: "analytics" },
+      icon: "analytics",
+    },
   ];
 
   return (
@@ -100,7 +104,8 @@ export default function ContentTabs({
 function CatchesTab({
   records,
   loading,
-  locale }: {
+  locale,
+}: {
   records: CatchRecord[];
   loading: boolean;
   locale: string;
@@ -196,7 +201,8 @@ function CatchesTab({
 // ─── News Tab ────────────────────────────────────────────────────────────────
 function NewsTab({
   news,
-  locale }: {
+  locale,
+}: {
   news: FishingNewsItem[];
   locale: string;
 }) {
@@ -283,7 +289,8 @@ function NewsTab({
 // ─── Forecast Tab ────────────────────────────────────────────────────────────
 function ForecastTab({
   biteTime,
-  locale }: {
+  locale,
+}: {
   biteTime: BiteTimePrediction | null;
   locale: string;
 }) {
@@ -294,11 +301,20 @@ function ForecastTab({
 
   if (!biteTime) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 text-slate-400 dark:text-slate-500">
-        <Loader2 size={28} className="mb-2 animate-spin" />
-        <p className="text-sm">
-          {isKo ? "입질 데이터 로딩 중..." : "Loading bite data..."}
-        </p>
+      <div className="space-y-2">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="flex items-center gap-3 bg-white dark:bg-slate-800/50 rounded-xl p-3 border border-slate-100 dark:border-slate-700/50 animate-pulse"
+          >
+            <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-700 shrink-0" />
+            <div className="flex-1 space-y-1.5">
+              <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-16" />
+              <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded w-full" />
+            </div>
+            <div className="w-8 h-3 bg-slate-200 dark:bg-slate-700 rounded shrink-0" />
+          </div>
+        ))}
       </div>
     );
   }
