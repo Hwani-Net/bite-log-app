@@ -106,7 +106,7 @@ export async function chatWithExpert(
     ];
 
     const requestBody = {
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents,
       systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
       generationConfig: {

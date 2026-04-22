@@ -107,7 +107,7 @@ export async function identifyFish(
     else if (photoBase64.startsWith("data:image/webp")) mimeType = "image/webp";
 
     const requestBody = {
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: [
         {
           parts: [

@@ -48,7 +48,7 @@ export async function parseNotice(
 ): Promise<NoticeParseResult | null> {
   try {
     const requestBody = {
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: [{ role: "user", parts: [{ text }] }],
       systemInstruction: {
         parts: [{ text: SYSTEM_PROMPT }],

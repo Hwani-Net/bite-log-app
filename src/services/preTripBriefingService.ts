@@ -17,7 +17,8 @@ import {
   getTackleAdvice,
   getWeatherChecklist,
   ChecklistItem,
-  TackleAdvice } from "./tackleAdviceService";
+  TackleAdvice,
+} from "./tackleAdviceService";
 import { getGearRecommendations } from "./affiliateService";
 
 // ─── Types ──────────────────────────────────────────────────────
@@ -67,42 +68,50 @@ const BOAT_BASIC_CHECKLIST: ChecklistItem[] = [
     icon: "FishingRod",
     item: "낚싯대 + 릴 세팅 확인",
     reason: "출발 전 드래그/가이드 체크",
-    priority: "essential" },
+    priority: "essential",
+  },
   {
     icon: "Anchor",
     item: "여분 채비 세트",
     reason: "밑걸림/라인 끊김 대비 3세트 이상",
-    priority: "essential" },
+    priority: "essential",
+  },
   {
     icon: "Scissors",
     item: "낚시 가위/집게",
     reason: "채비 교체 필수 도구",
-    priority: "essential" },
+    priority: "essential",
+  },
   {
     icon: "Flashlight",
     item: "헤드랜턴 + 여분 건전지",
     reason: "새벽/야간 출조 필수",
-    priority: "essential" },
+    priority: "essential",
+  },
   {
     icon: "Phone",
     item: "선장님 연락처 + 예약 확인",
     reason: "사전 결제 완료 여부 재확인",
-    priority: "essential" },
+    priority: "essential",
+  },
   {
     icon: "Droplets",
     item: "손 세정제 + 물티슈",
     reason: "물고기 다룬 후 위생",
-    priority: "recommended" },
+    priority: "recommended",
+  },
   {
     icon: "Package",
     item: "아이스박스에 얼음 미리 채우기",
     reason: "출발 당일 아침 준비 번거로움",
-    priority: "recommended" },
+    priority: "recommended",
+  },
   {
     icon: "Waves",
     item: "다시마 + 굵은소금 (활어 보관용)",
     reason: "전어·볼락 등 신선도 유지",
-    priority: "optional" },
+    priority: "optional",
+  },
 ];
 
 const getShoreBasicChecklist = (tripDate: string): ChecklistItem[] => {
@@ -114,17 +123,20 @@ const getShoreBasicChecklist = (tripDate: string): ChecklistItem[] => {
       icon: "Flashlight",
       item: "헤드랜턴 (야간 방파제)",
       reason: "발밑 안전 + 채비 작업",
-      priority: "essential" },
+      priority: "essential",
+    },
     {
       icon: "Anchor",
       item: "여분 채비 세트",
       reason: "밑걸림 대비",
-      priority: "essential" },
+      priority: "essential",
+    },
     {
       icon: "Armchair",
       item: "낚시 의자 or 방석",
       reason: "장시간 대기 피로 방지",
-      priority: "optional" },
+      priority: "optional",
+    },
   ];
 
   if (isMosquitoSeason) {
@@ -132,7 +144,8 @@ const getShoreBasicChecklist = (tripDate: string): ChecklistItem[] => {
       icon: "Bug",
       item: "방충제 (모기약)",
       reason: "방파제/갯가 모기 많음",
-      priority: "recommended" });
+      priority: "recommended",
+    });
   }
 
   return base;
@@ -185,13 +198,15 @@ ${params.communitySummary}
 
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 300 } }) },
+          generationConfig: { temperature: 0.7, maxOutputTokens: 300 },
+        }),
+      },
     );
     if (!res.ok) {
       const errText = await res.text().catch(() => "");
@@ -226,7 +241,8 @@ export async function generateTripBriefing(
     temp: 15,
     windSpeed: 4,
     rain: false,
-    uv: 4 };
+    uv: 4,
+  };
 
   // 1. 병렬로 데이터 수집
   const [tideData, communityResult, gearRecs] = await Promise.allSettled([
@@ -261,7 +277,8 @@ export async function generateTripBriefing(
       source: a.sourceLabel,
       title: a.title,
       snippet: a.description,
-      link: a.link }));
+      link: a.link,
+    }));
 
   // 6. 장비 딥링크
   const gearList = gearRecs.status === "fulfilled" ? gearRecs.value : [];
@@ -269,7 +286,8 @@ export async function generateTripBriefing(
     name: g.name,
     reason: g.description,
     affiliateUrl: g.affiliateUrl,
-    icon: g.icon }));
+    icon: g.icon,
+  }));
 
   // 7. AI 종합 브리핑
   const weatherSummary = `기온 ${weather.temp}℃, 풍속 ${weather.windSpeed}m/s${weather.rain ? ", 비 예보" : ""}`;
@@ -280,7 +298,8 @@ export async function generateTripBriefing(
     tideNum,
     weatherSummary,
     communitySummary: insights.summary,
-    tackleAdvice });
+    tackleAdvice,
+  });
 
   // 8. 기본 준비물
   const basicChecklist =
@@ -297,7 +316,8 @@ export async function generateTripBriefing(
     gearSuggestions,
     aiSummary,
     tideInfo,
-    generatedAt: new Date().toISOString() };
+    generatedAt: new Date().toISOString(),
+  };
 }
 
 /**
