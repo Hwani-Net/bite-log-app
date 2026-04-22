@@ -48,3 +48,12 @@ env:
 
   - variable: KAMIS_CERT_ID
     secret: KAMIS_CERT_ID
+
+  - variable: NEXT_PUBLIC_NAVER_CLIENT_ID
+    secret: NEXT_PUBLIC_NAVER_CLIENT_ID
+
+  - variable: NEXT_PUBLIC_NAVER_CLIENT_SECRET
+    secret: NEXT_PUBLIC_NAVER_CLIENT_SECRET
+
+  - variable: NEXT_PUBLIC_GEMINI_API_KEY
+    secret: NEXT_PUBLIC_GEMINI_API_KEY
