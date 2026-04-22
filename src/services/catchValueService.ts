@@ -16,7 +16,7 @@ export interface CatchValueData {
   isLive: boolean;
 }
 
-// @mock-data — 수협 위판 시세 모의 데이터 (20종)
+// @mock-data — fallback only when KAMIS API unavailable
 const MOCK_PRICES: FishPrice[] = [
   {
     species: "감성돔",
