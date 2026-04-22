@@ -121,6 +121,39 @@ export default function ConciergePage() {
     loadData();
   }, []);
 
+  const handleRequestLocation = () => {
+    if (!navigator.geolocation) return;
+    setLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setUserCoords({ lat, lng });
+        try {
+          const [w, td, m] = await Promise.all([
+            fetchWeather(lat, lng),
+            fetchTideData(lat, lng),
+            fetchMarineData(lat, lng),
+          ]);
+          setWeather(w);
+          setTideData(td);
+          const bt = calculateBiteTime(w, td, m ?? null);
+          setBiteTime(bt);
+          const isPro = useSubscriptionStore.getState().isPro;
+          const rec = generateRecommendation(w, td, bt, lat, lng, isPro);
+          setRecommendation(rec);
+          if (rec) setAffiliateGear(getGearRecommendations(rec.species.name));
+        } catch (err) {
+          console.error("[Concierge] handleRequestLocation fetch failed:", err);
+        } finally {
+          setLoading(false);
+        }
+      },
+      () => setLoading(false),
+      { timeout: 10000 },
+    );
+  };
+
   const handleSendMessage = async (msg: string) => {
     if (!msg.trim()) return;
 
@@ -239,6 +272,7 @@ export default function ConciergePage() {
             biteTime={biteTime}
             recommendation={recommendation}
             inSeasonSpecies={inSeasonSpecies}
+            onRequestLocation={handleRequestLocation}
           />
         )}
         {activeTab === "chat" && (

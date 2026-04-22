@@ -11,7 +11,7 @@ import {
 import { useDragScroll } from "@/hooks/useDragScroll";
 import { useSubscriptionStore } from "@/store/subscriptionStore";
 import { DynamicIcon } from "@/lib/iconMap";
-import { Sparkles } from "lucide-react";
+import { Sparkles, MapPin } from "lucide-react";
 
 interface OverviewTabProps {
   locale: string;
@@ -21,6 +21,7 @@ interface OverviewTabProps {
   biteTime: BiteTimePrediction | null;
   recommendation: ConciergeRecommendation | null;
   inSeasonSpecies: SpeciesInfo[];
+  onRequestLocation?: () => void;
 }
 
 export default function OverviewTab({
@@ -31,6 +32,7 @@ export default function OverviewTab({
   biteTime,
   recommendation,
   inSeasonSpecies,
+  onRequestLocation,
 }: OverviewTabProps) {
   const { isPro, openPaywall } = useSubscriptionStore();
   const biteScore = biteTime?.score ?? 0;
@@ -353,13 +355,24 @@ export default function OverviewTab({
           </div>
         </div>
 
-        {/* Location permission hint when weather unavailable */}
+        {/* Location permission CTA when weather unavailable */}
         {!loading && !weather && (
-          <p className="text-[10px] text-white/40 text-center mt-2">
-            {locale === "ko"
-              ? "위치 권한을 허용하면 실시간 날씨를 확인할 수 있습니다"
-              : "Allow location access to see real-time weather"}
-          </p>
+          <div className="flex flex-col items-center gap-2 mt-3">
+            <p className="text-[10px] text-white/40 text-center">
+              {locale === "ko"
+                ? "위치 권한을 허용하면 실시간 날씨를 확인할 수 있습니다"
+                : "Allow location access to see real-time weather"}
+            </p>
+            {onRequestLocation && (
+              <button
+                onClick={onRequestLocation}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/20 border border-primary/40 text-primary text-[11px] font-semibold active:scale-95 transition-transform"
+              >
+                <MapPin size={12} />
+                {locale === "ko" ? "위치 허용하기" : "Allow Location"}
+              </button>
+            )}
+          </div>
         )}
 
         {/* Tide bar chart */}
