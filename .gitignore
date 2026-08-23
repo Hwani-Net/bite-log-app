@@ -58,3 +58,5 @@ resize_*.js
 # agent config (local only)
 .agent/
 nul
+
+.vercel
