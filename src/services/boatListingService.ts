@@ -1,9 +1,10 @@
-// Reads 더피싱(thefishing.kr)'s own boat directory — the same public listing
-// page a visitor browses at thefishing.kr/reservation, one page ~50 boats,
-// real photos/region/target species/capacity, no login. Same honest,
-// non-browser-impersonating User-Agent as boatAvailabilityService.ts; see
-// that file for why. sunsang24.com is not touched here for the same reason
-// it isn't touched there — its robots.txt explicitly disallows /ship/.
+// Reads 더피싱(thefishing.kr)'s own public boat directory — the same listing
+// page a visitor browses at thefishing.kr/reservation — with the same
+// date/region/species filters its own search form exposes. ~50 boats per
+// page, real photos/region/target species/capacity, no login. Same honest,
+// non-browser-impersonating User-Agent as boatCalendarService.ts; see that
+// file for why. sunsang24.com is not touched here for the same reason it
+// isn't touched there — its robots.txt explicitly disallows /ship/.
 
 const USER_AGENT =
   "BiteLog/1.0 (+https://bite-log-three.vercel.app; fishing app, low-frequency read-only)";
@@ -23,6 +24,46 @@ export interface BoatListing {
   detailUrl: string;
 }
 
+export interface BoatListingPage {
+  boats: BoatListing[];
+  total: number; // "검색 N건" from the page header; 0 when unparseable
+  page: number;
+}
+
+// Values are the `sa[]` codes from thefishing.kr's own search form. The four
+// 권역 codes here are the top-level checkboxes; the form also exposes finer
+// port-level codes we don't surface yet.
+export const REGION_FILTERS = [
+  { id: "west", label: "서해", code: "1" },
+  { id: "south", label: "남해", code: "3" },
+  { id: "east", label: "동해", code: "2" },
+  { id: "jeju", label: "제주", code: "130" },
+] as const;
+
+// `si[]` codes from the same form, limited to the species this app already
+// knows how to talk about (SPECIES_OPTIONS on the booking page).
+export const SPECIES_FILTERS = [
+  { label: "우럭", code: "4" },
+  { label: "광어", code: "5" },
+  { label: "참돔", code: "1" },
+  { label: "감성돔", code: "22" },
+  { label: "볼락", code: "11" },
+  { label: "주꾸미", code: "3" },
+  { label: "갑오징어", code: "6" },
+  { label: "갈치", code: "2" },
+  { label: "농어", code: "21" },
+  { label: "삼치", code: "48" },
+  { label: "방어", code: "54" },
+  { label: "타이라바", code: "38" },
+] as const;
+
+export interface BoatSearchParams {
+  date?: string; // YYYY-MM-DD
+  regionCode?: string;
+  speciesCode?: string;
+  page?: number;
+}
+
 function decodeEntities(s: string): string {
   return s
     .replace(/&gt;/g, ">")
@@ -40,7 +81,14 @@ function decodeEntities(s: string): string {
  * cutting the block off before the fields we actually need.
  */
 export function parseBoatListingHtml(html: string): BoatListing[] {
-  const clean = html.replace(/<!--[\s\S]*?-->/g, "");
+  const stripped = html.replace(/<!--[\s\S]*?-->/g, "");
+  // The page has two lists: 더피싱패밀리 (a fixed ~32 featured boats that
+  // ignore every filter, date included) and 예약리스트 (`re_list_etc`) — the
+  // actual search results, 20/page, whose length matches the "검색 N건"
+  // header. Only the second is a search result, so scope to it; fall back
+  // to the whole document if the marker ever moves.
+  const listStart = stripped.indexOf('class="re_list re_list_etc"');
+  const clean = listStart >= 0 ? stripped.slice(listStart) : stripped;
   const results: BoatListing[] = [];
 
   const liRe = /<li>([\s\S]*?)<\/li>/g;
@@ -79,8 +127,26 @@ export function parseBoatListingHtml(html: string): BoatListing[] {
   return results;
 }
 
-export async function fetchBoatListings(page = 1): Promise<BoatListing[]> {
-  const url = page > 1 ? `${LISTING_URL}?page=${page}` : LISTING_URL;
+/** "전체 684건 / 검색 85건" → 85. Returns 0 if the header isn't there. */
+export function parseBoatListingTotal(html: string): number {
+  const m = html.match(/검색\s*<b[^>]*>(\d+)<\/b>\s*건/);
+  return m ? Number(m[1]) : 0;
+}
+
+export function buildListingUrl(params: BoatSearchParams = {}): string {
+  const q = new URLSearchParams();
+  if (params.date) q.set("search_date", params.date);
+  if (params.regionCode) q.append("sa[]", params.regionCode);
+  if (params.speciesCode) q.append("si[]", params.speciesCode);
+  if (params.page && params.page > 1) q.set("page", String(params.page));
+  const qs = q.toString();
+  return qs ? `${LISTING_URL}?${qs}` : LISTING_URL;
+}
+
+export async function fetchBoatListings(
+  params: BoatSearchParams = {},
+): Promise<BoatListingPage> {
+  const url = buildListingUrl(params);
   const res = await fetch(url, {
     headers: { "User-Agent": USER_AGENT },
     next: { revalidate: 1800 },
@@ -89,5 +155,9 @@ export async function fetchBoatListings(page = 1): Promise<BoatListing[]> {
     throw new Error(`boat listing fetch failed: ${res.status}`);
   }
   const html = await res.text();
-  return parseBoatListingHtml(html);
+  return {
+    boats: parseBoatListingHtml(html),
+    total: parseBoatListingTotal(html),
+    page: params.page ?? 1,
+  };
 }

@@ -31,7 +31,12 @@ import {
   type BoatDayStatus,
   type BoatOperatorId,
 } from "@/services/boatAvailabilityService";
-import { type BoatListing } from "@/services/boatListingService";
+import {
+  REGION_FILTERS,
+  SPECIES_FILTERS,
+  type BoatListing,
+  type BoatListingPage,
+} from "@/services/boatListingService";
 import {
   requestNotificationPermission,
   sendLocalNotification,
@@ -432,25 +437,25 @@ function BoatAvailabilityPanel({
   );
 }
 
-function BoatListingCard({ boat }: { boat: BoatListing }) {
+function BoatListingCard({ boat, date }: { boat: BoatListing; date: string }) {
   const shortArea = boat.areaPath.split(" > ").slice(1).join(" · ");
   return (
-    <a
-      href={boat.detailUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="shrink-0 w-40 bg-white/3 border border-white/8 rounded-2xl overflow-hidden hover:border-white/20 transition-all"
+    <Link
+      href={`/booking/boat/${boat.uid}?date=${date}`}
+      className="bg-white/3 border border-white/8 rounded-2xl overflow-hidden hover:border-[#c9a84c]/40 transition-all"
     >
       <div className="relative w-full h-28 bg-white/5">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={boat.imageUrl}
-          alt={boat.name}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).style.display = "none";
-          }}
-        />
+        {boat.imageUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={boat.imageUrl}
+            alt={boat.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = "none";
+            }}
+          />
+        )}
         <span className="absolute bottom-1.5 right-1.5 text-[9px] px-1.5 py-0.5 rounded-full bg-black/60 text-white/80">
           {boat.capacity || "정원 미표기"}
         </span>
@@ -466,7 +471,7 @@ function BoatListingCard({ boat }: { boat: BoatListing }) {
           {boat.fishTypes || "어종 정보 없음"}
         </p>
       </div>
-    </a>
+    </Link>
   );
 }
 
@@ -498,28 +503,52 @@ export default function BookingPage() {
     Partial<Record<BoatOperatorId, boolean>>
   >({});
   const [watchlist, setWatchlist] = useState<WatchedSlot[]>([]);
-  const [boatListings, setBoatListings] = useState<BoatListing[] | null>(
-    null,
+  // ── 더피싱-style search: date + region + species → boats sailing that day.
+  const [searchDate, setSearchDate] = useState<string>(() =>
+    new Date().toISOString().slice(0, 10),
   );
-  const [boatListingsError, setBoatListingsError] = useState(false);
+  const [searchRegion, setSearchRegion] = useState<string>(""); // REGION_FILTERS code
+  const [searchSpecies, setSearchSpecies] = useState<string>(""); // SPECIES_FILTERS code
+  const [searchPage, setSearchPage] = useState(1);
+  const [searchResult, setSearchResult] = useState<BoatListingPage | null>(null);
+  const [searchBoats, setSearchBoats] = useState<BoatListing[]>([]);
+  const [searchLoading, setSearchLoading] = useState(true);
+  const [searchError, setSearchError] = useState(false);
+
+  // Auto-pick the user's sea region once, if they haven't chosen one.
+  useEffect(() => {
+    if (!userRegion || userRegion === "기타" || searchRegion) return;
+    const match = REGION_FILTERS.find((r) => r.label === userRegion);
+    if (match) setSearchRegion(match.code);
+  }, [userRegion, searchRegion]);
 
   useEffect(() => {
-    fetch("/api/boat-listings")
+    let cancelled = false;
+    setSearchLoading(true);
+    setSearchError(false);
+    const q = new URLSearchParams({ date: searchDate, page: String(searchPage) });
+    if (searchRegion) q.set("region", searchRegion);
+    if (searchSpecies) q.set("species", searchSpecies);
+    fetch(`/api/boat-listings?${q.toString()}`)
       .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-      .then((data) => setBoatListings(data.boats))
-      .catch(() => setBoatListingsError(true));
-  }, []);
+      .then((data: BoatListingPage) => {
+        if (cancelled) return;
+        const boats = Array.isArray(data.boats) ? data.boats : [];
+        setSearchResult({ ...data, boats });
+        setSearchBoats((prev) => (searchPage === 1 ? boats : [...prev, ...boats]));
+      })
+      .catch(() => {
+        if (!cancelled) setSearchError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setSearchLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [searchDate, searchRegion, searchSpecies, searchPage]);
 
-  const sortedBoatListings = useMemo(() => {
-    if (!boatListings) return null;
-    if (!userRegion) return boatListings;
-    const targetRegion = `${userRegion}권`;
-    return [...boatListings].sort(
-      (a, b) =>
-        Number(b.seaRegion === targetRegion) -
-        Number(a.seaRegion === targetRegion),
-    );
-  }, [boatListings, userRegion]);
+  const resetSearchPage = () => setSearchPage(1);
 
   const loadOperatorAvailability = async (operatorId: BoatOperatorId) => {
     setAvailabilityLoading((prev) => ({ ...prev, [operatorId]: true }));
@@ -775,44 +804,123 @@ export default function BookingPage() {
           </div>
         </section>
 
-        {/* Boat listings — real boats browsable in-app, not just outbound
-            links. Pulled from 더피싱's own public boat directory. */}
-        <section className="space-y-2">
+        {/* 더피싱-style search: pick a date, filter by region/species, see the
+            boats sailing that day, tap one to open its month calendar with
+            per-day 예약하기 → the boat's own booking page. */}
+        <section className="space-y-3">
+          <div className="glass-morphism border border-white/5 rounded-2xl p-4 space-y-3">
+            <label className="block">
+              <span className="block text-xs text-white/50 mb-1.5 font-medium">
+                <Calendar size={12} className="inline mr-1 text-[#c9a84c]" />
+                출조 날짜
+              </span>
+              <input
+                type="date"
+                value={searchDate}
+                min={new Date().toISOString().slice(0, 10)}
+                onChange={(e) => {
+                  setSearchDate(e.target.value);
+                  resetSearchPage();
+                }}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#c9a84c]/50 transition-colors"
+              />
+            </label>
+
+            <div>
+              <span className="block text-xs text-white/50 mb-1.5 font-medium">
+                <MapPin size={12} className="inline mr-1 text-[#c9a84c]" />
+                지역
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {[{ id: "all", label: "전체", code: "" }, ...REGION_FILTERS].map((r) => (
+                  <button
+                    key={r.id}
+                    onClick={() => {
+                      setSearchRegion(r.code);
+                      resetSearchPage();
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                      searchRegion === r.code
+                        ? "bg-[#c9a84c] text-[#080d14] border-[#c9a84c]"
+                        : "bg-white/5 text-white/60 border-white/10 hover:border-white/30"
+                    }`}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <span className="block text-xs text-white/50 mb-1.5 font-medium">
+                <Fish size={12} className="inline mr-1 text-[#c9a84c]" />
+                어종
+              </span>
+              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+                {[{ label: "전체", code: "" }, ...SPECIES_FILTERS].map((s) => (
+                  <button
+                    key={s.code || "all"}
+                    onClick={() => {
+                      setSearchSpecies(s.code);
+                      resetSearchPage();
+                    }}
+                    className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                      searchSpecies === s.code
+                        ? "bg-[#c9a84c] text-[#080d14] border-[#c9a84c]"
+                        : "bg-white/5 text-white/60 border-white/10 hover:border-white/30"
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between px-1">
             <h3 className="text-xs text-white/40 font-semibold uppercase tracking-[0.15em]">
-              선사 둘러보기
+              {searchDate.slice(5).replace("-", "/")} 출조 선박
             </h3>
-            <a
-              href="https://thefishing.kr/reservation/list.php"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[10px] text-white/30 hover:text-white/60"
-            >
-              전체 보기
-            </a>
+            <span className="text-[11px] text-white/40">
+              {searchResult ? `${searchResult.total}척` : ""}
+            </span>
           </div>
-          {boatListingsError ? (
-            <p className="text-xs text-white/30 py-3 text-center">
-              선사 목록을 지금 불러오지 못했습니다.
+
+          {searchError ? (
+            <p className="text-xs text-white/30 py-6 text-center">
+              선박 목록을 지금 불러오지 못했습니다.
             </p>
-          ) : !sortedBoatListings ? (
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="shrink-0 w-40 h-44 rounded-2xl bg-white/3 animate-pulse"
-                />
+          ) : searchLoading && searchBoats.length === 0 ? (
+            <div className="grid grid-cols-2 gap-2">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="h-48 rounded-2xl bg-white/3 animate-pulse" />
               ))}
             </div>
+          ) : searchBoats.length === 0 ? (
+            <p className="text-xs text-white/30 py-6 text-center">
+              이 조건으로 출조하는 선박이 없습니다. 날짜나 필터를 바꿔보세요.
+            </p>
           ) : (
-            <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
-              {sortedBoatListings.slice(0, 12).map((boat) => (
-                <BoatListingCard key={boat.uid} boat={boat} />
-              ))}
-            </div>
+            <>
+              <div className={`grid grid-cols-2 gap-2 ${searchLoading ? "opacity-60" : ""}`}>
+                {searchBoats.map((boat) => (
+                  <BoatListingCard key={boat.uid} boat={boat} date={searchDate} />
+                ))}
+              </div>
+              {searchResult && searchBoats.length < searchResult.total && (
+                <button
+                  onClick={() => setSearchPage((p) => p + 1)}
+                  disabled={searchLoading}
+                  className="w-full py-2.5 rounded-xl border border-white/10 text-white/60 text-sm font-semibold hover:bg-white/5 transition-colors disabled:opacity-40"
+                >
+                  {searchLoading ? "불러오는 중..." : `더 보기 (${searchBoats.length}/${searchResult.total})`}
+                </button>
+              )}
+            </>
           )}
           <p className="text-[10px] text-white/25 px-1">
-            더피싱 예약 시스템에 등록된 선사 목록 · 예약은 각 선사 페이지에서
+            더피싱 예약 시스템 기준 · 선박을 누르면 달력과 남은 자리가 보이고,
+            예약은 선사 홈페이지에서 이루어집니다
           </p>
         </section>
 
