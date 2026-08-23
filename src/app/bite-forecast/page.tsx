@@ -865,11 +865,6 @@ function BiteIndexOfficialSection() {
   >("전체");
   const [showAll, setShowAll] = useState(false);
 
-  // Reset show-all when filter changes
-  useEffect(() => {
-    setShowAll(false);
-  }, [gubun, selectedRegion]);
-
   useEffect(() => {
     let cancelled = false;
     fetchBiteIndexWithMeta({ gubun, numOfRows: 100 })
@@ -937,7 +932,10 @@ function BiteIndexOfficialSection() {
       <div className="flex gap-2">
         <button
           type="button"
-          onClick={() => setGubun("shore")}
+          onClick={() => {
+            setGubun("shore");
+            setShowAll(false);
+          }}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors ${
             gubun === "shore"
               ? "bg-[#7dd3fc]/20 border border-[#7dd3fc]/40 text-[#7dd3fc]"
@@ -949,7 +947,10 @@ function BiteIndexOfficialSection() {
         </button>
         <button
           type="button"
-          onClick={() => setGubun("boat")}
+          onClick={() => {
+            setGubun("boat");
+            setShowAll(false);
+          }}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors ${
             gubun === "boat"
               ? "bg-[#c9a84c]/20 border border-[#c9a84c]/40 text-[#c9a84c]"
@@ -977,7 +978,10 @@ function BiteIndexOfficialSection() {
             <button
               key={key}
               type="button"
-              onClick={() => setSelectedRegion(key)}
+              onClick={() => {
+                setSelectedRegion(key);
+                setShowAll(false);
+              }}
               className="flex-1 py-1.5 rounded-xl text-[11px] font-bold transition-colors"
               style={
                 active
