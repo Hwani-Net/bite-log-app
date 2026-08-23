@@ -14,6 +14,10 @@ import {
   Star,
   ShieldCheck,
   Check,
+  Bell,
+  BellRing,
+  ChevronDown,
+  X,
 } from "lucide-react";
 import {
   FISH_SEASON_DB,
@@ -23,6 +27,14 @@ import {
   type FishSeasonData,
 } from "@/data/fishSeasonDB";
 import { getRegionForCoords, type SeaRegion } from "@/lib/region";
+import {
+  type BoatDayStatus,
+  type BoatOperatorId,
+} from "@/services/boatAvailabilityService";
+import {
+  requestNotificationPermission,
+  sendLocalNotification,
+} from "@/services/pushNotificationService";
 
 // @mock-data — editorial fallback only for months with no FISH_SEASON_DB
 // species in gold/peak season (getMonthlyRecommendation() below prefers real
@@ -280,6 +292,145 @@ const PLATFORMS: BookingPlatform[] = [
   },
 ];
 
+interface WatchedSlot {
+  operatorId: BoatOperatorId;
+  boatName: string;
+  date: string;
+}
+
+const WATCHLIST_KEY = "biteLog_boatWatchlist";
+
+function loadWatchlist(): WatchedSlot[] {
+  try {
+    const raw = localStorage.getItem(WATCHLIST_KEY);
+    return raw ? (JSON.parse(raw) as WatchedSlot[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveWatchlist(list: WatchedSlot[]) {
+  localStorage.setItem(WATCHLIST_KEY, JSON.stringify(list));
+}
+
+const STATUS_LABEL: Record<BoatDayStatus["status"], string> = {
+  available: "예약 가능",
+  full: "마감",
+  weather: "기상악화",
+  unknown: "정보 없음",
+};
+
+const STATUS_STYLE: Record<BoatDayStatus["status"], string> = {
+  available: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+  full: "bg-white/5 text-white/40 border-white/10",
+  weather: "bg-orange-500/15 text-orange-400 border-orange-500/30",
+  unknown: "bg-white/5 text-white/30 border-white/10",
+};
+
+function formatShortDate(iso: string): string {
+  const [, m, d] = iso.split("-");
+  return `${Number(m)}/${Number(d)}`;
+}
+
+function BoatAvailabilityPanel({
+  operatorId,
+  days,
+  loading,
+  error,
+  watchlist,
+  onToggleWatch,
+}: {
+  operatorId: BoatOperatorId;
+  days: BoatDayStatus[] | undefined;
+  loading: boolean;
+  error: boolean;
+  watchlist: WatchedSlot[];
+  onToggleWatch: (slot: WatchedSlot) => void;
+}) {
+  if (loading) {
+    return (
+      <p className="text-xs text-white/30 py-3 text-center">
+        예약 현황 불러오는 중...
+      </p>
+    );
+  }
+  if (error) {
+    return (
+      <p className="text-xs text-white/30 py-3 text-center">
+        예약 현황을 지금 불러오지 못했습니다. 선사 페이지에서 직접
+        확인해주세요.
+      </p>
+    );
+  }
+  if (!days || days.length === 0) {
+    return (
+      <p className="text-xs text-white/30 py-3 text-center">
+        표시할 예약 현황이 없습니다.
+      </p>
+    );
+  }
+
+  const upcoming = days
+    .filter((d) => d.status !== "unknown")
+    .slice(0, 14);
+
+  return (
+    <div className="space-y-1.5 pt-1">
+      {upcoming.map((d, i) => {
+        const isWatched = watchlist.some(
+          (w) =>
+            w.operatorId === operatorId &&
+            w.boatName === d.boatName &&
+            w.date === d.date,
+        );
+        return (
+          <div
+            key={`${d.date}-${d.boatName}-${i}`}
+            className="flex items-center gap-2 py-1.5 px-2 rounded-lg bg-white/2"
+          >
+            <span className="text-[11px] text-white/50 w-10 shrink-0">
+              {formatShortDate(d.date)}
+            </span>
+            <span className="text-[11px] text-white/70 flex-1 truncate">
+              {d.boatName}
+            </span>
+            <span
+              className={`text-[10px] px-2 py-0.5 rounded-full border shrink-0 ${STATUS_STYLE[d.status]}`}
+            >
+              {d.status === "available" && d.remainingSeats != null
+                ? `잔여 ${d.remainingSeats}명`
+                : STATUS_LABEL[d.status]}
+            </span>
+            {d.status === "full" && (
+              <button
+                onClick={() =>
+                  onToggleWatch({
+                    operatorId,
+                    boatName: d.boatName,
+                    date: d.date,
+                  })
+                }
+                className={`shrink-0 size-6 rounded-full flex items-center justify-center transition-colors ${
+                  isWatched
+                    ? "bg-[#c9a84c] text-[#080d14]"
+                    : "bg-white/5 text-white/40 hover:text-white/70"
+                }`}
+                title={isWatched ? "알림 취소" : "빈자리 알림 받기"}
+              >
+                {isWatched ? <BellRing size={12} /> : <Bell size={12} />}
+              </button>
+            )}
+          </div>
+        );
+      })}
+      <p className="text-[10px] text-white/25 pt-1 px-1">
+        더피싱 예약 시스템 기준 · 30분마다 갱신 · 확정은 반드시 선사
+        페이지에서 확인하세요
+      </p>
+    </div>
+  );
+}
+
 export default function BookingPage() {
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
@@ -296,6 +447,67 @@ export default function BookingPage() {
   const [selectedPlatform, setSelectedPlatform] = useState<BookingPlatform>(
     PLATFORMS[0],
   );
+  const [expandedOperator, setExpandedOperator] =
+    useState<BoatOperatorId | null>(null);
+  const [availability, setAvailability] = useState<
+    Partial<Record<BoatOperatorId, BoatDayStatus[]>>
+  >({});
+  const [availabilityError, setAvailabilityError] = useState<
+    Partial<Record<BoatOperatorId, boolean>>
+  >({});
+  const [availabilityLoading, setAvailabilityLoading] = useState<
+    Partial<Record<BoatOperatorId, boolean>>
+  >({});
+  const [watchlist, setWatchlist] = useState<WatchedSlot[]>([]);
+
+  const loadOperatorAvailability = async (operatorId: BoatOperatorId) => {
+    setAvailabilityLoading((prev) => ({ ...prev, [operatorId]: true }));
+    setAvailabilityError((prev) => ({ ...prev, [operatorId]: false }));
+    try {
+      const res = await fetch(`/api/boat-availability?operator=${operatorId}`);
+      if (!res.ok) throw new Error(String(res.status));
+      const data = await res.json();
+      setAvailability((prev) => ({ ...prev, [operatorId]: data.days }));
+    } catch {
+      setAvailabilityError((prev) => ({ ...prev, [operatorId]: true }));
+    } finally {
+      setAvailabilityLoading((prev) => ({ ...prev, [operatorId]: false }));
+    }
+  };
+
+  const handleToggleExpand = (operatorId: BoatOperatorId) => {
+    const next = expandedOperator === operatorId ? null : operatorId;
+    setExpandedOperator(next);
+    if (next && !availability[next]) {
+      loadOperatorAvailability(next);
+    }
+  };
+
+  const handleToggleWatch = (slot: WatchedSlot) => {
+    setWatchlist((prev) => {
+      const exists = prev.some(
+        (w) =>
+          w.operatorId === slot.operatorId &&
+          w.boatName === slot.boatName &&
+          w.date === slot.date,
+      );
+      const next = exists
+        ? prev.filter(
+            (w) =>
+              !(
+                w.operatorId === slot.operatorId &&
+                w.boatName === slot.boatName &&
+                w.date === slot.date
+              ),
+          )
+        : [...prev, slot];
+      saveWatchlist(next);
+      return next;
+    });
+    if (typeof Notification !== "undefined" && Notification.permission === "default") {
+      requestNotificationPermission();
+    }
+  };
 
   // One-time sync from external systems (URL query, localStorage,
   // geolocation) into React state after mount. Deliberately not done via
@@ -308,7 +520,6 @@ export default function BookingPage() {
     const species = params.get("species");
     const date = params.get("date");
     if (species && SPECIES_OPTIONS.includes(species)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedSpecies(species);
     }
     if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -318,6 +529,8 @@ export default function BookingPage() {
     const savedPlatformId = localStorage.getItem("biteLog_bookingPlatform");
     const savedPlatform = PLATFORMS.find((p) => p.id === savedPlatformId);
     if (savedPlatform) setSelectedPlatform(savedPlatform);
+
+    setWatchlist(loadWatchlist());
 
     // Best-effort location for the monthly pick — silently falls back to
     // the nationwide top release site if permission is denied/unavailable.
@@ -332,6 +545,66 @@ export default function BookingPage() {
       { timeout: 5000, maximumAge: 300000 },
     );
   }, []);
+
+  // Re-checks every watched (boat, date) slot while this page stays open and
+  // fires a local notification the moment one flips from full to available.
+  // This only runs in the foreground tab — there's no push infrastructure
+  // (service worker + FCM server key + a cron sender) in this app yet, so it
+  // can't wake a closed app. The UI copy says so; this isn't meant to quietly
+  // promise more than it does.
+  useEffect(() => {
+    if (watchlist.length === 0) return;
+
+    const checkWatchlist = async () => {
+      const operatorIds = Array.from(
+        new Set(watchlist.map((w) => w.operatorId)),
+      );
+      for (const operatorId of operatorIds) {
+        try {
+          const res = await fetch(
+            `/api/boat-availability?operator=${operatorId}`,
+          );
+          if (!res.ok) continue;
+          const { days } = (await res.json()) as { days: BoatDayStatus[] };
+          setAvailability((prev) => ({ ...prev, [operatorId]: days }));
+
+          const stillWatchedForOperator = loadWatchlist().filter(
+            (w) => w.operatorId === operatorId,
+          );
+          for (const w of stillWatchedForOperator) {
+            const current = days.find(
+              (d) => d.boatName === w.boatName && d.date === w.date,
+            );
+            if (current && current.status === "available") {
+              sendLocalNotification(
+                `${w.boatName} 자리 났어요`,
+                `${formatShortDate(w.date)} 예약이 가능해졌습니다. 서두르세요!`,
+                undefined,
+                `boat-${w.operatorId}-${w.boatName}-${w.date}`,
+              );
+              setWatchlist((prev) => {
+                const next = prev.filter(
+                  (p) =>
+                    !(
+                      p.operatorId === w.operatorId &&
+                      p.boatName === w.boatName &&
+                      p.date === w.date
+                    ),
+                );
+                saveWatchlist(next);
+                return next;
+              });
+            }
+          }
+        } catch {
+          // best-effort — try again on the next interval
+        }
+      }
+    };
+
+    const interval = setInterval(checkWatchlist, 10 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [watchlist]);
 
   const spotOfMonth = useMemo(
     () => getMonthlyRecommendation(currentMonth, currentDay, userRegion),
@@ -681,49 +954,111 @@ export default function BookingPage() {
             개별 선사 직접 예약
           </h3>
           {PLATFORMS.filter((p) => p.kind === "operator").map(
-            (platform, i) => (
-              <a
-                key={platform.id}
-                href={platform.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-4 bg-white/3 border border-white/8 rounded-2xl p-4 hover:bg-white/6 hover:border-white/15 transition-all group"
-                style={{ animationDelay: `${i * 0.08}s` }}
-              >
+            (platform, i) => {
+              const operatorId = platform.id as BoatOperatorId;
+              const isExpanded = expandedOperator === operatorId;
+              return (
                 <div
-                  className={`size-11 rounded-xl border flex items-center justify-center shrink-0 ${platform.accent}`}
+                  key={platform.id}
+                  className="bg-white/3 border border-white/8 rounded-2xl p-4"
+                  style={{ animationDelay: `${i * 0.08}s` }}
                 >
-                  <Anchor size={18} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-bold text-white mb-0.5">
-                    {platform.name}
-                  </h4>
-                  <p className="text-xs text-white/50 truncate mb-1.5">
-                    {platform.description}
-                  </p>
-                  <div className="flex gap-1 flex-wrap">
-                    {platform.features.map((f) => (
-                      <span
-                        key={f}
-                        className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-white/40 border border-white/8"
+                  <div className="flex items-center gap-4">
+                    <a
+                      href={platform.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-4 flex-1 min-w-0 group"
+                    >
+                      <div
+                        className={`size-11 rounded-xl border flex items-center justify-center shrink-0 ${platform.accent}`}
                       >
-                        {f}
-                      </span>
-                    ))}
+                        <Anchor size={18} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-bold text-white mb-0.5">
+                          {platform.name}
+                        </h4>
+                        <p className="text-xs text-white/50 truncate mb-1.5">
+                          {platform.description}
+                        </p>
+                        <div className="flex gap-1 flex-wrap">
+                          {platform.features.map((f) => (
+                            <span
+                              key={f}
+                              className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-white/40 border border-white/8"
+                            >
+                              {f}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <ChevronRight
+                        size={16}
+                        className="text-white/20 group-hover:text-white/50 transition-colors shrink-0"
+                      />
+                    </a>
                   </div>
+                  <button
+                    onClick={() => handleToggleExpand(operatorId)}
+                    className="flex items-center gap-1 mt-3 text-[11px] text-white/40 hover:text-white/70 transition-colors"
+                  >
+                    <ChevronDown
+                      size={12}
+                      className="transition-transform"
+                      style={{ transform: isExpanded ? "rotate(180deg)" : "" }}
+                    />
+                    예약 현황 보기
+                  </button>
+                  {isExpanded && (
+                    <BoatAvailabilityPanel
+                      operatorId={operatorId}
+                      days={availability[operatorId]}
+                      loading={!!availabilityLoading[operatorId]}
+                      error={!!availabilityError[operatorId]}
+                      watchlist={watchlist}
+                      onToggleWatch={handleToggleWatch}
+                    />
+                  )}
                 </div>
-                <ChevronRight
-                  size={16}
-                  className="text-white/20 group-hover:text-white/50 transition-colors shrink-0"
-                />
-              </a>
-            ),
+              );
+            },
           )}
           <p className="text-[11px] text-white/30 px-1">
             아는 선사가 여기 없나요? 위 플랫폼에서 선사명으로 검색해보세요.
           </p>
         </div>
+
+        {/* Watchlist */}
+        {watchlist.length > 0 && (
+          <div className="space-y-2 border border-[#c9a84c]/20 rounded-2xl p-4 bg-[#c9a84c]/5">
+            <h3 className="flex items-center gap-1.5 text-xs text-[#c9a84c] font-semibold uppercase tracking-[0.15em]">
+              <BellRing size={13} />
+              빈자리 알림 등록 ({watchlist.length})
+            </h3>
+            {watchlist.map((w) => (
+              <div
+                key={`${w.operatorId}-${w.boatName}-${w.date}`}
+                className="flex items-center gap-2 py-1 px-1"
+              >
+                <span className="text-[11px] text-white/60 flex-1">
+                  {w.boatName} · {formatShortDate(w.date)}
+                </span>
+                <button
+                  onClick={() => handleToggleWatch(w)}
+                  className="size-5 rounded-full flex items-center justify-center text-white/30 hover:text-white/60"
+                  title="알림 취소"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ))}
+            <p className="text-[10px] text-white/30 px-1">
+              BITE Log 앱이 열려 있는 동안 10분마다 확인해서 알려드려요. 앱을
+              완전히 닫으면 확인하지 못합니다.
+            </p>
+          </div>
+        )}
 
         {/* Why link-out instead of in-app booking */}
         <div className="flex items-start gap-3 border border-white/8 rounded-2xl p-4 bg-white/2">
