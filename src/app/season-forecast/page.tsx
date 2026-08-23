@@ -240,6 +240,13 @@ function FishCard({
               )}
             </div>
           </div>
+
+          <Link
+            href={`/booking?species=${encodeURIComponent(data.species)}`}
+            className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#c9a84c] text-[#080d14] text-xs font-bold hover:brightness-110 transition-all"
+          >
+            {data.species} 예약하기
+          </Link>
         </div>
       )}
     </div>

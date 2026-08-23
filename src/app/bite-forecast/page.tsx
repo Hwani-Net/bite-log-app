@@ -15,6 +15,7 @@ import {
 import { TideData, getCurrentPhase, TidePhase } from "@/services/tideService";
 import { WeatherData } from "@/services/weatherService";
 import PeakTimeline from "@/app/components/concierge/PeakTimeline";
+import { getRegionForCoords } from "@/lib/region";
 import {
   ArrowLeft,
   Lock,
@@ -844,16 +845,6 @@ function FishingTips({ biteTime }: { biteTime: BiteTimePrediction }) {
 }
 
 // ─── Bite Index Section (해양수산부 공식 바다낚시지수 v2) ─────────────────────
-function getRegionForCoords(
-  lat?: number,
-  lon?: number,
-): "서해" | "남해" | "동해" | "제주" | "기타" {
-  if (lat == null || lon == null) return "기타";
-  if (lat < 33.9) return "제주";
-  if (lon < 127.2) return "서해";
-  if (lon > 128.8) return "동해";
-  return "남해";
-}
 
 function BiteIndexOfficialSection() {
   const [gubun, setGubun] = useState<BiteIndexGubun>("shore");
@@ -1371,6 +1362,17 @@ export default function BiteForecastPage() {
               </div>
             );
           })()}
+
+          {/* ── Booking CTA (shown when conditions are decent or better) ── */}
+          {(biteTime.grade === "excellent" || biteTime.grade === "good") && (
+            <Link
+              href={`/booking?date=${new Date().toISOString().slice(0, 10)}`}
+              className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-[#c9a84c] text-[#080d14] text-sm font-bold hover:brightness-110 transition-all"
+            >
+              <Anchor size={16} />
+              {isKo ? "지금 출조 예약하기" : "Book a trip now"}
+            </Link>
+          )}
 
           {/* ── 해양수산부 공식 바다낚시지수 (data.go.kr v2) ── */}
           <BiteIndexOfficialSection />
