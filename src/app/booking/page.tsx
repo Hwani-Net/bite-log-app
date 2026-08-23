@@ -207,6 +207,8 @@ interface BookingPlatform {
   url: string;
   features: string[];
   accent: string;
+  /** "operator" = a single boat's own site, not a multi-boat marketplace. */
+  kind?: "operator";
 }
 
 // Every URL below was verified live and pointed at the platform's actual
@@ -253,6 +255,28 @@ const PLATFORMS: BookingPlatform[] = [
     url: "https://www.fishapp.co.kr/pt/info/ship_search_page",
     features: ["테마낚시", "체험낚시", "숙박 연계"],
     accent: "bg-cyan-500/15 border-cyan-500/30 text-cyan-400",
+  },
+  // Individual boats (not multi-boat marketplaces) — added on request.
+  // Both run on the same white-label booking template as thefishing.kr
+  // (js.thefishing.kr scripts on both), so they're linked, not scraped —
+  // see the "실시간 예약 현황" note below for why.
+  {
+    id: "masterfishing",
+    name: "루피호 (대천항)",
+    description: "대천항 팀루피호·루피호·슈퍼맨호 전문 예약",
+    url: "https://masterfishing.kr/index.php?mid=bk",
+    features: ["대천항", "우럭·광어", "선상낚시"],
+    accent: "bg-amber-500/15 border-amber-500/30 text-amber-400",
+    kind: "operator",
+  },
+  {
+    id: "teambite",
+    name: "팀바이트호 (마검포)",
+    description: "마검포 팀바이트호 선상낚시 전문 예약",
+    url: "http://teambite.kr/index.php?mid=bk",
+    features: ["마검포", "선상낚시"],
+    accent: "bg-rose-500/15 border-rose-500/30 text-rose-400",
+    kind: "operator",
   },
 ];
 
@@ -611,7 +635,7 @@ export default function BookingPage() {
           <h3 className="text-xs text-white/40 font-semibold uppercase tracking-[0.15em] px-1">
             검증된 예약 플랫폼
           </h3>
-          {PLATFORMS.map((platform, i) => (
+          {PLATFORMS.filter((p) => !p.kind).map((platform, i) => (
             <a
               key={platform.id}
               href={platform.url}
@@ -649,6 +673,56 @@ export default function BookingPage() {
               />
             </a>
           ))}
+        </div>
+
+        {/* Individual boat operators */}
+        <div className="space-y-3">
+          <h3 className="text-xs text-white/40 font-semibold uppercase tracking-[0.15em] px-1">
+            개별 선사 직접 예약
+          </h3>
+          {PLATFORMS.filter((p) => p.kind === "operator").map(
+            (platform, i) => (
+              <a
+                key={platform.id}
+                href={platform.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-4 bg-white/3 border border-white/8 rounded-2xl p-4 hover:bg-white/6 hover:border-white/15 transition-all group"
+                style={{ animationDelay: `${i * 0.08}s` }}
+              >
+                <div
+                  className={`size-11 rounded-xl border flex items-center justify-center shrink-0 ${platform.accent}`}
+                >
+                  <Anchor size={18} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-bold text-white mb-0.5">
+                    {platform.name}
+                  </h4>
+                  <p className="text-xs text-white/50 truncate mb-1.5">
+                    {platform.description}
+                  </p>
+                  <div className="flex gap-1 flex-wrap">
+                    {platform.features.map((f) => (
+                      <span
+                        key={f}
+                        className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-white/40 border border-white/8"
+                      >
+                        {f}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <ChevronRight
+                  size={16}
+                  className="text-white/20 group-hover:text-white/50 transition-colors shrink-0"
+                />
+              </a>
+            ),
+          )}
+          <p className="text-[11px] text-white/30 px-1">
+            아는 선사가 여기 없나요? 위 플랫폼에서 선사명으로 검색해보세요.
+          </p>
         </div>
 
         {/* Why link-out instead of in-app booking */}
