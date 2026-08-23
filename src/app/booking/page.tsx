@@ -31,6 +31,7 @@ import {
   type BoatDayStatus,
   type BoatOperatorId,
 } from "@/services/boatAvailabilityService";
+import { type BoatListing } from "@/services/boatListingService";
 import {
   requestNotificationPermission,
   sendLocalNotification,
@@ -431,6 +432,44 @@ function BoatAvailabilityPanel({
   );
 }
 
+function BoatListingCard({ boat }: { boat: BoatListing }) {
+  const shortArea = boat.areaPath.split(" > ").slice(1).join(" · ");
+  return (
+    <a
+      href={boat.detailUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="shrink-0 w-40 bg-white/3 border border-white/8 rounded-2xl overflow-hidden hover:border-white/20 transition-all"
+    >
+      <div className="relative w-full h-28 bg-white/5">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={boat.imageUrl}
+          alt={boat.name}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.display = "none";
+          }}
+        />
+        <span className="absolute bottom-1.5 right-1.5 text-[9px] px-1.5 py-0.5 rounded-full bg-black/60 text-white/80">
+          {boat.capacity || "정원 미표기"}
+        </span>
+      </div>
+      <div className="p-2.5">
+        <h4 className="text-xs font-bold text-white truncate mb-0.5">
+          {boat.name}
+        </h4>
+        <p className="text-[10px] text-white/40 truncate mb-1">
+          {shortArea || boat.areaPath}
+        </p>
+        <p className="text-[10px] text-[#c9a84c]/80 truncate">
+          {boat.fishTypes || "어종 정보 없음"}
+        </p>
+      </div>
+    </a>
+  );
+}
+
 export default function BookingPage() {
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
@@ -459,6 +498,28 @@ export default function BookingPage() {
     Partial<Record<BoatOperatorId, boolean>>
   >({});
   const [watchlist, setWatchlist] = useState<WatchedSlot[]>([]);
+  const [boatListings, setBoatListings] = useState<BoatListing[] | null>(
+    null,
+  );
+  const [boatListingsError, setBoatListingsError] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/boat-listings")
+      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+      .then((data) => setBoatListings(data.boats))
+      .catch(() => setBoatListingsError(true));
+  }, []);
+
+  const sortedBoatListings = useMemo(() => {
+    if (!boatListings) return null;
+    if (!userRegion) return boatListings;
+    const targetRegion = `${userRegion}권`;
+    return [...boatListings].sort(
+      (a, b) =>
+        Number(b.seaRegion === targetRegion) -
+        Number(a.seaRegion === targetRegion),
+    );
+  }, [boatListings, userRegion]);
 
   const loadOperatorAvailability = async (operatorId: BoatOperatorId) => {
     setAvailabilityLoading((prev) => ({ ...prev, [operatorId]: true }));
@@ -712,6 +773,47 @@ export default function BookingPage() {
               )}
             </div>
           </div>
+        </section>
+
+        {/* Boat listings — real boats browsable in-app, not just outbound
+            links. Pulled from 더피싱's own public boat directory. */}
+        <section className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-xs text-white/40 font-semibold uppercase tracking-[0.15em]">
+              선사 둘러보기
+            </h3>
+            <a
+              href="https://thefishing.kr/reservation/list.php"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] text-white/30 hover:text-white/60"
+            >
+              전체 보기
+            </a>
+          </div>
+          {boatListingsError ? (
+            <p className="text-xs text-white/30 py-3 text-center">
+              선사 목록을 지금 불러오지 못했습니다.
+            </p>
+          ) : !sortedBoatListings ? (
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="shrink-0 w-40 h-44 rounded-2xl bg-white/3 animate-pulse"
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
+              {sortedBoatListings.slice(0, 12).map((boat) => (
+                <BoatListingCard key={boat.uid} boat={boat} />
+              ))}
+            </div>
+          )}
+          <p className="text-[10px] text-white/25 px-1">
+            더피싱 예약 시스템에 등록된 선사 목록 · 예약은 각 선사 페이지에서
+          </p>
         </section>
 
         {/* Assistant */}

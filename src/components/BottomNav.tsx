@@ -9,6 +9,7 @@ import {
   Trophy,
   Menu,
   BarChart2,
+  Anchor,
   type LucideIcon,
 } from "lucide-react";
 
@@ -23,6 +24,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/records", icon: BookOpen, label: "기록" },
   { href: "/stats", icon: BarChart2, label: "통계" },
   { href: "/ranking", icon: Trophy, label: "랭킹" },
+  { href: "/booking", icon: Anchor, label: "예약" },
   { href: "/concierge", icon: Menu, label: "AI" },
 ];
 
