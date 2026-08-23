@@ -79,50 +79,47 @@ describe('fetchNaverNews — fallback to mock data when no API key', () => {
   });
 });
 
-// ── fetchYouTubeVideos (no API key → mock data) ───────────────────
-describe('fetchYouTubeVideos — fallback to mock data when no API key', () => {
-  it('should return an array of items', async () => {
+// -- fetchYouTubeVideos (server RSS route) ------------------------
+// Videos now come from /api/youtube-rss. There is no client-side mock:
+// the contract is that an unreachable route degrades to an empty list
+// instead of throwing (see docs/PITFALLS.md - graceful fallback rule).
+describe('fetchYouTubeVideos - graceful degradation', () => {
+  it('returns an empty array instead of throwing when the RSS route is unreachable', async () => {
     const items = await fetchYouTubeVideos();
     expect(Array.isArray(items)).toBe(true);
-    expect(items.length).toBeGreaterThan(0);
+    expect(items).toHaveLength(0);
   });
 
-  it('all items should have source = "youtube"', async () => {
-    const items = await fetchYouTubeVideos();
-    items.forEach((item) => {
-      expect(item.source).toBe('youtube');
-      expect(item.sourceLabel).toBe('YouTube');
-    });
-  });
-
-  it('each YouTube item should have a valid structure', async () => {
-    const items = await fetchYouTubeVideos();
-    items.forEach(validateNewsItem);
-  });
-
-  it('YouTube items should have YouTube links', async () => {
-    const items = await fetchYouTubeVideos();
-    items.forEach((item) => {
-      expect(item.link).toContain('youtube.com');
-    });
-  });
-
-  it('YouTube items should have thumbnails', async () => {
-    const items = await fetchYouTubeVideos();
-    items.forEach((item) => {
-      expect(item.thumbnail).toBeTruthy();
-    });
-  });
-
-  it('YouTube items should have sns reliability', async () => {
-    const items = await fetchYouTubeVideos();
-    items.forEach((item) => {
-      expect(item.reliability).toBe('sns');
-    });
+  it('parses items returned by the RSS route', async () => {
+    const payload = [
+      {
+        title: 'TEST_VIDEO',
+        link: 'https://www.youtube.com/watch?v=abc123',
+        source: 'youtube',
+        sourceLabel: 'YouTube',
+        reliability: 'sns',
+        thumbnail: 'https://i.ytimg.com/vi/abc123/hqdefault.jpg',
+        pubDate: '2026-04-20T00:00:00Z',
+      },
+    ];
+    const original = globalThis.fetch;
+    globalThis.fetch = (async () =>
+      new Response(JSON.stringify(payload), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      })) as typeof fetch;
+    try {
+      const items = await fetchYouTubeVideos();
+      expect(items).toHaveLength(1);
+      expect(items[0].source).toBe('youtube');
+      expect(items[0].link).toContain('youtube.com');
+    } finally {
+      globalThis.fetch = original;
+    }
   });
 
   it('should accept a custom query without crashing', async () => {
-    const items = await fetchYouTubeVideos('제주 방어 낚시', 3);
+    const items = await fetchYouTubeVideos('CUSTOM_QUERY', 3);
     expect(Array.isArray(items)).toBe(true);
   });
 });

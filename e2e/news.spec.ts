@@ -27,8 +27,8 @@ test.describe('Fishing News page', () => {
 
     // Either news items or a loading/empty state should be visible
     const newsItems = page.locator('[class*="news"], [class*="card"], article');
-    const loadingState = page.locator('[class*="loading"], [class*="spinner"], text=분석 중');
-    const emptyState = page.locator('text=뉴스, text=News, text=조황');
+    const loadingState = page.locator('[class*="loading"], [class*="spinner"]');
+    const emptyState = page.getByText(/뉴스|News|조황/);
 
     const hasContent =
       (await newsItems.count()) > 0 ||

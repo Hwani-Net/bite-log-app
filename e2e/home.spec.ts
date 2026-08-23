@@ -11,7 +11,7 @@ test.describe('Home page', () => {
 
   test('should display the app header or greeting', async ({ page }) => {
     // App title or greeting should be visible on home page
-    const header = page.locator('text=BITE Log, text=바이트로그').first();
+    const header = page.getByText(/BITE Log|바이트로그/).first();
     await expect(header).toBeVisible({ timeout: 10000 });
   });
 
@@ -31,7 +31,7 @@ test.describe('Home page', () => {
     // Home shows total catch, this month, max size cards
     const statCards = page.locator('[class*="card"], [class*="stat"], [class*="summary"]');
     // If no catch records, a no-catches message should be shown
-    const noCatches = page.locator('text=아직 조과 기록이 없습니다, text=No catches recorded yet');
+    const noCatches = page.getByText(/아직 조과 기록이 없습니다|No catches recorded yet/);
     const hasStatCards = await statCards.count() > 0;
     const hasNoCatches = await noCatches.count() > 0;
     expect(hasStatCards || hasNoCatches).toBe(true);
@@ -47,7 +47,20 @@ test.describe('Home page', () => {
     expect(bodyWidth).toBeLessThanOrEqual(viewportWidth + 10); // 10px tolerance
   });
 
+});
+
+// Kept outside the describe above: that block navigates in beforeEach, and a
+// second navigation cancels the first page's in-flight requests, which surfaces
+// as a spurious "Failed to fetch" console error.
+test.describe('Home page - console hygiene', () => {
   test('should load without console errors', async ({ page }) => {
+    // The Agentation annotation overlay polls localhost:4747 and is rendered
+    // only under NODE_ENV === 'development' (layout.tsx), so its connection
+    // refusals are a dev-server artifact, not an app error. Stub it out.
+    await page.route('http://localhost:4747/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
+    );
+
     const errors: string[] = [];
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
