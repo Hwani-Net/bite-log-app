@@ -28,7 +28,11 @@ test.describe('Booking search — /booking', () => {
   });
 
   test('region filter narrows the result count', async ({ page }) => {
-    const countLabel = page.locator('text=/\\d+척/');
+    // Scoped to the search-grid heading's own count span — 낚시뚜's "X/177척
+    // 동기화됨" text below also matches a bare /\d+척/ pattern.
+    const countLabel = page
+      .locator('h3', { hasText: '출조 선박' })
+      .locator('xpath=following-sibling::span[1]');
     await expect(countLabel).toBeVisible({ timeout: 15000 });
     const before = await countLabel.textContent();
 
@@ -46,7 +50,11 @@ test.describe('Booking search — /booking', () => {
   });
 
   test('species filter also narrows results', async ({ page }) => {
-    const countLabel = page.locator('text=/\\d+척/');
+    // Scoped to the search-grid heading's own count span — 낚시뚜's "X/177척
+    // 동기화됨" text below also matches a bare /\d+척/ pattern.
+    const countLabel = page
+      .locator('h3', { hasText: '출조 선박' })
+      .locator('xpath=following-sibling::span[1]');
     await expect(countLabel).toBeVisible({ timeout: 15000 });
     const before = await countLabel.textContent();
 

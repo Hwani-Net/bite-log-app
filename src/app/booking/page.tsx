@@ -37,6 +37,7 @@ import {
   type BoatListing,
   type BoatListingPage,
 } from "@/services/boatListingService";
+import { type FishappBoat } from "@/services/fishappListingService";
 import {
   requestNotificationPermission,
   sendLocalNotification,
@@ -475,6 +476,42 @@ function BoatListingCard({ boat, date }: { boat: BoatListing; date: string }) {
   );
 }
 
+function FishappBoatCard({ boat }: { boat: FishappBoat }) {
+  return (
+    <a
+      href={boat.detailUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="bg-white/3 border border-white/8 rounded-2xl overflow-hidden hover:border-cyan-400/40 transition-all"
+    >
+      <div className="relative w-full h-28 bg-white/5">
+        {boat.imageUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={boat.imageUrl}
+            alt={boat.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = "none";
+            }}
+          />
+        )}
+        <span className="absolute top-1.5 left-1.5 text-[9px] px-1.5 py-0.5 rounded-full bg-cyan-500/80 text-[#080d14] font-bold">
+          낚시뚜
+        </span>
+      </div>
+      <div className="p-2.5">
+        <h4 className="text-xs font-bold text-white truncate mb-0.5">
+          {boat.name}
+        </h4>
+        <p className="text-[10px] text-white/40 truncate">
+          {boat.province} · {boat.harbor || boat.area}
+        </p>
+      </div>
+    </a>
+  );
+}
+
 export default function BookingPage() {
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
@@ -504,9 +541,14 @@ export default function BookingPage() {
   >({});
   const [watchlist, setWatchlist] = useState<WatchedSlot[]>([]);
   // ── 더피싱-style search: date + region + species → boats sailing that day.
-  const [searchDate, setSearchDate] = useState<string>(() =>
-    new Date().toISOString().slice(0, 10),
-  );
+  // Starts empty rather than new Date() — a lazy initializer computing
+  // "today" runs during this page's server render too, and dev-mode
+  // compiles are slow enough (multi-second) that the server's "today" and
+  // the client's "today" at hydration can genuinely land on different
+  // calendar days, which is a hydration mismatch on the date input's value.
+  // Set for real in the mount effect below (client-only).
+  const [searchDate, setSearchDate] = useState<string>("");
+  const [todayDate, setTodayDate] = useState<string>(""); // for both date inputs' `min`
   const [searchRegion, setSearchRegion] = useState<string>(""); // REGION_FILTERS code
   const [searchSpecies, setSearchSpecies] = useState<string>(""); // SPECIES_FILTERS code
   const [searchPage, setSearchPage] = useState(1);
@@ -523,6 +565,7 @@ export default function BookingPage() {
   }, [userRegion, searchRegion]);
 
   useEffect(() => {
+    if (!searchDate) return; // not yet set by the mount effect
     let cancelled = false;
     setSearchLoading(true);
     setSearchError(false);
@@ -549,6 +592,38 @@ export default function BookingPage() {
   }, [searchDate, searchRegion, searchSpecies, searchPage]);
 
   const resetSearchPage = () => setSearchPage(1);
+
+  // ── 낚시뚜 directory: region-only filter, no date/species (their search
+  // API doesn't expose either) — kept in its own labeled section rather
+  // than merged into the date-specific grid above, so we never imply a
+  // boat is confirmed sailing on searchDate when we don't actually know.
+  const [directoryBoats, setDirectoryBoats] = useState<FishappBoat[]>([]);
+  const [directoryTotalCached, setDirectoryTotalCached] = useState(0);
+  const [directoryLoading, setDirectoryLoading] = useState(true);
+  const [directoryError, setDirectoryError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setDirectoryLoading(true);
+    setDirectoryError(false);
+    const q = searchRegion ? `?region=${searchRegion}` : "";
+    fetch(`/api/boat-directory${q}`)
+      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+      .then((data) => {
+        if (cancelled) return;
+        setDirectoryBoats(Array.isArray(data.boats) ? data.boats : []);
+        setDirectoryTotalCached(data.totalCached ?? 0);
+      })
+      .catch(() => {
+        if (!cancelled) setDirectoryError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setDirectoryLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [searchRegion]);
 
   const loadOperatorAvailability = async (operatorId: BoatOperatorId) => {
     setAvailabilityLoading((prev) => ({ ...prev, [operatorId]: true }));
@@ -606,6 +681,10 @@ export default function BookingPage() {
   // server-rendered HTML and the client's first render disagree (a
   // hydration mismatch) instead of just being a beat slower.
   useEffect(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    setSearchDate(today);
+    setTodayDate(today);
+
     const params = new URLSearchParams(window.location.search);
     const species = params.get("species");
     const date = params.get("date");
@@ -817,7 +896,7 @@ export default function BookingPage() {
               <input
                 type="date"
                 value={searchDate}
-                min={new Date().toISOString().slice(0, 10)}
+                min={todayDate || undefined}
                 onChange={(e) => {
                   setSearchDate(e.target.value);
                   resetSearchPage();
@@ -924,6 +1003,52 @@ export default function BookingPage() {
           </p>
         </section>
 
+        {/* 낚시뚜 directory — a second, separately-labeled source. No
+            date/species filter (their API doesn't expose either), so this
+            is deliberately not merged into the date-specific grid above:
+            merging would imply these boats are confirmed sailing on
+            searchDate, which we don't actually know. Boats appear here as
+            the daily cron warms them in — see fishappListingService.ts. */}
+        <section className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-xs text-white/40 font-semibold uppercase tracking-[0.15em]">
+              낚시뚜 등록 선박 (날짜 무관)
+            </h3>
+            {directoryTotalCached > 0 && (
+              <span className="text-[11px] text-white/40">
+                {directoryTotalCached}/177척 동기화됨
+              </span>
+            )}
+          </div>
+          {directoryError ? (
+            <p className="text-xs text-white/30 py-4 text-center">
+              선박 목록을 지금 불러오지 못했습니다.
+            </p>
+          ) : directoryLoading && directoryBoats.length === 0 ? (
+            <div className="grid grid-cols-2 gap-2">
+              {[0, 1].map((i) => (
+                <div key={i} className="h-40 rounded-2xl bg-white/3 animate-pulse" />
+              ))}
+            </div>
+          ) : directoryBoats.length === 0 ? (
+            <p className="text-xs text-white/30 py-4 text-center">
+              {directoryTotalCached === 0
+                ? "매일 조금씩 동기화 중입니다 — 곧 채워집니다."
+                : "이 지역에 동기화된 선박이 아직 없습니다."}
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {directoryBoats.map((boat) => (
+                <FishappBoatCard key={boat.shipId} boat={boat} />
+              ))}
+            </div>
+          )}
+          <p className="text-[10px] text-white/25 px-1">
+            낚시뚜 등록 선사 목록 · 날짜별 예약 가능 여부는 선박을 눌러 낚시뚜
+            페이지에서 확인하세요
+          </p>
+        </section>
+
         {/* Assistant */}
         <section className="glass-morphism border border-white/5 rounded-2xl p-5">
           <h3 className="text-sm font-bold text-white/70 uppercase tracking-[0.15em] mb-4 flex items-center gap-2">
@@ -966,7 +1091,7 @@ export default function BookingPage() {
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#c9a84c]/50 transition-colors"
-                  min={new Date().toISOString().slice(0, 10)}
+                  min={todayDate || undefined}
                 />
               </div>
 
