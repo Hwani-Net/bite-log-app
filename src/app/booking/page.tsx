@@ -334,6 +334,15 @@ const STATUS_LABEL: Record<BoatDayStatus["status"], string> = {
   unknown: "정보 없음",
 };
 
+/**
+ * YYYY-MM-DD in the browser's local timezone. `toISOString()` is always
+ * UTC — for a KST (UTC+9) user that reads "yesterday" for the first 9
+ * hours of every day, which is the wrong default for a Korea-only search.
+ */
+function localISODate(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 const STATUS_STYLE: Record<BoatDayStatus["status"], string> = {
   available: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
   full: "bg-white/5 text-white/40 border-white/10",
@@ -746,7 +755,12 @@ export default function BookingPage() {
   // server-rendered HTML and the client's first render disagree (a
   // hydration mismatch) instead of just being a beat slower.
   useEffect(() => {
-    const today = new Date().toISOString().slice(0, 10);
+    // Local date, not toISOString() — toISOString() is always UTC, so for
+    // a KST user (UTC+9) it reads "yesterday" for the first 9 hours of
+    // every day (00:00–08:59 KST). Caught live: the search grid defaulted
+    // to 2026-08-26 while the clock read 2026-08-27 00:03 KST, and
+    // thefishing.kr correctly had zero listings for a date already past.
+    const today = localISODate(new Date());
     setSearchDate(today);
     setTodayDate(today);
 

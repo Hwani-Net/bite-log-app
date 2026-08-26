@@ -6,6 +6,8 @@
 // file for why. sunsang24.com is not touched here for the same reason it
 // isn't touched there — its robots.txt explicitly disallows /ship/.
 
+import { fetchWithRetry } from "@/lib/retryFetch";
+
 const USER_AGENT =
   "BiteLog/1.0 (+https://bite-log-three.vercel.app; fishing app, low-frequency read-only)";
 
@@ -170,7 +172,7 @@ export async function fetchBoatListings(
   params: BoatSearchParams = {},
 ): Promise<BoatListingPage> {
   const url = buildListingUrl(params);
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: { "User-Agent": USER_AGENT },
     next: { revalidate: 1800 },
   });

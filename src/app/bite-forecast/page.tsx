@@ -35,6 +35,13 @@ import {
 } from "@/services/biteIndexService";
 
 // ─── Secret Spots Section ─────────────────────────────────────────────────────
+// YYYY-MM-DD in the browser's local timezone. `toISOString()` is always
+// UTC, which reads "yesterday" for a KST user during the first 9 hours of
+// every day — the wrong default for a link into a Korea-only date search.
+function localISODate(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function SecretSpotsSection({
   isPro,
   onOpenPaywall,
@@ -1366,7 +1373,7 @@ export default function BiteForecastPage() {
           {/* ── Booking CTA (shown when conditions are decent or better) ── */}
           {(biteTime.grade === "excellent" || biteTime.grade === "good") && (
             <Link
-              href={`/booking?date=${new Date().toISOString().slice(0, 10)}`}
+              href={`/booking?date=${localISODate(new Date())}`}
               className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-[#c9a84c] text-[#080d14] text-sm font-bold hover:brightness-110 transition-all"
             >
               <Anchor size={16} />

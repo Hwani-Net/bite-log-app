@@ -14,6 +14,8 @@
 // their robots.txt — AhrefsBot, SemrushBot, CCbot...), so we identify by our
 // real app name and URL without that word; we do not send a browser UA.
 
+import { fetchWithRetry } from "@/lib/retryFetch";
+
 const USER_AGENT =
   "BiteLog/1.0 (+https://bite-log-three.vercel.app; fishing app, low-frequency read-only)";
 
@@ -181,7 +183,7 @@ export async function fetchBoatCalendar(
   uid: string,
   ym?: string,
 ): Promise<BoatCalendar> {
-  const detailRes = await fetch(`${DETAIL_URL}?uid=${uid}`, {
+  const detailRes = await fetchWithRetry(`${DETAIL_URL}?uid=${uid}`, {
     headers: { "User-Agent": USER_AGENT },
     next: { revalidate: 1800 },
   });
@@ -208,7 +210,7 @@ export async function fetchBoatCalendar(
     st_uid: meta.stUid,
     pa_uid: uid,
   }).toString();
-  const monthRes = await fetch(MONTH_AJAX_URL, {
+  const monthRes = await fetchWithRetry(MONTH_AJAX_URL, {
     method: "POST",
     headers: {
       "User-Agent": USER_AGENT,
