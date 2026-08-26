@@ -16,12 +16,21 @@ test.describe('Booking search — /booking', () => {
   const searchCard = (page: import('@playwright/test').Page) =>
     page.locator('.glass-morphism').first();
 
+  // The 즐겨찾는 선사 row (once anything is favorited) renders its own
+  // a[href^="/booking/boat/"] cards above the search grid, so every locator
+  // that means "a search-result card" scopes to this testid, not the bare
+  // href-prefix selector. Each card is a <div data-testid="boat-card"> —
+  // the calendar link is now an absolutely-positioned overlay inside it
+  // (not a wrapper), since a <button> can't legally nest inside an <a>.
+  const resultsGrid = (page: import('@playwright/test').Page) =>
+    page.locator('[data-testid="search-results"]');
+
   test('loads with a default search date and boat grid', async ({ page }) => {
     await expect(searchCard(page).locator('input[type="date"]')).toBeVisible();
     // The grid resolves to either boats or the explicit empty-state copy —
     // never a silent blank area.
     await expect(
-      page.locator('a[href^="/booking/boat/"]').first().or(
+      resultsGrid(page).locator('[data-testid="boat-card"]').first().or(
         page.getByText('이 조건으로 출조하는 선박이 없습니다'),
       ),
     ).toBeVisible({ timeout: 15000 });
@@ -80,11 +89,52 @@ test.describe('Booking search — /booking', () => {
     }
   });
 
+  test('favoriting a boat persists across reload and surfaces it in 즐겨찾는 선사', async ({
+    page,
+  }) => {
+    const firstCard = resultsGrid(page).locator('[data-testid="boat-card"]').first();
+    await expect(firstCard).toBeVisible({ timeout: 15000 });
+    const boatName = await firstCard.locator('h4').textContent();
+    // Every parsed listing has a name (parseBoatListingHtml drops nameless
+    // entries) — assert it rather than letting a null silently turn the
+    // toContainText checks below into no-op empty-string matches.
+    expect(boatName).toBeTruthy();
+
+    const star = firstCard.getByRole('button', { name: /즐겨찾기/ });
+    await expect(star).toBeVisible();
+    await star.click();
+    await expect(star).toHaveAttribute('aria-pressed', 'true');
+    // The star sits on an absolutely-positioned overlay Link — clicking it
+    // must stay on /booking, not fall through to the calendar page.
+    expect(page.url()).toContain('/booking');
+    expect(page.url()).not.toMatch(/\/booking\/boat\//);
+
+    await page.reload();
+    const favSection = page.locator('h3', { hasText: '즐겨찾는 선사' });
+    await expect(favSection).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="favorite-boats"]')).toContainText(
+      boatName ?? '',
+    );
+
+    // Un-favoriting removes it from the section again — the star click
+    // must not have accidentally navigated to the calendar page instead.
+    const searchStar = resultsGrid(page)
+      .locator('[data-testid="boat-card"]')
+      .filter({ hasText: boatName ?? '' })
+      .first()
+      .getByRole('button', { name: /즐겨찾기/ });
+    await searchStar.click();
+    await expect(page.locator('h3', { hasText: '즐겨찾는 선사' })).toHaveCount(0);
+  });
+
   test('clicking a boat card navigates to its calendar page', async ({ page }) => {
-    const card = page.locator('a[href^="/booking/boat/"]').first();
-    await expect(card).toBeVisible({ timeout: 15000 });
-    const href = await card.getAttribute('href');
-    await card.click();
+    const link = resultsGrid(page)
+      .locator('[data-testid="boat-card"]')
+      .first()
+      .locator('a[href^="/booking/boat/"]');
+    await expect(link).toBeVisible({ timeout: 15000 });
+    const href = await link.getAttribute('href');
+    await link.click();
     await page.waitForURL(/\/booking\/boat\/\d+/, { timeout: 10000 });
     expect(page.url()).toContain(href!.split('?')[0]);
   });

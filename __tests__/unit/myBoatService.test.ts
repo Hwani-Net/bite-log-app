@@ -1,0 +1,208 @@
+import { describe, it, expect, beforeEach } from 'vitest';
+import {
+  loadMyBoats,
+  saveMyBoats,
+  getMyBoat,
+  updateMyBoat,
+  recordSnapshot,
+  toggleFavorite,
+  isFavorite,
+  listFavorites,
+  favoritesFromMap,
+} from '@/services/myBoatService';
+
+// vitest runs in the node environment (vitest.config.ts), so localStorage
+// has to be stubbed. The service reads it directly and guards for its
+// absence, which is also what makes it safe during SSR.
+const store = new Map<string, string>();
+beforeEach(() => {
+  store.clear();
+  (globalThis as unknown as { localStorage: unknown }).localStorage = {
+    getItem: (k: string) => store.get(k) ?? null,
+    setItem: (k: string, v: string) => void store.set(k, v),
+    removeItem: (k: string) => void store.delete(k),
+    clear: () => store.clear(),
+  };
+});
+
+const snap = { name: '스텔라호', areaPath: '서해권 > 충청남도 > 보령시 > 대천항' };
+
+describe('load/save', () => {
+  it('starts empty and round-trips a saved map', () => {
+    expect(loadMyBoats()).toEqual({});
+    const boat = updateMyBoat('4247', { memo: '선장님 친절' });
+    expect(loadMyBoats()['4247']).toEqual(boat);
+    expect(boat.uid).toBe('4247');
+  });
+
+  it('returns an empty map instead of throwing on corrupted storage', () => {
+    store.set('biteLog_myBoats', '{not json');
+    expect(loadMyBoats()).toEqual({});
+  });
+
+  it('rejects a stored value that is not an object map', () => {
+    store.set('biteLog_myBoats', '["nope"]');
+    expect(loadMyBoats()).toEqual({});
+  });
+
+  it('survives having no localStorage at all (SSR)', () => {
+    delete (globalThis as unknown as { localStorage?: unknown }).localStorage;
+    expect(loadMyBoats()).toEqual({});
+    expect(getMyBoat('4247')).toBeNull();
+    expect(() => saveMyBoats({})).not.toThrow();
+  });
+
+  it('normalizes a malformed individual entry instead of crashing a reader', () => {
+    // localStorage is a trust boundary, not just our own writes — a
+    // half-written entry (crashed tab, manual devtools edit, stale schema)
+    // must not take down listFavorites/render with it.
+    store.set(
+      'biteLog_myBoats',
+      JSON.stringify({
+        '1': { favorite: true }, // missing snapshots/rides/verdict/memo entirely
+        '2': null,
+        '3': { favorite: 'yes', verdict: 'not-a-real-verdict', snapshots: 'nope' },
+      }),
+    );
+    const map = loadMyBoats();
+    expect(map['1']).toEqual({
+      uid: '1',
+      favorite: true,
+      verdict: null,
+      memo: '',
+      rides: [],
+      snapshots: [],
+    });
+    expect(map['2'].favorite).toBe(false);
+    expect(map['3'].favorite).toBe(false); // non-boolean input falls back, doesn't coerce
+    expect(map['3'].verdict).toBeNull();
+    expect(map['3'].snapshots).toEqual([]);
+    // The actual failure mode this guards against: reading the latest
+    // snapshot off an entry that had none must not throw.
+    expect(() => favoritesFromMap(map)).not.toThrow();
+  });
+
+  it('does not throw when the storage write itself fails (quota exceeded)', () => {
+    (globalThis as unknown as { localStorage: { setItem: () => void } }).localStorage.setItem =
+      () => {
+        throw new DOMException('quota exceeded');
+      };
+    expect(() => updateMyBoat('4247', { favorite: true })).not.toThrow();
+  });
+});
+
+describe('updateMyBoat', () => {
+  it('creates a boat with sane defaults on first write', () => {
+    const boat = updateMyBoat('4247', { verdict: 'never' });
+    expect(boat).toEqual({
+      uid: '4247',
+      favorite: false,
+      verdict: 'never',
+      memo: '',
+      rides: [],
+      snapshots: [],
+    });
+  });
+
+  it('merges into an existing boat without dropping other fields', () => {
+    updateMyBoat('4247', { verdict: 'again', memo: '자리 넓음' });
+    const boat = updateMyBoat('4247', { favorite: true });
+    expect(boat.verdict).toBe('again');
+    expect(boat.memo).toBe('자리 넓음');
+    expect(boat.favorite).toBe(true);
+  });
+
+  it('keeps boats separate by uid', () => {
+    updateMyBoat('1', { verdict: 'again' });
+    updateMyBoat('2', { verdict: 'never' });
+    expect(getMyBoat('1')?.verdict).toBe('again');
+    expect(getMyBoat('2')?.verdict).toBe('never');
+  });
+});
+
+describe('recordSnapshot', () => {
+  it('appends the first snapshot with a timestamp', () => {
+    const boat = recordSnapshot('4247', snap, '2026-08-01T00:00:00.000Z');
+    expect(boat.snapshots).toHaveLength(1);
+    expect(boat.snapshots[0].name).toBe('스텔라호');
+    expect(boat.snapshots[0].seenAt).toBe('2026-08-01T00:00:00.000Z');
+  });
+
+  it('does not stack duplicates when nothing changed', () => {
+    recordSnapshot('4247', snap, '2026-08-01T00:00:00.000Z');
+    recordSnapshot('4247', snap, '2026-08-02T00:00:00.000Z');
+    recordSnapshot('4247', snap, '2026-08-03T00:00:00.000Z');
+    expect(getMyBoat('4247')?.snapshots).toHaveLength(1);
+  });
+
+  it('appends when the boat is renamed — the case that makes this worth storing', () => {
+    recordSnapshot('4247', snap, '2026-08-01T00:00:00.000Z');
+    recordSnapshot(
+      '4247',
+      { name: '스텔스호', areaPath: '서해권 > 충청남도 > 보령시 > 오천항' },
+      '2026-08-20T00:00:00.000Z',
+    );
+    const snaps = getMyBoat('4247')!.snapshots;
+    expect(snaps).toHaveLength(2);
+    expect(snaps[0].name).toBe('스텔라호');
+    expect(snaps[1].name).toBe('스텔스호');
+  });
+
+  it('appends when only the price changed', () => {
+    recordSnapshot('4247', { ...snap, priceLine: '10만원' }, '2026-08-01T00:00:00.000Z');
+    recordSnapshot('4247', { ...snap, priceLine: '12만원' }, '2026-08-20T00:00:00.000Z');
+    expect(getMyBoat('4247')?.snapshots).toHaveLength(2);
+  });
+});
+
+describe('favorites', () => {
+  it('toggles on and off', () => {
+    expect(isFavorite('4247')).toBe(false);
+    expect(toggleFavorite('4247', snap)).toBe(true);
+    expect(isFavorite('4247')).toBe(true);
+    expect(toggleFavorite('4247')).toBe(false);
+    expect(isFavorite('4247')).toBe(false);
+  });
+
+  it('keeps the verdict and memo when un-favoriting', () => {
+    updateMyBoat('4247', { verdict: 'never', memo: '화장실 없음' });
+    toggleFavorite('4247', snap);
+    toggleFavorite('4247');
+    const boat = getMyBoat('4247')!;
+    expect(boat.favorite).toBe(false);
+    expect(boat.verdict).toBe('never');
+    expect(boat.memo).toBe('화장실 없음');
+  });
+
+  it('lists only favorites, newest-seen first, with a snapshot to render', () => {
+    toggleFavorite('1', { name: '가호', areaPath: '서해권 > A' });
+    toggleFavorite('2', { name: '나호', areaPath: '남해권 > B' });
+    updateMyBoat('3', { verdict: 'again' }); // not a favorite
+    // Force a deterministic order rather than relying on write timing.
+    const map = loadMyBoats();
+    map['1'].snapshots[0].seenAt = '2026-08-01T00:00:00.000Z';
+    map['2'].snapshots[0].seenAt = '2026-08-20T00:00:00.000Z';
+    saveMyBoats(map);
+
+    const favs = listFavorites();
+    expect(favs.map((f) => f.uid)).toEqual(['2', '1']);
+    expect(favs[0].latest?.name).toBe('나호');
+  });
+
+  it('still lists a favorite that has no snapshot', () => {
+    toggleFavorite('9');
+    const favs = listFavorites();
+    expect(favs).toHaveLength(1);
+    expect(favs[0].latest).toBeNull();
+  });
+
+  it('favoritesFromMap is pure — works on an in-memory map without touching storage', () => {
+    // This is what the booking page actually calls, on its own React state,
+    // so it can't have a hidden dependency on localStorage being in sync.
+    const map = {
+      '1': { uid: '1', favorite: true, verdict: null, memo: '', rides: [], snapshots: [] },
+    };
+    store.clear(); // storage is empty/stale; the map itself is the source of truth
+    expect(favoritesFromMap(map)).toEqual([{ ...map['1'], latest: null }]);
+  });
+});

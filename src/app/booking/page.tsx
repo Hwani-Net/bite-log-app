@@ -42,6 +42,13 @@ import {
   requestNotificationPermission,
   sendLocalNotification,
 } from "@/services/pushNotificationService";
+import {
+  loadMyBoats,
+  toggleFavorite,
+  favoritesFromMap,
+  type MyBoatMap,
+  type BoatSnapshot,
+} from "@/services/myBoatService";
 
 // @mock-data — editorial fallback only for months with no FISH_SEASON_DB
 // species in gold/peak season (getMonthlyRecommendation() below prefers real
@@ -438,14 +445,34 @@ function BoatAvailabilityPanel({
   );
 }
 
-function BoatListingCard({ boat, date }: { boat: BoatListing; date: string }) {
+function BoatListingCard({
+  boat,
+  date,
+  isFav,
+  onToggleFav,
+}: {
+  boat: BoatListing;
+  date: string;
+  isFav: boolean;
+  onToggleFav: (boat: BoatListing) => void;
+}) {
   const shortArea = boat.areaPath.split(" > ").slice(1).join(" · ");
   return (
-    <Link
-      href={`/booking/boat/${boat.uid}?date=${date}`}
-      className="bg-white/3 border border-white/8 rounded-2xl overflow-hidden hover:border-[#c9a84c]/40 transition-all"
+    // A <button> can't legally nest inside an <a> (invalid HTML, breaks
+    // screen-reader focus order), so the card isn't a <Link> anymore — the
+    // Link is an absolutely-positioned overlay under the star button
+    // (z-0 vs z-10), and the visual content is pointer-events-none so
+    // clicks pass through to it everywhere except the star.
+    <div
+      data-testid="boat-card"
+      className="relative bg-white/3 border border-white/8 rounded-2xl overflow-hidden hover:border-[#c9a84c]/40 transition-all"
     >
-      <div className="relative w-full h-28 bg-white/5">
+      <Link
+        href={`/booking/boat/${boat.uid}?date=${date}`}
+        className="absolute inset-0 z-0"
+        aria-label={`${boat.name} 예약 달력 보기`}
+      />
+      <div className="relative w-full h-28 bg-white/5 pointer-events-none">
         {boat.imageUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -461,7 +488,20 @@ function BoatListingCard({ boat, date }: { boat: BoatListing; date: string }) {
           {boat.capacity || "정원 미표기"}
         </span>
       </div>
-      <div className="p-2.5">
+      <button
+        type="button"
+        onClick={() => onToggleFav(boat)}
+        aria-label={isFav ? `${boat.name} 즐겨찾기 해제` : `${boat.name} 즐겨찾기`}
+        aria-pressed={isFav}
+        className={`absolute top-1.5 right-1.5 z-10 size-7 rounded-full flex items-center justify-center transition-colors ${
+          isFav
+            ? "bg-[#c9a84c] text-[#080d14]"
+            : "bg-black/50 text-white/60 hover:text-white"
+        }`}
+      >
+        <Star size={13} fill={isFav ? "currentColor" : "none"} />
+      </button>
+      <div className="p-2.5 pointer-events-none">
         <h4 className="text-xs font-bold text-white truncate mb-0.5">
           {boat.name}
         </h4>
@@ -472,7 +512,7 @@ function BoatListingCard({ boat, date }: { boat: BoatListing; date: string }) {
           {boat.fishTypes || "어종 정보 없음"}
         </p>
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -540,6 +580,18 @@ export default function BookingPage() {
     Partial<Record<BoatOperatorId, boolean>>
   >({});
   const [watchlist, setWatchlist] = useState<WatchedSlot[]>([]);
+  // "내 선사 카드" — 즐겨찾기·판정·이력을 배(uid) 하나에 묶어 저장.
+  const [myBoats, setMyBoats] = useState<MyBoatMap>({});
+  const handleToggleFavorite = (boat: BoatListing) => {
+    const snap: Omit<BoatSnapshot, "seenAt"> = {
+      name: boat.name,
+      areaPath: boat.areaPath,
+      fishTypes: boat.fishTypes,
+      imageUrl: boat.imageUrl,
+    };
+    toggleFavorite(boat.uid, snap);
+    setMyBoats(loadMyBoats());
+  };
   // ── 더피싱-style search: date + region + species → boats sailing that day.
   // Starts empty rather than new Date() — a lazy initializer computing
   // "today" runs during this page's server render too, and dev-mode
@@ -713,6 +765,7 @@ export default function BookingPage() {
     if (savedPlatform) setSelectedPlatform(savedPlatform);
 
     setWatchlist(loadWatchlist());
+    setMyBoats(loadMyBoats());
 
     // Best-effort location for the monthly pick — silently falls back to
     // the nationwide top release site if permission is denied/unavailable.
@@ -792,6 +845,8 @@ export default function BookingPage() {
     () => getMonthlyRecommendation(currentMonth, currentDay, userRegion),
     [currentMonth, currentDay, userRegion],
   );
+
+  const favoriteBoats = useMemo(() => favoritesFromMap(myBoats), [myBoats]);
 
   const checklist = selectedSpecies
     ? [
@@ -896,6 +951,54 @@ export default function BookingPage() {
           </div>
         </section>
 
+        {/* 즐겨찾는 선사 — 별표한 배를 uid로 저장해 두므로 선사가 이름·모항을
+            바꿔도(GOAL-3) 계속 같은 배로 따라간다. 즐겨찾기 없으면 섹션 자체를
+            숨긴다 — 빈 상태를 위한 공간을 매번 차지하게 두지 않는다. */}
+        {favoriteBoats.length > 0 && (
+          <section className="space-y-2">
+            <h3 className="text-xs text-white/40 font-semibold uppercase tracking-[0.15em] px-1">
+              즐겨찾는 선사
+            </h3>
+            <div
+              data-testid="favorite-boats"
+              className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4"
+            >
+              {favoriteBoats.map((fav) => (
+                <Link
+                  key={fav.uid}
+                  href={`/booking/boat/${fav.uid}`}
+                  className="shrink-0 w-40 bg-white/3 border border-white/8 rounded-2xl overflow-hidden hover:border-[#c9a84c]/40 transition-all"
+                >
+                  <div className="relative w-full h-20 bg-white/5">
+                    {fav.latest?.imageUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={fav.latest.imageUrl}
+                        alt={fav.latest?.name ?? fav.uid}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    )}
+                    <span className="absolute top-1.5 right-1.5 size-6 rounded-full bg-[#c9a84c] text-[#080d14] flex items-center justify-center">
+                      <Star size={11} fill="currentColor" />
+                    </span>
+                  </div>
+                  <div className="p-2">
+                    <p className="text-xs font-bold text-white truncate">
+                      {fav.latest?.name ?? `선박 #${fav.uid}`}
+                    </p>
+                    <p className="text-[10px] text-white/40 truncate">
+                      {fav.latest?.areaPath.split(" > ").slice(-1)[0] ?? ""}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* 더피싱-style search: pick a date, filter by region/species, see the
             boats sailing that day, tap one to open its month calendar with
             per-day 예약하기 → the boat's own booking page. */}
@@ -998,9 +1101,18 @@ export default function BookingPage() {
             </p>
           ) : (
             <>
-              <div className={`grid grid-cols-2 gap-2 ${searchLoading ? "opacity-60" : ""}`}>
+              <div
+                data-testid="search-results"
+                className={`grid grid-cols-2 gap-2 ${searchLoading ? "opacity-60" : ""}`}
+              >
                 {searchBoats.map((boat) => (
-                  <BoatListingCard key={boat.uid} boat={boat} date={searchDate} />
+                  <BoatListingCard
+                    key={boat.uid}
+                    boat={boat}
+                    date={searchDate}
+                    isFav={!!myBoats[boat.uid]?.favorite}
+                    onToggleFav={handleToggleFavorite}
+                  />
                 ))}
               </div>
               {searchResult && searchBoats.length < searchResult.total && (
