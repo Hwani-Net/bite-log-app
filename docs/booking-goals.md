@@ -30,7 +30,7 @@ GOAL로 변환한 문서. **이 문서 + 한 줄 명령이면 구현→검증→
 
 | GOAL | 항목 | 의존 | 상태 | 증거 |
 |------|------|------|------|------|
-| 1 | 내 선사 카드 저장 구조 + 즐겨찾기 | — | TODO | |
+| 1 | 내 선사 카드 저장 구조 + 즐겨찾기 | — | DONE | 커밋 e74509f(기능)+dc0d40d(버그수정 2건). 유닛 168/168, e2e 9/9(booking.spec.ts), 빌드 정상. 라이브(https://bite-log-three.vercel.app/booking) 200, 즐겨찾기 별·"즐겨찾는 선사" 섹션 스크린샷 확인(screenshots/goal1/live-booking-final.png). ox-alpha(z-ai/glm-5.3-flash로 정체 공개됨, $0.0012) 교차검수 5건 지적 중 4건 반영: nested button-in-a 무효 HTML 수정, loadMyBoats 엔트리별 정규화, favoritesFromMap 순수함수화, e2e null-textContent 취약점 수정. 검증 중 발견한 별개 버그 2건도 같은 커밋에서 수정: 검색 기본 날짜가 UTC 기준이라 KST 자정~9시에 하루 밀리는 문제, thefishing.kr 커넥션 타임아웃에 대한 재시도 부재 |
 | 2 | 승선 이력·판정 UI + 배지 + de-rank | 1 | TODO | |
 | 3 | 이름·모항·가격 변경 감지 + 소멸 감지 | 1 | TODO | |
 | 4 | 키워드 통합 검색 | — | TODO | |
