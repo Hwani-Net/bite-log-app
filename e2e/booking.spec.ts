@@ -63,10 +63,21 @@ test.describe('Booking search — /booking', () => {
       { timeout: 15000 },
     );
     await searchCard(page).getByRole('button', { name: '우럭', exact: true }).click();
-    await responsePromise;
+    const response = await responsePromise;
     await page.waitForTimeout(300);
 
     await expect(countLabel).not.toHaveText(before ?? '');
+
+    // The count changing is not enough on its own — thefishing.kr's own
+    // si[] filter has been observed to narrow the count while still
+    // returning boats whose displayed species has nothing to do with the
+    // one selected (e.g. si[]=3 주꾸미 returning 꽃게 boats). Assert the
+    // actual response content, not just that a number moved.
+    const body = await response.json();
+    expect(Array.isArray(body.boats)).toBe(true);
+    for (const boat of body.boats) {
+      expect(boat.fishTypes).toContain('우럭');
+    }
   });
 
   test('clicking a boat card navigates to its calendar page', async ({ page }) => {

@@ -5,6 +5,8 @@ import {
   parseBoatListingHtml,
   parseBoatListingTotal,
   buildListingUrl,
+  filterBoatsBySpecies,
+  type BoatListing,
 } from '@/services/boatListingService';
 
 const fixture = readFileSync(
@@ -76,6 +78,44 @@ describe('parseBoatListingTotal', () => {
   });
   it('returns 0 when the header is missing', () => {
     expect(parseBoatListingTotal('<html></html>')).toBe(0);
+  });
+});
+
+describe('filterBoatsBySpecies', () => {
+  // Reproduces the reported bug: thefishing.kr's si[]=3(주꾸미) narrows the
+  // count but its own results include boats whose displayed species has
+  // nothing to do with 주꾸미 (confirmed live on thefishing.kr itself).
+  const boat = (fishTypes: string): BoatListing => ({
+    uid: '1',
+    name: 'test',
+    imageUrl: '',
+    areaPath: '',
+    seaRegion: '기타',
+    fishTypes,
+    capacity: '',
+    detailUrl: '',
+  });
+
+  it('drops boats whose fishTypes does not mention the selected species', () => {
+    const boats = [boat('주꾸미,갑오징어'), boat('꽃게'), boat('광어,우럭')];
+    expect(filterBoatsBySpecies(boats, '3').map((b) => b.fishTypes)).toEqual([
+      '주꾸미,갑오징어',
+    ]);
+  });
+
+  it('matches the 쭈꾸미 spelling variant too', () => {
+    const boats = [boat('쭈꾸미'), boat('갈치')];
+    expect(filterBoatsBySpecies(boats, '3')).toHaveLength(1);
+  });
+
+  it('passes boats through unchanged when no species code is given', () => {
+    const boats = [boat('꽃게'), boat('참돔')];
+    expect(filterBoatsBySpecies(boats, undefined)).toBe(boats);
+  });
+
+  it('passes boats through unchanged for an unknown species code', () => {
+    const boats = [boat('꽃게')];
+    expect(filterBoatsBySpecies(boats, '99999')).toBe(boats);
   });
 });
 

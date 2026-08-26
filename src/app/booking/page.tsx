@@ -974,7 +974,11 @@ export default function BookingPage() {
               {searchDate.slice(5).replace("-", "/")} 출조 선박
             </h3>
             <span className="text-[11px] text-white/40">
-              {searchResult ? `${searchResult.total}척` : ""}
+              {searchResult
+                ? searchSpecies
+                  ? `${searchBoats.length}척 일치`
+                  : `${searchResult.total}척`
+                : ""}
             </span>
           </div>
 
@@ -1005,7 +1009,11 @@ export default function BookingPage() {
                   disabled={searchLoading}
                   className="w-full py-2.5 rounded-xl border border-white/10 text-white/60 text-sm font-semibold hover:bg-white/5 transition-colors disabled:opacity-40"
                 >
-                  {searchLoading ? "불러오는 중..." : `더 보기 (${searchBoats.length}/${searchResult.total})`}
+                  {searchLoading
+                    ? "불러오는 중..."
+                    : searchSpecies
+                      ? "더 보기"
+                      : `더 보기 (${searchBoats.length}/${searchResult.total})`}
                 </button>
               )}
             </>

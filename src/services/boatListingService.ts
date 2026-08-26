@@ -133,6 +133,29 @@ export function parseBoatListingTotal(html: string): number {
   return m ? Number(m[1]) : 0;
 }
 
+// thefishing.kr's own si[] filter narrows the result COUNT by an internal
+// tag that doesn't always match the species text it displays on the card —
+// e.g. si[]=3(주꾸미) includes boats whose visible fishTypes reads "광어,우럭"
+// with no 주꾸미 mention at all. Confirmed by querying thefishing.kr directly
+// (bypassing our request-building entirely), so it's their tagging, not a
+// bug in buildListingUrl/parseBoatListingHtml. We can't fix their tags, but
+// we can stop showing a boat under a species filter its own label disagrees
+// with. Some species are spelled two ways across their pages.
+const SPECIES_LABEL_ALIASES: Record<string, string[]> = {
+  주꾸미: ["주꾸미", "쭈꾸미"],
+};
+
+export function filterBoatsBySpecies(
+  boats: BoatListing[],
+  speciesCode?: string,
+): BoatListing[] {
+  if (!speciesCode) return boats;
+  const label = SPECIES_FILTERS.find((s) => s.code === speciesCode)?.label;
+  if (!label) return boats;
+  const aliases = SPECIES_LABEL_ALIASES[label] ?? [label];
+  return boats.filter((b) => aliases.some((a) => b.fishTypes.includes(a)));
+}
+
 export function buildListingUrl(params: BoatSearchParams = {}): string {
   const q = new URLSearchParams();
   if (params.date) q.set("search_date", params.date);
@@ -156,7 +179,7 @@ export async function fetchBoatListings(
   }
   const html = await res.text();
   return {
-    boats: parseBoatListingHtml(html),
+    boats: filterBoatsBySpecies(parseBoatListingHtml(html), params.speciesCode),
     total: parseBoatListingTotal(html),
     page: params.page ?? 1,
   };
