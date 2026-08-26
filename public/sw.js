@@ -4,7 +4,7 @@
  */
 
 const CACHE_NAME = "bitelog-v3";
-const API_CACHE = "bitelog-api-v1";
+const API_CACHE = "bitelog-api-v2"; // bumped: v1 held bad 200-status offline fallbacks
 
 const STATIC_PAGES = [
   "/",
@@ -58,9 +58,13 @@ self.addEventListener("fetch", (event) => {
   if (url.hostname.includes("firestore") || url.hostname.includes("googleapis"))
     return;
 
-  // API routes (/api/*) — Network First with 5s timeout, fallback to cache
+  // API routes (/api/*) — Network First, fallback to cache. 15s: several
+  // routes proxy an external site with their own ~10s connect timeout
+  // (e.g. thefishing.kr), so this needs to outlast that or the SW cuts the
+  // request off before the route ever gets to return its own real
+  // success/error response.
   if (url.pathname.startsWith("/api/")) {
-    event.respondWith(networkFirstWithTimeout(request, API_CACHE, 5000));
+    event.respondWith(networkFirstWithTimeout(request, API_CACHE, 15000));
     return;
   }
 
@@ -89,12 +93,22 @@ async function networkFirstWithTimeout(request, cacheName, timeout) {
     return response;
   } catch {
     const cached = await cache.match(request);
-    return (
-      cached ||
-      new Response(JSON.stringify({ error: "offline", items: [], data: [] }), {
-        headers: { "Content-Type": "application/json" },
-      })
-    );
+    if (cached) return cached;
+    // No cached copy — return a real error status, not a fake 200. A
+    // synthetic `Response(json, {})` defaults to status 200, so any caller
+    // that only checks `res.ok` (the normal, correct thing to check) reads
+    // this as success and gets a body shape it doesn't recognize instead of
+    // hitting its own error handling. Concretely: /api/boat-listings times
+    // out reaching thefishing.kr around 10s, longer than this function's
+    // 5s budget — the SW gives up first and used to paper over that with
+    // {error:"offline"} at 200, which the booking page's `Array.isArray
+    // (data.boats)` guard silently turned into "0 boats match your
+    // filters" instead of the actual "couldn't load" state.
+    return new Response(JSON.stringify({ error: "offline", items: [], data: [] }), {
+      status: 503,
+      statusText: "Offline",
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
 

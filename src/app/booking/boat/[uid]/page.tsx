@@ -65,8 +65,11 @@ export default function BoatDetailPage() {
     setError(false);
     fetch(`/api/boat-calendar?uid=${uid}&ym=${ym}`)
       .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-      .then((data: BoatCalendar) => {
+      .then((data: BoatCalendar & { ok?: boolean }) => {
         if (cancelled) return;
+        if (data.ok === false || !data.meta) {
+          throw new Error("malformed boat-calendar response");
+        }
         setCalendar(data);
       })
       .catch(() => {

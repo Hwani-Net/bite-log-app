@@ -574,11 +574,18 @@ export default function BookingPage() {
     if (searchSpecies) q.set("species", searchSpecies);
     fetch(`/api/boat-listings?${q.toString()}`)
       .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-      .then((data: BoatListingPage) => {
+      .then((data: BoatListingPage & { ok?: boolean }) => {
         if (cancelled) return;
-        const boats = Array.isArray(data.boats) ? data.boats : [];
-        setSearchResult({ ...data, boats });
-        setSearchBoats((prev) => (searchPage === 1 ? boats : [...prev, ...boats]));
+        // A malformed body (no `boats` array) is a failure, not "0 results"
+        // — e.g. the service worker's offline fallback used to satisfy
+        // `res.ok` with a 200 whose body didn't match this shape at all.
+        if (data.ok === false || !Array.isArray(data.boats)) {
+          throw new Error("malformed boat-listings response");
+        }
+        setSearchResult(data);
+        setSearchBoats((prev) =>
+          searchPage === 1 ? data.boats : [...prev, ...data.boats],
+        );
       })
       .catch(() => {
         if (!cancelled) setSearchError(true);
@@ -611,7 +618,10 @@ export default function BookingPage() {
       .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
       .then((data) => {
         if (cancelled) return;
-        setDirectoryBoats(Array.isArray(data.boats) ? data.boats : []);
+        if (data.ok === false || !Array.isArray(data.boats)) {
+          throw new Error("malformed boat-directory response");
+        }
+        setDirectoryBoats(data.boats);
         setDirectoryTotalCached(data.totalCached ?? 0);
       })
       .catch(() => {
@@ -632,6 +642,9 @@ export default function BookingPage() {
       const res = await fetch(`/api/boat-availability?operator=${operatorId}`);
       if (!res.ok) throw new Error(String(res.status));
       const data = await res.json();
+      if (data.ok === false || !Array.isArray(data.days)) {
+        throw new Error("malformed boat-availability response");
+      }
       setAvailability((prev) => ({ ...prev, [operatorId]: data.days }));
     } catch {
       setAvailabilityError((prev) => ({ ...prev, [operatorId]: true }));
