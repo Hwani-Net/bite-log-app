@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { STORE_KEY } from '@/services/myBoatService';
+import { SPECIES_FILTERS } from '@/services/boatListingService';
 
 // These hit the real /api/boat-listings and /api/boat-calendar routes,
 // which proxy thefishing.kr live (same pattern as news.spec.ts's YouTube
@@ -378,6 +379,62 @@ test.describe('Booking search — /booking', () => {
         await expect(stalePortChip).toHaveAttribute('aria-pressed', 'false');
       }
     }
+  });
+
+  test('species-first recommendation: picking a species shows season + dates, picking a date fills the search grid', async ({
+    page,
+  }) => {
+    const reverseSection = page.locator('[data-testid="reverse-recommendation"]');
+    await expect(reverseSection).toBeVisible();
+
+    await reverseSection.getByRole('button', { name: '우럭', exact: true }).click();
+    // ① 시즌 상태 표기
+    await expect(reverseSection.getByText(/시즌|금어기/)).toBeVisible();
+
+    // ② 추천 날짜 최대 3개, 각각 근거(등급) 함께
+    const recommendations = reverseSection.getByRole('listitem');
+    const count = await recommendations.count();
+    expect(count).toBeGreaterThan(0);
+    expect(count).toBeLessThanOrEqual(3);
+    await expect(recommendations.first().getByText(/물때/)).toBeVisible();
+
+    const firstDateLabel = await recommendations.first().textContent();
+
+    // ③ 날짜 탭 → 기존 검색 그리드가 그 날짜/어종으로 다시 채워진다 —
+    // 새 API 경로가 아니라 기존 /api/boat-listings 재사용을 확인한다.
+    const woorukCode = SPECIES_FILTERS.find((s) => s.label === '우럭')!.code;
+    const responsePromise = page.waitForResponse(
+      (r) =>
+        r.url().includes('/api/boat-listings') &&
+        r.url().includes(`species=${woorukCode}`),
+      { timeout: 15000 },
+    );
+    await recommendations.first().click();
+    await responsePromise;
+
+    const dateInput = searchCard(page).locator('input[type="date"]');
+    const pickedValue = await dateInput.inputValue();
+    // 추천 카드에 쓰인 "M/D" 표기가 실제로 채워진 date input과 일치하는지.
+    const [, m, d] = pickedValue.split('-');
+    expect(firstDateLabel).toContain(`${Number(m)}/${Number(d)}`);
+
+    await expect(
+      resultsGrid(page)
+        .locator('[data-testid="boat-card"]')
+        .first()
+        .or(page.getByText('이 조건으로 출조하는 선박이 없습니다')),
+    ).toBeVisible({ timeout: 15000 });
+  });
+
+  test('the search grid still defaults to today with no species pre-picked — reverse recommendation is opt-in', async ({
+    page,
+  }) => {
+    await expect(searchCard(page).locator('input[type="date"]')).toBeVisible();
+    const speciesGroup = searchCard(page).getByRole('group', { name: '어종 필터' });
+    await expect(speciesGroup.getByRole('button', { name: '전체', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
   });
 });
 

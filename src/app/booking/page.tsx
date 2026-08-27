@@ -26,6 +26,8 @@ import {
   extractPorts,
   type CapacityBucket,
 } from "@/lib/boatFilters";
+import { recommendDates } from "@/lib/speciesRecommendation";
+import { BITE_GRADE_LABEL } from "@/lib/calendarBiteOverlay";
 import {
   FISH_SEASON_DB,
   getSeasonStatus,
@@ -372,6 +374,26 @@ function formatShortDate(iso: string): string {
   return `${Number(m)}/${Number(d)}`;
 }
 
+// 어종 역방향 추천에서 다루는 어종 — FISH_SEASON_DB에 실제 시즌 데이터가
+// 있으면서 동시에 SPECIES_FILTERS(더피싱 검색용)에도 코드가 있는 것만
+// 남긴다. 둘 다 있어야 추천 날짜를 골랐을 때 그 코드를 기존 검색에 그대로
+// 넘길 수 있다(새 API 없음) — "라벨이 겹친다"는 걸 주석으로만 가정하면
+// 둘 중 하나가 바뀌었을 때 조용히 "전체 어종"으로 새는 경로가 생긴다.
+// 필터링 자체로 그 경로를 원천 차단한다(옵션에 없는 어종은 애초에 못 고름).
+const REVERSE_SPECIES_OPTIONS = FISH_SEASON_DB.map((d) => d.species).filter((s) =>
+  SPECIES_FILTERS.some((f) => f.label === s),
+);
+
+const SEASON_STATUS_LABEL: Record<
+  "peak" | "gold" | "closed" | "offseason",
+  string
+> = {
+  gold: "황금 시즌",
+  peak: "피크 시즌",
+  closed: "금어기",
+  offseason: "시즌 아님",
+};
+
 function BoatAvailabilityPanel({
   operatorId,
   days,
@@ -678,6 +700,8 @@ export default function BookingPage() {
   // changes can filter to zero boats with the port chip row itself gone
   // (it only renders when portOptions is non-empty), leaving no way back.
   const resetPortFilter = () => setSelectedPort("");
+  // 어종 역방향 추천 — "날짜 → 배" 대신 "이 어종, 언제 갈까"로 시작한다.
+  const [reverseSpecies, setReverseSpecies] = useState("");
   const [searchPage, setSearchPage] = useState(1);
   const [searchResult, setSearchResult] = useState<BoatListingPage | null>(null);
   const [searchBoats, setSearchBoats] = useState<BoatListing[]>([]);
@@ -970,6 +994,37 @@ export default function BookingPage() {
     searchSpecies || debouncedKeyword.trim() || selectedPort || selectedCapacity,
   );
 
+  const reverseSeasonData = reverseSpecies
+    ? (FISH_SEASON_DB.find((d) => d.species === reverseSpecies) ?? null)
+    : null;
+  const reverseSeasonStatus = reverseSeasonData
+    ? getSeasonStatus(reverseSeasonData, currentMonth, currentDay)
+    : null;
+  // `now`를 deps에서 뺀 채로 둔다 — 같은 종을 껐다 다시 켜면(토글)
+  // reverseSpecies가 바뀌므로 그때마다 이 시점의 최신 now로 다시 계산된다.
+  // 재계산 없이 남는 경우는 "같은 종을 선택한 패널을 자정 넘게 열어
+  // 둔다" 뿐인데, 14일 창이 겹치는 범위가 커서 실질적으로 하루 어긋나도
+  // 추천이 크게 달라지지 않는다.
+  const recommendedDates = useMemo(
+    () => (reverseSpecies ? recommendDates(now, 14, 3) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [reverseSpecies],
+  );
+
+  const handlePickRecommendedDate = (date: string) => {
+    const code = SPECIES_FILTERS.find((s) => s.label === reverseSpecies)?.code ?? "";
+    setSearchDate(date);
+    setSearchSpecies(code);
+    resetSearchPage();
+    resetPortFilter();
+    setKeyword("");
+    // 스크롤만으로는 스크린리더 사용자에게 "여기로 왔다"는 신호가 안
+    // 간다 — 헤딩에 포커스를 옮기면 스크롤과 알림을 동시에 해결한다.
+    const heading = document.getElementById("search-results-heading");
+    heading?.scrollIntoView({ behavior: "smooth", block: "start" });
+    heading?.focus();
+  };
+
   const checklist = selectedSpecies
     ? [
         ...CHECKLIST_BASE,
@@ -1120,6 +1175,91 @@ export default function BookingPage() {
             </div>
           </section>
         )}
+
+        {/* 어종 역방향 추천 — "날짜 → 배" 대신 "이 어종, 언제 갈까"를 먼저
+            묻는다. 시즌 상태는 FISH_SEASON_DB, 추천 날짜는 GOAL-7의 물때
+            지수를 그대로 재사용(새 점수 계산도, 새 API 호출도 없음).
+            추천 날짜를 고르면 기존 날짜-우선 검색 상태(searchDate/
+            searchSpecies)를 그대로 세팅한다 — 아래 검색 그리드가 이미
+            그 상태를 구독하고 있어 새 fetch 로직 없이 자연히 다시 그려진다. */}
+        <section
+          data-testid="reverse-recommendation"
+          className="bg-white/3 border border-white/8 rounded-2xl p-4 space-y-3"
+        >
+          <h3 className="text-xs text-white/40 font-semibold uppercase tracking-[0.15em] flex items-center gap-1.5">
+            <Fish size={12} className="text-[#c9a84c]" aria-hidden="true" />
+            어종으로 찾기
+          </h3>
+          <div className="flex gap-1.5 flex-wrap" role="group" aria-label="어종 선택">
+            {REVERSE_SPECIES_OPTIONS.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setReverseSpecies((cur) => (cur === s ? "" : s))}
+                aria-pressed={reverseSpecies === s}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                  reverseSpecies === s
+                    ? "bg-[#c9a84c] text-[#080d14] border-[#c9a84c]"
+                    : "bg-white/5 text-white/60 border-white/10 hover:border-white/30"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+
+          {reverseSpecies && reverseSeasonData && reverseSeasonStatus && (
+            <div className="space-y-2">
+              <p className="text-xs text-white/60">
+                {reverseSpecies} ·{" "}
+                <span
+                  className={
+                    reverseSeasonStatus === "gold" || reverseSeasonStatus === "peak"
+                      ? "text-[#c9a84c] font-semibold"
+                      : "text-white/40"
+                  }
+                >
+                  {SEASON_STATUS_LABEL[reverseSeasonStatus]}
+                </span>
+              </p>
+
+              {recommendedDates.length === 0 ? (
+                <p role="status" className="text-xs text-white/30 py-2">
+                  향후 14일 중 추천할 만한 물때 데이터를 찾지 못했습니다.
+                </p>
+              ) : (
+                // <button role="listitem">이었으면 버튼의 네이티브 role이
+                // 덮어써져 스크린리더가 클릭 가능한 요소로 인식 못 한다 —
+                // role은 li에 맡기고 button은 그대로 button으로 둔다.
+                <ul className="flex flex-col gap-1.5 list-none" aria-label="추천 출조일">
+                  {recommendedDates.map((r) => (
+                    <li key={r.date}>
+                      <button
+                        type="button"
+                        onClick={() => handlePickRecommendedDate(r.date)}
+                        className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-[#c9a84c]/40 hover:bg-white/10 transition-colors text-left"
+                      >
+                        <span className="flex items-center gap-2">
+                          <Calendar size={13} className="text-[#c9a84c]" aria-hidden="true" />
+                          <span className="text-xs font-bold text-white">
+                            {formatShortDate(r.date)}
+                          </span>
+                        </span>
+                        <span className="flex items-center gap-1 text-[10px] text-white/50">
+                          {BITE_GRADE_LABEL[r.grade]}
+                          <ChevronRight size={12} aria-hidden="true" />
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="text-[10px] text-white/40">
+                날짜를 고르면 그날 이 어종으로 출조하는 선박을 아래에서 보여드려요
+              </p>
+            </div>
+          )}
+        </section>
 
         {/* 통합 검색 — 더피싱과 낚시뚜, 소스 두 개를 동시에 훑는 건 개별
             플랫폼엔 없는 기능이다. 서버 요청은 추가하지 않고, 이미 불러온
@@ -1295,7 +1435,11 @@ export default function BookingPage() {
           </div>
 
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-xs text-white/40 font-semibold uppercase tracking-[0.15em]">
+            <h3
+              id="search-results-heading"
+              tabIndex={-1}
+              className="text-xs text-white/40 font-semibold uppercase tracking-[0.15em] scroll-mt-4 focus:outline-none"
+            >
               {searchDate.slice(5).replace("-", "/")} 출조 선박
             </h3>
             <span className="text-[11px] text-white/40" aria-live="polite">

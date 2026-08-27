@@ -7,6 +7,7 @@
 // 만드는 조류 강도 하나만 반영한다는 걸 이름에서부터 정직하게 드러낸다.
 
 import { getLunarInfo } from "@/services/lunarService";
+import { parseLocalISODate } from "@/lib/localDate";
 
 export type BiteGrade = "excellent" | "good" | "fair" | "poor";
 
@@ -29,30 +30,6 @@ export const BITE_GRADE_DOT_COLOR: Record<BiteGrade, string> = {
   fair: "bg-amber-400",
   poor: "bg-red-400/70",
 };
-
-/**
- * "YYYY-MM-DD"를 로컬 자정으로 파싱한다. `new Date(iso)` 는 UTC 자정으로
- * 해석되어 KST에서 하루가 밀린다 — 이 세션에서 이미 두 번(검색 그리드 기본
- * 날짜, bite-forecast 예약 CTA 링크) 같은 버그를 고쳤다. 형식이 안 맞거나
- * "2026-02-30"처럼 달력에 없는 날짜면 null — 예보를 생략하는 편이 틀린
- * 날짜로 계산한 값을 보여주는 것보다 안전하다.
- */
-function parseLocalISODate(iso: string): Date | null {
-  const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!m) return null;
-  const year = Number(m[1]);
-  const month = Number(m[2]);
-  const day = Number(m[3]);
-  const parsed = new Date(year, month - 1, day);
-  if (
-    parsed.getFullYear() !== year ||
-    parsed.getMonth() !== month - 1 ||
-    parsed.getDate() !== day
-  ) {
-    return null;
-  }
-  return parsed;
-}
 
 /** date: "YYYY-MM-DD". 파싱 실패 시 null — 셀에 아무것도 표시하지 않는다. */
 export function biteGradeForDate(date: string): BiteGrade | null {
