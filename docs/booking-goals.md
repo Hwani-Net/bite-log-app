@@ -31,7 +31,7 @@ GOAL로 변환한 문서. **이 문서 + 한 줄 명령이면 구현→검증→
 | GOAL | 항목 | 의존 | 상태 | 증거 |
 |------|------|------|------|------|
 | 1 | 내 선사 카드 저장 구조 + 즐겨찾기 | — | DONE | 커밋 e74509f(기능)+dc0d40d(버그수정 2건). 유닛 168/168, e2e 9/9(booking.spec.ts), 빌드 정상. 라이브(https://bite-log-three.vercel.app/booking) 200, 즐겨찾기 별·"즐겨찾는 선사" 섹션 스크린샷 확인(screenshots/goal1/live-booking-final.png). ox-alpha(z-ai/glm-5.3-flash로 정체 공개됨, $0.0012) 교차검수 5건 지적 중 4건 반영: nested button-in-a 무효 HTML 수정, loadMyBoats 엔트리별 정규화, favoritesFromMap 순수함수화, e2e null-textContent 취약점 수정. 검증 중 발견한 별개 버그 2건도 같은 커밋에서 수정: 검색 기본 날짜가 UTC 기준이라 KST 자정~9시에 하루 밀리는 문제, thefishing.kr 커넥션 타임아웃에 대한 재시도 부재 |
-| 2 | 승선 이력·판정 UI + 배지 + de-rank | 1 | TODO | |
+| 2 | 승선 이력·판정 UI + 배지 + de-rank | 1 | DONE | 커밋 48f72e5. 유닛 174/174(sortByVerdict/addRide 신규 9건), e2e 10/10(booking.spec.ts, "안 탄다" 정렬 테스트는 라이브 데이터 이동 시 vacuous pass 대신 annotation 남기도록 처리). ox-alpha(z-ai/glm-5.3-flash, $0.0011) 교차검수 반영: 배지·메모가 de-rank opacity와 함께 흐려지지 않도록 분리, data-verdict 속성 추가(테스트가 CSS 클래스 아닌 상태 자체를 단언), 판정 버튼 그룹 role=group+aria-label, 메모·날짜 input aria-label 추가. 라이브(https://bite-log-three.vercel.app/booking, /booking/boat/4247) 200, 실제 오늘자 배(uid 3390)에 판정 시딩 후 배지 "⭐ 2회 승선 · 다시 타고 싶음" + 메모 렌더링 스크린샷 확인(screenshots/goal2/live-badge-real.png). 상세 페이지 판정 UI 자체도 스크린샷 확인(live-detail-verdict-set.png) — 단, 이 확인 중 Vercel→thefishing.kr 커넥션이 재시도 두 번 다 실패하는 상태가 재현됐다(직접 접속은 0.39초 성공, Vercel에서는 재시도 포함 21초 실패 — GOAL-1에서 만든 재시도 로직 자체는 정상 작동, 외부 네트워크 경로 문제가 여전히 간헐적으로 심함). GOAL-2 자체 기능과는 무관 |
 | 3 | 이름·모항·가격 변경 감지 + 소멸 감지 | 1 | TODO | |
 | 4 | 키워드 통합 검색 | — | TODO | |
 | 5 | 항구·정원 필터 | — | TODO | |
