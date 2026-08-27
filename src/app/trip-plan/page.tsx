@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   TripPlan,
@@ -143,6 +143,21 @@ export default function TripPlanPage() {
       return false;
     }
   });
+
+  // /booking의 D-1 브리핑 카드에서 ?date=&name= 으로 진입하면 폼을 미리
+  // 채운다. useSearchParams 대신 mount에서 location.search를 읽는다 —
+  // Suspense 경계 없이 되고, 이 폼은 어차피 클라이언트 전용이다.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const date = params.get("date");
+    const name = params.get("name");
+    if (!date && !name) return;
+    setForm((f) => ({
+      ...f,
+      ...(date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? { date } : {}),
+      ...(name ? { charterName: name, fishingType: "boat" as const } : {}),
+    }));
+  }, []);
 
   const handleGenerate = async () => {
     if (!form.species || !form.location || !form.date) return;

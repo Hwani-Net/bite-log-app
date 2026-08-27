@@ -603,3 +603,101 @@ test.describe('Boat calendar — /booking/boat/[uid]', () => {
     });
   });
 });
+
+test.describe('Trip briefing + season reminders — /booking (GOAL-9)', () => {
+  // Both features are clock-sensitive (D-1 = "tomorrow", season = "this
+  // month"), so every test pins the browser clock to 2026-10-15 — a date
+  // where 우럭 is peak and 광어 is gold in FISH_SEASON_DB — instead of
+  // depending on whichever real month the suite happens to run in.
+  const FIXED_NOW = new Date(2026, 9, 15, 10, 0, 0);
+
+  test('a watched slot for tomorrow renders the D-1 briefing card, and its link prefills /trip-plan', async ({
+    page,
+  }) => {
+    await page.clock.setFixedTime(FIXED_NOW);
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'biteLog_boatWatchlist',
+        JSON.stringify([
+          { operatorId: 'yeongjin', boatName: '몬스터호', date: '2026-10-16' },
+        ]),
+      );
+    });
+    await page.goto('/booking');
+
+    const card = page.locator('[data-testid="trip-briefing-card"]');
+    await expect(card).toBeVisible({ timeout: 15000 });
+    await expect(card).toContainText('내일 출조 예정');
+    await expect(card).toContainText('몬스터호');
+    await expect(card).toContainText('10/16');
+
+    // The link is the actual 브리핑 연동 — clicking it must land on
+    // /trip-plan with the date and charter name already filled in, not on
+    // an empty form the user has to re-type.
+    await card.getByRole('link', { name: '출조 브리핑 준비' }).click();
+    await expect(page).toHaveURL(/\/trip-plan\?/);
+    await expect(page.locator('input[type="date"]')).toHaveValue('2026-10-16');
+    await expect(
+      page.locator('input[placeholder="예: 홍길동 낚시배"]'),
+    ).toHaveValue('몬스터호');
+  });
+
+  test('past-year same-month boat records render the season reminder, wired into the species picker', async ({
+    page,
+  }) => {
+    await page.clock.setFixedTime(FIXED_NOW);
+    await page.addInitScript(() => {
+      const base = {
+        location: { id: 's1', name: '오천항', lat: 36.3, lng: 126.5 },
+        count: 3,
+        photos: [],
+        visibility: 'private',
+        createdAt: '2025-10-20T00:00:00.000Z',
+      };
+      localStorage.setItem(
+        'fishlog_catches',
+        JSON.stringify([
+          { ...base, id: 'g9-1', date: '2025-10-10', species: '우럭', boatUid: '4247' },
+          { ...base, id: 'g9-2', date: '2024-10-02', species: '우럭', boatUid: '4247' },
+          // no boatUid — shore record, must NOT count toward 승선 이력
+          { ...base, id: 'g9-3', date: '2025-10-12', species: '광어' },
+        ]),
+      );
+    });
+    await page.goto('/booking');
+
+    const card = page.locator('[data-testid="season-reminder-card"]');
+    await expect(card).toBeVisible({ timeout: 15000 });
+    await expect(card).toContainText('작년 이맘때');
+    // Two 우럭 boat records across 2024/2025 aggregate; the untagged 광어
+    // record is excluded entirely — real content, not just card presence.
+    await expect(card).toContainText('2025년 10월 우럭 출조 2회');
+    await expect(card).toContainText('피크 시즌');
+    await expect(card).not.toContainText('광어');
+
+    // "날짜 추천 보기" hands off to the GOAL-8 species-first flow.
+    await card.getByRole('button', { name: '날짜 추천 보기' }).click();
+    await expect(
+      page.getByRole('button', { name: /우럭/ }).and(
+        page.locator('[aria-pressed="true"]'),
+      ),
+    ).toBeVisible();
+  });
+
+  test('no cards for a fresh user — no watchlist, no ride history', async ({
+    page,
+  }) => {
+    await page.clock.setFixedTime(FIXED_NOW);
+    await page.goto('/booking');
+    // The search grid resolving (boats or empty state) proves the page is
+    // done mounting — only then is the cards' absence meaningful.
+    await expect(
+      page
+        .locator('[data-testid="search-results"] [data-testid="boat-card"]')
+        .first()
+        .or(page.getByText('이 조건으로 출조하는 선박이 없습니다')),
+    ).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="trip-briefing-card"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="season-reminder-card"]')).toHaveCount(0);
+  });
+});

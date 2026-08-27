@@ -27,7 +27,10 @@ import {
   type CapacityBucket,
 } from "@/lib/boatFilters";
 import { recommendDates } from "@/lib/speciesRecommendation";
+import { dayBeforeTrips, seasonReminders } from "@/lib/tripReminders";
 import { BITE_GRADE_LABEL } from "@/lib/calendarBiteOverlay";
+import { getDataService } from "@/services/dataServiceFactory";
+import type { CatchRecord } from "@/types";
 import {
   FISH_SEASON_DB,
   getSeasonStatus,
@@ -657,6 +660,8 @@ export default function BookingPage() {
   const [watchlist, setWatchlist] = useState<WatchedSlot[]>([]);
   // "내 선사 카드" — 즐겨찾기·판정·이력을 배(uid) 하나에 묶어 저장.
   const [myBoats, setMyBoats] = useState<MyBoatMap>({});
+  // 시즌 회귀 리마인더용 — 배 태그(boatUid)된 과거 조과기록.
+  const [catchRecords, setCatchRecords] = useState<CatchRecord[]>([]);
   const handleToggleFavorite = (boat: BoatListing) => {
     const snap: Omit<BoatSnapshot, "seenAt"> = {
       name: boat.name,
@@ -945,6 +950,61 @@ export default function BookingPage() {
     return () => clearInterval(interval);
   }, [watchlist]);
 
+  // 출조 D-1 브리핑 — 내일 승선 예정(빈자리 알림에 등록한 날짜, 또는
+  // 즐겨찾기 배에 적어둔 탄 날짜)이 있으면 로컬 알림 한 번 + 상단 카드.
+  // 위 watchlist 폴링과 같은 포그라운드 한정이며, 이미 알린 (배,날짜)는
+  // localStorage에 기억해 페이지를 다시 열 때마다 재알림하지 않는다.
+  const briefingTrips = useMemo(
+    () => dayBeforeTrips(watchlist, myBoats, new Date()),
+    [watchlist, myBoats],
+  );
+  useEffect(() => {
+    if (briefingTrips.length === 0) return;
+    const KEY = "biteLog_briefingNotified";
+    let sent: string[] = [];
+    try {
+      const parsed = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+      if (Array.isArray(parsed)) sent = parsed.filter((k) => typeof k === "string");
+    } catch {
+      // 깨진 저장값은 새로 시작
+    }
+    // 키는 "배이름|YYYY-MM-DD" — 지나간 날짜 키는 버려서 무한히 안 쌓이게.
+    const today = localISODate(new Date());
+    sent = sent.filter((k) => (k.split("|")[1] ?? "") >= today);
+    let changed = false;
+    for (const trip of briefingTrips) {
+      const key = `${trip.name}|${trip.date}`;
+      if (sent.includes(key)) continue;
+      sendLocalNotification(
+        `내일 ${trip.name} 출조 예정`,
+        "날씨·물때·채비 브리핑을 미리 확인하세요.",
+        undefined,
+        `briefing-${key}`,
+      );
+      sent.push(key);
+      changed = true;
+    }
+    if (changed) localStorage.setItem(KEY, JSON.stringify(sent));
+  }, [briefingTrips]);
+
+  // 시즌 회귀 리마인더 — 기록을 못 읽으면 카드만 조용히 생략.
+  useEffect(() => {
+    let cancelled = false;
+    getDataService()
+      .getCatchRecords()
+      .then((records) => {
+        if (!cancelled) setCatchRecords(records);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const seasonRems = useMemo(
+    () => seasonReminders(catchRecords, new Date()),
+    [catchRecords],
+  );
+
   const spotOfMonth = useMemo(
     () => getMonthlyRecommendation(currentMonth, currentDay, userRegion),
     [currentMonth, currentDay, userRegion],
@@ -1173,6 +1233,77 @@ export default function BookingPage() {
                 </Link>
               ))}
             </div>
+          </section>
+        )}
+
+        {/* 출조 D-1 브리핑 — 알림은 포그라운드+권한 허용일 때만 도달하므로,
+            조건이 참인 동안 카드는 항상 그린다(알림이 못 간 경우의 보험). */}
+        {briefingTrips.length > 0 && (
+          <section
+            data-testid="trip-briefing-card"
+            role="status"
+            className="rounded-2xl border border-[#7dd3fc]/30 bg-[#7dd3fc]/8 p-4 space-y-2"
+          >
+            <div className="flex items-center gap-2">
+              <BellRing size={14} className="text-[#7dd3fc]" aria-hidden="true" />
+              <p className="text-xs font-bold text-[#7dd3fc]">내일 출조 예정</p>
+            </div>
+            {briefingTrips.map((trip) => (
+              <div
+                key={`${trip.name}|${trip.date}`}
+                className="flex items-center justify-between gap-2"
+              >
+                <p className="text-sm text-white/80 truncate">
+                  {trip.name} · {formatShortDate(trip.date)}
+                </p>
+                <Link
+                  href={`/trip-plan?date=${trip.date}&name=${encodeURIComponent(trip.name)}`}
+                  className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#7dd3fc]/15 border border-[#7dd3fc]/30 text-[#7dd3fc] hover:bg-[#7dd3fc]/25 transition-colors"
+                >
+                  출조 브리핑 준비
+                </Link>
+              </div>
+            ))}
+            <p className="text-[10px] text-white/45">
+              날씨 · 물때 · 채비 체크리스트를 브리핑에서 한 번에 확인하세요.
+            </p>
+          </section>
+        )}
+
+        {/* 시즌 회귀 리마인더 — 작년 같은 달의 승선 기록 어종이 지금 다시
+            시즌이면 알려준다. 이력 없는 사용자에겐 아무것도 안 그린다. */}
+        {seasonRems.length > 0 && (
+          <section
+            data-testid="season-reminder-card"
+            className="rounded-2xl border border-[#c9a84c]/30 bg-[#c9a84c]/8 p-4 space-y-2"
+          >
+            <div className="flex items-center gap-2">
+              <Calendar size={14} className="text-[#c9a84c]" aria-hidden="true" />
+              <p className="text-xs font-bold text-[#c9a84c]">
+                작년 이맘때 다녀오셨어요
+              </p>
+            </div>
+            {seasonRems.map((rem) => (
+              <div
+                key={rem.species}
+                className="flex items-center justify-between gap-2"
+              >
+                <p className="text-sm text-white/80">
+                  {rem.lastYear}년 {currentMonth}월 {rem.species} 출조{" "}
+                  {rem.tripCount}회 — 지금이{" "}
+                  {rem.status === "gold" ? "황금" : "피크"} 시즌이에요
+                </p>
+                {REVERSE_SPECIES_OPTIONS.includes(rem.species) && (
+                  <button
+                    type="button"
+                    onClick={() => setReverseSpecies(rem.species)}
+                    className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#c9a84c]/15 border border-[#c9a84c]/30 text-[#c9a84c] hover:bg-[#c9a84c]/25 transition-colors"
+                  >
+                    날짜 추천 보기
+                  </button>
+                )}
+              </div>
+            ))}
           </section>
         )}
 
