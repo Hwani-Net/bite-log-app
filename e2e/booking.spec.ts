@@ -687,6 +687,9 @@ test.describe('Trip briefing + season reminders — /booking (GOAL-9)', () => {
   // GOAL-10 — 출항 취소 조기 경보. 예보는 open-meteo 두 API를 route mock으로
   // 주입한다(수용 기준이 "테스트에선 예보 주입") — 실제 날씨에 좌우되지 않는
   // 결정적 테스트이자, 실 API 계약(daily.time/필드 배열)을 그대로 흉내낸다.
+  // 주의: mock은 10/15~17 사흘치만 준다 — watchlist 날짜는 반드시 이 범위
+  // 안(D-2인 10/17)이어야 한다. 범위 밖 날짜는 "예보 결측"으로 조용히
+  // 생략되므로, D-3(10/18) 케이스를 추가하려면 mock 배열부터 늘려야 한다.
   const mockForecast = (windMax: number, waveMax: number) => ({
     windRoute: {
       daily: {
@@ -777,6 +780,13 @@ test.describe('Trip briefing + season reminders — /booking (GOAL-9)', () => {
     await expect(page.locator('[data-testid="cancel-alert-card"]')).toHaveCount(
       0,
     );
+    // 알림 dedupe 저장소도 비어 있어야 한다 — 카드만 안 그린 게 아니라
+    // 알림 발송 경로 자체가 타지 않았다는 것까지 단언.
+    expect(
+      await page.evaluate(() =>
+        localStorage.getItem('biteLog_cancelAlertNotified'),
+      ),
+    ).toBeNull();
   });
 
   test('no cards for a fresh user — no watchlist, no ride history', async ({

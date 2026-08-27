@@ -829,6 +829,15 @@ export default function BookingPage() {
     }
   };
 
+  // 취소 경보 카드의 "달력 열기" — 해당 선사 패널을 펼치고 그리로 스크롤.
+  const openOperatorCalendar = (operatorId: BoatOperatorId) => {
+    setExpandedOperator(operatorId);
+    if (!availability[operatorId]) loadOperatorAvailability(operatorId);
+    document
+      .getElementById(`operator-${operatorId}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   const handleToggleWatch = (slot: WatchedSlot) => {
     setWatchlist((prev) => {
       const exists = prev.some(
@@ -1003,16 +1012,15 @@ export default function BookingPage() {
   // 경보 카드 + 로컬 알림 1회, 같은 배의 자리 있는 대안 날짜 최대 2개.
   // 예보 결측·API 실패는 조용히 생략(오탐 경보 금지). 즐겨찾기 rides는
   // 선사 달력이 없어 대안 날짜를 못 주므로 여기선 다루지 않는다.
-  const [cancelAlerts, setCancelAlerts] = useState<
-    {
-      operatorId: BoatOperatorId;
-      boatName: string;
-      date: string;
-      windSpeedMax: number | null;
-      waveHeightMax: number | null;
-      alternatives: string[];
-    }[]
-  >([]);
+  interface CancelAlert {
+    operatorId: BoatOperatorId;
+    boatName: string;
+    date: string;
+    windSpeedMax: number | null;
+    waveHeightMax: number | null;
+    alternatives: string[];
+  }
+  const [cancelAlerts, setCancelAlerts] = useState<CancelAlert[]>([]);
   useEffect(() => {
     const inWindow = watchlist.filter((w) =>
       isWithinAlertWindow(w.date, new Date()),
@@ -1028,7 +1036,7 @@ export default function BookingPage() {
         Awaited<ReturnType<typeof fetchDailyMarineOutlook>>
       >();
       const daysCache = new Map<BoatOperatorId, BoatDayStatus[]>();
-      const alerts: typeof cancelAlerts = [];
+      const alerts: CancelAlert[] = [];
       for (const w of inWindow) {
         const coords = OPERATOR_COORDS[w.operatorId];
         if (!coords) continue;
@@ -1054,6 +1062,14 @@ export default function BookingPage() {
                 : [],
             );
           }
+          // 예보상 같은 악천후 창에 있는 날짜는 대안에서 제외 — 예보
+          // 범위(5일) 밖은 판정 불가라 허용.
+          const risky = new Set(
+            outlookCache
+              .get(w.operatorId)!
+              .filter(isCancellationRisk)
+              .map((o) => o.date),
+          );
           alerts.push({
             ...w,
             windSpeedMax: day.windSpeedMax,
@@ -1062,6 +1078,8 @@ export default function BookingPage() {
               daysCache.get(w.operatorId)!,
               w.boatName,
               w.date,
+              2,
+              risky,
             ),
           });
         } catch {
@@ -1353,6 +1371,7 @@ export default function BookingPage() {
         {cancelAlerts.length > 0 && (
           <section
             data-testid="cancel-alert-card"
+            role="alert"
             className="rounded-2xl border border-red-400/40 bg-red-400/10 p-4 space-y-2"
           >
             <div className="flex items-center gap-2">
@@ -1366,7 +1385,10 @@ export default function BookingPage() {
               </p>
             </div>
             {cancelAlerts.map((a) => (
-              <div key={`${a.boatName}|${a.date}`} className="space-y-1">
+              <div
+                key={`${a.operatorId}|${a.boatName}|${a.date}`}
+                className="space-y-1"
+              >
                 <p className="text-sm text-white/85">
                   {a.boatName} · {formatShortDate(a.date)} — 예보{" "}
                   {a.windSpeedMax !== null &&
@@ -1376,10 +1398,19 @@ export default function BookingPage() {
                     `파고 최대 ${Math.round(a.waveHeightMax * 10) / 10}m`}
                 </p>
                 {a.alternatives.length > 0 && (
-                  <p className="text-xs text-white/60">
-                    자리 있는 대안 날짜:{" "}
-                    {a.alternatives.map(formatShortDate).join(" · ")}
-                  </p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-xs text-white/60">
+                      자리 있는 대안 날짜:{" "}
+                      {a.alternatives.map(formatShortDate).join(" · ")}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => openOperatorCalendar(a.operatorId)}
+                      className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-red-400/15 border border-red-400/30 text-red-200 hover:bg-red-400/25 transition-colors"
+                    >
+                      선사 달력 열기
+                    </button>
+                  </div>
                 )}
               </div>
             ))}
@@ -2106,6 +2137,7 @@ export default function BookingPage() {
               return (
                 <div
                   key={platform.id}
+                  id={`operator-${platform.id}`}
                   className="bg-white/3 border border-white/8 rounded-2xl p-4"
                   style={{ animationDelay: `${i * 0.08}s` }}
                 >

@@ -25,6 +25,11 @@ describe('isWithinAlertWindow', () => {
   it('spans month boundaries', () => {
     expect(isWithinAlertWindow('2026-11-02', new Date(2026, 9, 31))).toBe(true); // D-2
   });
+
+  it('judges by calendar day, not 24h distance — 23:59 is still D-1', () => {
+    expect(isWithinAlertWindow('2026-10-16', new Date(2026, 9, 15, 23, 59))).toBe(true);
+    expect(isWithinAlertWindow('2026-10-18', new Date(2026, 9, 15, 23, 59))).toBe(true); // D-3
+  });
 });
 
 describe('isCancellationRisk', () => {
@@ -64,6 +69,7 @@ describe('alternativeDates', () => {
     day('2026-10-18', '팀바이트호', 'available'),
     day('2026-10-19', '팀바이트호', 'weather'),
     day('2026-10-20', '배쯔호', 'available'), // 다른 배
+    day('2026-10-20', '팀바이트호', 'unknown'), // 판독 불가 — 대안 아님
     day('2026-10-21', '팀바이트호', 'available'),
     day('2026-10-22', '팀바이트호', 'available'), // limit 밖
     day('2026-10-15', '팀바이트호', 'available'), // trip 이전
@@ -79,6 +85,12 @@ describe('alternativeDates', () => {
   it('returns empty when the boat has no future availability', () => {
     expect(alternativeDates(days, '배쯔호', '2026-10-20')).toEqual([]);
     expect(alternativeDates([], '팀바이트호', '2026-10-16')).toEqual([]);
+  });
+
+  it('skips dates the forecast marks risky — a storm-day alternative is no alternative', () => {
+    expect(
+      alternativeDates(days, '팀바이트호', '2026-10-16', 2, new Set(['2026-10-18'])),
+    ).toEqual(['2026-10-21', '2026-10-22']);
   });
 
   it('dedupes multiple trips of the same boat on one date', () => {

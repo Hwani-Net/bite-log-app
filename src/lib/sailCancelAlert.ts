@@ -32,8 +32,9 @@ export function isWithinAlertWindow(tripDate: string, now: Date): boolean {
 }
 
 /**
- * 임계 초과 판정. 결측(null)은 초과의 증거가 아니다 — 예보가 없으면
- * 조용히 false (오탐 경보 금지가 이 기능의 회귀 조건).
+ * 임계 도달(이상, >=) 판정 — 경계값 자체(풍속 10m/s·파고 1.5m)도 경보다.
+ * 결측(null)은 도달의 증거가 아니다 — 예보가 없으면 조용히 false
+ * (오탐 경보 금지가 이 기능의 회귀 조건).
  */
 export function isCancellationRisk(o: DailyMarineOutlook): boolean {
   return (
@@ -46,13 +47,17 @@ export function isCancellationRisk(o: DailyMarineOutlook): boolean {
 
 /**
  * 같은 배의 달력에서 tripDate 이후 예약 가능한 가장 가까운 날짜 최대
- * limit개. full/weather/unknown 은 대안이 아니다.
+ * limit개. full/weather/unknown 은 대안이 아니고, exclude(예보상 같은
+ * 악천후 창에 있는 날짜들)도 건너뛴다 — 취소 위험일의 대안으로 또 다른
+ * 위험일을 내밀지 않기 위해서다. 예보 범위 밖 날짜는 판정 불가이므로
+ * 허용(결측을 위험으로 취급하지 않는 것과 같은 원칙).
  */
 export function alternativeDates(
   days: BoatDayStatus[],
   boatName: string,
   tripDate: string,
   limit = 2,
+  exclude?: ReadonlySet<string>,
 ): string[] {
   return [
     ...new Set(
@@ -61,7 +66,8 @@ export function alternativeDates(
           (d) =>
             d.boatName === boatName &&
             d.status === "available" &&
-            d.date > tripDate,
+            d.date > tripDate &&
+            !exclude?.has(d.date),
         )
         .map((d) => d.date),
     ),
