@@ -37,7 +37,7 @@ C12(플랫폼 간 자동 동일선박 판별)는 **하지 않기로 결정**된 
 
 | GOAL | 항목 | 의존 | 상태 | 증거 |
 |------|------|------|------|------|
-| 1 | 내 위치 거리순 정렬 (C10) | — | TODO | |
+| 1 | 내 위치 거리순 정렬 (C10) | — | DONE | 커밋 21a130d(기능)+후속 1커밋(리뷰 반영). src/data/portCoords.ts — 더피싱 4개 권역 목록에서 실제 수집한 항구 34곳을 OSM Nominatim으로 지오코딩(6곳은 소재지 리 단위 근사, ODbL 표기, 기억이 아니라 실측: 진두항이 기억상 '안면도'가 아니라 실데이터 '영흥도'였음). 동명 항구 안전장치: within 지역 힌트(모항=태안 등 4곳)가 어긋나면 엉뚱한 거리 대신 미등록 취급. src/lib/portDistance.ts — haversine+안정 정렬(미등록은 원래 순서로 뒤, 숨김 없음), 거리순은 sortByVerdict 앞에 적용해 '안 탄다' 하단 유지. 유닛 255/255(신규 8: 대천↔오천 실거리, 한국 bbox sanity로 좌표 오타 클래스 전부 차단, within 거부, 정렬 안정성). e2e 26/26(신규 1: listings API를 fixture로 mock — 라이브 0척인 날 조용히 skip되는 구조를 리뷰 지적으로 제거하고 오천<평택<제주<미등록 정확한 순서+토글 오프 복원 단언). 기존 e2e 2건이 h3 형제 span 로케이터로 깨진 걸 잡아 DOM 형제 구조 유지로 수정. 교차검수(z-ai/glm-5.3-flash, $0.0023) 반영 6건(동명 항구 가드·e2e mock 전환·geoError 토글 정리·role=alert+대비+aria-describedby·bbox 테스트·ODbL), 반박 3건(하버사인 2N 계산은 ≤50척 규모에서 무의미, mount 실패 무음은 의도적 백그라운드 향상, maximumAge 캐시는 거부 상태에선 캐시된 위치 자체가 없음). 라이브(https://bite-log-three.vercel.app/booking) 200, 대천항 좌표 주입 후 거리순 토글 → ~0km(대천항 드림호)→~11km(영목항)→오름차순 정렬+라벨 스크린샷 확인(screenshots/goals2/goal1/live-distance-sort.png) |
 | 2 | "예약 가능만 보기" 토글 (C9) | — | TODO | |
 | 3 | 동출 모집 v1 (C11) | — | TODO | |
 
