@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Anchor,
@@ -43,6 +43,11 @@ import {
   distanceKmForAreaPath,
   sortBoatsByDistance,
 } from "@/lib/portDistance";
+import {
+  dayAvailability,
+  ymForDate,
+  type DayAvailability,
+} from "@/lib/boatAvailabilityFilter";
 import { fetchDailyMarineOutlook } from "@/services/marineService";
 import { BITE_GRADE_LABEL } from "@/lib/calendarBiteOverlay";
 import { getDataService } from "@/services/dataServiceFactory";
@@ -381,6 +386,39 @@ function localISODate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+// (uid, 월) 단위 sessionStorage 캐시를 앞에 둔 달력 날짜 가용성 조회 —
+// "예약 가능만 보기"가 같은 세션에서 같은 달력을 두 번 받지 않게 한다.
+// 실패는 전부 unknown(보여주되 "확인 불가")이며 캐시하지 않는다(다음
+// 토글에서 재시도 기회를 남긴다).
+async function fetchDayAvailability(
+  uid: string,
+  date: string,
+): Promise<DayAvailability> {
+  const ym = ymForDate(date);
+  const cacheKey = `biteLog_boatCal:${uid}:${ym}`;
+  try {
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) return dayAvailability(JSON.parse(cached), date);
+  } catch {
+    // 깨진 캐시는 무시하고 새로 받는다
+  }
+  try {
+    const res = await fetch(`/api/boat-calendar?uid=${uid}&ym=${ym}`);
+    if (!res.ok) return { state: "unknown" };
+    const data = (await res.json()) as { days?: unknown };
+    if (Array.isArray(data.days)) {
+      try {
+        sessionStorage.setItem(cacheKey, JSON.stringify(data.days));
+      } catch {
+        // 저장 공간 부족 등 — 캐시 없이도 동작엔 지장 없음
+      }
+    }
+    return dayAvailability(data.days, date);
+  } catch {
+    return { state: "unknown" };
+  }
+}
+
 const STATUS_STYLE: Record<BoatDayStatus["status"], string> = {
   available: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
   full: "bg-white/5 text-white/40 border-white/10",
@@ -521,6 +559,7 @@ function BoatListingCard({
   rideCount,
   memo,
   distanceKm = null,
+  availability = null,
 }: {
   boat: BoatListing;
   date: string;
@@ -530,6 +569,7 @@ function BoatListingCard({
   rideCount: number;
   memo: string;
   distanceKm?: number | null;
+  availability?: DayAvailability | null;
 }) {
   const shortArea = boat.areaPath.split(" > ").slice(1).join(" · ");
   return (
@@ -568,6 +608,22 @@ function BoatListingCard({
         <span className="absolute bottom-1.5 right-1.5 text-[9px] px-1.5 py-0.5 rounded-full bg-black/60 text-white/80">
           {boat.capacity || "정원 미표기"}
         </span>
+        {availability && (
+          <span
+            data-testid="avail-badge"
+            className={`absolute bottom-1.5 left-1.5 text-[9px] px-1.5 py-0.5 rounded-full font-semibold ${
+              availability.state === "available"
+                ? "bg-emerald-500/80 text-[#08140d]"
+                : "bg-black/60 text-white/60"
+            }`}
+          >
+            {availability.state === "available"
+              ? availability.remainingSeats !== undefined
+                ? `잔여 ${availability.remainingSeats}석`
+                : "예약 가능"
+              : "확인 불가"}
+          </span>
+        )}
       </div>
       <button
         type="button"
@@ -740,6 +796,16 @@ export default function BookingPage() {
   } | null>(null);
   const [sortByDist, setSortByDist] = useState(false);
   const [geoError, setGeoError] = useState(false);
+  // "예약 가능만 보기"(2차 GOAL-2) — 옵트인 시에만 현재 페이지 배들의
+  // 달력을 조회한다. sessionStorage에 (uid,월) 단위로 캐시해 같은 세션에선
+  // 재요청하지 않고, 확실히 마감(full)인 배만 숨긴다.
+  const [availableOnly, setAvailableOnly] = useState(false);
+  const [dayAvail, setDayAvail] = useState<Record<string, DayAvailability>>({});
+  const dayAvailRef = useRef<Record<string, DayAvailability>>({});
+  const [availProgress, setAvailProgress] = useState<{
+    done: number;
+    total: number;
+  } | null>(null);
   const handleToggleDistanceSort = () => {
     if (sortByDist) {
       setSortByDist(false);
@@ -766,6 +832,22 @@ export default function BookingPage() {
       { timeout: 5000, maximumAge: 300000 },
     );
   };
+
+  // 켜는 순간 이전 판정 중 "확인 불가"만 비운다 — 일시 장애였다면 이번
+  // 토글에서 재시도되고, 성공 판정(가능/마감)은 세션 캐시와 함께 즉시.
+  const handleToggleAvailableOnly = () => {
+    if (!availableOnly) {
+      const retained = Object.fromEntries(
+        Object.entries(dayAvailRef.current).filter(
+          ([, a]) => a.state !== "unknown",
+        ),
+      );
+      dayAvailRef.current = retained;
+      setDayAvail(retained);
+    }
+    setAvailableOnly(!availableOnly);
+  };
+
   const [searchPage, setSearchPage] = useState(1);
   const [searchResult, setSearchResult] = useState<BoatListingPage | null>(null);
   const [searchBoats, setSearchBoats] = useState<BoatListing[]>([]);
@@ -1187,6 +1269,44 @@ export default function BookingPage() {
     [catchRecords],
   );
 
+  // "예약 가능만" 토글이 켜져 있는 동안 현재 결과 페이지 배들의 달력을
+  // 동시성 3으로 확인한다. dayAvailRef는 state 미러 — deps에 dayAvail을
+  // 넣으면 판정 하나 도착할 때마다 효과가 재시작돼 진행 중 요청을 끊는다.
+  useEffect(() => {
+    if (!availableOnly || searchBoats.length === 0 || !searchDate) {
+      setAvailProgress(null);
+      return;
+    }
+    const need = searchBoats.filter(
+      (b) => dayAvailRef.current[`${b.uid}|${searchDate}`] === undefined,
+    );
+    if (need.length === 0) return;
+    let cancelled = false;
+    setAvailProgress({ done: 0, total: need.length });
+    (async () => {
+      let done = 0;
+      const queue = [...need];
+      const worker = async () => {
+        for (;;) {
+          const boat = queue.shift();
+          if (!boat || cancelled) return;
+          const avail = await fetchDayAvailability(boat.uid, searchDate);
+          if (cancelled) return;
+          const key = `${boat.uid}|${searchDate}`;
+          dayAvailRef.current = { ...dayAvailRef.current, [key]: avail };
+          setDayAvail(dayAvailRef.current);
+          done += 1;
+          setAvailProgress({ done, total: need.length });
+        }
+      };
+      await Promise.all([worker(), worker(), worker()]);
+      if (!cancelled) setAvailProgress(null);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [availableOnly, searchBoats, searchDate]);
+
   const spotOfMonth = useMemo(
     () => getMonthlyRecommendation(currentMonth, currentDay, userRegion),
     [currentMonth, currentDay, userRegion],
@@ -1234,11 +1354,26 @@ export default function BookingPage() {
       }),
     [keywordFilteredSearchBoats, selectedPort, selectedCapacity],
   );
+  // "예약 가능만" — 확실히 마감(full)로 판정된 배만 숨긴다. 아직 판정
+  // 전이거나 확인 실패(unknown)면 남겨서 "확인 불가"로 표시.
+  const visibleSearchBoats = useMemo(
+    () =>
+      availableOnly
+        ? finalFilteredSearchBoats.filter(
+            (b) => dayAvail[`${b.uid}|${searchDate}`]?.state !== "full",
+          )
+        : finalFilteredSearchBoats,
+    [finalFilteredSearchBoats, availableOnly, dayAvail, searchDate],
+  );
   // Any client-side narrowing that makes the server's own total/pagination
   // fraction stop meaning "what you're looking at" — the count label and
   // the 더 보기 label both fall back to a plain filtered count once true.
   const hasClientFilter = Boolean(
-    searchSpecies || debouncedKeyword.trim() || selectedPort || selectedCapacity,
+    searchSpecies ||
+      debouncedKeyword.trim() ||
+      selectedPort ||
+      selectedCapacity ||
+      availableOnly,
   );
 
   const reverseSeasonData = reverseSpecies
@@ -1818,10 +1953,22 @@ export default function BookingPage() {
                 찾으므로, 칩을 넣어도 h3·span의 형제 관계는 유지한다. */}
             <button
               type="button"
+              onClick={handleToggleAvailableOnly}
+              aria-pressed={availableOnly}
+              className={`ml-auto text-[11px] px-2 py-1 rounded-lg border transition-colors ${
+                availableOnly
+                  ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300 font-semibold"
+                  : "bg-white/5 border-white/10 text-white/50"
+              }`}
+            >
+              예약 가능만
+            </button>
+            <button
+              type="button"
               onClick={handleToggleDistanceSort}
               aria-pressed={sortByDist}
               aria-describedby={geoError ? "distance-sort-error" : undefined}
-              className={`ml-auto mr-2 text-[11px] px-2 py-1 rounded-lg border transition-colors ${
+              className={`ml-1.5 mr-2 text-[11px] px-2 py-1 rounded-lg border transition-colors ${
                 sortByDist
                   ? "bg-[#c9a84c]/20 border-[#c9a84c]/40 text-[#c9a84c] font-semibold"
                   : "bg-white/5 border-white/10 text-white/50"
@@ -1832,11 +1979,23 @@ export default function BookingPage() {
             <span className="text-[11px] text-white/40" aria-live="polite">
               {searchResult
                 ? hasClientFilter
-                  ? `${finalFilteredSearchBoats.length}척 일치`
+                  ? `${visibleSearchBoats.length}척 일치`
                   : `${searchResult.total}척`
                 : ""}
             </span>
           </div>
+          {availableOnly && (
+            <p
+              className="text-[10px] text-white/40 px-1"
+              role="status"
+              aria-live="polite"
+            >
+              {availProgress
+                ? `선사 달력 확인 중 ${availProgress.done}/${availProgress.total}…`
+                : "확실히 마감된 배만 숨겨요. 확인 불가는 그대로 보여드려요."}{" "}
+              낚시뚜 목록에는 적용되지 않아요.
+            </p>
+          )}
           {geoError && (
             <p
               id="distance-sort-error"
@@ -1862,12 +2021,14 @@ export default function BookingPage() {
             <p role="status" className="text-xs text-white/30 py-6 text-center">
               이 조건으로 출조하는 선박이 없습니다. 날짜나 필터를 바꿔보세요.
             </p>
-          ) : finalFilteredSearchBoats.length === 0 ? (
+          ) : visibleSearchBoats.length === 0 ? (
             <div role="status" className="py-6 text-center space-y-2">
               <p className="text-xs text-white/30">
-                {debouncedKeyword.trim()
-                  ? "검색어와 일치하는 선박이 없습니다. 다른 키워드를 시도해보세요."
-                  : "이 조건에 맞는 선박이 없습니다. 항구나 정원 필터를 바꿔보세요."}
+                {availableOnly && finalFilteredSearchBoats.length > 0
+                  ? "이 날짜에 잔여석이 확인된 배가 없습니다. 다른 날짜를 시도해보세요."
+                  : debouncedKeyword.trim()
+                    ? "검색어와 일치하는 선박이 없습니다. 다른 키워드를 시도해보세요."
+                    : "이 조건에 맞는 선박이 없습니다. 항구나 정원 필터를 바꿔보세요."}
               </p>
               <button
                 type="button"
@@ -1875,10 +2036,11 @@ export default function BookingPage() {
                   setKeyword("");
                   setSelectedPort("");
                   setSelectedCapacity("");
+                  setAvailableOnly(false);
                 }}
                 className="text-xs text-[#c9a84c] underline underline-offset-2"
               >
-                검색어·항구·정원 필터 초기화
+                검색어·항구·정원·예약가능 필터 초기화
               </button>
             </div>
           ) : (
@@ -1887,7 +2049,7 @@ export default function BookingPage() {
                 data-testid="search-results"
                 className={`grid grid-cols-2 gap-2 ${searchLoading ? "opacity-60" : ""}`}
               >
-                {finalFilteredSearchBoats.map((boat) => (
+                {visibleSearchBoats.map((boat) => (
                   <BoatListingCard
                     key={boat.uid}
                     boat={boat}
@@ -1897,6 +2059,11 @@ export default function BookingPage() {
                     verdict={myBoats[boat.uid]?.verdict ?? null}
                     rideCount={myBoats[boat.uid]?.rides.length ?? 0}
                     memo={myBoats[boat.uid]?.memo ?? ""}
+                    availability={
+                      availableOnly
+                        ? (dayAvail[`${boat.uid}|${searchDate}`] ?? null)
+                        : null
+                    }
                     distanceKm={
                       sortByDist && userCoords
                         ? distanceKmForAreaPath(

@@ -678,6 +678,95 @@ test.describe('Distance sort — /booking (2차 GOAL-1)', () => {
   });
 });
 
+test.describe('Available-only toggle — /booking (2차 GOAL-2)', () => {
+  // listings + 달력을 전부 mock — 판정 3종(가능/마감/확인실패)이 한 화면에
+  // 결정적으로 나오게 한다. 91=잔여 5석, 92=마감, 93=503 실패.
+  const fixture = (uid: string, name: string) => ({
+    uid,
+    name,
+    areaPath: '서해권 > 충청남도 > 보령시 > 대천항',
+    fishTypes: '우럭',
+    capacity: '12인승',
+    imageUrl: '',
+    detailUrl: `https://thefishing.kr/reservation/list.php?uid=${uid}`,
+  });
+  const calDay = (date: string, status: string, remainingSeats?: number) => ({
+    date,
+    day: Number(date.slice(8)),
+    tide: '4물',
+    status,
+    ...(remainingSeats !== undefined ? { remainingSeats } : {}),
+  });
+
+  test('hides only confirmed-full boats, keeps failures visible, restores on toggle-off, and caches', async ({
+    page,
+  }) => {
+    let calendarRequests = 0;
+    await page.route('**/api/boat-listings**', (r) =>
+      r.fulfill({
+        json: {
+          ok: true,
+          page: 1,
+          total: 3,
+          boats: [
+            fixture('91', '가능호'),
+            fixture('92', '마감호'),
+            fixture('93', '불명호'),
+          ],
+        },
+      }),
+    );
+    await page.route('**/api/boat-calendar**', (r) => {
+      calendarRequests += 1;
+      const uid = new URL(r.request().url()).searchParams.get('uid');
+      if (uid === '93') {
+        return r.fulfill({ status: 503, json: { ok: false, error: 'fetch_failed' } });
+      }
+      const today = new Date();
+      const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      return r.fulfill({
+        json: {
+          ok: true,
+          ym: date.slice(0, 7).replace('-', ''),
+          days: [calDay(date, uid === '91' ? 'available' : 'full', uid === '91' ? 5 : undefined)],
+        },
+      });
+    });
+    await page.goto('/booking');
+    const grid = page.locator('[data-testid="search-results"]');
+    await expect(grid.locator('[data-testid="boat-card"]')).toHaveCount(3, {
+      timeout: 20000,
+    });
+    // 회귀: 토글을 켜기 전엔 달력 요청이 한 건도 없어야 한다.
+    expect(calendarRequests).toBe(0);
+
+    await page.getByRole('button', { name: '예약 가능만' }).click();
+    // 마감호만 사라지고, 가능호(잔여 5석)와 불명호(확인 불가)는 남는다.
+    await expect(grid.locator('[data-testid="boat-card"] h4')).toHaveText(
+      ['가능호', '불명호'],
+      { timeout: 15000 },
+    );
+    await expect(grid.getByText('잔여 5석')).toBeVisible();
+    await expect(grid.getByText('확인 불가')).toBeVisible();
+    expect(calendarRequests).toBe(3);
+
+    // 토글 오프 → 전체 복원, 배지 제거.
+    await page.getByRole('button', { name: '예약 가능만' }).click();
+    await expect(grid.locator('[data-testid="boat-card"]')).toHaveCount(3);
+    await expect(grid.locator('[data-testid="avail-badge"]')).toHaveCount(0);
+
+    // 다시 켜면 성공 판정 2척은 세션 캐시로 즉시 — 실패했던 93만 재시도.
+    await page.getByRole('button', { name: '예약 가능만' }).click();
+    await expect(grid.locator('[data-testid="boat-card"] h4')).toHaveText(
+      ['가능호', '불명호'],
+      { timeout: 15000 },
+    );
+    await expect
+      .poll(() => calendarRequests, { timeout: 10000 })
+      .toBe(4);
+  });
+});
+
 test.describe('Trip briefing + season reminders — /booking (GOAL-9)', () => {
   // Both features are clock-sensitive (D-1 = "tomorrow", season = "this
   // month"), so every test pins the browser clock to 2026-10-15 — a date
