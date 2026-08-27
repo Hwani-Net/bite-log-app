@@ -18,7 +18,9 @@ import {
   BellRing,
   ChevronDown,
   X,
+  Search,
 } from "lucide-react";
+import { matchesKeyword } from "@/lib/keywordMatch";
 import {
   FISH_SEASON_DB,
   getSeasonStatus,
@@ -641,6 +643,18 @@ export default function BookingPage() {
   const [todayDate, setTodayDate] = useState<string>(""); // for both date inputs' `min`
   const [searchRegion, setSearchRegion] = useState<string>(""); // REGION_FILTERS code
   const [searchSpecies, setSearchSpecies] = useState<string>(""); // SPECIES_FILTERS code
+  // 통합 검색 — 서버에 새 요청을 보내지 않고, 이미 불러온 더피싱+낚시뚜
+  // 결과를 클라이언트에서 이름·항구·어종으로 한 번 더 거른다. 입력창은
+  // keyword로 즉시 반응하고, 실제 필터링은 debouncedKeyword로 살짝 늦춰서
+  // 타이핑 중간중간 "일치 없음"이 깜빡이는 걸 막는다 — 이 페이지 전체가
+  // 하나의 큰 컴포넌트라 매 키 입력마다 전체가 리렌더되는데, 필터 결과
+  // 자체가 그 리렌더 빈도를 따라가지 않게 하는 값싼 방법이기도 하다.
+  const [keyword, setKeyword] = useState("");
+  const [debouncedKeyword, setDebouncedKeyword] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedKeyword(keyword), 200);
+    return () => clearTimeout(t);
+  }, [keyword]);
   const [searchPage, setSearchPage] = useState(1);
   const [searchResult, setSearchResult] = useState<BoatListingPage | null>(null);
   const [searchBoats, setSearchBoats] = useState<BoatListing[]>([]);
@@ -896,6 +910,20 @@ export default function BookingPage() {
     () => sortByVerdict(searchBoats, myBoats),
     [searchBoats, myBoats],
   );
+  const keywordFilteredSearchBoats = useMemo(
+    () =>
+      sortedSearchBoats.filter((b) =>
+        matchesKeyword(debouncedKeyword, b.name, b.areaPath, b.fishTypes),
+      ),
+    [sortedSearchBoats, debouncedKeyword],
+  );
+  const keywordFilteredDirectoryBoats = useMemo(
+    () =>
+      directoryBoats.filter((b) =>
+        matchesKeyword(debouncedKeyword, b.name, b.province, b.area, b.harbor),
+      ),
+    [directoryBoats, debouncedKeyword],
+  );
 
   const checklist = selectedSpecies
     ? [
@@ -1048,6 +1076,39 @@ export default function BookingPage() {
           </section>
         )}
 
+        {/* 통합 검색 — 더피싱과 낚시뚜, 소스 두 개를 동시에 훑는 건 개별
+            플랫폼엔 없는 기능이다. 서버 요청은 추가하지 않고, 이미 불러온
+            결과를 이름·항구·어종 기준으로 클라이언트에서 한 번 더 거른다. */}
+        <section
+          data-testid="keyword-search"
+          className="bg-white/3 border border-white/8 rounded-2xl p-3"
+        >
+          <label className="relative block">
+            <Search
+              size={15}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30"
+            />
+            <input
+              type="text"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder="배 이름·항구·어종으로 검색 (더피싱+낚시뚜 통합)"
+              aria-label="선박 통합 검색"
+              className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-9 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#c9a84c]/50 transition-colors"
+            />
+            {keyword && (
+              <button
+                type="button"
+                onClick={() => setKeyword("")}
+                aria-label="검색어 지우기"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 size-7 rounded-full bg-white/10 text-white/50 hover:text-white flex items-center justify-center"
+              >
+                <X size={12} />
+              </button>
+            )}
+          </label>
+        </section>
+
         {/* 더피싱-style search: pick a date, filter by region/species, see the
             boats sailing that day, tap one to open its month calendar with
             per-day 예약하기 → the boat's own booking page. */}
@@ -1125,10 +1186,10 @@ export default function BookingPage() {
             <h3 className="text-xs text-white/40 font-semibold uppercase tracking-[0.15em]">
               {searchDate.slice(5).replace("-", "/")} 출조 선박
             </h3>
-            <span className="text-[11px] text-white/40">
+            <span className="text-[11px] text-white/40" aria-live="polite">
               {searchResult
-                ? searchSpecies
-                  ? `${searchBoats.length}척 일치`
+                ? searchSpecies || debouncedKeyword.trim()
+                  ? `${keywordFilteredSearchBoats.length}척 일치`
                   : `${searchResult.total}척`
                 : ""}
             </span>
@@ -1148,13 +1209,17 @@ export default function BookingPage() {
             <p className="text-xs text-white/30 py-6 text-center">
               이 조건으로 출조하는 선박이 없습니다. 날짜나 필터를 바꿔보세요.
             </p>
+          ) : keywordFilteredSearchBoats.length === 0 ? (
+            <p role="status" className="text-xs text-white/30 py-6 text-center">
+              검색어와 일치하는 선박이 없습니다. 다른 키워드를 시도해보세요.
+            </p>
           ) : (
             <>
               <div
                 data-testid="search-results"
                 className={`grid grid-cols-2 gap-2 ${searchLoading ? "opacity-60" : ""}`}
               >
-                {sortedSearchBoats.map((boat) => (
+                {keywordFilteredSearchBoats.map((boat) => (
                   <BoatListingCard
                     key={boat.uid}
                     boat={boat}
@@ -1175,7 +1240,7 @@ export default function BookingPage() {
                 >
                   {searchLoading
                     ? "불러오는 중..."
-                    : searchSpecies
+                    : searchSpecies || debouncedKeyword.trim()
                       ? "더 보기"
                       : `더 보기 (${searchBoats.length}/${searchResult.total})`}
                 </button>
@@ -1200,8 +1265,10 @@ export default function BookingPage() {
               낚시뚜 등록 선박 (날짜 무관)
             </h3>
             {directoryTotalCached > 0 && (
-              <span className="text-[11px] text-white/40">
-                {directoryTotalCached}/177척 동기화됨
+              <span className="text-[11px] text-white/40" aria-live="polite">
+                {debouncedKeyword.trim()
+                  ? `${keywordFilteredDirectoryBoats.length}척 일치`
+                  : `${directoryTotalCached}/177척 동기화됨`}
               </span>
             )}
           </div>
@@ -1221,9 +1288,13 @@ export default function BookingPage() {
                 ? "매일 조금씩 동기화 중입니다 — 곧 채워집니다."
                 : "이 지역에 동기화된 선박이 아직 없습니다."}
             </p>
+          ) : keywordFilteredDirectoryBoats.length === 0 ? (
+            <p role="status" className="text-xs text-white/30 py-4 text-center">
+              검색어와 일치하는 선박이 없습니다. 다른 키워드를 시도해보세요.
+            </p>
           ) : (
-            <div className="grid grid-cols-2 gap-2">
-              {directoryBoats.map((boat) => (
+            <div data-testid="fishapp-results" className="grid grid-cols-2 gap-2">
+              {keywordFilteredDirectoryBoats.map((boat) => (
                 <FishappBoatCard key={boat.shipId} boat={boat} />
               ))}
             </div>

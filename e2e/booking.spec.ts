@@ -183,6 +183,71 @@ test.describe('Booking search — /booking', () => {
     expect(markedIndex).toBe(total - 1);
   });
 
+  test('keyword search filters real content on both sources, and clearing it restores the view', async ({
+    page,
+  }) => {
+    const cards = resultsGrid(page).locator('[data-testid="boat-card"]');
+    await expect(cards.first()).toBeVisible({ timeout: 15000 });
+    const boatName = await cards.first().locator('h4').textContent();
+    expect(boatName).toBeTruthy();
+    const beforeCount = await cards.count();
+
+    const searchInput = page.getByLabel('선박 통합 검색');
+    await searchInput.fill(boatName!);
+    // The filter is debounced (~200ms). A plain toContainText on the grid
+    // container isn't a real wait condition here — it can pass instantly,
+    // before the debounce even fires, simply because the unfiltered grid
+    // already contains this card's own (unfiltered) text. Poll for the
+    // actual end state instead: every visible card matches the keyword.
+    await expect
+      .poll(
+        async () => {
+          const texts = await cards.allTextContents();
+          return texts.length > 0 && texts.every((t) => t.includes(boatName!));
+        },
+        { timeout: 5000 },
+      )
+      .toBe(true);
+
+    // Clearing the keyword restores the original, unfiltered card count —
+    // the filter is a pure client-side pass, not a new server request.
+    await page.getByRole('button', { name: '검색어 지우기' }).click();
+    await expect(cards).toHaveCount(beforeCount);
+
+    // A keyword nothing can match shows the empty-state copy instead of a
+    // silently blank grid. Both sources share the same copy, so this can
+    // match more than one element — .first() is enough to prove it renders.
+    await searchInput.fill('존재하지않는선박이름ZZZ999');
+    await expect(
+      page
+        .getByText('검색어와 일치하는 선박이 없습니다. 다른 키워드를 시도해보세요.')
+        .first(),
+    ).toBeVisible();
+  });
+
+  test('keyword search also filters the 낚시뚜 directory — the point of a combined search', async ({
+    page,
+  }) => {
+    const fishappCards = page.locator('[data-testid="fishapp-results"] h4');
+    await expect(fishappCards.first()).toBeVisible({ timeout: 15000 });
+    const boatName = await fishappCards.first().textContent();
+    expect(boatName).toBeTruthy();
+
+    await page.getByLabel('선박 통합 검색').fill(boatName!);
+    // Same reasoning as the thefishing.kr test above: poll for every
+    // visible card actually matching, not just the container text
+    // trivially containing this card's own (still unfiltered) name.
+    await expect
+      .poll(
+        async () => {
+          const texts = await fishappCards.allTextContents();
+          return texts.length > 0 && texts.every((t) => t.includes(boatName!));
+        },
+        { timeout: 5000 },
+      )
+      .toBe(true);
+  });
+
   test('clicking a boat card navigates to its calendar page', async ({ page }) => {
     const link = resultsGrid(page)
       .locator('[data-testid="boat-card"]')
