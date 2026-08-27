@@ -19,6 +19,8 @@ export function dayAvailability(
   );
   if (!day) return { state: "unknown" }; // 달력에 그 날짜 자체가 없음
   if (day.status === "available") {
+    // "남은자리 0명" 같은 모순 표기 방어 — 0석이면 사실상 마감이다.
+    if (day.remainingSeats === 0) return { state: "full" };
     return {
       state: "available",
       remainingSeats:

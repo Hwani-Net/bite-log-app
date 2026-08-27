@@ -24,6 +24,13 @@ describe('dayAvailability', () => {
     expect(dayAvailability(DAYS, '2026-09-03')).toEqual({ state: 'full' });
   });
 
+  it('treats "available with 0 remaining seats" as full — contradictory markup defense', () => {
+    const days = [
+      { date: '2026-09-05', day: 5, tide: '8물', status: 'available', remainingSeats: 0 },
+    ];
+    expect(dayAvailability(days, '2026-09-05')).toEqual({ state: 'full' });
+  });
+
   it('treats none, missing dates, and malformed payloads as unknown — never as full', () => {
     expect(dayAvailability(DAYS, '2026-09-04').state).toBe('unknown'); // "none"
     expect(dayAvailability(DAYS, '2026-09-30').state).toBe('unknown'); // 달력에 없는 날짜

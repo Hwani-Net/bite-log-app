@@ -387,9 +387,11 @@ function localISODate(d: Date): string {
 }
 
 // (uid, 월) 단위 sessionStorage 캐시를 앞에 둔 달력 날짜 가용성 조회 —
-// "예약 가능만 보기"가 같은 세션에서 같은 달력을 두 번 받지 않게 한다.
-// 실패는 전부 unknown(보여주되 "확인 불가")이며 캐시하지 않는다(다음
-// 토글에서 재시도 기회를 남긴다).
+// "예약 가능만 보기"가 같은 세션에서 같은 달력을 반복해 받지 않게 한다.
+// 잔여석은 실시간으로 변하므로 캐시는 10분만 신뢰한다(빈자리 알림 폴링과
+// 같은 주기 — 마감이 풀린 배를 세션 내내 숨기지 않기 위해서다). 실패는
+// 전부 unknown(보여주되 "확인 불가")이며 캐시하지 않는다.
+const CAL_CACHE_TTL_MS = 10 * 60 * 1000;
 async function fetchDayAvailability(
   uid: string,
   date: string,
@@ -398,7 +400,16 @@ async function fetchDayAvailability(
   const cacheKey = `biteLog_boatCal:${uid}:${ym}`;
   try {
     const cached = sessionStorage.getItem(cacheKey);
-    if (cached) return dayAvailability(JSON.parse(cached), date);
+    if (cached) {
+      const parsed = JSON.parse(cached) as { t?: number; days?: unknown };
+      if (
+        typeof parsed?.t === "number" &&
+        Date.now() - parsed.t < CAL_CACHE_TTL_MS
+      ) {
+        return dayAvailability(parsed.days, date);
+      }
+      // TTL 지났거나 옛 형식 — 새로 받는다.
+    }
   } catch {
     // 깨진 캐시는 무시하고 새로 받는다
   }
@@ -408,7 +419,10 @@ async function fetchDayAvailability(
     const data = (await res.json()) as { days?: unknown };
     if (Array.isArray(data.days)) {
       try {
-        sessionStorage.setItem(cacheKey, JSON.stringify(data.days));
+        sessionStorage.setItem(
+          cacheKey,
+          JSON.stringify({ t: Date.now(), days: data.days }),
+        );
       } catch {
         // 저장 공간 부족 등 — 캐시 없이도 동작엔 지장 없음
       }
