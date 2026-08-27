@@ -138,3 +138,55 @@ async function fetchMarineDataRaw(
     hourlyTimes: hourlyTimes ?? undefined,
   };
 }
+
+// ── 출항 취소 조기 경보용 일별 전망 (GOAL-10) ──────────────────────────
+// 위 fetchMarineData는 "지금" 중심(current+hourly 3일)이라 D-3~D-1의
+// 날짜별 최대값엔 못 쓴다. 풍속은 일반 forecast API, 파고는 marine API —
+// 한쪽이 실패하면 그 필드만 null로 두고, 둘 다 실패하면 빈 배열(호출측이
+// 조용히 생략하는 게 계약 — 결측으로 경보를 만들지 않는다).
+
+export interface DailyMarineOutlook {
+  date: string; // YYYY-MM-DD
+  windSpeedMax: number | null; // m/s
+  waveHeightMax: number | null; // m
+}
+
+export async function fetchDailyMarineOutlook(
+  lat: number,
+  lng: number,
+): Promise<DailyMarineOutlook[]> {
+  const windUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=wind_speed_10m_max&wind_speed_unit=ms&forecast_days=5&timezone=auto`;
+  const waveUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lng}&daily=wave_height_max&forecast_days=5&timezone=auto`;
+
+  const byDate = new Map<string, DailyMarineOutlook>();
+  const entry = (date: string): DailyMarineOutlook => {
+    let o = byDate.get(date);
+    if (!o) {
+      o = { date, windSpeedMax: null, waveHeightMax: null };
+      byDate.set(date, o);
+    }
+    return o;
+  };
+
+  const fill = async (
+    url: string,
+    field: "wind_speed_10m_max" | "wave_height_max",
+    key: "windSpeedMax" | "waveHeightMax",
+  ) => {
+    const res = await fetch(url);
+    if (!res.ok) return;
+    const data = await res.json();
+    const times = (data?.daily?.time ?? []) as string[];
+    const values = (data?.daily?.[field] ?? []) as (number | null)[];
+    times.forEach((t, i) => {
+      const v = values[i];
+      entry(t)[key] = typeof v === "number" ? v : null;
+    });
+  };
+
+  await Promise.allSettled([
+    fill(windUrl, "wind_speed_10m_max", "windSpeedMax"),
+    fill(waveUrl, "wave_height_max", "waveHeightMax"),
+  ]);
+  return [...byDate.values()];
+}

@@ -19,6 +19,7 @@ import {
   ChevronDown,
   X,
   Search,
+  TriangleAlert,
 } from "lucide-react";
 import { matchesKeyword } from "@/lib/keywordMatch";
 import {
@@ -32,6 +33,13 @@ import {
   nextBriefingNotifications,
   seasonReminders,
 } from "@/lib/tripReminders";
+import {
+  alternativeDates,
+  isCancellationRisk,
+  isWithinAlertWindow,
+  OPERATOR_COORDS,
+} from "@/lib/sailCancelAlert";
+import { fetchDailyMarineOutlook } from "@/services/marineService";
 import { BITE_GRADE_LABEL } from "@/lib/calendarBiteOverlay";
 import { getDataService } from "@/services/dataServiceFactory";
 import type { CatchRecord } from "@/types";
@@ -990,6 +998,107 @@ export default function BookingPage() {
     if (notify.length > 0) localStorage.setItem(KEY, JSON.stringify(sent));
   }, [briefingTrips]);
 
+  // 출항 취소 조기 경보 — 빈자리 알림에 등록한 승선일이 D-3~D-1이면 그
+  // 선사 모항 근해의 일별 예보(풍속·파고 최대)를 확인해 임계 초과 시
+  // 경보 카드 + 로컬 알림 1회, 같은 배의 자리 있는 대안 날짜 최대 2개.
+  // 예보 결측·API 실패는 조용히 생략(오탐 경보 금지). 즐겨찾기 rides는
+  // 선사 달력이 없어 대안 날짜를 못 주므로 여기선 다루지 않는다.
+  const [cancelAlerts, setCancelAlerts] = useState<
+    {
+      operatorId: BoatOperatorId;
+      boatName: string;
+      date: string;
+      windSpeedMax: number | null;
+      waveHeightMax: number | null;
+      alternatives: string[];
+    }[]
+  >([]);
+  useEffect(() => {
+    const inWindow = watchlist.filter((w) =>
+      isWithinAlertWindow(w.date, new Date()),
+    );
+    if (inWindow.length === 0) {
+      setCancelAlerts([]);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const outlookCache = new Map<
+        BoatOperatorId,
+        Awaited<ReturnType<typeof fetchDailyMarineOutlook>>
+      >();
+      const daysCache = new Map<BoatOperatorId, BoatDayStatus[]>();
+      const alerts: typeof cancelAlerts = [];
+      for (const w of inWindow) {
+        const coords = OPERATOR_COORDS[w.operatorId];
+        if (!coords) continue;
+        try {
+          if (!outlookCache.has(w.operatorId)) {
+            outlookCache.set(
+              w.operatorId,
+              await fetchDailyMarineOutlook(coords.lat, coords.lng),
+            );
+          }
+          const day = outlookCache
+            .get(w.operatorId)!
+            .find((o) => o.date === w.date);
+          if (!day || !isCancellationRisk(day)) continue;
+          if (!daysCache.has(w.operatorId)) {
+            const res = await fetch(
+              `/api/boat-availability?operator=${w.operatorId}`,
+            );
+            daysCache.set(
+              w.operatorId,
+              res.ok
+                ? ((await res.json()) as { days: BoatDayStatus[] }).days
+                : [],
+            );
+          }
+          alerts.push({
+            ...w,
+            windSpeedMax: day.windSpeedMax,
+            waveHeightMax: day.waveHeightMax,
+            alternatives: alternativeDates(
+              daysCache.get(w.operatorId)!,
+              w.boatName,
+              w.date,
+            ),
+          });
+        } catch {
+          // 이 배 하나만 조용히 생략 — 나머지 경보는 계속 평가
+        }
+      }
+      if (!cancelled) setCancelAlerts(alerts);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [watchlist]);
+  useEffect(() => {
+    if (cancelAlerts.length === 0) return;
+    const KEY = "biteLog_cancelAlertNotified";
+    let stored: unknown = [];
+    try {
+      stored = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    } catch {
+      // 깨진 저장값은 새로 시작
+    }
+    const { notify, sent } = nextBriefingNotifications(
+      stored,
+      cancelAlerts.map((a) => ({ name: a.boatName, date: a.date })),
+      localISODate(new Date()),
+    );
+    for (const t of notify) {
+      sendLocalNotification(
+        `${t.name} 출항 취소 가능성`,
+        `${formatShortDate(t.date)} 예보가 좋지 않아요. 대안 날짜를 확인해 보세요.`,
+        undefined,
+        `cancel-${t.name}|${t.date}`,
+      );
+    }
+    if (notify.length > 0) localStorage.setItem(KEY, JSON.stringify(sent));
+  }, [cancelAlerts]);
+
   // 시즌 회귀 리마인더 — 기록을 못 읽으면 카드만 조용히 생략.
   useEffect(() => {
     let cancelled = false;
@@ -1236,6 +1345,47 @@ export default function BookingPage() {
                 </Link>
               ))}
             </div>
+          </section>
+        )}
+
+        {/* 출항 취소 조기 경보 — D-1 브리핑보다 위: 일정 자체가 무산될 수
+            있다는 정보가 준비물 안내보다 급하다. */}
+        {cancelAlerts.length > 0 && (
+          <section
+            data-testid="cancel-alert-card"
+            className="rounded-2xl border border-red-400/40 bg-red-400/10 p-4 space-y-2"
+          >
+            <div className="flex items-center gap-2">
+              <TriangleAlert
+                size={14}
+                className="text-red-300"
+                aria-hidden="true"
+              />
+              <p className="text-xs font-bold text-red-300">
+                출항 취소 가능성
+              </p>
+            </div>
+            {cancelAlerts.map((a) => (
+              <div key={`${a.boatName}|${a.date}`} className="space-y-1">
+                <p className="text-sm text-white/85">
+                  {a.boatName} · {formatShortDate(a.date)} — 예보{" "}
+                  {a.windSpeedMax !== null &&
+                    `풍속 최대 ${Math.round(a.windSpeedMax * 10) / 10}m/s`}
+                  {a.windSpeedMax !== null && a.waveHeightMax !== null && " · "}
+                  {a.waveHeightMax !== null &&
+                    `파고 최대 ${Math.round(a.waveHeightMax * 10) / 10}m`}
+                </p>
+                {a.alternatives.length > 0 && (
+                  <p className="text-xs text-white/60">
+                    자리 있는 대안 날짜:{" "}
+                    {a.alternatives.map(formatShortDate).join(" · ")}
+                  </p>
+                )}
+              </div>
+            ))}
+            <p className="text-[10px] text-white/45">
+              예보 기준 참고용이에요 — 실제 출항 여부는 선사가 결정합니다.
+            </p>
           </section>
         )}
 

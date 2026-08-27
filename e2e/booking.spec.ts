@@ -684,6 +684,101 @@ test.describe('Trip briefing + season reminders — /booking (GOAL-9)', () => {
     ).toBeVisible();
   });
 
+  // GOAL-10 — 출항 취소 조기 경보. 예보는 open-meteo 두 API를 route mock으로
+  // 주입한다(수용 기준이 "테스트에선 예보 주입") — 실제 날씨에 좌우되지 않는
+  // 결정적 테스트이자, 실 API 계약(daily.time/필드 배열)을 그대로 흉내낸다.
+  const mockForecast = (windMax: number, waveMax: number) => ({
+    windRoute: {
+      daily: {
+        time: ['2026-10-15', '2026-10-16', '2026-10-17'],
+        wind_speed_10m_max: [5, 5, windMax],
+      },
+    },
+    waveRoute: {
+      daily: {
+        time: ['2026-10-15', '2026-10-16', '2026-10-17'],
+        wave_height_max: [0.5, 0.5, waveMax],
+      },
+    },
+  });
+
+  const routeForecasts = async (
+    page: import('@playwright/test').Page,
+    windMax: number,
+    waveMax: number,
+  ) => {
+    const { windRoute, waveRoute } = mockForecast(windMax, waveMax);
+    await page.route('**/api.open-meteo.com/**', (r) =>
+      r.fulfill({ json: windRoute }),
+    );
+    await page.route('**/marine-api.open-meteo.com/**', (r) =>
+      r.fulfill({ json: waveRoute }),
+    );
+    // 대안 날짜도 결정적으로: 10/18 available, 10/19 full, 10/20 available.
+    await page.route('**/api/boat-availability**', (r) =>
+      r.fulfill({
+        json: {
+          days: [
+            { date: '2026-10-18', boatName: '팀바이트호', status: 'available' },
+            { date: '2026-10-19', boatName: '팀바이트호', status: 'full' },
+            { date: '2026-10-20', boatName: '팀바이트호', status: 'available' },
+          ],
+        },
+      }),
+    );
+  };
+
+  test('an over-threshold forecast on a watched D-2 date raises the cancel alert with alternatives', async ({
+    page,
+  }) => {
+    await page.clock.setFixedTime(FIXED_NOW);
+    await routeForecasts(page, 12, 2.5); // 풍속 12m/s·파고 2.5m — 둘 다 초과
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'biteLog_boatWatchlist',
+        JSON.stringify([
+          { operatorId: 'teambite', boatName: '팀바이트호', date: '2026-10-17' },
+        ]),
+      );
+    });
+    await page.goto('/booking');
+
+    const card = page.locator('[data-testid="cancel-alert-card"]');
+    await expect(card).toBeVisible({ timeout: 15000 });
+    await expect(card).toContainText('출항 취소 가능성');
+    await expect(card).toContainText('팀바이트호 · 10/17');
+    await expect(card).toContainText('풍속 최대 12m/s');
+    await expect(card).toContainText('파고 최대 2.5m');
+    // 대안은 available만, 가까운 순 최대 2개 — full(10/19)은 건너뛴다.
+    await expect(card).toContainText('자리 있는 대안 날짜: 10/18 · 10/20');
+  });
+
+  test('a calm forecast raises no alert for the same watched date', async ({
+    page,
+  }) => {
+    await page.clock.setFixedTime(FIXED_NOW);
+    await routeForecasts(page, 4, 0.3); // 둘 다 임계 이하
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'biteLog_boatWatchlist',
+        JSON.stringify([
+          { operatorId: 'teambite', boatName: '팀바이트호', date: '2026-10-17' },
+        ]),
+      );
+    });
+    await page.goto('/booking');
+
+    // 판정이 끝났음을 D-1 아닌 워치리스트 카드 자체의 렌더로 확인한 뒤
+    // 경보 부재를 단언 — 아직 안 그려진 것과 안 그리는 것을 구분한다.
+    await expect(page.getByText('빈자리 알림 등록 (1)')).toBeVisible({
+      timeout: 15000,
+    });
+    await page.waitForTimeout(1500);
+    await expect(page.locator('[data-testid="cancel-alert-card"]')).toHaveCount(
+      0,
+    );
+  });
+
   test('no cards for a fresh user — no watchlist, no ride history', async ({
     page,
   }) => {
