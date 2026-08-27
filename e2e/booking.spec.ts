@@ -259,6 +259,126 @@ test.describe('Booking search — /booking', () => {
     await page.waitForURL(/\/booking\/boat\/\d+/, { timeout: 10000 });
     expect(page.url()).toContain(href!.split('?')[0]);
   });
+
+  const portChips = (page: import('@playwright/test').Page) =>
+    page.locator('[data-testid="port-filter"]').getByRole('button');
+  const capacityChips = (page: import('@playwright/test').Page) =>
+    page.locator('[data-testid="capacity-filter"]').getByRole('button');
+
+  test('port and capacity chips narrow to matching boats, individually and combined', async ({
+    page,
+  }) => {
+    const cards = resultsGrid(page).locator('[data-testid="boat-card"]');
+    await expect(cards.first()).toBeVisible({ timeout: 15000 });
+
+    // Derive both the target port and capacity bucket from one real card,
+    // so the combined port+capacity filter is guaranteed at least one
+    // match — that same card — regardless of what thefishing.kr's live
+    // listing looks like today.
+    const sample = cards.first();
+    const areaText = await sample.locator('p').first().textContent();
+    const capacityText = await sample
+      .locator('span')
+      .filter({ hasText: /인승/ })
+      .first()
+      .textContent();
+    expect(areaText).toBeTruthy();
+    expect(capacityText).toBeTruthy();
+    const targetPort = areaText!.split('·').map((s) => s.trim()).pop()!;
+    const seats = Number(capacityText!.match(/(\d+)인승/)?.[1]);
+    expect(Number.isFinite(seats)).toBe(true);
+    const bucketLabel = seats <= 10 ? '소형' : seats <= 18 ? '중형' : '대형';
+
+    // ① 항구 칩 → 그 항구 배만 표시
+    await expect(portChips(page).first()).toBeVisible({ timeout: 5000 });
+    await portChips(page).getByText(targetPort, { exact: true }).click();
+    await expect
+      .poll(
+        async () => {
+          const texts = await cards.allTextContents();
+          return texts.length > 0 && texts.every((t) => t.includes(targetPort));
+        },
+        { timeout: 5000 },
+      )
+      .toBe(true);
+
+    // ③ 정원 칩까지 같이 켜도(두 필터 동시 적용) — 표본 카드 자신이 두
+    // 조건을 다 만족하므로 최소 1건은 보장된다.
+    await capacityChips(page).filter({ hasText: bucketLabel }).click();
+    await expect
+      .poll(
+        async () => {
+          const texts = await cards.allTextContents();
+          if (texts.length === 0) return false;
+          return texts.every((t) => {
+            if (!t.includes(targetPort)) return false;
+            const n = Number(t.match(/(\d+)인승/)?.[1]);
+            if (!Number.isFinite(n)) return false;
+            if (bucketLabel === '소형') return n <= 10;
+            if (bucketLabel === '중형') return n >= 11 && n <= 18;
+            return n >= 19;
+          });
+        },
+        { timeout: 5000 },
+      )
+      .toBe(true);
+
+    // ② 정원 칩만 단독으로도 — 항구를 다시 전체로 풀어 정원 조건 하나만
+    // 남긴다. 표본 카드가 여전히 그 구간에 속하므로 최소 1건 보장.
+    await portChips(page).getByText('전체', { exact: true }).click();
+    await expect
+      .poll(
+        async () => {
+          const texts = await cards.allTextContents();
+          if (texts.length === 0) return false;
+          return texts.every((t) => {
+            const n = Number(t.match(/(\d+)인승/)?.[1]);
+            if (!Number.isFinite(n)) return false;
+            if (bucketLabel === '소형') return n <= 10;
+            if (bucketLabel === '중형') return n >= 11 && n <= 18;
+            return n >= 19;
+          });
+        },
+        { timeout: 5000 },
+      )
+      .toBe(true);
+  });
+
+  test('selecting a port clears when region changes — a stale pick can zero out results with no way back', async ({
+    page,
+  }) => {
+    await expect(
+      resultsGrid(page).locator('[data-testid="boat-card"]').first(),
+    ).toBeVisible({ timeout: 15000 });
+    await expect(portChips(page).first()).toBeVisible({ timeout: 5000 });
+
+    // Pick any non-전체 port.
+    const targetPort = await portChips(page).nth(1).textContent();
+    await portChips(page).nth(1).click();
+    await expect(portChips(page).nth(1)).toHaveAttribute('aria-pressed', 'true');
+
+    // Changing region reshapes which ports even exist — the picked one
+    // must not silently survive as an invisible, unreachable filter.
+    const responsePromise = page.waitForResponse(
+      (r) => r.url().includes('/api/boat-listings') && r.url().includes('region=1'),
+      { timeout: 15000 },
+    );
+    await searchCard(page).getByRole('button', { name: '서해', exact: true }).click();
+    await responsePromise;
+
+    // The port row either re-renders with "전체" selected, or disappears
+    // entirely (no ports in the new region) — either way, targetPort is no
+    // longer the active filter.
+    const stillHasPortChips = (await portChips(page).count()) > 0;
+    if (stillHasPortChips) {
+      const allChip = portChips(page).getByText('전체', { exact: true });
+      await expect(allChip).toHaveAttribute('aria-pressed', 'true');
+      const stalePortChip = portChips(page).getByText(targetPort!, { exact: true });
+      if ((await stalePortChip.count()) > 0) {
+        await expect(stalePortChip).toHaveAttribute('aria-pressed', 'false');
+      }
+    }
+  });
 });
 
 test.describe('Boat calendar — /booking/boat/[uid]', () => {

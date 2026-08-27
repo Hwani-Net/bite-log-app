@@ -22,6 +22,11 @@ import {
 } from "lucide-react";
 import { matchesKeyword } from "@/lib/keywordMatch";
 import {
+  capacityBucket,
+  extractPorts,
+  type CapacityBucket,
+} from "@/lib/boatFilters";
+import {
   FISH_SEASON_DB,
   getSeasonStatus,
   getTotalRelease,
@@ -49,6 +54,7 @@ import {
   toggleFavorite,
   favoritesFromMap,
   sortByVerdict,
+  shortPort,
   type MyBoatMap,
   type BoatSnapshot,
   type BoatVerdict,
@@ -204,6 +210,13 @@ const SPECIES_OPTIONS = [
   "삼치",
   "갈치",
   "기타",
+];
+
+const CAPACITY_OPTIONS: { value: CapacityBucket | ""; label: string }[] = [
+  { value: "", label: "전체" },
+  { value: "small", label: "소형 (~10인)" },
+  { value: "medium", label: "중형 (11~18인)" },
+  { value: "large", label: "대형 (19인~)" },
 ];
 
 const CHECKLIST_BASE = [
@@ -655,6 +668,16 @@ export default function BookingPage() {
     const t = setTimeout(() => setDebouncedKeyword(keyword), 200);
     return () => clearTimeout(t);
   }, [keyword]);
+  // 항구·정원 — 서버 요청 없이 이미 불러온 결과를 한 번 더 좁힌다. 칩
+  // 목록 자체는 지금 결과의 areaPath에서 뽑으므로, 지역/날짜가 바뀌면 그
+  // 결과 목록도 같이 바뀌면서 자연히 갱신된다.
+  const [selectedPort, setSelectedPort] = useState("");
+  const [selectedCapacity, setSelectedCapacity] = useState<CapacityBucket | "">("");
+  // Date/region/species/keyword all reshape which ports even exist in the
+  // current result set — a stale port pick left active after one of those
+  // changes can filter to zero boats with the port chip row itself gone
+  // (it only renders when portOptions is non-empty), leaving no way back.
+  const resetPortFilter = () => setSelectedPort("");
   const [searchPage, setSearchPage] = useState(1);
   const [searchResult, setSearchResult] = useState<BoatListingPage | null>(null);
   const [searchBoats, setSearchBoats] = useState<BoatListing[]>([]);
@@ -924,6 +947,28 @@ export default function BookingPage() {
       ),
     [directoryBoats, debouncedKeyword],
   );
+  // 항구 칩은 "지금 이 조건에서 뭐가 있는지"를 보여줘야 하니 항구/정원
+  // 필터를 적용하기 전, 키워드까지만 거른 목록에서 뽑는다 — 이미 항구를
+  // 골랐다고 칩 목록이 그 항구 하나로 쪼그라들면 다른 항구로 못 바꾼다.
+  const portOptions = useMemo(
+    () => extractPorts(keywordFilteredSearchBoats.map((b) => b.areaPath)),
+    [keywordFilteredSearchBoats],
+  );
+  const finalFilteredSearchBoats = useMemo(
+    () =>
+      keywordFilteredSearchBoats.filter((b) => {
+        if (selectedPort && shortPort(b.areaPath) !== selectedPort) return false;
+        if (selectedCapacity && capacityBucket(b.capacity) !== selectedCapacity) return false;
+        return true;
+      }),
+    [keywordFilteredSearchBoats, selectedPort, selectedCapacity],
+  );
+  // Any client-side narrowing that makes the server's own total/pagination
+  // fraction stop meaning "what you're looking at" — the count label and
+  // the 더 보기 label both fall back to a plain filtered count once true.
+  const hasClientFilter = Boolean(
+    searchSpecies || debouncedKeyword.trim() || selectedPort || selectedCapacity,
+  );
 
   const checklist = selectedSpecies
     ? [
@@ -1091,7 +1136,10 @@ export default function BookingPage() {
             <input
               type="text"
               value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
+              onChange={(e) => {
+                setKeyword(e.target.value);
+                resetPortFilter(); // a keyword can drop this port out of portOptions entirely
+              }}
               placeholder="배 이름·항구·어종으로 검색 (더피싱+낚시뚜 통합)"
               aria-label="선박 통합 검색"
               className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-9 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#c9a84c]/50 transition-colors"
@@ -1126,6 +1174,7 @@ export default function BookingPage() {
                 onChange={(e) => {
                   setSearchDate(e.target.value);
                   resetSearchPage();
+                  resetPortFilter();
                 }}
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#c9a84c]/50 transition-colors"
               />
@@ -1133,17 +1182,19 @@ export default function BookingPage() {
 
             <div>
               <span className="block text-xs text-white/50 mb-1.5 font-medium">
-                <MapPin size={12} className="inline mr-1 text-[#c9a84c]" />
+                <MapPin size={12} className="inline mr-1 text-[#c9a84c]" aria-hidden="true" />
                 지역
               </span>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1.5" role="group" aria-label="지역 필터">
                 {[{ id: "all", label: "전체", code: "" }, ...REGION_FILTERS].map((r) => (
                   <button
                     key={r.id}
                     onClick={() => {
                       setSearchRegion(r.code);
                       resetSearchPage();
+                      resetPortFilter();
                     }}
+                    aria-pressed={searchRegion === r.code}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                       searchRegion === r.code
                         ? "bg-[#c9a84c] text-[#080d14] border-[#c9a84c]"
@@ -1158,17 +1209,23 @@ export default function BookingPage() {
 
             <div>
               <span className="block text-xs text-white/50 mb-1.5 font-medium">
-                <Fish size={12} className="inline mr-1 text-[#c9a84c]" />
+                <Fish size={12} className="inline mr-1 text-[#c9a84c]" aria-hidden="true" />
                 어종
               </span>
-              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+              <div
+                className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1"
+                role="group"
+                aria-label="어종 필터"
+              >
                 {[{ label: "전체", code: "" }, ...SPECIES_FILTERS].map((s) => (
                   <button
                     key={s.code || "all"}
                     onClick={() => {
                       setSearchSpecies(s.code);
                       resetSearchPage();
+                      resetPortFilter();
                     }}
+                    aria-pressed={searchSpecies === s.code}
                     className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                       searchSpecies === s.code
                         ? "bg-[#c9a84c] text-[#080d14] border-[#c9a84c]"
@@ -1176,6 +1233,61 @@ export default function BookingPage() {
                     }`}
                   >
                     {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {(portOptions.length > 0 || selectedPort) && (
+              <div>
+                <span className="block text-xs text-white/50 mb-1.5 font-medium">
+                  <Anchor size={12} className="inline mr-1 text-[#c9a84c]" aria-hidden="true" />
+                  항구
+                </span>
+                <div
+                  data-testid="port-filter"
+                  className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1"
+                  role="group"
+                  aria-label="항구 필터"
+                >
+                  {[{ label: "전체", value: "" }, ...portOptions.map((p) => ({ label: p, value: p }))].map(
+                    (p) => (
+                      <button
+                        key={p.value || "all"}
+                        onClick={() => setSelectedPort(p.value)}
+                        aria-pressed={selectedPort === p.value}
+                        className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                          selectedPort === p.value
+                            ? "bg-[#c9a84c] text-[#080d14] border-[#c9a84c]"
+                            : "bg-white/5 text-white/60 border-white/10 hover:border-white/30"
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    ),
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <span className="block text-xs text-white/50 mb-1.5 font-medium">
+                <Users size={12} className="inline mr-1 text-[#c9a84c]" aria-hidden="true" />
+                정원
+              </span>
+              <div data-testid="capacity-filter" className="flex gap-1.5" role="group" aria-label="정원 필터">
+                {CAPACITY_OPTIONS.map((c) => (
+                  <button
+                    key={c.value || "all"}
+                    onClick={() => setSelectedCapacity(c.value)}
+                    aria-pressed={selectedCapacity === c.value}
+                    className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                      selectedCapacity === c.value
+                        ? "bg-[#c9a84c] text-[#080d14] border-[#c9a84c]"
+                        : "bg-white/5 text-white/60 border-white/10 hover:border-white/30"
+                    }`}
+                  >
+                    {c.label}
                   </button>
                 ))}
               </div>
@@ -1188,8 +1300,8 @@ export default function BookingPage() {
             </h3>
             <span className="text-[11px] text-white/40" aria-live="polite">
               {searchResult
-                ? searchSpecies || debouncedKeyword.trim()
-                  ? `${keywordFilteredSearchBoats.length}척 일치`
+                ? hasClientFilter
+                  ? `${finalFilteredSearchBoats.length}척 일치`
                   : `${searchResult.total}척`
                 : ""}
             </span>
@@ -1206,20 +1318,35 @@ export default function BookingPage() {
               ))}
             </div>
           ) : searchBoats.length === 0 ? (
-            <p className="text-xs text-white/30 py-6 text-center">
+            <p role="status" className="text-xs text-white/30 py-6 text-center">
               이 조건으로 출조하는 선박이 없습니다. 날짜나 필터를 바꿔보세요.
             </p>
-          ) : keywordFilteredSearchBoats.length === 0 ? (
-            <p role="status" className="text-xs text-white/30 py-6 text-center">
-              검색어와 일치하는 선박이 없습니다. 다른 키워드를 시도해보세요.
-            </p>
+          ) : finalFilteredSearchBoats.length === 0 ? (
+            <div role="status" className="py-6 text-center space-y-2">
+              <p className="text-xs text-white/30">
+                {debouncedKeyword.trim()
+                  ? "검색어와 일치하는 선박이 없습니다. 다른 키워드를 시도해보세요."
+                  : "이 조건에 맞는 선박이 없습니다. 항구나 정원 필터를 바꿔보세요."}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setKeyword("");
+                  setSelectedPort("");
+                  setSelectedCapacity("");
+                }}
+                className="text-xs text-[#c9a84c] underline underline-offset-2"
+              >
+                검색어·항구·정원 필터 초기화
+              </button>
+            </div>
           ) : (
             <>
               <div
                 data-testid="search-results"
                 className={`grid grid-cols-2 gap-2 ${searchLoading ? "opacity-60" : ""}`}
               >
-                {keywordFilteredSearchBoats.map((boat) => (
+                {finalFilteredSearchBoats.map((boat) => (
                   <BoatListingCard
                     key={boat.uid}
                     boat={boat}
@@ -1240,7 +1367,7 @@ export default function BookingPage() {
                 >
                   {searchLoading
                     ? "불러오는 중..."
-                    : searchSpecies || debouncedKeyword.trim()
+                    : hasClientFilter
                       ? "더 보기"
                       : `더 보기 (${searchBoats.length}/${searchResult.total})`}
                 </button>
