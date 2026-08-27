@@ -53,6 +53,27 @@ export function dayBeforeTrips(
   });
 }
 
+/**
+ * D-1 알림 dedupe — localStorage에 저장된 "이미 알린 키" 목록(sentRaw,
+ * 깨진 값 허용)과 오늘 날짜를 받아, 이번에 알릴 trip과 저장할 다음 키
+ * 목록을 돌려준다. 키는 `이름|YYYY-MM-DD` — watchlist 항목엔 uid가 없어
+ * 두 소스에 걸친 같은 배를 묶을 공통 속성이 이름뿐이다(같은 날 같은
+ * 이름의 다른 배가 하나로 합쳐지는 건 감수하는 한계). 날짜는 항상 키의
+ * 마지막 세그먼트로 읽어서 이름에 `|`가 들어 있어도 깨지지 않는다.
+ */
+export function nextBriefingNotifications(
+  sentRaw: unknown,
+  trips: UpcomingTrip[],
+  today: string,
+): { notify: UpcomingTrip[]; sent: string[] } {
+  let sent: string[] = Array.isArray(sentRaw)
+    ? sentRaw.filter((k): k is string => typeof k === "string")
+    : [];
+  sent = sent.filter((k) => (k.split("|").pop() ?? "") >= today);
+  const notify = trips.filter((t) => !sent.includes(`${t.name}|${t.date}`));
+  return { notify, sent: [...sent, ...notify.map((t) => `${t.name}|${t.date}`)] };
+}
+
 export interface SeasonReminder {
   species: string;
   lastYear: number; // 가장 최근 과거 출조 연도

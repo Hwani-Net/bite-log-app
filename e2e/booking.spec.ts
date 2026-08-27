@@ -634,7 +634,7 @@ test.describe('Trip briefing + season reminders — /booking (GOAL-9)', () => {
     // The link is the actual 브리핑 연동 — clicking it must land on
     // /trip-plan with the date and charter name already filled in, not on
     // an empty form the user has to re-type.
-    await card.getByRole('link', { name: '출조 브리핑 준비' }).click();
+    await card.getByRole('link', { name: /출조 브리핑 준비/ }).click();
     await expect(page).toHaveURL(/\/trip-plan\?/);
     await expect(page.locator('input[type="date"]')).toHaveValue('2026-10-16');
     await expect(

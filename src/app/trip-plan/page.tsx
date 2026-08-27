@@ -12,6 +12,7 @@ import {
   sendLocalNotification,
   requestNotificationPermission,
 } from "@/services/pushNotificationService";
+import { parseLocalISODate } from "@/lib/localDate";
 import { SPECIES_LIST } from "@/data/fishSpecies";
 import { LOCATION_COORDS } from "@/data/fishingLocations";
 import {
@@ -154,7 +155,8 @@ export default function TripPlanPage() {
     if (!date && !name) return;
     setForm((f) => ({
       ...f,
-      ...(date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? { date } : {}),
+      // 형식만이 아니라 달력에 실재하는 날짜인지까지 — "2026-13-99"류 거부.
+      ...(date && parseLocalISODate(date) ? { date } : {}),
       ...(name ? { charterName: name, fishingType: "boat" as const } : {}),
     }));
   }, []);

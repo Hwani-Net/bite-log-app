@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   isDayBefore,
   dayBeforeTrips,
+  nextBriefingNotifications,
   seasonReminders,
 } from '@/lib/tripReminders';
 import type { MyBoatMap } from '@/services/myBoatService';
@@ -82,6 +83,47 @@ describe('dayBeforeTrips', () => {
 
   it('returns empty when nothing is scheduled tomorrow', () => {
     expect(dayBeforeTrips([], {}, NOW)).toEqual([]);
+  });
+});
+
+describe('nextBriefingNotifications', () => {
+  const TODAY = '2026-10-15';
+  const trip = { name: '몬스터호', date: '2026-10-16' };
+
+  it('notifies a new trip once, then never again on revisit', () => {
+    const first = nextBriefingNotifications([], [trip], TODAY);
+    expect(first.notify).toEqual([trip]);
+    expect(first.sent).toEqual(['몬스터호|2026-10-16']);
+    // 재방문 — 저장된 sent를 그대로 다시 주면 알림 대상 없음.
+    const second = nextBriefingNotifications(first.sent, [trip], TODAY);
+    expect(second.notify).toEqual([]);
+  });
+
+  it('prunes past-date keys but keeps future ones, even with | in the boat name', () => {
+    const stored = [
+      '지난배|2026-10-01', // 지난 날짜 — 제거
+      '가자|미더덕|호|2026-10-16', // 이름에 | 포함 — 날짜는 마지막 세그먼트
+    ];
+    const { notify, sent } = nextBriefingNotifications(stored, [trip], TODAY);
+    expect(sent).toEqual(['가자|미더덕|호|2026-10-16', '몬스터호|2026-10-16']);
+    expect(notify).toEqual([trip]);
+    // 이름에 |가 있는 배도 이미 알렸으면 다시 알리지 않는다.
+    const again = nextBriefingNotifications(
+      sent,
+      [{ name: '가자|미더덕|호', date: '2026-10-16' }],
+      TODAY,
+    );
+    expect(again.notify).toEqual([]);
+  });
+
+  it('starts fresh on corrupt stored values', () => {
+    expect(nextBriefingNotifications('garbage', [trip], TODAY).notify).toEqual([
+      trip,
+    ]);
+    expect(
+      nextBriefingNotifications([1, null, '몬스터호|2026-10-16'], [trip], TODAY)
+        .notify,
+    ).toEqual([]);
   });
 });
 

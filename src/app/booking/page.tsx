@@ -27,7 +27,11 @@ import {
   type CapacityBucket,
 } from "@/lib/boatFilters";
 import { recommendDates } from "@/lib/speciesRecommendation";
-import { dayBeforeTrips, seasonReminders } from "@/lib/tripReminders";
+import {
+  dayBeforeTrips,
+  nextBriefingNotifications,
+  seasonReminders,
+} from "@/lib/tripReminders";
 import { BITE_GRADE_LABEL } from "@/lib/calendarBiteOverlay";
 import { getDataService } from "@/services/dataServiceFactory";
 import type { CatchRecord } from "@/types";
@@ -954,6 +958,9 @@ export default function BookingPage() {
   // 즐겨찾기 배에 적어둔 탄 날짜)이 있으면 로컬 알림 한 번 + 상단 카드.
   // 위 watchlist 폴링과 같은 포그라운드 한정이며, 이미 알린 (배,날짜)는
   // localStorage에 기억해 페이지를 다시 열 때마다 재알림하지 않는다.
+  // new Date()는 deps 밖이지만 watchlist/myBoats가 바뀔 때마다 현재
+  // 시각으로 재계산된다 — 자정을 넘겨 계속 열어둔 탭에서만 하루 어긋날
+  // 수 있는 근사치(GOAL-8의 추천 날짜와 같은 한계, 같은 이유로 감수).
   const briefingTrips = useMemo(
     () => dayBeforeTrips(watchlist, myBoats, new Date()),
     [watchlist, myBoats],
@@ -961,30 +968,26 @@ export default function BookingPage() {
   useEffect(() => {
     if (briefingTrips.length === 0) return;
     const KEY = "biteLog_briefingNotified";
-    let sent: string[] = [];
+    let stored: unknown = [];
     try {
-      const parsed = JSON.parse(localStorage.getItem(KEY) ?? "[]");
-      if (Array.isArray(parsed)) sent = parsed.filter((k) => typeof k === "string");
+      stored = JSON.parse(localStorage.getItem(KEY) ?? "[]");
     } catch {
       // 깨진 저장값은 새로 시작
     }
-    // 키는 "배이름|YYYY-MM-DD" — 지나간 날짜 키는 버려서 무한히 안 쌓이게.
-    const today = localISODate(new Date());
-    sent = sent.filter((k) => (k.split("|")[1] ?? "") >= today);
-    let changed = false;
-    for (const trip of briefingTrips) {
-      const key = `${trip.name}|${trip.date}`;
-      if (sent.includes(key)) continue;
+    const { notify, sent } = nextBriefingNotifications(
+      stored,
+      briefingTrips,
+      localISODate(new Date()),
+    );
+    for (const trip of notify) {
       sendLocalNotification(
         `내일 ${trip.name} 출조 예정`,
         "날씨·물때·채비 브리핑을 미리 확인하세요.",
         undefined,
-        `briefing-${key}`,
+        `briefing-${trip.name}|${trip.date}`,
       );
-      sent.push(key);
-      changed = true;
     }
-    if (changed) localStorage.setItem(KEY, JSON.stringify(sent));
+    if (notify.length > 0) localStorage.setItem(KEY, JSON.stringify(sent));
   }, [briefingTrips]);
 
   // 시즌 회귀 리마인더 — 기록을 못 읽으면 카드만 조용히 생략.
@@ -1241,7 +1244,6 @@ export default function BookingPage() {
         {briefingTrips.length > 0 && (
           <section
             data-testid="trip-briefing-card"
-            role="status"
             className="rounded-2xl border border-[#7dd3fc]/30 bg-[#7dd3fc]/8 p-4 space-y-2"
           >
             <div className="flex items-center gap-2">
@@ -1258,6 +1260,7 @@ export default function BookingPage() {
                 </p>
                 <Link
                   href={`/trip-plan?date=${trip.date}&name=${encodeURIComponent(trip.name)}`}
+                  aria-label={`${trip.name} 출조 브리핑 준비`}
                   className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#7dd3fc]/15 border border-[#7dd3fc]/30 text-[#7dd3fc] hover:bg-[#7dd3fc]/25 transition-colors"
                 >
                   출조 브리핑 준비
