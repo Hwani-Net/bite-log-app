@@ -15,6 +15,8 @@ import {
   diffLatestSnapshots,
   markGoneStreak,
   isGone,
+  knownBoatsFromMap,
+  listKnownBoats,
   type MyBoatMap,
 } from '@/services/myBoatService';
 
@@ -357,5 +359,51 @@ describe('gone-boat detection', () => {
     const boat = markGoneStreak('1', false);
     expect(isGone(boat)).toBe(false);
     expect(boat.goneStreak).toBe(0);
+  });
+});
+
+describe('knownBoatsFromMap / listKnownBoats', () => {
+  it('includes a favorited boat even with no verdict or rides', () => {
+    toggleFavorite('1', snap);
+    expect(listKnownBoats().map((b) => b.uid)).toEqual(['1']);
+  });
+
+  it('includes a boat with a verdict but never favorited', () => {
+    updateMyBoat('1', { verdict: 'again' });
+    expect(listKnownBoats().map((b) => b.uid)).toEqual(['1']);
+  });
+
+  it('includes a boat with ride history but no verdict or favorite', () => {
+    addRide('1', { date: '2026-08-01' });
+    expect(listKnownBoats().map((b) => b.uid)).toEqual(['1']);
+  });
+
+  it('excludes a boat with none of the three signals', () => {
+    updateMyBoat('1', { memo: '메모만 있음' });
+    expect(listKnownBoats()).toEqual([]);
+  });
+
+  it('sorts by most-recently-seen snapshot, like favoritesFromMap', () => {
+    const map: MyBoatMap = {
+      '1': {
+        uid: '1',
+        favorite: false,
+        verdict: 'again',
+        memo: '',
+        rides: [],
+        goneStreak: 0,
+        snapshots: [{ name: '가호', areaPath: 'A', seenAt: '2026-08-01T00:00:00.000Z' }],
+      },
+      '2': {
+        uid: '2',
+        favorite: false,
+        verdict: null,
+        memo: '',
+        rides: [{ date: '2026-08-10' }],
+        goneStreak: 0,
+        snapshots: [{ name: '나호', areaPath: 'B', seenAt: '2026-08-20T00:00:00.000Z' }],
+      },
+    };
+    expect(knownBoatsFromMap(map).map((b) => b.uid)).toEqual(['2', '1']);
   });
 });

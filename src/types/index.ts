@@ -55,6 +55,7 @@ export interface CatchRecord extends BaseEntity {
   tide?: TideRecordData;
   visibility: RecordVisibility; // 기본값: 'public'
   likeCount?: number;  // 좋아요 기능 (Option B)
+  boatUid?: string;    // 더피싱 uid — myBoatService.ts 의 "내 선사 카드"와 같은 키
 }
 
 // ===== Public Feed Item (GPS 좌표 제외) =====

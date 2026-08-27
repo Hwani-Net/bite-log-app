@@ -32,6 +32,11 @@ import {
   type BoatVerdict,
   type SnapshotChange,
 } from "@/services/myBoatService";
+import { getDataService } from "@/services/dataServiceFactory";
+import {
+  summarizeCatchesForBoat,
+  type BoatCatchSummary,
+} from "@/lib/boatCatchStats";
 
 const VERDICT_OPTIONS: { value: BoatVerdict; label: string }[] = [
   { value: "again", label: "또 탄다" },
@@ -77,6 +82,7 @@ export default function BoatDetailPage() {
   const [rideDate, setRideDate] = useState("");
   const [snapshotChange, setSnapshotChange] = useState<SnapshotChange | null>(null);
   const [boatGone, setBoatGone] = useState(false);
+  const [catchSummary, setCatchSummary] = useState<BoatCatchSummary | null>(null);
 
   // Client-only: localStorage isn't available during SSR, and "today" is
   // deliberately not a useState lazy initializer for the same hydration
@@ -88,6 +94,27 @@ export default function BoatDetailPage() {
     setMyBoat(boat);
     setMemoDraft(boat?.memo ?? "");
     setRideDate(localISODate(new Date()));
+  }, [uid]);
+
+  // "이 배에서 내 조과" — records/page.tsx의 "탄 배" 태그와 조인한다.
+  // 태그된 기록이 하나도 없으면 요약 자체를 숨기므로(엄격히 null vs
+  // 빈 배열 구분 없이 렌더 조건만 recordCount로 본다), 로그인 안 한
+  // 사용자나 태그를 써본 적 없는 사용자에게는 조용히 아무것도 안 보인다.
+  useEffect(() => {
+    if (!uid) return;
+    let cancelled = false;
+    getDataService()
+      .getCatchRecords()
+      .then((records) => {
+        if (cancelled) return;
+        setCatchSummary(summarizeCatchesForBoat(records, uid));
+      })
+      .catch(() => {
+        // 조과 요약은 부가 정보 — 못 불러와도 나머지 화면(판정/달력)은 정상 동작해야 한다.
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [uid]);
 
   const handleSetVerdict = (verdict: BoatVerdict) => {
@@ -366,6 +393,27 @@ export default function BoatDetailPage() {
             </p>
           )}
         </section>
+
+        {/* 이 배에서 내 조과 — records/page.tsx에서 "탄 배"로 태그된 기록만
+            집계한다. 태그된 기록이 없으면 카드째 숨긴다. */}
+        {catchSummary && catchSummary.recordCount > 0 && (
+          <section className="rounded-2xl bg-white/3 border border-white/8 p-4 space-y-2">
+            <h2 className="text-xs text-white/40 font-semibold uppercase tracking-[0.15em] flex items-center gap-1.5">
+              <Fish size={12} className="text-[#c9a84c]" aria-hidden="true" />
+              이 배에서 내 조과
+            </h2>
+            <p className="text-xs text-white/70">
+              기록 {catchSummary.recordCount}건 · 총 {catchSummary.totalCount}마리
+            </p>
+            {catchSummary.bySpecies.length > 0 && (
+              <p className="text-[11px] text-white/40">
+                {catchSummary.bySpecies
+                  .map((s) => `${s.species} ${s.count}마리`)
+                  .join(" · ")}
+              </p>
+            )}
+          </section>
+        )}
 
         {/* Month nav */}
         <div className="flex items-center justify-between px-1">

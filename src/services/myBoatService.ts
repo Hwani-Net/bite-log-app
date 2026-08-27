@@ -252,3 +252,21 @@ export function favoritesFromMap(map: MyBoatMap): FavoriteBoat[] {
 export function listFavorites(): FavoriteBoat[] {
   return favoritesFromMap(loadMyBoats());
 }
+
+/**
+ * 기록 폼의 "탄 배" 선택지 — 즐겨찾기 여부와 무관하게, 판정을 남겼거나
+ * 승선 이력이 있거나 즐겨찾기한 배라면 "내가 아는 배"로 취급한다. 조과
+ * 기록은 즐겨찾기 안 한 배에서도 남길 수 있으니 즐겨찾기로만 좁히면
+ * 정작 자주 타는 배가 빠질 수 있다.
+ */
+export function knownBoatsFromMap(map: MyBoatMap): FavoriteBoat[] {
+  return Object.values(map)
+    .filter((b) => b.favorite || b.verdict !== null || b.rides.length > 0)
+    .map((b) => ({ ...b, latest: b.snapshots[b.snapshots.length - 1] ?? null }))
+    .sort((a, b) => (b.latest?.seenAt ?? "").localeCompare(a.latest?.seenAt ?? ""));
+}
+
+/** localStorage 를 직접 읽는 버전 — 컴포넌트 밖에서 1회성으로 쓸 때만. */
+export function listKnownBoats(): FavoriteBoat[] {
+  return knownBoatsFromMap(loadMyBoats());
+}

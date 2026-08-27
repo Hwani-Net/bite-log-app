@@ -20,6 +20,7 @@ import {
   TideRecordData,
   RecordVisibility,
 } from "@/types";
+import { listKnownBoats, type FavoriteBoat } from "@/services/myBoatService";
 import {
   ArrowLeft,
   X,
@@ -43,6 +44,7 @@ import {
   AlertTriangle,
   Loader2,
   Waves,
+  Anchor,
 } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
@@ -62,6 +64,13 @@ export default function RecordPage() {
   );
   const [locationName, setLocationName] = useState("");
   const [species, setSpecies] = useState("");
+  // "탄 배" — booking에서 쌓인 "내 선사 카드" 이력(myBoatService)에서 고른다.
+  // localStorage 라 client-only, 빈 배열로 시작해도 무해(필드 자체가 안 보임).
+  const [boatUid, setBoatUid] = useState("");
+  const [knownBoats, setKnownBoats] = useState<FavoriteBoat[]>([]);
+  useEffect(() => {
+    setKnownBoats(listKnownBoats());
+  }, []);
   const [count, setCount] = useState(1);
   const [sizeCm, setSizeCm] = useState("");
   const [memo, setMemo] = useState("");
@@ -223,6 +232,7 @@ export default function RecordPage() {
           : undefined,
         tide: tide || undefined,
         visibility,
+        boatUid: boatUid || undefined,
       };
 
       try {
@@ -669,6 +679,32 @@ export default function RecordPage() {
               </select>
             </label>
           </div>
+
+          {/* 탄 배 — booking에서 즐겨찾기·판정·승선 이력을 남긴 배가 있을
+              때만 보인다. 없으면 필드째로 숨겨서 booking을 안 쓰는 사용자의
+              기록 흐름엔 아무 변화가 없다. */}
+          {knownBoats.length > 0 && (
+            <div className="glass-morphism border border-white/5 rounded-2xl p-4">
+              <label className="flex flex-col gap-2">
+                <span className="text-white/70 text-sm font-semibold flex items-center gap-2">
+                  <Anchor size={16} className="text-[#c9a84c]" aria-hidden="true" />
+                  {t("record.boat")}
+                </span>
+                <select
+                  value={boatUid}
+                  onChange={(e) => setBoatUid(e.target.value)}
+                  className={`${inputCls} appearance-none`}
+                >
+                  <option value="">{t("record.selectBoat")}</option>
+                  {knownBoats.map((b) => (
+                    <option key={b.uid} value={b.uid}>
+                      {b.latest?.name ?? `선박 #${b.uid}`}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          )}
 
           {/* Count + Size */}
           <div className="grid grid-cols-2 gap-4">
