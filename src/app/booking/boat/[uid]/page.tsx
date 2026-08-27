@@ -12,6 +12,8 @@ import {
   MapPin,
   Fish,
   Plus,
+  AlertTriangle,
+  History,
 } from "lucide-react";
 import type {
   BoatCalendar,
@@ -21,8 +23,14 @@ import {
   getMyBoat,
   updateMyBoat,
   addRide,
+  recordSnapshot,
+  diffLatestSnapshots,
+  markGoneStreak,
+  isGone,
+  shortPort,
   type MyBoat,
   type BoatVerdict,
+  type SnapshotChange,
 } from "@/services/myBoatService";
 
 const VERDICT_OPTIONS: { value: BoatVerdict; label: string }[] = [
@@ -67,6 +75,8 @@ export default function BoatDetailPage() {
   const [myBoat, setMyBoat] = useState<MyBoat | null>(null);
   const [memoDraft, setMemoDraft] = useState("");
   const [rideDate, setRideDate] = useState("");
+  const [snapshotChange, setSnapshotChange] = useState<SnapshotChange | null>(null);
+  const [boatGone, setBoatGone] = useState(false);
 
   // Client-only: localStorage isn't available during SSR, and "today" is
   // deliberately not a useState lazy initializer for the same hydration
@@ -123,6 +133,30 @@ export default function BoatDetailPage() {
           throw new Error("malformed boat-calendar response");
         }
         setCalendar(data);
+
+        if (!data.meta.name) {
+          // The fetch succeeded — this isn't the network/parse failure the
+          // catch block below handles — but thefishing.kr's page had no
+          // recognizable boat identity in it. That can mean the listing
+          // itself is gone, or just a one-off glitch on their end, so a
+          // single hit only counts toward a streak (isGone requires 2+)
+          // rather than declaring it gone immediately.
+          setBoatGone(isGone(markGoneStreak(uid, true)));
+          setSnapshotChange(null);
+          return;
+        }
+        setBoatGone(false);
+        markGoneStreak(uid, false);
+        // Auto-snapshot every visit, not just favoriting — this is what
+        // lets a later visit notice the boat got renamed or repriced.
+        const priceLine = data.days.find((d) => d.priceLine)?.priceLine;
+        const boat = recordSnapshot(uid, {
+          name: data.meta.name,
+          areaPath: data.meta.areaPath,
+          imageUrl: data.meta.imageUrl,
+          priceLine,
+        });
+        setSnapshotChange(diffLatestSnapshots(boat));
       })
       .catch(() => {
         if (cancelled) return;
@@ -179,6 +213,53 @@ export default function BoatDetailPage() {
       </div>
 
       <div className="max-w-lg mx-auto px-4 space-y-5 pb-28">
+        {/* 소멸 감지 — 자동 매칭은 하지 않는다(오판 위험). 같은 배가 다른
+            uid 로 재등록됐는지는 사용자가 예약 검색에서 직접 확인해야 한다. */}
+        {boatGone && (
+          <section
+            role="alert"
+            className="rounded-2xl bg-red-500/10 border border-red-500/30 p-3 flex gap-2"
+          >
+            <AlertTriangle size={16} className="text-red-400 shrink-0 mt-0.5" aria-hidden="true" />
+            <p className="text-xs text-red-200 leading-relaxed">
+              이 배는 더피싱에서 더 이상 확인되지 않습니다. 선사가 폐업했거나
+              다른 이름으로 재등록했을 수 있어요. 혹시 같은 배라면 예약
+              검색에서 직접 찾아 새로 즐겨찾기해 주세요 — 자동으로 연결하지는
+              않습니다.
+            </p>
+          </section>
+        )}
+
+        {/* 이름·모항·가격 변경 감지 — 방문할 때마다 스냅샷을 남기고 직전
+            스냅샷과 비교한다. 판정·이력은 uid를 따라가므로 이름이 바뀌어도
+            그대로 유지된다. */}
+        {snapshotChange && (snapshotChange.nameChanged || snapshotChange.portChanged) && (
+          <section
+            role="status"
+            className="rounded-2xl bg-[#c9a84c]/10 border border-[#c9a84c]/30 p-3 flex gap-2"
+          >
+            <History size={16} className="text-[#c9a84c] shrink-0 mt-0.5" aria-hidden="true" />
+            <p className="text-xs text-[#c9a84c] leading-relaxed">
+              <span className="font-semibold">이름·모항 변경 </span>
+              이 배는 이전에 &lsquo;{snapshotChange.previous.name}(
+              {shortPort(snapshotChange.previous.areaPath)})&rsquo;였습니다.
+            </p>
+          </section>
+        )}
+        {snapshotChange?.priceChanged && (
+          <section
+            role="status"
+            className="rounded-2xl bg-[#c9a84c]/10 border border-[#c9a84c]/30 p-3 flex gap-2"
+          >
+            <History size={16} className="text-[#c9a84c] shrink-0 mt-0.5" aria-hidden="true" />
+            <p className="text-xs text-[#c9a84c] leading-relaxed">
+              <span className="font-semibold">가격 변동 </span>
+              지난 조회 대비: {snapshotChange.previous.priceLine || "정보 없음"} →{" "}
+              {snapshotChange.current.priceLine || "정보 없음"}
+            </p>
+          </section>
+        )}
+
         {/* Boat header */}
         {meta ? (
           <section className="rounded-2xl overflow-hidden bg-white/3 border border-white/8">

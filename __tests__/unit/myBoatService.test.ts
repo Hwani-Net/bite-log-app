@@ -11,6 +11,10 @@ import {
   favoritesFromMap,
   addRide,
   sortByVerdict,
+  shortPort,
+  diffLatestSnapshots,
+  markGoneStreak,
+  isGone,
   type MyBoatMap,
 } from '@/services/myBoatService';
 
@@ -75,6 +79,7 @@ describe('load/save', () => {
       memo: '',
       rides: [],
       snapshots: [],
+      goneStreak: 0,
     });
     expect(map['2'].favorite).toBe(false);
     expect(map['3'].favorite).toBe(false); // non-boolean input falls back, doesn't coerce
@@ -104,6 +109,7 @@ describe('updateMyBoat', () => {
       memo: '',
       rides: [],
       snapshots: [],
+      goneStreak: 0,
     });
   });
 
@@ -203,7 +209,7 @@ describe('favorites', () => {
     // This is what the booking page actually calls, on its own React state,
     // so it can't have a hidden dependency on localStorage being in sync.
     const map = {
-      '1': { uid: '1', favorite: true, verdict: null, memo: '', rides: [], snapshots: [] },
+      '1': { uid: '1', favorite: true, verdict: null, memo: '', rides: [], snapshots: [], goneStreak: 0 },
     };
     store.clear(); // storage is empty/stale; the map itself is the source of truth
     expect(favoritesFromMap(map)).toEqual([{ ...map['1'], latest: null }]);
@@ -235,7 +241,7 @@ describe('sortByVerdict', () => {
   it('pushes "never" boats to the bottom and leaves everyone else in place', () => {
     const boats = [boat('1'), boat('2'), boat('3'), boat('4')];
     const myBoats: MyBoatMap = {
-      '2': { uid: '2', favorite: false, verdict: 'never', memo: '', rides: [], snapshots: [] },
+      '2': { uid: '2', favorite: false, verdict: 'never', memo: '', rides: [], snapshots: [], goneStreak: 0 },
     };
     expect(sortByVerdict(boats, myBoats).map((b) => b.uid)).toEqual([
       '1',
@@ -248,7 +254,7 @@ describe('sortByVerdict', () => {
   it('is a no-op when nothing is verdict "never"', () => {
     const boats = [boat('1'), boat('2'), boat('3')];
     const myBoats: MyBoatMap = {
-      '1': { uid: '1', favorite: false, verdict: 'again', memo: '', rides: [], snapshots: [] },
+      '1': { uid: '1', favorite: false, verdict: 'again', memo: '', rides: [], snapshots: [], goneStreak: 0 },
     };
     expect(sortByVerdict(boats, myBoats).map((b) => b.uid)).toEqual([
       '1',
@@ -260,8 +266,8 @@ describe('sortByVerdict', () => {
   it('handles multiple "never" boats, keeping their relative order at the bottom', () => {
     const boats = [boat('1'), boat('2'), boat('3'), boat('4')];
     const myBoats: MyBoatMap = {
-      '1': { uid: '1', favorite: false, verdict: 'never', memo: '', rides: [], snapshots: [] },
-      '3': { uid: '3', favorite: false, verdict: 'never', memo: '', rides: [], snapshots: [] },
+      '1': { uid: '1', favorite: false, verdict: 'never', memo: '', rides: [], snapshots: [], goneStreak: 0 },
+      '3': { uid: '3', favorite: false, verdict: 'never', memo: '', rides: [], snapshots: [], goneStreak: 0 },
     };
     expect(sortByVerdict(boats, myBoats).map((b) => b.uid)).toEqual([
       '2',
@@ -274,9 +280,82 @@ describe('sortByVerdict', () => {
   it('does not mutate the input array', () => {
     const boats = [boat('1'), boat('2')];
     const myBoats: MyBoatMap = {
-      '1': { uid: '1', favorite: false, verdict: 'never', memo: '', rides: [], snapshots: [] },
+      '1': { uid: '1', favorite: false, verdict: 'never', memo: '', rides: [], snapshots: [], goneStreak: 0 },
     };
     sortByVerdict(boats, myBoats);
     expect(boats.map((b) => b.uid)).toEqual(['1', '2']);
+  });
+});
+
+describe('shortPort', () => {
+  it('takes the last segment of an areaPath', () => {
+    expect(shortPort('서해권 > 충청남도 > 보령시 > 대천항')).toBe('대천항');
+  });
+
+  it('falls back to the whole string when there is no ">"', () => {
+    expect(shortPort('대천항')).toBe('대천항');
+  });
+});
+
+describe('diffLatestSnapshots', () => {
+  const base = { name: '스텔라호', areaPath: '서해권 > 충청남도 > 보령시 > 대천항' };
+
+  it('returns null with fewer than two snapshots', () => {
+    expect(diffLatestSnapshots(updateMyBoat('1', {}))).toBeNull();
+    recordSnapshot('1', base);
+    expect(diffLatestSnapshots(getMyBoat('1')!)).toBeNull();
+  });
+
+  it('flags a name change', () => {
+    recordSnapshot('1', base, '2026-08-01T00:00:00.000Z');
+    recordSnapshot('1', { ...base, name: '스텔스호' }, '2026-08-20T00:00:00.000Z');
+    const diff = diffLatestSnapshots(getMyBoat('1')!)!;
+    expect(diff.nameChanged).toBe(true);
+    expect(diff.portChanged).toBe(false);
+    expect(diff.priceChanged).toBe(false);
+    expect(diff.previous.name).toBe('스텔라호');
+    expect(diff.current.name).toBe('스텔스호');
+  });
+
+  it('flags a port change even when the name stays the same', () => {
+    recordSnapshot('1', base, '2026-08-01T00:00:00.000Z');
+    recordSnapshot(
+      '1',
+      { ...base, areaPath: '서해권 > 충청남도 > 보령시 > 오천항' },
+      '2026-08-20T00:00:00.000Z',
+    );
+    const diff = diffLatestSnapshots(getMyBoat('1')!)!;
+    expect(diff.nameChanged).toBe(false);
+    expect(diff.portChanged).toBe(true);
+  });
+
+  it('flags a price change', () => {
+    recordSnapshot('1', { ...base, priceLine: '10만원' }, '2026-08-01T00:00:00.000Z');
+    recordSnapshot('1', { ...base, priceLine: '12만원' }, '2026-08-20T00:00:00.000Z');
+    const diff = diffLatestSnapshots(getMyBoat('1')!)!;
+    expect(diff.priceChanged).toBe(true);
+    expect(diff.previous.priceLine).toBe('10만원');
+    expect(diff.current.priceLine).toBe('12만원');
+  });
+});
+
+describe('gone-boat detection', () => {
+  it('is not gone after a single empty-parse visit', () => {
+    const boat = markGoneStreak('1', true);
+    expect(isGone(boat)).toBe(false);
+  });
+
+  it('is gone after two consecutive empty-parse visits', () => {
+    markGoneStreak('1', true);
+    const boat = markGoneStreak('1', true);
+    expect(isGone(boat)).toBe(true);
+  });
+
+  it('resets the streak the moment a real visit succeeds', () => {
+    markGoneStreak('1', true);
+    markGoneStreak('1', true);
+    const boat = markGoneStreak('1', false);
+    expect(isGone(boat)).toBe(false);
+    expect(boat.goneStreak).toBe(0);
   });
 });

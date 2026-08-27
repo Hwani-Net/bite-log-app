@@ -6,7 +6,7 @@
 // 키는 더피싱 uid. 선사가 배 이름이나 모항을 바꿔도 uid는 유지되므로,
 // 이름이 바뀐 배에도 과거의 판정이 그대로 따라붙는다(스냅샷 비교는 GOAL-3).
 
-const STORE_KEY = "biteLog_myBoats";
+export const STORE_KEY = "biteLog_myBoats";
 
 export type BoatVerdict = "again" | "ok" | "never";
 
@@ -32,12 +32,26 @@ export interface MyBoat {
   memo: string;
   rides: BoatRide[];
   snapshots: BoatSnapshot[];
+  // Consecutive detail-page visits where thefishing.kr returned a page
+  // that parsed to an empty name — a fetch that succeeded but found
+  // nothing, as opposed to a network failure. Counted rather than acted on
+  // after one hit, since a single empty parse can be their own transient
+  // hiccup; see markGoneStreak.
+  goneStreak: number;
 }
 
 export type MyBoatMap = Record<string, MyBoat>;
 
 function emptyBoat(uid: string): MyBoat {
-  return { uid, favorite: false, verdict: null, memo: "", rides: [], snapshots: [] };
+  return {
+    uid,
+    favorite: false,
+    verdict: null,
+    memo: "",
+    rides: [],
+    snapshots: [],
+    goneStreak: 0,
+  };
 }
 
 /**
@@ -59,6 +73,7 @@ function normalizeBoat(uid: string, raw: unknown): MyBoat {
     memo: typeof r.memo === "string" ? r.memo : base.memo,
     rides: Array.isArray(r.rides) ? r.rides : base.rides,
     snapshots: Array.isArray(r.snapshots) ? r.snapshots : base.snapshots,
+    goneStreak: typeof r.goneStreak === "number" ? r.goneStreak : base.goneStreak,
   };
 }
 
@@ -125,6 +140,58 @@ export function recordSnapshot(
   return updateMyBoat(uid, {
     snapshots: [...boat.snapshots, { ...snap, seenAt }],
   });
+}
+
+/** "서해권 > 충청남도 > 보령시 > 대천항" → "대천항". 마지막 조각이 모항. */
+export function shortPort(areaPath: string): string {
+  return areaPath.split(">").map((s) => s.trim()).filter(Boolean).at(-1) ?? areaPath;
+}
+
+export interface SnapshotChange {
+  nameChanged: boolean;
+  portChanged: boolean;
+  priceChanged: boolean;
+  previous: BoatSnapshot;
+  current: BoatSnapshot;
+}
+
+/**
+ * 최근 두 스냅샷을 비교해 무엇이 바뀌었는지 알려준다. recordSnapshot 은
+ * 이름·모항·가격이 전부 같으면 새로 쌓지 않으므로, 스냅샷이 2개 이상이면
+ * 마지막 둘은 반드시 다르다 — 그래서 "뭐가 바뀌었나"만 가려내면 된다.
+ * 스냅샷이 1개 이하(첫 방문 또는 아직 변경 이력 없음)면 null.
+ */
+export function diffLatestSnapshots(boat: MyBoat): SnapshotChange | null {
+  if (boat.snapshots.length < 2) return null;
+  const previous = boat.snapshots[boat.snapshots.length - 2];
+  const current = boat.snapshots[boat.snapshots.length - 1];
+  return {
+    nameChanged: previous.name !== current.name,
+    portChanged: shortPort(previous.areaPath) !== shortPort(current.areaPath),
+    priceChanged: (previous.priceLine ?? "") !== (current.priceLine ?? ""),
+    previous,
+    current,
+  };
+}
+
+// Two consecutive empty-parse visits before calling a listing "gone" — one
+// miss could just be thefishing.kr's own page glitching, not the boat
+// actually being deregistered.
+const GONE_STREAK_THRESHOLD = 2;
+
+/**
+ * A detail-page visit reports whether thefishing.kr's page parsed to a
+ * boat identity or came back empty (fetch succeeded, nothing recognizable
+ * in it — distinct from a network failure, which the caller already
+ * handles separately and never reaches this function for).
+ */
+export function markGoneStreak(uid: string, isGone: boolean): MyBoat {
+  const boat = getMyBoat(uid) ?? emptyBoat(uid);
+  return updateMyBoat(uid, { goneStreak: isGone ? boat.goneStreak + 1 : 0 });
+}
+
+export function isGone(boat: MyBoat): boolean {
+  return boat.goneStreak >= GONE_STREAK_THRESHOLD;
 }
 
 /** 즐겨찾기를 뒤집고 새 상태를 돌려준다. 켤 때는 표시용 스냅샷도 함께 남긴다. */

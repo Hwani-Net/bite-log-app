@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { STORE_KEY } from '@/services/myBoatService';
 
 // These hit the real /api/boat-listings and /api/boat-calendar routes,
 // which proxy thefishing.kr live (same pattern as news.spec.ts's YouTube
@@ -250,5 +251,77 @@ test.describe('Boat calendar — /booking/boat/[uid]', () => {
 
     const after = await monthLabel.textContent();
     expect(after).not.toBe(before);
+  });
+
+  test('shows a change banner when a stale localStorage snapshot disagrees with the live name/port', async ({
+    page,
+  }) => {
+    // Seeded before the app's own mount effect gets a chance to run, so
+    // the visit's real recordSnapshot() call has something older to diff
+    // against — a fake old name/port guarantees a mismatch regardless of
+    // what thefishing.kr's live page currently says for this uid.
+    await page.addInitScript(
+      ({ uid, storeKey }) => {
+        localStorage.setItem(
+          storeKey,
+          JSON.stringify({
+            [uid]: {
+              uid,
+              favorite: false,
+              verdict: null,
+              memo: '',
+              rides: [],
+              goneStreak: 0,
+              snapshots: [
+                {
+                  name: '스텔라호',
+                  areaPath: '서해권 > 충청남도 > 보령시 > 대천항',
+                  seenAt: '2026-01-01T00:00:00.000Z',
+                },
+              ],
+            },
+          }),
+        );
+      },
+      { uid: '4247', storeKey: STORE_KEY },
+    );
+    await page.goto('/booking/boat/4247');
+
+    const banner = page.getByText(/이전에.*스텔라호.*대천항/, { exact: false });
+    await expect(banner).toBeVisible({ timeout: 15000 });
+  });
+
+  test('shows no change banner on a boat with no prior recorded snapshot', async ({
+    page,
+  }) => {
+    // uid 3896 (비너스마린, from the unit fixtures) has never been visited
+    // in this fresh browser context — recordSnapshot's very first write has
+    // nothing to diff against.
+    await page.goto('/booking/boat/3896');
+    await expect(page.getByRole('link', { name: /홈페이지 예약/ })).toBeVisible({
+      timeout: 15000,
+    });
+    await expect(page.getByText(/이전에.*였습니다/)).toHaveCount(0);
+  });
+
+  test('shows a "no longer listed" banner after two consecutive empty-parse visits', async ({
+    page,
+  }) => {
+    // A uid this large doesn't exist on thefishing.kr — confirmed live: it
+    // returns HTTP 200 with an 87-byte page carrying none of the markup
+    // parseBoatDetailMeta looks for, so meta.name parses to "". That's the
+    // exact "fetch succeeded, found nothing" case this banner is for, as
+    // opposed to a network failure (which the separate error state handles).
+    const FAKE_UID = '999999999';
+
+    await page.goto(`/booking/boat/${FAKE_UID}`);
+    await page.waitForTimeout(3000);
+    // First empty-parse visit only counts one strike — not gone yet.
+    await expect(page.getByText(/더 이상 확인되지 않습니다/)).toHaveCount(0);
+
+    await page.goto(`/booking/boat/${FAKE_UID}`);
+    await expect(page.getByText(/더 이상 확인되지 않습니다/)).toBeVisible({
+      timeout: 15000,
+    });
   });
 });
