@@ -37,6 +37,12 @@ import {
   summarizeCatchesForBoat,
   type BoatCatchSummary,
 } from "@/lib/boatCatchStats";
+import {
+  biteGradeForDate,
+  BITE_GRADE_LABEL,
+  BITE_GRADE_DOT_COLOR,
+  type BiteGrade,
+} from "@/lib/calendarBiteOverlay";
 
 const VERDICT_OPTIONS: { value: BoatVerdict; label: string }[] = [
   { value: "again", label: "또 탄다" },
@@ -469,15 +475,21 @@ export default function BoatDetailPage() {
             </p>
           ) : (
             <div className={`grid grid-cols-7 gap-1 ${loading ? "opacity-50" : ""}`}>
-              {grid.map((cell, i) =>
-                cell === null ? (
-                  <div key={`pad-${i}`} />
-                ) : (
+              {grid.map((cell, i) => {
+                if (cell === null) return <div key={`pad-${i}`} />;
+                // 물때 지수는 예약 가능한 날에만 보여준다 — 마감/출조없음
+                // 날짜에 조건이 좋다고 표시해봐야 예약할 수 없으니 의미가
+                // 없다. biteGradeForDate는 날짜만으로 계산되는 순수 함수라
+                // 매 렌더 호출해도 비용이 없다(새 요청 없음).
+                const grade: BiteGrade | null =
+                  cell.status === "available" ? biteGradeForDate(cell.date) : null;
+                return (
                   <button
                     key={cell.date}
                     onClick={() =>
                       setSelectedDate((cur) => (cur === cell.date ? null : cell.date))
                     }
+                    data-bite-grade={grade ?? undefined}
                     className={`relative h-16 rounded-lg p-1 text-left flex flex-col transition-colors ${
                       cell.status === "available"
                         ? "bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20"
@@ -486,6 +498,20 @@ export default function BoatDetailPage() {
                           : "bg-transparent border border-transparent"
                     } ${selectedDate === cell.date ? "ring-2 ring-[#c9a84c]" : ""}`}
                   >
+                    {grade && (
+                      <>
+                        {/* 점 자체는 순수 장식 — 색만으로 등급을 전달하면
+                            안 되니(WCAG 1.4.1) 실제 접근성 텍스트는 아래
+                            sr-only 로 버튼 안에 직접 넣는다. 별도 span에
+                            aria-label 만 얹으면 그 값이 버튼의 접근성 이름
+                            계산에 포함되는지가 스크린리더마다 갈린다. */}
+                        <span
+                          aria-hidden="true"
+                          className={`absolute top-1.5 right-1.5 size-2 rounded-full ${BITE_GRADE_DOT_COLOR[grade]}`}
+                        />
+                        <span className="sr-only"> {BITE_GRADE_LABEL[grade]}</span>
+                      </>
+                    )}
                     <div className="flex items-baseline gap-1">
                       <span
                         className={`text-[11px] font-bold ${
@@ -515,8 +541,33 @@ export default function BoatDetailPage() {
                       )}
                     </div>
                   </button>
-                ),
-              )}
+                );
+              })}
+            </div>
+          )}
+          {calendar && !error && (
+            <div className="px-1 pt-2 mt-1 border-t border-white/5 space-y-1">
+              <div
+                role="group"
+                aria-label="물때 지수 범례"
+                className="flex flex-wrap items-center gap-x-3 gap-y-1"
+              >
+                {(Object.keys(BITE_GRADE_LABEL) as BiteGrade[]).map((g) => (
+                  <span
+                    key={g}
+                    className="flex items-center gap-1 text-[9px] text-white/40"
+                  >
+                    <span
+                      className={`size-1.5 rounded-full ${BITE_GRADE_DOT_COLOR[g]}`}
+                      aria-hidden="true"
+                    />
+                    {BITE_GRADE_LABEL[g]}
+                  </span>
+                ))}
+              </div>
+              <p className="text-[9px] text-white/25">
+                달 주기(사리/조금) 기반 — 실제 조황은 날씨·파고에 따라 달라질 수 있어요
+              </p>
             </div>
           )}
         </section>

@@ -395,6 +395,42 @@ test.describe('Boat calendar — /booking/boat/[uid]', () => {
     await expect(page.getByText(/\d{4}년 \d{1,2}월/)).toBeVisible();
   });
 
+  test('available calendar days show a 물때 grade dot, and the legend is visible', async ({
+    page,
+  }) => {
+    const availableDay = page
+      .locator('button')
+      .filter({ hasText: /남은 \d+명/ })
+      .first();
+    await expect(availableDay).toBeVisible({ timeout: 15000 });
+
+    const grade = await availableDay.getAttribute('data-bite-grade');
+    expect(['excellent', 'good', 'fair', 'poor']).toContain(grade);
+
+    // A "마감"(full) day never shows a grade — it isn't bookable regardless
+    // of the tide condition, so surfacing one would be misleading.
+    const fullDay = page.locator('button').filter({ hasText: '마감' }).first();
+    if ((await fullDay.count()) > 0) {
+      expect(await fullDay.getAttribute('data-bite-grade')).toBeNull();
+    } else {
+      // No 마감 day on the currently-loaded month — nothing to assert.
+      // Annotate rather than let this look like a passing check that ran.
+      test.info().annotations.push({
+        type: 'skipped-assertion',
+        description: 'no 마감 day in the current month to check against',
+      });
+    }
+
+    // Calendar cells also carry an sr-only span with the same grade text
+    // (accessible name for the color-only dot) — scope to the legend
+    // itself so this doesn't collide with those.
+    const legend = page.getByLabel('물때 지수 범례');
+    await expect(legend).toBeVisible();
+    for (const label of ['물때 최고', '물때 좋음', '물때 보통', '물때 약함']) {
+      await expect(legend.getByText(label, { exact: true })).toBeVisible();
+    }
+  });
+
   test('the 홈페이지 예약 button points at the boat operator, not thefishing.kr', async ({
     page,
   }) => {
