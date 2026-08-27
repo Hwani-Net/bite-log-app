@@ -807,8 +807,12 @@ test.describe('Companion recruiting — /booking (2차 GOAL-3)', () => {
     // 같은 익명 세션 = 작성자이므로 마감/삭제 버튼이 보인다.
     await expect(myPost.getByRole('button', { name: '삭제' })).toBeVisible();
 
-    // 정리 — 삭제 후 목록에서 사라진다(소유권 규칙까지 실검증).
+    // 정리 — 2단계 삭제(무장 → 정말 삭제) 후 목록에서 사라진다(소유권
+    // 규칙까지 실검증). 만약 이 사이의 단언이 실패하면 마커 글이 남을 수
+    // 있는데, 마커가 e2e동출- 접두라 눈에 띄고 다음 지난 날짜가 되면
+    // 목록에서도 자동으로 내려간다 — 발견 시 수동 삭제.
     await myPost.getByRole('button', { name: '삭제' }).click();
+    await myPost.getByRole('button', { name: '정말 삭제' }).click();
     await expect(
       section.locator('[data-testid="companion-post"]').filter({ hasText: marker }),
     ).toHaveCount(0, { timeout: 15000 });

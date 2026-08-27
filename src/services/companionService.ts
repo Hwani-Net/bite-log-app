@@ -12,9 +12,11 @@ import {
   doc,
   query,
   orderBy,
+  where,
   limit,
   Firestore,
 } from "firebase/firestore";
+import { localISODate } from "@/lib/localDate";
 import { signInAnonymously } from "firebase/auth";
 import {
   getFirebaseDb,
@@ -48,13 +50,33 @@ export function currentAuthUid(): string | null {
   return getFirebaseAuth()?.currentUser?.uid ?? null;
 }
 
-// 예정일 가까운 순 최대 50건 — status/미래 필터는 클라이언트에서.
-// (where+orderBy 복합 인덱스를 요구하지 않는 단일 orderBy 쿼리를 유지.)
+// 오늘 이후 글만 예정일 가까운 순 최대 50건. 범위 조건과 정렬이 같은
+// 필드(date)라 복합 인덱스가 필요 없다. 서버에서 과거 글을 잘라내는 게
+// 핵심 — asc+limit만 쓰면 지난 글 50건이 창을 점령해 미래 글이 영영 안
+// 보이는 버그가 된다(교차검수에서 잡힘). status 필터는 클라이언트에서.
 export async function listCompanionPosts(): Promise<CompanionPost[]> {
   const db = getDb();
   if (!db) return [];
   const snap = await getDocs(
-    query(collection(db, COLLECTION), orderBy("date", "asc"), limit(50)),
+    query(
+      collection(db, COLLECTION),
+      where("date", ">=", localISODate(new Date())),
+      orderBy("date", "asc"),
+      limit(50),
+    ),
+  );
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as CompanionPost);
+}
+
+// 배 상세용 — uid 하나 보자고 전체 50건을 읽지 않는다. 단일 where라
+// 인덱스 불필요, 날짜·open 필터는 글 수가 적으니 클라이언트에서.
+export async function listCompanionPostsForBoat(
+  boatUid: string,
+): Promise<CompanionPost[]> {
+  const db = getDb();
+  if (!db) return [];
+  const snap = await getDocs(
+    query(collection(db, COLLECTION), where("boatUid", "==", boatUid), limit(20)),
   );
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as CompanionPost);
 }

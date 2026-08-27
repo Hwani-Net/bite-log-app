@@ -57,12 +57,22 @@ service cloud.firestore {
     // Anyone can read; writes need auth (anonymous auth counts — the app
     // signs users in anonymously before posting). Ownership is enforced
     // server-side via authorUid == request.auth.uid.
+    // Known v1 limits, accepted knowingly: `contact` is world-readable by
+    // design (users are told to post only shareable links), the date shape
+    // regex doesn't bound how far in the future a date may be, and there is
+    // no per-uid rate limit (anonymous auth is unmetered) — revisit with
+    // App Check if abuse appears.
     match /companionPosts/{postId} {
       allow read: if true;
 
       allow create: if request.auth != null
                     && request.resource.data.authorUid == request.auth.uid
+                    && request.resource.data.keys().hasOnly(['boatUid', 'boatName', 'port', 'date', 'seatsWanted', 'note', 'contact', 'authorUid', 'authorName', 'status', 'createdAt'])
                     && request.resource.data.keys().hasAll(['boatName', 'date', 'seatsWanted', 'note', 'contact', 'authorUid', 'authorName', 'status', 'createdAt'])
+                    && (!('boatUid' in request.resource.data) || (request.resource.data.boatUid is string && request.resource.data.boatUid.size() <= 20))
+                    && (!('port' in request.resource.data) || (request.resource.data.port is string && request.resource.data.port.size() <= 50))
+                    && request.resource.data.createdAt is string
+                    && request.resource.data.createdAt.size() <= 40
                     && request.resource.data.boatName is string
                     && request.resource.data.boatName.size() >= 1
                     && request.resource.data.boatName.size() <= 50

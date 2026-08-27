@@ -715,9 +715,14 @@ function CompanionSection({
   const [expanded, setExpanded] = useState(false);
   const [posts, setPosts] = useState<CompanionPost[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  // 마감/삭제의 결과 피드백 — 실패가 무음이면 "버튼이 안 먹는 앱"이 된다.
+  // 특히 다른 기기·시크릿 모드에선 익명 세션이 달라 rules가 거부한다.
+  const [actionMsg, setActionMsg] = useState("");
+  const [deleteArmId, setDeleteArmId] = useState<string | null>(null);
   const [myUid, setMyUid] = useState<string | null>(null);
   const [form, setForm] = useState({
     boatName: "",
@@ -730,16 +735,22 @@ function CompanionSection({
 
   const load = async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       setPosts(await listCompanionPosts());
       setMyUid(currentAuthUid());
     } catch {
-      setPosts([]);
+      // 실패를 빈 게시판으로 위장하지 않는다 — posts는 null로 두고 에러 표시.
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
   };
-  const handleExpand = () => {
+  const handleToggleExpanded = () => {
+    if (expanded) {
+      setExpanded(false);
+      return;
+    }
     setExpanded(true);
     if (posts === null) load();
   };
@@ -776,19 +787,37 @@ function CompanionSection({
     }
   };
 
+  const OWNER_FAIL_MSG =
+    "처리하지 못했습니다 — 이 기기의 세션에서 만든 글이 아닐 수 있어요.";
   const handleClose = async (id: string) => {
     if (await closeCompanionPost(id)) {
       setPosts((prev) =>
         (prev ?? []).map((p) => (p.id === id ? { ...p, status: "closed" as const } : p)),
       );
+      setActionMsg("모집을 마감했어요. 마감된 글은 목록에서 내려갑니다.");
+    } else {
+      setActionMsg(OWNER_FAIL_MSG);
     }
   };
+  // 삭제는 2단계 — 첫 클릭은 무장(armed), 같은 버튼을 한 번 더 눌러야
+  // 지워진다. confirm() 모달 없이 실수 클릭만 막는 최소 장치.
   const handleDelete = async (id: string) => {
+    if (deleteArmId !== id) {
+      setDeleteArmId(id);
+      return;
+    }
+    setDeleteArmId(null);
     if (await deleteCompanionPost(id)) {
       setPosts((prev) => (prev ?? []).filter((p) => p.id !== id));
+      setActionMsg("글을 삭제했어요.");
+    } else {
+      setActionMsg(OWNER_FAIL_MSG);
     }
   };
 
+  // 표시 시점 시간 기준이라 자정이 지나면 그날 글이 자동으로 내려간다 —
+  // 의도된 동작. 목록은 일회성 읽기(onSnapshot 아님)라 남이 방금 올린
+  // 글은 다시 열어야 보인다(v1 한계).
   const visible = visibleCompanionPosts(posts ?? [], new Date());
 
   return (
@@ -801,15 +830,14 @@ function CompanionSection({
           <Users size={15} className="text-[#7dd3fc]" aria-hidden="true" />
           동출 모집
         </h3>
-        {!expanded && (
-          <button
-            type="button"
-            onClick={handleExpand}
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#7dd3fc]/15 border border-[#7dd3fc]/30 text-[#7dd3fc]"
-          >
-            모집 글 보기
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={handleToggleExpanded}
+          aria-expanded={expanded}
+          className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#7dd3fc]/15 border border-[#7dd3fc]/30 text-[#7dd3fc]"
+        >
+          {expanded ? "접기" : "모집 글 보기"}
+        </button>
       </div>
       <p className="text-[11px] text-white/45">
         같이 탈 사람을 구하는 게시판이에요. 선상낚시는 인원이 차야 출항하는
@@ -817,8 +845,26 @@ function CompanionSection({
       </p>
       {expanded && (
         <div className="space-y-2">
+          {actionMsg && (
+            <p role="status" className="text-[11px] text-[#7dd3fc]/90">
+              {actionMsg}
+            </p>
+          )}
           {loading ? (
             <p className="text-xs text-white/40 py-3 text-center">불러오는 중…</p>
+          ) : loadError ? (
+            <div role="alert" className="py-3 text-center space-y-2">
+              <p className="text-xs text-amber-200/80">
+                모집 글을 불러오지 못했습니다.
+              </p>
+              <button
+                type="button"
+                onClick={load}
+                className="text-xs text-[#7dd3fc] underline underline-offset-2"
+              >
+                다시 시도
+              </button>
+            </div>
           ) : visible.length === 0 ? (
             <p role="status" className="text-xs text-white/40 py-3 text-center">
               아직 모집 글이 없어요. 첫 글을 올려보세요.
@@ -847,9 +893,13 @@ function CompanionSection({
                       <button
                         type="button"
                         onClick={() => handleDelete(post.id)}
-                        className="text-[10px] px-2 py-0.5 rounded bg-red-400/15 text-red-300"
+                        className={`text-[10px] px-2 py-0.5 rounded ${
+                          deleteArmId === post.id
+                            ? "bg-red-400/40 text-white font-bold"
+                            : "bg-red-400/15 text-red-300"
+                        }`}
                       >
-                        삭제
+                        {deleteArmId === post.id ? "정말 삭제" : "삭제"}
                       </button>
                     </span>
                   )}

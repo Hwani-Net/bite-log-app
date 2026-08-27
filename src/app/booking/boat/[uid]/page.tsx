@@ -41,7 +41,7 @@ import {
   visibleCompanionPosts,
   type CompanionPost,
 } from "@/lib/companionPosts";
-import { listCompanionPosts } from "@/services/companionService";
+import { listCompanionPostsForBoat } from "@/services/companionService";
 import {
   biteGradeForDate,
   BITE_GRADE_LABEL,
@@ -133,7 +133,7 @@ export default function BoatDetailPage() {
   useEffect(() => {
     if (!uid) return;
     let cancelled = false;
-    listCompanionPosts()
+    listCompanionPostsForBoat(uid)
       .then((posts) => {
         if (cancelled) return;
         setCompanions(visibleCompanionPosts(posts, new Date(), { boatUid: uid }));
