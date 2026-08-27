@@ -767,6 +767,71 @@ test.describe('Available-only toggle — /booking (2차 GOAL-2)', () => {
   });
 });
 
+test.describe('Companion recruiting — /booking (2차 GOAL-3)', () => {
+  test('full round trip: post anonymously, see the card, then delete it (self-cleaning)', async ({
+    page,
+  }) => {
+    // 실제 Firestore(+익명 인증)까지 관통하는 왕복 — 규칙·서비스·UI를
+    // 한 번에 검증하고, 만든 글은 같은 익명 세션의 소유권으로 즉시
+    // 지워 프로덕션에 잔여물을 남기지 않는다.
+    const marker = `e2e동출-${Date.now().toString(36)}`;
+    await page.goto('/booking');
+
+    const section = page.locator('[data-testid="companion-section"]');
+    await expect(section).toBeVisible({ timeout: 20000 });
+    // 접힌 기본 상태 — 열기 전엔 목록도 폼도 없다(lazy 로드 회귀).
+    await expect(section.locator('[data-testid="companion-post"]')).toHaveCount(0);
+    await expect(section.getByText('+ 모집 글 쓰기')).toHaveCount(0);
+
+    await section.getByRole('button', { name: '모집 글 보기' }).click();
+    await expect(section.getByText('+ 모집 글 쓰기')).toBeVisible({
+      timeout: 15000,
+    });
+
+    await section.getByText('+ 모집 글 쓰기').click();
+    await section.getByLabel('배 이름').fill(marker);
+    // 내일 날짜 — 지난 날짜 검증에 걸리지 않게.
+    const tomorrow = new Date(Date.now() + 86400000);
+    const iso = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
+    await section.getByLabel('출조 날짜').fill(iso);
+    await section.getByLabel('연락 방법').fill('open.kakao.com/e2e-test');
+    await section.getByRole('button', { name: '모집 글 올리기' }).click();
+
+    // 카드 렌더 — 실제 저장을 거친 글이 목록에 나타난다.
+    const myPost = section
+      .locator('[data-testid="companion-post"]')
+      .filter({ hasText: marker });
+    await expect(myPost).toBeVisible({ timeout: 20000 });
+    await expect(myPost).toContainText('2명 모집');
+    await expect(myPost).toContainText('open.kakao.com/e2e-test');
+    // 같은 익명 세션 = 작성자이므로 마감/삭제 버튼이 보인다.
+    await expect(myPost.getByRole('button', { name: '삭제' })).toBeVisible();
+
+    // 정리 — 삭제 후 목록에서 사라진다(소유권 규칙까지 실검증).
+    await myPost.getByRole('button', { name: '삭제' }).click();
+    await expect(
+      section.locator('[data-testid="companion-post"]').filter({ hasText: marker }),
+    ).toHaveCount(0, { timeout: 15000 });
+  });
+
+  test('the form rejects a past date and an empty contact', async ({ page }) => {
+    await page.goto('/booking');
+    const section = page.locator('[data-testid="companion-section"]');
+    await section.getByRole('button', { name: '모집 글 보기' }).click();
+    await section.getByText('+ 모집 글 쓰기').click({ timeout: 15000 });
+
+    await section.getByLabel('배 이름').fill('검증테스트호');
+    await section.getByRole('button', { name: '모집 글 올리기' }).click();
+    await expect(section.getByRole('alert')).toContainText('출조 날짜');
+
+    const tomorrow = new Date(Date.now() + 86400000);
+    const iso = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
+    await section.getByLabel('출조 날짜').fill(iso);
+    await section.getByRole('button', { name: '모집 글 올리기' }).click();
+    await expect(section.getByRole('alert')).toContainText('연락 방법');
+  });
+});
+
 test.describe('Trip briefing + season reminders — /booking (GOAL-9)', () => {
   // Both features are clock-sensitive (D-1 = "tomorrow", season = "this
   // month"), so every test pins the browser clock to 2026-10-15 — a date

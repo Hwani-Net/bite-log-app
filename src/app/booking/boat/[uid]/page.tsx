@@ -38,6 +38,11 @@ import {
   type BoatCatchSummary,
 } from "@/lib/boatCatchStats";
 import {
+  visibleCompanionPosts,
+  type CompanionPost,
+} from "@/lib/companionPosts";
+import { listCompanionPosts } from "@/services/companionService";
+import {
   biteGradeForDate,
   BITE_GRADE_LABEL,
   BITE_GRADE_DOT_COLOR,
@@ -118,6 +123,22 @@ export default function BoatDetailPage() {
       .catch(() => {
         // 조과 요약은 부가 정보 — 못 불러와도 나머지 화면(판정/달력)은 정상 동작해야 한다.
       });
+    return () => {
+      cancelled = true;
+    };
+  }, [uid]);
+
+  // 이 배의 동출 모집 글 — 없으면 섹션째 숨긴다. 부가 정보라 실패는 무음.
+  const [companions, setCompanions] = useState<CompanionPost[]>([]);
+  useEffect(() => {
+    if (!uid) return;
+    let cancelled = false;
+    listCompanionPosts()
+      .then((posts) => {
+        if (cancelled) return;
+        setCompanions(visibleCompanionPosts(posts, new Date(), { boatUid: uid }));
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -418,6 +439,34 @@ export default function BoatDetailPage() {
                   .join(" · ")}
               </p>
             )}
+          </section>
+        )}
+
+        {/* 이 배 동출 모집 — /booking 동출 게시판에서 이 배(uid)로 태그된
+            open 글만. 없으면 섹션째 숨긴다. */}
+        {companions.length > 0 && (
+          <section
+            data-testid="boat-companions"
+            className="rounded-2xl bg-white/3 border border-white/8 p-4 space-y-2"
+          >
+            <h2 className="text-xs text-white/40 font-semibold uppercase tracking-[0.15em] flex items-center gap-1.5">
+              <Users size={12} className="text-[#7dd3fc]" aria-hidden="true" />
+              이 배 동출 모집
+            </h2>
+            {companions.map((post) => (
+              <div key={post.id} className="text-xs text-white/70">
+                <span className="font-semibold text-white">
+                  {post.date.slice(5).replace("-", "/")}
+                </span>{" "}
+                · {post.seatsWanted}명 모집 · {post.authorName}
+                {post.note && (
+                  <span className="text-white/45"> — {post.note}</span>
+                )}
+                <span className="block text-[11px] text-[#7dd3fc]/90 break-all">
+                  연락: {post.contact}
+                </span>
+              </div>
+            ))}
           </section>
         )}
 

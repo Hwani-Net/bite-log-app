@@ -53,6 +53,18 @@ import { BITE_GRADE_LABEL } from "@/lib/calendarBiteOverlay";
 import { getDataService } from "@/services/dataServiceFactory";
 import type { CatchRecord } from "@/types";
 import {
+  visibleCompanionPosts,
+  isPostOwner,
+  type CompanionPost,
+} from "@/lib/companionPosts";
+import {
+  listCompanionPosts,
+  createCompanionPost,
+  closeCompanionPost,
+  deleteCompanionPost,
+  currentAuthUid,
+} from "@/services/companionService";
+import {
   FISH_SEASON_DB,
   getSeasonStatus,
   getTotalRelease,
@@ -687,6 +699,273 @@ function BoatListingCard({
         )}
       </div>
     </div>
+  );
+}
+
+// 동출 모집(2차 GOAL-3) — 접힌 상태가 기본이고 열 때만 Firestore를 읽는다
+// (부킹 페이지 초기 로드에 요청을 얹지 않는 게 회귀 조건). 글쓰기는
+// companionService가 익명 인증으로 uid를 만들어 서버가 소유권을 강제한다.
+function CompanionSection({
+  boatSuggestions,
+  today,
+}: {
+  boatSuggestions: { uid?: string; name: string }[];
+  today: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [posts, setPosts] = useState<CompanionPost[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [myUid, setMyUid] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    boatName: "",
+    date: "",
+    seatsWanted: 2,
+    note: "",
+    contact: "",
+    authorName: "",
+  });
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      setPosts(await listCompanionPosts());
+      setMyUid(currentAuthUid());
+    } catch {
+      setPosts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleExpand = () => {
+    setExpanded(true);
+    if (posts === null) load();
+  };
+
+  const handleSubmit = async () => {
+    if (!form.boatName.trim()) return setFormError("배 이름을 입력해주세요.");
+    if (!form.date || form.date < today)
+      return setFormError("오늘 이후의 출조 날짜를 골라주세요.");
+    if (!form.contact.trim())
+      return setFormError("연락 방법(오픈채팅 링크 등)을 적어주세요.");
+    setFormError("");
+    setSubmitting(true);
+    try {
+      const matched = boatSuggestions.find((b) => b.name === form.boatName.trim());
+      const created = await createCompanionPost({
+        boatUid: matched?.uid,
+        boatName: form.boatName.trim().slice(0, 50),
+        date: form.date,
+        seatsWanted: Math.min(20, Math.max(1, form.seatsWanted)),
+        note: form.note.trim().slice(0, 300),
+        contact: form.contact.trim().slice(0, 200),
+        authorName: (form.authorName.trim() || "익명 낚시인").slice(0, 30),
+      });
+      if (!created) {
+        setFormError("지금은 글을 올릴 수 없습니다. 잠시 후 다시 시도해주세요.");
+        return;
+      }
+      setPosts((prev) => [...(prev ?? []), created]);
+      setMyUid(currentAuthUid());
+      setShowForm(false);
+      setForm({ boatName: "", date: "", seatsWanted: 2, note: "", contact: "", authorName: "" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleClose = async (id: string) => {
+    if (await closeCompanionPost(id)) {
+      setPosts((prev) =>
+        (prev ?? []).map((p) => (p.id === id ? { ...p, status: "closed" as const } : p)),
+      );
+    }
+  };
+  const handleDelete = async (id: string) => {
+    if (await deleteCompanionPost(id)) {
+      setPosts((prev) => (prev ?? []).filter((p) => p.id !== id));
+    }
+  };
+
+  const visible = visibleCompanionPosts(posts ?? [], new Date());
+
+  return (
+    <section
+      data-testid="companion-section"
+      className="bg-white/3 border border-white/8 rounded-2xl p-4 space-y-3"
+    >
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-bold text-white flex items-center gap-2">
+          <Users size={15} className="text-[#7dd3fc]" aria-hidden="true" />
+          동출 모집
+        </h3>
+        {!expanded && (
+          <button
+            type="button"
+            onClick={handleExpand}
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#7dd3fc]/15 border border-[#7dd3fc]/30 text-[#7dd3fc]"
+          >
+            모집 글 보기
+          </button>
+        )}
+      </div>
+      <p className="text-[11px] text-white/45">
+        같이 탈 사람을 구하는 게시판이에요. 선상낚시는 인원이 차야 출항하는
+        배가 많아요.
+      </p>
+      {expanded && (
+        <div className="space-y-2">
+          {loading ? (
+            <p className="text-xs text-white/40 py-3 text-center">불러오는 중…</p>
+          ) : visible.length === 0 ? (
+            <p role="status" className="text-xs text-white/40 py-3 text-center">
+              아직 모집 글이 없어요. 첫 글을 올려보세요.
+            </p>
+          ) : (
+            visible.map((post) => (
+              <div
+                key={post.id}
+                data-testid="companion-post"
+                className="rounded-xl bg-white/4 border border-white/8 p-3 space-y-1"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs font-bold text-white truncate">
+                    {post.boatName} · {formatShortDate(post.date)} ·{" "}
+                    {post.seatsWanted}명 모집
+                  </p>
+                  {isPostOwner(post, myUid) && (
+                    <span className="flex gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handleClose(post.id)}
+                        className="text-[10px] px-2 py-0.5 rounded bg-white/8 text-white/60"
+                      >
+                        마감
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(post.id)}
+                        className="text-[10px] px-2 py-0.5 rounded bg-red-400/15 text-red-300"
+                      >
+                        삭제
+                      </button>
+                    </span>
+                  )}
+                </div>
+                {post.note && (
+                  <p className="text-[11px] text-white/60">{post.note}</p>
+                )}
+                <p className="text-[11px] text-[#7dd3fc]/90 break-all">
+                  연락: {post.contact}
+                </p>
+                <p className="text-[10px] text-white/35">{post.authorName}</p>
+              </div>
+            ))
+          )}
+
+          {showForm ? (
+            <div className="rounded-xl bg-white/4 border border-white/8 p-3 space-y-2">
+              <input
+                type="text"
+                list="companion-boat-suggestions"
+                placeholder="배 이름 (검색 결과에서 고르거나 직접 입력)"
+                value={form.boatName}
+                onChange={(e) => setForm((f) => ({ ...f, boatName: e.target.value }))}
+                aria-label="배 이름"
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white placeholder:text-white/30"
+              />
+              <datalist id="companion-boat-suggestions">
+                {boatSuggestions.map((b) => (
+                  <option key={`${b.uid ?? ""}|${b.name}`} value={b.name} />
+                ))}
+              </datalist>
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  min={today}
+                  value={form.date}
+                  onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+                  aria-label="출조 날짜"
+                  style={{ colorScheme: "dark" }}
+                  className="flex-1 bg-white/5 border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white"
+                />
+                <input
+                  type="number"
+                  min={1}
+                  max={20}
+                  value={form.seatsWanted}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, seatsWanted: Number(e.target.value) || 1 }))
+                  }
+                  aria-label="모집 인원"
+                  className="w-20 bg-white/5 border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white"
+                />
+              </div>
+              <input
+                type="text"
+                placeholder="한 줄 소개 (선택)"
+                value={form.note}
+                onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
+                aria-label="한 줄 소개"
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white placeholder:text-white/30"
+              />
+              <input
+                type="text"
+                placeholder="연락 방법 — 오픈채팅 링크 등 공개 가능한 것만"
+                value={form.contact}
+                onChange={(e) => setForm((f) => ({ ...f, contact: e.target.value }))}
+                aria-label="연락 방법"
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white placeholder:text-white/30"
+              />
+              <input
+                type="text"
+                placeholder="닉네임 (선택, 기본 익명 낚시인)"
+                value={form.authorName}
+                onChange={(e) => setForm((f) => ({ ...f, authorName: e.target.value }))}
+                aria-label="닉네임"
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white placeholder:text-white/30"
+              />
+              {formError && (
+                <p role="alert" className="text-[11px] text-amber-200/90">
+                  {formError}
+                </p>
+              )}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                  className="flex-1 text-xs font-bold py-2 rounded-lg bg-[#7dd3fc]/20 border border-[#7dd3fc]/40 text-[#7dd3fc] disabled:opacity-50"
+                >
+                  {submitting ? "올리는 중…" : "모집 글 올리기"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="text-xs px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white/50"
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowForm(true)}
+              className="w-full text-xs font-semibold py-2 rounded-lg bg-white/5 border border-dashed border-white/15 text-white/60 hover:border-[#7dd3fc]/40"
+            >
+              + 모집 글 쓰기
+            </button>
+          )}
+          <p className="text-[10px] text-white/35">
+            연락처는 공개해도 되는 것만 적어주세요. 처음 만나는 사람과의
+            출조는 항구 등 공개된 장소에서 시작하세요.
+          </p>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -2162,6 +2441,20 @@ export default function BookingPage() {
             페이지에서 확인하세요
           </p>
         </section>
+
+        {/* 동출 모집 — 접힌 기본 상태, 열 때만 Firestore 읽기 */}
+        <CompanionSection
+          today={todayDate}
+          boatSuggestions={[
+            ...searchBoats.map((b) => ({ uid: b.uid, name: b.name })),
+            ...Object.entries(myBoats)
+              .map(([uid, b]) => ({
+                uid,
+                name: b.snapshots[b.snapshots.length - 1]?.name ?? "",
+              }))
+              .filter((b) => b.name),
+          ]}
+        />
 
         {/* Assistant */}
         <section className="glass-morphism border border-white/5 rounded-2xl p-5">
