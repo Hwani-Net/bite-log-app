@@ -30,6 +30,8 @@ export function distanceKmForAreaPath(
   const port = areaPath.split(" > ").pop()?.trim() ?? "";
   const coords = PORT_COORDS[port];
   if (!coords) return null;
+  // 동명 항구 안전장치 — within이 지정된 이름은 그 지역 경로에서만 매칭.
+  if (coords.within && !areaPath.includes(coords.within)) return null;
   return haversineKm(userLat, userLng, coords.lat, coords.lng);
 }
 

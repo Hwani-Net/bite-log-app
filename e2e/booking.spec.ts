@@ -611,21 +611,41 @@ test.describe('Distance sort — /booking (2차 GOAL-1)', () => {
     permissions: ['geolocation'],
   });
 
-  test('the 거리순 chip sorts visible cards by ascending port distance and labels each', async ({
+  test('the 거리순 chip sorts cards by ascending port distance and labels each', async ({
     page,
   }) => {
+    // 라이브 데이터에 의존하면 0척인 날 이 테스트가 조용히 skip으로 새므로
+    // listings API를 결정적 fixture로 mock한다 — 사용자(대천항) 기준 기대
+    // 순서가 자명한 항구들 + 미등록 항구 1척(맨 뒤 유지 검증용).
+    const fixture = (uid: string, name: string, areaPath: string) => ({
+      uid,
+      name,
+      areaPath,
+      fishTypes: '우럭',
+      capacity: '12인승',
+      imageUrl: '',
+      detailUrl: `https://thefishing.kr/reservation/list.php?uid=${uid}`,
+    });
+    await page.route('**/api/boat-listings**', (r) =>
+      r.fulfill({
+        json: {
+          ok: true,
+          page: 1,
+          total: 4,
+          boats: [
+            fixture('91', '제주배', '남해권 > 제주 > 제주시 > 제주항'),
+            fixture('92', '미지배', '서해권 > 충청남도 > 어딘가 > 없는항'),
+            fixture('93', '평택배', '서해권 > 경기도 > 평택시 > 평택항'),
+            fixture('94', '오천배', '서해권 > 충청남도 > 보령시 > 오천항'),
+          ],
+        },
+      }),
+    );
     await page.goto('/booking');
     const grid = page.locator('[data-testid="search-results"]');
-    await expect(
-      grid.locator('[data-testid="boat-card"]').first().or(
-        page.getByText('이 조건으로 출조하는 선박이 없습니다'),
-      ),
-    ).toBeVisible({ timeout: 20000 });
-
-    // 라이브 데이터가 0척인 날이면 정렬을 검증할 수 없다 — 조용한 통과
-    // 대신 명시적으로 스킵 사유를 남긴다.
-    const cardCount = await grid.locator('[data-testid="boat-card"]').count();
-    test.skip(cardCount === 0, 'no live boats today — nothing to sort');
+    await expect(grid.locator('[data-testid="boat-card"]')).toHaveCount(4, {
+      timeout: 20000,
+    });
 
     await page.getByRole('button', { name: '거리순' }).click();
     await expect(page.getByRole('button', { name: '거리순' })).toHaveAttribute(
@@ -633,23 +653,28 @@ test.describe('Distance sort — /booking (2차 GOAL-1)', () => {
       'true',
     );
 
-    // 거리 라벨이 실제로 붙고, DOM 순서대로 비내림차순이어야 한다.
+    // 대천항에 선 사용자 기준 정확한 기대 순서 — 오천(≈12km) < 평택(≈77km)
+    // < 제주(≈330km) < 미등록(거리 없음, 맨 뒤).
     await expect(
-      grid.locator('[data-testid="boat-distance"]').first(),
-    ).toBeVisible({ timeout: 10000 });
+      grid.locator('[data-testid="boat-card"] h4'),
+    ).toHaveText(['오천배', '평택배', '제주배', '미지배'], { timeout: 10000 });
+    // 거리 라벨은 등록 항구 3척에만 붙고 오름차순이다. 라벨은 km 반올림
+    // 값이라 미세 오정렬은 유닛 테스트가 잡는다 — 여기선 표시 계약만.
     const labels = await grid
       .locator('[data-testid="boat-distance"]')
       .allInnerTexts();
+    expect(labels).toHaveLength(3);
     const kms = labels.map((t) => Number(t.match(/~(\d+)km/)?.[1]));
-    expect(kms.length).toBeGreaterThan(0);
     for (const km of kms) expect(Number.isNaN(km)).toBe(false);
-    for (let i = 1; i < kms.length; i++) {
-      expect(kms[i]).toBeGreaterThanOrEqual(kms[i - 1]);
-    }
+    expect(kms[0]).toBeLessThan(kms[1]);
+    expect(kms[1]).toBeLessThan(kms[2]);
 
-    // 끄면 라벨이 사라진다 — 기존 화면 복원.
+    // 끄면 라벨이 사라지고 원래(fixture) 순서로 복원된다.
     await page.getByRole('button', { name: '거리순' }).click();
     await expect(grid.locator('[data-testid="boat-distance"]')).toHaveCount(0);
+    await expect(
+      grid.locator('[data-testid="boat-card"] h4'),
+    ).toHaveText(['제주배', '미지배', '평택배', '오천배']);
   });
 });
 

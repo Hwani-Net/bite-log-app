@@ -743,6 +743,7 @@ export default function BookingPage() {
   const handleToggleDistanceSort = () => {
     if (sortByDist) {
       setSortByDist(false);
+      setGeoError(false);
       return;
     }
     if (userCoords) {
@@ -1819,6 +1820,7 @@ export default function BookingPage() {
               type="button"
               onClick={handleToggleDistanceSort}
               aria-pressed={sortByDist}
+              aria-describedby={geoError ? "distance-sort-error" : undefined}
               className={`ml-auto mr-2 text-[11px] px-2 py-1 rounded-lg border transition-colors ${
                 sortByDist
                   ? "bg-[#c9a84c]/20 border-[#c9a84c]/40 text-[#c9a84c] font-semibold"
@@ -1836,7 +1838,11 @@ export default function BookingPage() {
             </span>
           </div>
           {geoError && (
-            <p role="status" className="text-[10px] text-white/40 px-1">
+            <p
+              id="distance-sort-error"
+              role="alert"
+              className="text-[10px] text-amber-200/80 px-1"
+            >
               위치 권한이 없어 거리순 정렬을 쓸 수 없어요. 브라우저 설정에서
               위치를 허용한 뒤 다시 눌러주세요.
             </p>

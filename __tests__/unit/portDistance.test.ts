@@ -24,6 +24,17 @@ describe('haversineKm', () => {
   });
 });
 
+describe('PORT_COORDS sanity', () => {
+  it('every coordinate falls inside the Korea bbox — catches swapped/typo lat-lng', () => {
+    for (const [name, c] of Object.entries(PORT_COORDS)) {
+      expect(c.lat, name).toBeGreaterThan(33);
+      expect(c.lat, name).toBeLessThan(39);
+      expect(c.lng, name).toBeGreaterThan(124);
+      expect(c.lng, name).toBeLessThan(132);
+    }
+  });
+});
+
 describe('distanceKmForAreaPath', () => {
   const user = { lat: 36.35, lng: 126.6 }; // 보령 내륙 어딘가
 
@@ -41,6 +52,15 @@ describe('distanceKmForAreaPath', () => {
     expect(
       distanceKmForAreaPath('서해권 > 충청남도 > 어딘가 > 없는항', user.lat, user.lng),
     ).toBeNull();
+  });
+
+  it('rejects a duplicate-prone name outside its within region — 부안 모항은 태안 모항이 아니다', () => {
+    expect(
+      distanceKmForAreaPath('서해권 > 전라북도 > 부안군 > 모항', user.lat, user.lng),
+    ).toBeNull();
+    expect(
+      distanceKmForAreaPath('서해권 > 충청남도 > 태안 > 모항', user.lat, user.lng),
+    ).not.toBeNull();
   });
 });
 
