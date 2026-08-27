@@ -604,6 +604,55 @@ test.describe('Boat calendar — /booking/boat/[uid]', () => {
   });
 });
 
+test.describe('Distance sort — /booking (2차 GOAL-1)', () => {
+  // 사용자를 대천항 방파제 좌표에 세워두면 "가까운 항구"가 자명해진다.
+  test.use({
+    geolocation: { latitude: 36.3304, longitude: 126.5104 },
+    permissions: ['geolocation'],
+  });
+
+  test('the 거리순 chip sorts visible cards by ascending port distance and labels each', async ({
+    page,
+  }) => {
+    await page.goto('/booking');
+    const grid = page.locator('[data-testid="search-results"]');
+    await expect(
+      grid.locator('[data-testid="boat-card"]').first().or(
+        page.getByText('이 조건으로 출조하는 선박이 없습니다'),
+      ),
+    ).toBeVisible({ timeout: 20000 });
+
+    // 라이브 데이터가 0척인 날이면 정렬을 검증할 수 없다 — 조용한 통과
+    // 대신 명시적으로 스킵 사유를 남긴다.
+    const cardCount = await grid.locator('[data-testid="boat-card"]').count();
+    test.skip(cardCount === 0, 'no live boats today — nothing to sort');
+
+    await page.getByRole('button', { name: '거리순' }).click();
+    await expect(page.getByRole('button', { name: '거리순' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+
+    // 거리 라벨이 실제로 붙고, DOM 순서대로 비내림차순이어야 한다.
+    await expect(
+      grid.locator('[data-testid="boat-distance"]').first(),
+    ).toBeVisible({ timeout: 10000 });
+    const labels = await grid
+      .locator('[data-testid="boat-distance"]')
+      .allInnerTexts();
+    const kms = labels.map((t) => Number(t.match(/~(\d+)km/)?.[1]));
+    expect(kms.length).toBeGreaterThan(0);
+    for (const km of kms) expect(Number.isNaN(km)).toBe(false);
+    for (let i = 1; i < kms.length; i++) {
+      expect(kms[i]).toBeGreaterThanOrEqual(kms[i - 1]);
+    }
+
+    // 끄면 라벨이 사라진다 — 기존 화면 복원.
+    await page.getByRole('button', { name: '거리순' }).click();
+    await expect(grid.locator('[data-testid="boat-distance"]')).toHaveCount(0);
+  });
+});
+
 test.describe('Trip briefing + season reminders — /booking (GOAL-9)', () => {
   // Both features are clock-sensitive (D-1 = "tomorrow", season = "this
   // month"), so every test pins the browser clock to 2026-10-15 — a date

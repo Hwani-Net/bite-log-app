@@ -39,6 +39,10 @@ import {
   isWithinAlertWindow,
   OPERATOR_COORDS,
 } from "@/lib/sailCancelAlert";
+import {
+  distanceKmForAreaPath,
+  sortBoatsByDistance,
+} from "@/lib/portDistance";
 import { fetchDailyMarineOutlook } from "@/services/marineService";
 import { BITE_GRADE_LABEL } from "@/lib/calendarBiteOverlay";
 import { getDataService } from "@/services/dataServiceFactory";
@@ -516,6 +520,7 @@ function BoatListingCard({
   verdict,
   rideCount,
   memo,
+  distanceKm = null,
 }: {
   boat: BoatListing;
   date: string;
@@ -524,6 +529,7 @@ function BoatListingCard({
   verdict: BoatVerdict | null;
   rideCount: number;
   memo: string;
+  distanceKm?: number | null;
 }) {
   const shortArea = boat.areaPath.split(" > ").slice(1).join(" · ");
   return (
@@ -582,6 +588,14 @@ function BoatListingCard({
             {boat.name}
           </h4>
           <p className="text-[10px] text-white/40 truncate mb-1">
+            {distanceKm !== null && (
+              <span
+                data-testid="boat-distance"
+                className="text-[#7dd3fc]/90 font-semibold"
+              >
+                ~{Math.round(distanceKm)}km ·{" "}
+              </span>
+            )}
             {shortArea || boat.areaPath}
           </p>
           <p className="text-[10px] text-[#c9a84c]/80 truncate">
@@ -719,6 +733,38 @@ export default function BookingPage() {
   const resetPortFilter = () => setSelectedPort("");
   // 어종 역방향 추천 — "날짜 → 배" 대신 "이 어종, 언제 갈까"로 시작한다.
   const [reverseSpecies, setReverseSpecies] = useState("");
+  // 거리순 정렬(2차 GOAL-1) — 위치는 지역 자동 선택과 같은 요청을 재사용.
+  const [userCoords, setUserCoords] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [sortByDist, setSortByDist] = useState(false);
+  const [geoError, setGeoError] = useState(false);
+  const handleToggleDistanceSort = () => {
+    if (sortByDist) {
+      setSortByDist(false);
+      return;
+    }
+    if (userCoords) {
+      setSortByDist(true);
+      return;
+    }
+    if (!navigator.geolocation) {
+      setGeoError(true);
+      return;
+    }
+    // mount 시점 요청이 거부/실패했어도 칩을 누르면 한 번 더 요청한다 —
+    // 사용자가 방금 의사를 표시했으니 이때가 권한을 물을 적기다.
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setGeoError(false);
+        setSortByDist(true);
+      },
+      () => setGeoError(true),
+      { timeout: 5000, maximumAge: 300000 },
+    );
+  };
   const [searchPage, setSearchPage] = useState(1);
   const [searchResult, setSearchResult] = useState<BoatListingPage | null>(null);
   const [searchBoats, setSearchBoats] = useState<BoatListing[]>([]);
@@ -905,6 +951,11 @@ export default function BookingPage() {
         setUserRegion(
           getRegionForCoords(pos.coords.latitude, pos.coords.longitude),
         );
+        // 거리순 정렬(2차 GOAL-1)도 같은 위치를 재사용 — 권한 요청은 한 번.
+        setUserCoords({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        });
       },
       () => {},
       { timeout: 5000, maximumAge: 300000 },
@@ -1143,10 +1194,15 @@ export default function BookingPage() {
   const favoriteBoats = useMemo(() => favoritesFromMap(myBoats), [myBoats]);
   // "다시 안 탐" 배는 목록에서 숨기지 않고 맨 아래로 밀어낸다 — 실수로
   // 재예약하는 걸 막는 게 목적이라, 안 보이면 그 목적을 못 이룬다.
-  const sortedSearchBoats = useMemo(
-    () => sortByVerdict(searchBoats, myBoats),
-    [searchBoats, myBoats],
-  );
+  // 거리순은 verdict 정렬보다 먼저 — sortByVerdict가 안정 partition이라
+  // '안 탄다' 배는 여전히 맨 뒤로 가고, 각 구획 안에서 거리순이 유지된다.
+  const sortedSearchBoats = useMemo(() => {
+    const base =
+      sortByDist && userCoords
+        ? sortBoatsByDistance(searchBoats, userCoords.lat, userCoords.lng)
+        : searchBoats;
+    return sortByVerdict(base, myBoats);
+  }, [searchBoats, myBoats, sortByDist, userCoords]);
   const keywordFilteredSearchBoats = useMemo(
     () =>
       sortedSearchBoats.filter((b) =>
@@ -1757,6 +1813,20 @@ export default function BookingPage() {
             >
               {searchDate.slice(5).replace("-", "/")} 출조 선박
             </h3>
+            {/* 기존 e2e가 h3의 following-sibling::span으로 개수 라벨을
+                찾으므로, 칩을 넣어도 h3·span의 형제 관계는 유지한다. */}
+            <button
+              type="button"
+              onClick={handleToggleDistanceSort}
+              aria-pressed={sortByDist}
+              className={`ml-auto mr-2 text-[11px] px-2 py-1 rounded-lg border transition-colors ${
+                sortByDist
+                  ? "bg-[#c9a84c]/20 border-[#c9a84c]/40 text-[#c9a84c] font-semibold"
+                  : "bg-white/5 border-white/10 text-white/50"
+              }`}
+            >
+              거리순
+            </button>
             <span className="text-[11px] text-white/40" aria-live="polite">
               {searchResult
                 ? hasClientFilter
@@ -1765,6 +1835,12 @@ export default function BookingPage() {
                 : ""}
             </span>
           </div>
+          {geoError && (
+            <p role="status" className="text-[10px] text-white/40 px-1">
+              위치 권한이 없어 거리순 정렬을 쓸 수 없어요. 브라우저 설정에서
+              위치를 허용한 뒤 다시 눌러주세요.
+            </p>
+          )}
 
           {searchError ? (
             <p className="text-xs text-white/30 py-6 text-center">
@@ -1815,6 +1891,15 @@ export default function BookingPage() {
                     verdict={myBoats[boat.uid]?.verdict ?? null}
                     rideCount={myBoats[boat.uid]?.rides.length ?? 0}
                     memo={myBoats[boat.uid]?.memo ?? ""}
+                    distanceKm={
+                      sortByDist && userCoords
+                        ? distanceKmForAreaPath(
+                            boat.areaPath,
+                            userCoords.lat,
+                            userCoords.lng,
+                          )
+                        : null
+                    }
                   />
                 ))}
               </div>
