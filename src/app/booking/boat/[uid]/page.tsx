@@ -11,11 +11,31 @@ import {
   Users,
   MapPin,
   Fish,
+  Plus,
 } from "lucide-react";
 import type {
   BoatCalendar,
   BoatCalendarDay,
 } from "@/services/boatCalendarService";
+import {
+  getMyBoat,
+  updateMyBoat,
+  addRide,
+  type MyBoat,
+  type BoatVerdict,
+} from "@/services/myBoatService";
+
+const VERDICT_OPTIONS: { value: BoatVerdict; label: string }[] = [
+  { value: "again", label: "또 탄다" },
+  { value: "ok", label: "보통" },
+  { value: "never", label: "안 탄다" },
+];
+
+// Local date, not toISOString() — see booking/page.tsx for why UTC is wrong
+// for a KST default.
+function localISODate(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -44,6 +64,38 @@ export default function BoatDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [myBoat, setMyBoat] = useState<MyBoat | null>(null);
+  const [memoDraft, setMemoDraft] = useState("");
+  const [rideDate, setRideDate] = useState("");
+
+  // Client-only: localStorage isn't available during SSR, and "today" is
+  // deliberately not a useState lazy initializer for the same hydration
+  // reason as the date-search grid (booking/page.tsx).
+  useEffect(() => {
+    if (!uid) return;
+    const boat = getMyBoat(uid);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMyBoat(boat);
+    setMemoDraft(boat?.memo ?? "");
+    setRideDate(localISODate(new Date()));
+  }, [uid]);
+
+  const handleSetVerdict = (verdict: BoatVerdict) => {
+    const next = updateMyBoat(uid, {
+      verdict: myBoat?.verdict === verdict ? null : verdict,
+    });
+    setMyBoat(next);
+  };
+
+  const handleMemoBlur = () => {
+    if (memoDraft === (myBoat?.memo ?? "")) return;
+    setMyBoat(updateMyBoat(uid, { memo: memoDraft }));
+  };
+
+  const handleAddRide = () => {
+    if (!rideDate) return;
+    setMyBoat(addRide(uid, { date: rideDate }));
+  };
 
   // ?date=YYYY-MM-DD from the search grid jumps the calendar to that month
   // and pre-selects the day. Read after mount so server HTML and the
@@ -174,6 +226,65 @@ export default function BoatDetailPage() {
         ) : (
           <div className="h-72 rounded-2xl bg-white/3 animate-pulse" />
         )}
+
+        {/* 내 기록 — 예약 플랫폼은 만들 수 없는, 이 배에 대한 내 판단과 이력.
+            uid로 저장되므로 선사가 이름·모항을 바꿔도(GOAL-3) 그대로 따라간다. */}
+        <section className="rounded-2xl bg-white/3 border border-white/8 p-4 space-y-3">
+          <h2 className="text-xs text-white/40 font-semibold uppercase tracking-[0.15em]">
+            내 기록
+          </h2>
+          <div className="flex gap-1.5" role="group" aria-label="내 승선 판정">
+            {VERDICT_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => handleSetVerdict(opt.value)}
+                aria-pressed={myBoat?.verdict === opt.value}
+                className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${
+                  myBoat?.verdict === opt.value
+                    ? opt.value === "never"
+                      ? "bg-red-500/20 border-red-500/40 text-red-300"
+                      : "bg-[#c9a84c] border-[#c9a84c] text-[#080d14]"
+                    : "bg-white/5 border-white/10 text-white/60 hover:border-white/30"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <input
+            type="text"
+            value={memoDraft}
+            onChange={(e) => setMemoDraft(e.target.value)}
+            onBlur={handleMemoBlur}
+            placeholder="메모 (예: 화장실 없음, 선장님 친절)"
+            aria-label="이 선박에 대한 메모"
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#c9a84c]/50"
+          />
+          <div className="flex items-center gap-1.5">
+            <input
+              type="date"
+              value={rideDate}
+              onChange={(e) => setRideDate(e.target.value)}
+              aria-label="탄 날짜"
+              className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#c9a84c]/50"
+            />
+            <button
+              type="button"
+              onClick={handleAddRide}
+              className="shrink-0 flex items-center gap-1 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-white/70 hover:border-[#c9a84c]/40 hover:text-white transition-colors"
+            >
+              <Plus size={13} />
+              탄 날짜 추가
+            </button>
+          </div>
+          {myBoat && myBoat.rides.length > 0 && (
+            <p className="text-[11px] text-white/40">
+              승선 {myBoat.rides.length}회 ·{" "}
+              {myBoat.rides.map((r) => r.date).join(", ")}
+            </p>
+          )}
+        </section>
 
         {/* Month nav */}
         <div className="flex items-center justify-between px-1">

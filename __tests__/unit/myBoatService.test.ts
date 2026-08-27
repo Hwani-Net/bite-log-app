@@ -9,6 +9,9 @@ import {
   isFavorite,
   listFavorites,
   favoritesFromMap,
+  addRide,
+  sortByVerdict,
+  type MyBoatMap,
 } from '@/services/myBoatService';
 
 // vitest runs in the node environment (vitest.config.ts), so localStorage
@@ -204,5 +207,76 @@ describe('favorites', () => {
     };
     store.clear(); // storage is empty/stale; the map itself is the source of truth
     expect(favoritesFromMap(map)).toEqual([{ ...map['1'], latest: null }]);
+  });
+});
+
+describe('addRide', () => {
+  it('appends a ride without touching verdict or memo', () => {
+    updateMyBoat('4247', { verdict: 'again', memo: '선장님 친절' });
+    const boat = addRide('4247', { date: '2026-08-20', memo: '조황 좋음' });
+    expect(boat.rides).toEqual([{ date: '2026-08-20', memo: '조황 좋음' }]);
+    expect(boat.verdict).toBe('again');
+    expect(boat.memo).toBe('선장님 친절');
+  });
+
+  it('accumulates multiple rides in order', () => {
+    addRide('4247', { date: '2026-07-01' });
+    addRide('4247', { date: '2026-08-20' });
+    expect(getMyBoat('4247')?.rides.map((r) => r.date)).toEqual([
+      '2026-07-01',
+      '2026-08-20',
+    ]);
+  });
+});
+
+describe('sortByVerdict', () => {
+  const boat = (uid: string) => ({ uid, name: `배${uid}` });
+
+  it('pushes "never" boats to the bottom and leaves everyone else in place', () => {
+    const boats = [boat('1'), boat('2'), boat('3'), boat('4')];
+    const myBoats: MyBoatMap = {
+      '2': { uid: '2', favorite: false, verdict: 'never', memo: '', rides: [], snapshots: [] },
+    };
+    expect(sortByVerdict(boats, myBoats).map((b) => b.uid)).toEqual([
+      '1',
+      '3',
+      '4',
+      '2',
+    ]);
+  });
+
+  it('is a no-op when nothing is verdict "never"', () => {
+    const boats = [boat('1'), boat('2'), boat('3')];
+    const myBoats: MyBoatMap = {
+      '1': { uid: '1', favorite: false, verdict: 'again', memo: '', rides: [], snapshots: [] },
+    };
+    expect(sortByVerdict(boats, myBoats).map((b) => b.uid)).toEqual([
+      '1',
+      '2',
+      '3',
+    ]);
+  });
+
+  it('handles multiple "never" boats, keeping their relative order at the bottom', () => {
+    const boats = [boat('1'), boat('2'), boat('3'), boat('4')];
+    const myBoats: MyBoatMap = {
+      '1': { uid: '1', favorite: false, verdict: 'never', memo: '', rides: [], snapshots: [] },
+      '3': { uid: '3', favorite: false, verdict: 'never', memo: '', rides: [], snapshots: [] },
+    };
+    expect(sortByVerdict(boats, myBoats).map((b) => b.uid)).toEqual([
+      '2',
+      '4',
+      '1',
+      '3',
+    ]);
+  });
+
+  it('does not mutate the input array', () => {
+    const boats = [boat('1'), boat('2')];
+    const myBoats: MyBoatMap = {
+      '1': { uid: '1', favorite: false, verdict: 'never', memo: '', rides: [], snapshots: [] },
+    };
+    sortByVerdict(boats, myBoats);
+    expect(boats.map((b) => b.uid)).toEqual(['1', '2']);
   });
 });

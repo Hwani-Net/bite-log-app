@@ -127,6 +127,61 @@ test.describe('Booking search — /booking', () => {
     await expect(page.locator('h3', { hasText: '즐겨찾는 선사' })).toHaveCount(0);
   });
 
+  test('marking a boat "안 탄다" badges it and pushes it to the bottom of the results', async ({
+    page,
+  }) => {
+    const cards = resultsGrid(page).locator('[data-testid="boat-card"]');
+    await expect(cards.first()).toBeVisible({ timeout: 15000 });
+
+    const firstCard = cards.first();
+    const href = await firstCard.locator('a[href^="/booking/boat/"]').getAttribute('href');
+    const uid = href!.match(/\/booking\/boat\/(\d+)/)![1];
+
+    await page.goto(`/booking/boat/${uid}`);
+    const neverButton = page.getByRole('button', { name: '안 탄다', exact: true });
+    await expect(neverButton).toBeVisible({ timeout: 15000 });
+    await neverButton.click();
+    await expect(neverButton).toHaveAttribute('aria-pressed', 'true');
+
+    await page.goto('/booking');
+    const reloadedCards = resultsGrid(page).locator('[data-testid="boat-card"]');
+    await expect(reloadedCards.first()).toBeVisible({ timeout: 15000 });
+
+    // thefishing.kr's live listing for "today" isn't guaranteed to return
+    // the exact same set on a second fetch, so this doesn't compare
+    // against the first load — it asserts the actual invariant
+    // sortByVerdict guarantees on whatever the current result set is: a
+    // "never"-marked boat sorts to the end of the list it's a part of.
+    const total = await reloadedCards.count();
+    // Match on "?" too — a bare uid prefix like "123" would otherwise also
+    // match a card for uid "1234".
+    const markedCard = reloadedCards
+      .filter({ has: page.locator(`a[href^="/booking/boat/${uid}?"]`) })
+      .first();
+    if ((await markedCard.count()) === 0) {
+      // thefishing.kr's own listing for today no longer includes this uid
+      // at all (live data moved on) — nothing left to assert position on.
+      // Annotate rather than silently pass with zero assertions run, so a
+      // vacuous pass is visible in the report instead of looking identical
+      // to a real one.
+      test.info().annotations.push({
+        type: 'skipped-assertion',
+        description: `uid ${uid} no longer in today's live listing`,
+      });
+      return;
+    }
+    await expect(markedCard).toContainText('다시 안 탐');
+    await expect(markedCard).toHaveAttribute('data-verdict', 'never');
+    const markedIndex = await reloadedCards.evaluateAll(
+      (els, targetUid) =>
+        els.findIndex((el) =>
+          el.querySelector(`a[href^="/booking/boat/${targetUid}?"]`),
+        ),
+      uid,
+    );
+    expect(markedIndex).toBe(total - 1);
+  });
+
   test('clicking a boat card navigates to its calendar page', async ({ page }) => {
     const link = resultsGrid(page)
       .locator('[data-testid="boat-card"]')

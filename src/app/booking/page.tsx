@@ -46,8 +46,10 @@ import {
   loadMyBoats,
   toggleFavorite,
   favoritesFromMap,
+  sortByVerdict,
   type MyBoatMap,
   type BoatSnapshot,
+  type BoatVerdict,
 } from "@/services/myBoatService";
 
 // @mock-data — editorial fallback only for months with no FISH_SEASON_DB
@@ -459,11 +461,17 @@ function BoatListingCard({
   date,
   isFav,
   onToggleFav,
+  verdict,
+  rideCount,
+  memo,
 }: {
   boat: BoatListing;
   date: string;
   isFav: boolean;
   onToggleFav: (boat: BoatListing) => void;
+  verdict: BoatVerdict | null;
+  rideCount: number;
+  memo: string;
 }) {
   const shortArea = boat.areaPath.split(" > ").slice(1).join(" · ");
   return (
@@ -474,6 +482,7 @@ function BoatListingCard({
     // clicks pass through to it everywhere except the star.
     <div
       data-testid="boat-card"
+      data-verdict={verdict ?? undefined}
       className="relative bg-white/3 border border-white/8 rounded-2xl overflow-hidden hover:border-[#c9a84c]/40 transition-all"
     >
       <Link
@@ -481,7 +490,12 @@ function BoatListingCard({
         className="absolute inset-0 z-0"
         aria-label={`${boat.name} 예약 달력 보기`}
       />
-      <div className="relative w-full h-28 bg-white/5 pointer-events-none">
+      {/* "다시 안 탐" de-ranks the whole card, but the badge explaining WHY
+          stays at full opacity below — dimming the reason along with
+          everything else would defeat the point of showing it at all. */}
+      <div
+        className={`relative w-full h-28 bg-white/5 pointer-events-none ${verdict === "never" ? "opacity-50" : ""}`}
+      >
         {boat.imageUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -511,15 +525,30 @@ function BoatListingCard({
         <Star size={13} fill={isFav ? "currentColor" : "none"} />
       </button>
       <div className="p-2.5 pointer-events-none">
-        <h4 className="text-xs font-bold text-white truncate mb-0.5">
-          {boat.name}
-        </h4>
-        <p className="text-[10px] text-white/40 truncate mb-1">
-          {shortArea || boat.areaPath}
-        </p>
-        <p className="text-[10px] text-[#c9a84c]/80 truncate">
-          {boat.fishTypes || "어종 정보 없음"}
-        </p>
+        <div className={verdict === "never" ? "opacity-50" : ""}>
+          <h4 className="text-xs font-bold text-white truncate mb-0.5">
+            {boat.name}
+          </h4>
+          <p className="text-[10px] text-white/40 truncate mb-1">
+            {shortArea || boat.areaPath}
+          </p>
+          <p className="text-[10px] text-[#c9a84c]/80 truncate">
+            {boat.fishTypes || "어종 정보 없음"}
+          </p>
+        </div>
+        {verdict === "again" && (
+          <p className="text-[10px] text-amber-300 truncate mt-1">
+            ⭐ {rideCount}회 승선 · 다시 타고 싶음
+          </p>
+        )}
+        {verdict === "never" && (
+          <p className="text-[10px] text-red-300 truncate mt-1">
+            ⚠️ 다시 안 탐
+          </p>
+        )}
+        {memo && (verdict === "again" || verdict === "never") && (
+          <p className="text-[9px] text-white/40 truncate">{memo}</p>
+        )}
       </div>
     </div>
   );
@@ -861,6 +890,12 @@ export default function BookingPage() {
   );
 
   const favoriteBoats = useMemo(() => favoritesFromMap(myBoats), [myBoats]);
+  // "다시 안 탐" 배는 목록에서 숨기지 않고 맨 아래로 밀어낸다 — 실수로
+  // 재예약하는 걸 막는 게 목적이라, 안 보이면 그 목적을 못 이룬다.
+  const sortedSearchBoats = useMemo(
+    () => sortByVerdict(searchBoats, myBoats),
+    [searchBoats, myBoats],
+  );
 
   const checklist = selectedSpecies
     ? [
@@ -1119,13 +1154,16 @@ export default function BookingPage() {
                 data-testid="search-results"
                 className={`grid grid-cols-2 gap-2 ${searchLoading ? "opacity-60" : ""}`}
               >
-                {searchBoats.map((boat) => (
+                {sortedSearchBoats.map((boat) => (
                   <BoatListingCard
                     key={boat.uid}
                     boat={boat}
                     date={searchDate}
                     isFav={!!myBoats[boat.uid]?.favorite}
                     onToggleFav={handleToggleFavorite}
+                    verdict={myBoats[boat.uid]?.verdict ?? null}
+                    rideCount={myBoats[boat.uid]?.rides.length ?? 0}
+                    memo={myBoats[boat.uid]?.memo ?? ""}
                   />
                 ))}
               </div>

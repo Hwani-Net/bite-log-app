@@ -142,6 +142,29 @@ export function isFavorite(uid: string): boolean {
   return getMyBoat(uid)?.favorite ?? false;
 }
 
+/** 탄 날짜를 이력에 추가한다. 판정·메모는 그대로 두고 이력만 늘린다. */
+export function addRide(uid: string, ride: BoatRide): MyBoat {
+  const boat = getMyBoat(uid) ?? emptyBoat(uid);
+  return updateMyBoat(uid, { rides: [...boat.rides, ride] });
+}
+
+/**
+ * "다시 안 탐" 배는 목록 밖으로 완전히 숨기지 않는다 — 목적이 실수로
+ * 재예약하는 걸 막는 것이므로, 보이되 맨 아래로 밀어낸다. Array.sort는
+ * 안정 정렬이 보장되므로(V8/Node/모든 현대 엔진), 'never' 여부로만 나누면
+ * 나머지는 원래 순서를 그대로 유지한다.
+ */
+export function sortByVerdict<T extends { uid: string }>(
+  items: T[],
+  myBoats: MyBoatMap,
+): T[] {
+  return [...items].sort((a, b) => {
+    const aNever = myBoats[a.uid]?.verdict === "never" ? 1 : 0;
+    const bNever = myBoats[b.uid]?.verdict === "never" ? 1 : 0;
+    return aNever - bNever;
+  });
+}
+
 export type FavoriteBoat = MyBoat & { latest: BoatSnapshot | null };
 
 /**
