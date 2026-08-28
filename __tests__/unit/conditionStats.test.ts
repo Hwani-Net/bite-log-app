@@ -1,0 +1,95 @@
+import { describe, it, expect } from 'vitest';
+import {
+  conditionStats,
+  tempBucket,
+  windBucket,
+  MIN_SAMPLES,
+} from '@/lib/conditionStats';
+import type { CatchRecord } from '@/types';
+
+function record(partial: Partial<CatchRecord>): CatchRecord {
+  return {
+    id: Math.random().toString(36).slice(2),
+    createdAt: '2026-08-01T09:00:00.000Z',
+    date: '2026-08-01',
+    location: { id: 's', name: '오천항', lat: 36.4, lng: 126.5 },
+    species: '우럭',
+    count: 2,
+    photos: [],
+    visibility: 'private',
+    ...partial,
+  } as CatchRecord;
+}
+
+describe('bucket boundaries', () => {
+  it('temp buckets split exactly at 10/17/24', () => {
+    expect(tempBucket(9.9)).toBe('10°C 미만');
+    expect(tempBucket(10)).toBe('10~17°C');
+    expect(tempBucket(16.9)).toBe('10~17°C');
+    expect(tempBucket(17)).toBe('17~24°C');
+    expect(tempBucket(24)).toBe('24°C 이상');
+  });
+
+  it('wind buckets split exactly at 4/8', () => {
+    expect(windBucket(3.9)).toBe('바람 약(4m/s 미만)');
+    expect(windBucket(4)).toBe('바람 중(4~8m/s)');
+    expect(windBucket(8)).toBe('바람 강(8m/s 이상)');
+  });
+});
+
+describe('conditionStats', () => {
+  it('averages per bucket and picks the best only with enough samples', () => {
+    const records = [
+      // 17~24°C 구간 4회, 평균 (5+4+3+4)/4 = 4
+      record({ weather: { condition: 'clear', tempC: 18 }, count: 5 }),
+      record({ weather: { condition: 'clear', tempC: 20 }, count: 4 }),
+      record({ weather: { condition: 'clear', tempC: 22 }, count: 3 }),
+      record({ weather: { condition: 'clear', tempC: 19 }, count: 4 }),
+      // 10~17°C 구간 1회, 평균 9 — 표본 부족이라 best가 되면 안 됨
+      record({ weather: { condition: 'clear', tempC: 12 }, count: 9 }),
+    ];
+    const temp = conditionStats(records).find((a) => a.key === 'temp')!;
+    expect(temp.sampled).toBe(5);
+    expect(temp.best?.label).toBe('17~24°C'); // 표본 1회짜리 9마리에 안 속는다
+    expect(temp.best?.avgCount).toBe(4);
+    expect(temp.best?.records).toBeGreaterThanOrEqual(MIN_SAMPLES);
+    // 구간 자체는 표본 부족이어도 나열엔 나온다.
+    expect(temp.buckets.map((b) => b.label)).toContain('10~17°C');
+  });
+
+  it('drops records lacking the axis value from that axis only', () => {
+    const records = [
+      record({ weather: { condition: 'clear', tempC: 18 } }), // windSpeed 없음
+      record({
+        weather: { condition: 'clear', tempC: 18, windSpeed: 2 },
+        tide: { stationName: '보령', tides: [], currentPhase: '들물 3물' },
+      }),
+      record({}), // 조건 전무
+    ];
+    const axes = conditionStats(records);
+    expect(axes.find((a) => a.key === 'temp')!.sampled).toBe(2);
+    expect(axes.find((a) => a.key === 'wind')!.sampled).toBe(1);
+    expect(axes.find((a) => a.key === 'tide')!.sampled).toBe(1);
+  });
+
+  it('groups tide by the stored phase label, most-sampled first', () => {
+    const tide = (p: string) => ({ stationName: '보령', tides: [], currentPhase: p });
+    const records = [
+      record({ tide: tide('들물 3물'), count: 4 }),
+      record({ tide: tide('들물 3물'), count: 6 }),
+      record({ tide: tide('들물 3물'), count: 5 }),
+      record({ tide: tide('조금'), count: 1 }),
+    ];
+    const axis = conditionStats(records).find((a) => a.key === 'tide')!;
+    expect(axis.buckets[0].label).toBe('들물 3물');
+    expect(axis.best?.label).toBe('들물 3물');
+    expect(axis.best?.avgCount).toBe(5);
+  });
+
+  it('yields empty axes with null best on no records', () => {
+    for (const axis of conditionStats([])) {
+      expect(axis.best).toBeNull();
+      expect(axis.sampled).toBe(0);
+    }
+  });
+});

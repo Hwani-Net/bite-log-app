@@ -24,7 +24,9 @@ import {
   Dna,
   Compass,
   Clock,
+  Wind,
 } from "lucide-react";
+import { conditionStats } from "@/lib/conditionStats";
 import { DynamicIcon } from "@/lib/iconMap";
 import {
   BarChart,
@@ -280,6 +282,9 @@ export default function StatsPage() {
   const [period, setPeriod] = useState<PeriodFilter>("all");
   const [stats, setStats] = useState<UserStats | null>(null);
   const [records, setRecords] = useState<CatchRecord[]>([]);
+  // 나의 조건표 — DNA/배지처럼 기간 필터와 무관하게 전체 기록 기준
+  // (조건별 표본은 많을수록 의미 있어서다).
+  const conditionAxes = useMemo(() => conditionStats(records), [records]);
   const [badges, setBadges] = useState<AchievementBadge[]>([]);
   const [dna, setDna] = useState<FishingDna | null>(null);
   const [activeTab, setActiveTab] = useState<
@@ -669,6 +674,69 @@ export default function StatsPage() {
                     </Link>
                   </div>
                 )}
+              </div>
+            </section>
+
+            {/* 나의 조건표 (3차 GOAL-3) — 기록에 저장된 기온·풍속·물때를
+                구간별 평균 마릿수로. 표본 부족 축은 정직하게 빈 상태. */}
+            <section className="mt-2 px-4 mb-8" data-testid="condition-table">
+              <h3 className="text-white/50 text-base font-bold mb-3 flex items-center gap-2 uppercase tracking-[0.2em]">
+                {locale === "ko" ? "나의 조건표" : "My Conditions"}
+                <Wind size={16} className="text-[#7dd3fc]" />
+              </h3>
+              <div className="space-y-3">
+                {conditionAxes.map((axis) => (
+                  <div
+                    key={axis.key}
+                    className="glass-morphism border border-white/5 rounded-xl p-4"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-semibold text-white/50 uppercase tracking-[0.1em]">
+                        {axis.name}
+                      </span>
+                      <span className="text-[10px] text-white/30">
+                        {axis.sampled > 0
+                          ? `표본 ${axis.sampled}회`
+                          : ""}
+                      </span>
+                    </div>
+                    {axis.best ? (
+                      <>
+                        <p className="text-sm font-bold text-white">
+                          {axis.best.label}
+                          <span className="text-[#7dd3fc]">
+                            {" "}
+                            평균 {axis.best.avgCount}마리
+                          </span>
+                          <span className="text-white/35 text-xs font-normal">
+                            {" "}
+                            ({axis.best.records}회)
+                          </span>
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {axis.buckets.map((b) => (
+                            <span
+                              key={b.label}
+                              className={`text-[10px] px-2 py-1 rounded-lg border ${
+                                b.label === axis.best!.label
+                                  ? "bg-[#7dd3fc]/15 border-[#7dd3fc]/40 text-[#7dd3fc] font-semibold"
+                                  : "bg-white/4 border-white/8 text-white/50"
+                              }`}
+                            >
+                              {b.label} · {b.avgCount}마리/{b.records}회
+                            </span>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-xs text-white/35">
+                        {locale === "ko"
+                          ? "기록이 쌓이면 이 조건에서의 내 평균이 나타나요 (구간당 3회 이상)"
+                          : "Log more catches to see your averages (3+ per bucket)"}
+                      </p>
+                    )}
+                  </div>
+                ))}
               </div>
             </section>
           </>
