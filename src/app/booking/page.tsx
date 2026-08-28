@@ -433,7 +433,7 @@ async function fetchDayAvailability(
       // thefishing.kr 프록시라 apiFetch 기본 10초보다 오래 걸릴 수 있다
       // (서버측 fetchWithRetry 자체 타임아웃이 12초) — 짧게 잡으면
       // 진짜로 곧 성공했을 요청까지 조기 실패로 보고하게 된다.
-      { context: "boat-calendar", retries: 0, timeout: 13_000 },
+      { context: "boat-calendar", retries: 0, timeout: 17_000 },
     );
     if (Array.isArray(data.days)) {
       try {
@@ -1229,9 +1229,10 @@ export default function BookingPage() {
     if (searchSpecies) q.set("species", searchSpecies);
     apiFetch<BoatListingPage & { ok?: boolean }>(
       `/api/boat-listings?${q.toString()}`,
-      // thefishing.kr 프록시라 apiFetch 기본 10초보다 오래 걸릴 수 있다
-      // (서버측 fetchWithRetry 자체 타임아웃이 12초).
-      { context: "boat-listings", retries: 0, timeout: 13_000 },
+      // thefishing.kr 프록시라 apiFetch 기본 10초보다 오래 걸릴 수 있다 —
+      // 서버측 fetchWithRetry 자체 타임아웃이 15초라, 클라이언트가 그보다
+      // 먼저 포기하면 서버가 곧 성공했을 응답까지 실패로 보고하게 된다.
+      { context: "boat-listings", retries: 0, timeout: 17_000 },
     )
       .then((data) => {
         if (cancelled) return;
@@ -1713,9 +1714,20 @@ export default function BookingPage() {
   // 항구 칩은 "지금 이 조건에서 뭐가 있는지"를 보여줘야 하니 항구/정원
   // 필터를 적용하기 전, 키워드까지만 거른 목록에서 뽑는다 — 이미 항구를
   // 골랐다고 칩 목록이 그 항구 하나로 쪼그라들면 다른 항구로 못 바꾼다.
+  //
+  // thefishing.kr 쪽만 뽑으면 첫 페이지(20척)에 있는 항구만 보인다 —
+  // 전체가 347척이어도 화면엔 그중 몇 개뿐이라 "동해·남해는 항구가 아예
+  // 없고 서해도 몇 개뿐"으로 보였다(2026-08-29 사용자 지적). 낚시뚜는
+  // Firestore에 이미 전수(177/177) 동기화돼 있고 같은 searchRegion으로
+  // 이미 걸러져 있으니, 추가 요청 없이 여기 합치면 실제 있는 항구 폭을
+  // 훨씬 더 보여줄 수 있다.
   const portOptions = useMemo(
-    () => extractPorts(keywordFilteredSearchBoats.map((b) => b.areaPath)),
-    [keywordFilteredSearchBoats],
+    () =>
+      extractPorts([
+        ...keywordFilteredSearchBoats.map((b) => b.areaPath),
+        ...keywordFilteredDirectoryBoats.map((b) => b.harbor),
+      ]),
+    [keywordFilteredSearchBoats, keywordFilteredDirectoryBoats],
   );
   const finalFilteredSearchBoats = useMemo(
     () =>

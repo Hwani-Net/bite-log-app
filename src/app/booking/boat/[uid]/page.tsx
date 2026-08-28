@@ -190,9 +190,10 @@ export default function BoatDetailPage() {
     setError(false);
     apiFetch<BoatCalendar & { ok?: boolean }>(
       `/api/boat-calendar?uid=${uid}&ym=${ym}`,
-      // thefishing.kr 프록시라 apiFetch 기본 10초보다 오래 걸릴 수 있다
-      // (서버측 fetchWithRetry 자체 타임아웃이 12초).
-      { context: "boat-calendar", retries: 0, timeout: 13_000 },
+      // thefishing.kr 프록시라 apiFetch 기본 10초보다 오래 걸릴 수 있다 —
+      // 서버측 fetchWithRetry 자체 타임아웃이 15초라, 클라이언트가 그보다
+      // 먼저 포기하면 서버가 곧 성공했을 응답까지 실패로 보고하게 된다.
+      { context: "boat-calendar", retries: 0, timeout: 17_000 },
     )
       .then((data) => {
         if (cancelled) return;
