@@ -38,7 +38,10 @@ service cloud.firestore {
                             || request.resource.data.likeCount == resource.data.likeCount - 1)
                       )
                       ||
-                      // ...or bump commentCount by exactly one (comment write path)
+                      // ...or bump commentCount by exactly one (comment write path).
+                      // Accepted v1 model: like likeCount above, a scripted loop
+                      // could inflate this counter — same trust level as likes.
+                      // A Functions-owned counter is the upgrade path if abused.
                       (
                         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['commentCount'])
                         && request.resource.data.commentCount is int
@@ -54,9 +57,13 @@ service cloud.firestore {
       // field the client never wrote (the schema is `content`) — comment
       // creation was silently impossible against Firestore until this was
       // aligned (4차 GOAL-4).
+      // userDisplayName is client-provided (same trust boundary as
+      // companionPosts.authorName). No delete UI exists yet — when one
+      // ships, pair it with a commentCount decrement.
       match /comments/{commentId} {
         allow read: if true;
         allow create: if request.auth != null
+                      && exists(/databases/$(database)/documents/publicFeed/$(feedId))
                       && request.resource.data.userId == request.auth.uid
                       && request.resource.data.keys().hasOnly(['userId', 'userDisplayName', 'content', 'createdAt'])
                       && request.resource.data.content is string

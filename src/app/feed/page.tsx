@@ -120,10 +120,29 @@ export default function FeedPage() {
   async function openComments(item: PublicFeedItem) {
     setCommentInputId(item.id);
     if (item.comments !== undefined) return; // 이미 로드됨
-    const loaded = await getComments(item.id).catch(() => []);
+    // 실패를 []로 캐시하면 "댓글 0개"라는 거짓이 영구 저장되고 재시도
+    // 기회도 사라진다 — 실패면 undefined로 두어 다음 펼침에서 재시도.
+    const loaded = await getComments(item.id).catch(() => null);
+    if (loaded === null) return;
     setFeed((prev) =>
       prev.map((fi) =>
-        fi.id === item.id ? { ...fi, comments: loaded } : fi,
+        fi.id === item.id
+          ? {
+              ...fi,
+              // 로드 중 사용자가 단 낙관적 댓글을 서버 목록이 덮어쓰지
+              // 않게 병합(id 기준 중복 제거).
+              comments: [
+                ...loaded,
+                ...(fi.comments ?? []).filter(
+                  (c) => !loaded.some((l) => l.id === c.id),
+                ),
+              ],
+              // 구버전 발행 글엔 commentCount 필드가 없어 0으로 보인다 —
+              // 실로드한 개수로 표시를 보정(서버 백필은 소유자 권한 문제로
+              // 보류, 펼친 화면에서만이라도 수와 본문을 일치시킨다).
+              commentCount: Math.max(fi.commentCount, loaded.length),
+            }
+          : fi,
       ),
     );
   }
@@ -422,6 +441,7 @@ export default function FeedPage() {
                       <div className="flex items-center gap-2 mt-1">
                         <input
                           type="text"
+                          maxLength={500}
                           value={commentText}
                           onChange={(e) => setCommentText(e.target.value)}
                           onKeyDown={(e) =>

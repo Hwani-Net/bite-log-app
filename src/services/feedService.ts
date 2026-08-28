@@ -12,6 +12,7 @@ import {
   limit,
   increment,
   runTransaction,
+  writeBatch,
   Firestore } from 'firebase/firestore';
 import { getFirebaseDb, isFirebaseReady, getFirebaseAuth } from '@/lib/firebase';
 import { ensureAuthUid } from '@/services/companionService';
@@ -233,6 +234,13 @@ export async function toggleLike(feedItemId: string): Promise<{ liked: boolean; 
  * 하드코딩해 모든 댓글 작성자가 서로에게 "나"로 보였다(4차 GOAL-4).
  * 부모 문서의 commentCount도 +1 — 목록의 N+1 제거를 지탱하는 비정규화.
  */
+/** 댓글 표시명 결정 — 로그인 실이름 우선, 없으면 익명, 30자 상한. */
+export function commentIdentity(
+  displayName: string | null | undefined,
+): string {
+  return (displayName || '익명 낚시인').slice(0, 30);
+}
+
 export async function addComment(
   feedItemId: string,
   content: string
@@ -242,24 +250,22 @@ export async function addComment(
   const uid = await ensureAuthUid();
   if (!uid) return null;
   const auth = getFirebaseAuth();
-  const displayName = auth?.currentUser?.displayName || '익명 낚시인';
 
-  const commentsRef = collection(db, 'publicFeed', feedItemId, 'comments');
   const newComment = {
     userId: uid,
-    userDisplayName: displayName.slice(0, 30),
+    userDisplayName: commentIdentity(auth?.currentUser?.displayName),
     content: content.slice(0, 500),
     createdAt: new Date().toISOString() };
-  const docRef = await addDoc(commentsRef, newComment);
-  // 카운트 증분 실패(경합 등)는 댓글 자체를 무효화하지 않는다 — 수는
-  // 최선 노력 비정규화 값.
-  try {
-    await updateDoc(doc(db, 'publicFeed', feedItemId), {
-      commentCount: increment(1) });
-  } catch {
-    // best-effort
-  }
-  return { id: docRef.id, ...newComment };
+  // 댓글 생성과 카운트 증분을 한 배치로 — 따로 쓰면 "댓글은 있는데 수가
+  // 모자란" 드리프트를 스스로 만든다(교차검수 지적). increment는 서버
+  // 원자 연산이라 규칙의 +1 검증·병행 증분과 호환된다.
+  const commentRef = doc(collection(db, 'publicFeed', feedItemId, 'comments'));
+  const batch = writeBatch(db);
+  batch.set(commentRef, newComment);
+  batch.update(doc(db, 'publicFeed', feedItemId), {
+    commentCount: increment(1) });
+  await batch.commit();
+  return { id: commentRef.id, ...newComment };
 }
 
 export async function getComments(feedItemId: string): Promise<FeedComment[]> {
