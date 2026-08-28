@@ -175,9 +175,6 @@ async function generateAISummary(params: {
   communitySummary: string;
   tackleAdvice: TackleAdvice | null;
 }): Promise<string> {
-  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-  if (!apiKey) return "브리핑 생성 실패 (AI 키 없음)";
-
   const prompt = `당신은 한국의 낚시 전문가 AI입니다. 아래 정보를 보고 출조 전 핵심 브리핑을 한국어로 작성하세요.
 
 어종: ${params.species}
@@ -197,17 +194,17 @@ ${params.communitySummary}
 150자 이내로 간결하게 작성. 이모지 포함.`;
 
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 300 },
-        }),
-      },
-    );
+    // /api/gemini 프록시 경유 — 키를 서버에만 두려고 만든 프록시를 두고
+    // 여기만 generativelanguage를 직접 치면서 NEXT_PUBLIC_ 키를 클라이언트
+    // 번들에 실어 보내고 있었다(교차 조사에서 발견된 키 노출 경로).
+    const res = await fetch("/api/gemini", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 300 },
+      }),
+    });
     if (!res.ok) {
       const errText = await res.text().catch(() => "");
       console.error("Gemini API error:", res.status, errText);

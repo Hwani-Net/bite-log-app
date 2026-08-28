@@ -62,14 +62,18 @@
 src/app/
 ├── alerts/          # 알림
 ├── bite-forecast/   # 입질 예보
-├── booking/         # 예약
+├── booking/         # 예약 (+ boat/[uid] 배별 달력)
+├── catch-value/     # 조과 시세
 ├── concierge/       # 컨시어지
 ├── feed/            # 피드
-├── live-dashboard/  # 라이브 대시보드
+├── fishdex/         # 어류 도감
 ├── news/            # 뉴스
 ├── ranking/         # 랭킹
 ├── record/          # 기록 (단건)
-├── records/         # 기록 (목록)
+├── records/         # 기록 (목록 + detail)
 ├── regulations/     # 규정
 ├── season-forecast/ # 시즌 예보
+├── settings/        # 설정
+├── stats/           # 통계 (DNA·지도·달력·배지)
+├── trip-plan/       # 출조 전 브리핑
 ```

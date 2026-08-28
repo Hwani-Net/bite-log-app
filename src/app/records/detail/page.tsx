@@ -74,7 +74,9 @@ function RecordDetailContent() {
     try {
       const updated = await getDataService().updateCatchRecord(record.id, {
         date,
-        location: { name: locationName.trim() },
+        // 기존 location을 스프레드로 보존 — name만 바꿔야지, {name}만 보내면
+        // 제목 하나 고칠 때마다 GPS 좌표(lat/lng)가 통째로 지워진다.
+        location: { ...record.location, name: locationName.trim() },
         species,
         count,
         sizeCm: sizeCm ? Number(sizeCm) : undefined,
@@ -156,6 +158,7 @@ function RecordDetailContent() {
             <>
               <button
                 onClick={() => setEditing(true)}
+                aria-label={locale === "ko" ? "수정" : "Edit"}
                 className="text-[#c9a84c] size-10 flex items-center justify-center rounded-full hover:bg-[#c9a84c]/10 transition-colors"
               >
                 <Edit3 size={20} />
