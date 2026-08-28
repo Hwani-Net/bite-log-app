@@ -1,8 +1,8 @@
 import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import { getFirebaseDb, isFirebaseReady } from "@/lib/firebase";
 import { RankingCategory, RankingData, RankingEntry } from "@/types/ranking";
-import { computeBadges, type AchievementBadge } from "@/services/badgeService";
-import type { CatchRecord } from "@/types";
+import { computeBadges } from "@/services/badgeService";
+import type { Badge, BadgeType, CatchRecord } from "@/types";
 
 // ====================================================================
 // Firebase Ranking Service
@@ -109,13 +109,27 @@ async function fetchAndAggregate(): Promise<Map<string, UserAggregate>> {
  * 복원 가능한 최소 형태(마릿수·최대 크기·어종 수)만 합성해 넘긴다 —
  * 날짜 기반 배지(연속 출조 등)는 이 경로에서 판정 불가라 빠진다.
  */
-function badgesFromAggregate(a: UserAggregate): AchievementBadge[] {
+// 획득 개수로 등급을 매긴다 — RankingEntry.user.badges는 Badge[](등급형)
+// 이고 badgeService는 AchievementBadge[](진행형)이라 변환이 필요하다.
+function badgeTier(index: number): BadgeType {
+  const tiers: BadgeType[] = [
+    "beginner",
+    "intermediate",
+    "expert",
+    "master",
+    "legend",
+  ];
+  return tiers[Math.min(index, tiers.length - 1)];
+}
+
+function badgesFromAggregate(a: UserAggregate): Badge[] {
   const synthetic: CatchRecord[] = [];
   const species = Array.from(a.speciesSet);
   for (let i = 0; i < Math.max(a.totalCount, species.length); i++) {
-    synthetic.push({
+    const synth: CatchRecord = {
       id: `agg-${a.uid}-${i}`,
       createdAt: "",
+      updatedAt: "",
       date: "",
       location: { name: "" },
       species: species[i % Math.max(species.length, 1)] ?? "",
@@ -123,9 +137,18 @@ function badgesFromAggregate(a: UserAggregate): AchievementBadge[] {
       sizeCm: i === 0 ? a.maxSizeCm : undefined,
       photos: [],
       visibility: "public",
-    } as CatchRecord);
+    };
+    synthetic.push(synth);
   }
-  return computeBadges(synthetic).filter((b) => b.earned);
+  return computeBadges(synthetic)
+    .filter((b) => b.earned)
+    .map((b, i) => ({
+      id: b.id,
+      type: badgeTier(i),
+      name: b.name.ko,
+      description: b.description.ko,
+      earnedAt: "",
+    }));
 }
 
 function buildRealEntries(
