@@ -126,6 +126,8 @@ export function analyzeFishingDna(records: CatchRecord[]): FishingDna | null {
     const tideMap = new Map<string, number>();
     tideRecords.forEach((r) => {
       const phase = r.tide!.currentPhase!;
+      // count 가중이 의도다 — "황금 물때"는 방문 횟수가 아니라 실제로
+      // 많이 잡힌 물때. 꽝친 날(count 0)은 기여 0인 게 맞다.
       tideMap.set(phase, (tideMap.get(phase) ?? 0) + r.count);
     });
     const sortedTides = Array.from(tideMap.entries()).sort((a, b) => b[1] - a[1]);

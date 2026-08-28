@@ -757,6 +757,14 @@ export default function StatsPage() {
                   </p>
                   <h2 className="text-2xl font-black mb-1 text-[#c9a84c] gold-glow">
                     {locale === "ko" ? dna.archetypeKo : dna.archetypeEn}
+                    {/* 아키타입도 같은 시간 표본에서 나오므로, 저장 시각
+                        폴백이 섞였으면 여기에도 추정임을 밝힌다. */}
+                    {dna.timeSlotEstimated && (
+                      <span className="text-sm font-semibold text-white/40 align-middle">
+                        {" "}
+                        ({locale === "ko" ? "추정" : "est."})
+                      </span>
+                    )}
                   </h2>
                   <p className="text-xs text-white/60">
                     {dna.totalRecords}
