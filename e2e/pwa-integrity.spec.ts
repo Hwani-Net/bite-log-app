@@ -16,13 +16,13 @@ test.describe('PWA integrity', () => {
     request,
   }) => {
     const sw = await (await request.get('/sw.js')).text();
-    expect(sw).toContain('bitelog-v4'); // 캐시 버전 증가
+    expect(sw).toContain('bitelog-v5'); // 캐시 버전 증가
     for (const route of ['/booking', '/trip-plan', '/catch-value', '/fishdex', '/alerts']) {
       expect(sw, route).toContain(`"${route}"`);
     }
   });
 
-  test('the v4 cache actually forms in the browser — old v3 gone', async ({
+  test('the v5 cache actually forms in the browser — old v4 gone', async ({
     page,
   }) => {
     await page.goto('/settings');
@@ -37,9 +37,9 @@ test.describe('PWA integrity', () => {
           }),
         { timeout: 30000 },
       )
-      .toContain('bitelog-v4');
+      .toContain('bitelog-v5');
     const keys = await page.evaluate(() => caches.keys());
-    expect(keys).not.toContain('bitelog-v3');
+    expect(keys).not.toContain('bitelog-v4');
   });
 
   test('an early beforeinstallprompt (before hydration) is not lost', async ({

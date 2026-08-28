@@ -69,6 +69,17 @@ export default function RootLayout({
             __html: `try{var t=localStorage.getItem('fishlog_theme')||'dark';if(t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');}catch(e){document.documentElement.classList.add('dark');}`,
           }}
         />
+        {/* 청크 로드 실패 자가복구 — React가 뜨기 전에 죽는 경우가 있어
+            에러 바운더리(global-error.tsx)로는 못 잡는다. 캐시에 남은 옛
+            HTML·자산이 사라진 청크를 가리키면 앱 전체가 "Application error"
+            로 죽는데, 사용자가 할 수 있는 일이 없다. SW·캐시를 비우고 딱
+            한 번 새로고침한다(세션당 1회 — 진짜 고장 났을 때 무한 새로고침
+            루프에 빠지지 않게). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var K='__bitelog_chunk_recovery';function bad(m){return /Loading chunk|ChunkLoadError|dynamically imported module|Importing a module script failed/i.test(m||'')}function heal(m){if(!bad(m))return;try{if(sessionStorage.getItem(K))return;sessionStorage.setItem(K,'1')}catch(e){return}var done=function(){location.reload()};try{Promise.all([caches.keys().then(function(k){return Promise.all(k.map(function(n){return caches.delete(n)}))}),navigator.serviceWorker?navigator.serviceWorker.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister()}))}):0]).then(done,done)}catch(e){done()}}window.addEventListener('error',function(e){heal(e&&e.message)});window.addEventListener('unhandledrejection',function(e){heal(e&&e.reason&&e.reason.message)})})();`,
+          }}
+        />
         {/* Preconnect for font loading performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
