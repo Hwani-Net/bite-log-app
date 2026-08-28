@@ -3,6 +3,8 @@
 // Short, direct answers (< 3 bullets). Anti-hallucination guardrails built in.
 
 import type { UserFishingProfile } from "@/services/personalizationService";
+import { apiFetch } from "@/lib/apiClient";
+import { ApiError } from "@/lib/apiError";
 
 export interface ChatMessage {
   role: "user" | "model";
@@ -161,27 +163,28 @@ export async function chatWithExpert(
       },
     };
 
-    const res = await fetch("/api/gemini", {
+    // apiFetch — 앱 내부 /api/* 호출의 공통 경로(타임아웃·재시도·에러 분류).
+    // 503(서버에 키 없음) → mock 폴백이라는 기존 계약은 그대로 유지한다.
+    const data = await apiFetch<{
+      candidates?: { content?: { parts?: { text?: string }[] } }[];
+    }>("/api/gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
+      context: "gemini-chat",
+      retries: 0,
     });
-
-    // 503 = key not configured on server → fall back to mock
-    if (res.status === 503) {
-      await new Promise((r) => setTimeout(r, 800));
-      return getMockAnswer(selectedSpecies, userMessage);
-    }
-
-    if (!res.ok) {
-      console.error("Gemini Chat API error:", res.status);
-      return `[API 오류 ${res.status}] 잠시 후 다시 시도해주세요.`;
-    }
-
-    const data = await res.json();
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     return text || "죄송합니다, 답변을 생성할 수 없었습니다.";
   } catch (err) {
+    if (err instanceof ApiError && err.status === 503) {
+      await new Promise((r) => setTimeout(r, 800));
+      return getMockAnswer(selectedSpecies, userMessage);
+    }
+    if (err instanceof ApiError && err.status) {
+      console.error("Gemini Chat API error:", err.status);
+      return `[API 오류 ${err.status}] 잠시 후 다시 시도해주세요.`;
+    }
     console.error("Chat failed:", err);
     return "네트워크 오류가 발생했습니다. 다시 시도해주세요.";
   }

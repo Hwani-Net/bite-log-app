@@ -20,6 +20,7 @@ import {
   TackleAdvice,
 } from "./tackleAdviceService";
 import { getGearRecommendations } from "./affiliateService";
+import { apiFetch } from "@/lib/apiClient";
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -197,28 +198,26 @@ ${params.communitySummary}
     // /api/gemini 프록시 경유 — 키를 서버에만 두려고 만든 프록시를 두고
     // 여기만 generativelanguage를 직접 치면서 NEXT_PUBLIC_ 키를 클라이언트
     // 번들에 실어 보내고 있었다(교차 조사에서 발견된 키 노출 경로).
-    const res = await fetch("/api/gemini", {
+    const data = await apiFetch<{
+      candidates?: { content?: { parts?: { text?: string }[] } }[];
+    }>("/api/gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.7, maxOutputTokens: 300 },
       }),
+      context: "trip-briefing",
+      retries: 0,
     });
-    if (!res.ok) {
-      const errText = await res.text().catch(() => "");
-      console.error("Gemini API error:", res.status, errText);
-      // Graceful fallback — 기본 채비 메시지 반환
-      return ` ${params.species} 출조 준비! ${params.tideNum}물 기준 채비를 세팅하고, ${params.location} 현지 날씨를 출발 전 재확인하세요.`;
-    }
-    const data = await res.json();
     return (
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
       ` ${params.species} ${params.location} 출조 준비! 채비 점검 후 안전 출조하세요.`
     );
   } catch (err) {
+    // 프록시 실패(키 없음 503 포함)는 기존대로 기본 채비 문구로 폴백.
     console.error("Gemini briefing generation failed:", err);
-    return ` ${params.species} ${params.location} 출조! 날씨·물때·채비 준비 잘 하시고 안전한 낚시 되세요.`;
+    return ` ${params.species} 출조 준비! ${params.tideNum}물 기준 채비를 세팅하고, ${params.location} 현지 날씨를 출발 전 재확인하세요.`;
   }
 }
 

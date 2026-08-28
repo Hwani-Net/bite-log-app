@@ -51,6 +51,7 @@ import {
 import { fetchDailyMarineOutlook } from "@/services/marineService";
 import { BITE_GRADE_LABEL } from "@/lib/calendarBiteOverlay";
 import { getDataService } from "@/services/dataServiceFactory";
+import { apiFetch } from "@/lib/apiClient";
 import type { CatchRecord } from "@/types";
 import {
   visibleCompanionPosts,
@@ -426,9 +427,11 @@ async function fetchDayAvailability(
     // 깨진 캐시는 무시하고 새로 받는다
   }
   try {
-    const res = await fetch(`/api/boat-calendar?uid=${uid}&ym=${ym}`);
-    if (!res.ok) return { state: "unknown" };
-    const data = (await res.json()) as { days?: unknown };
+    // apiFetch 경유(5차 GOAL-6) — 실패는 기존대로 unknown(보여주되 확인 불가).
+    const data = await apiFetch<{ days?: unknown }>(
+      `/api/boat-calendar?uid=${uid}&ym=${ym}`,
+      { context: "boat-calendar", retries: 0 },
+    );
     if (Array.isArray(data.days)) {
       try {
         sessionStorage.setItem(
@@ -1212,9 +1215,11 @@ export default function BookingPage() {
     const q = new URLSearchParams({ date: searchDate, page: String(searchPage) });
     if (searchRegion) q.set("region", searchRegion);
     if (searchSpecies) q.set("species", searchSpecies);
-    fetch(`/api/boat-listings?${q.toString()}`)
-      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-      .then((data: BoatListingPage & { ok?: boolean }) => {
+    apiFetch<BoatListingPage & { ok?: boolean }>(
+      `/api/boat-listings?${q.toString()}`,
+      { context: "boat-listings", retries: 0 },
+    )
+      .then((data) => {
         if (cancelled) return;
         // A malformed body (no `boats` array) is a failure, not "0 results"
         // — e.g. the service worker's offline fallback used to satisfy
@@ -1254,8 +1259,10 @@ export default function BookingPage() {
     setDirectoryLoading(true);
     setDirectoryError(false);
     const q = searchRegion ? `?region=${searchRegion}` : "";
-    fetch(`/api/boat-directory${q}`)
-      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+    apiFetch<{ ok?: boolean; boats?: unknown; totalCached?: number }>(
+      `/api/boat-directory${q}`,
+      { context: "boat-directory", retries: 0 },
+    )
       .then((data) => {
         if (cancelled) return;
         if (data.ok === false || !Array.isArray(data.boats)) {
@@ -1279,9 +1286,10 @@ export default function BookingPage() {
     setAvailabilityLoading((prev) => ({ ...prev, [operatorId]: true }));
     setAvailabilityError((prev) => ({ ...prev, [operatorId]: false }));
     try {
-      const res = await fetch(`/api/boat-availability?operator=${operatorId}`);
-      if (!res.ok) throw new Error(String(res.status));
-      const data = await res.json();
+      const data = await apiFetch<{ ok?: boolean; days?: unknown }>(
+        `/api/boat-availability?operator=${operatorId}`,
+        { context: "boat-availability", retries: 0 },
+      );
       if (data.ok === false || !Array.isArray(data.days)) {
         throw new Error("malformed boat-availability response");
       }
@@ -1529,15 +1537,11 @@ export default function BookingPage() {
             .find((o) => o.date === w.date);
           if (!day || !isCancellationRisk(day)) continue;
           if (!daysCache.has(w.operatorId)) {
-            const res = await fetch(
+            const availability = await apiFetch<{ days: BoatDayStatus[] }>(
               `/api/boat-availability?operator=${w.operatorId}`,
-            );
-            daysCache.set(
-              w.operatorId,
-              res.ok
-                ? ((await res.json()) as { days: BoatDayStatus[] }).days
-                : [],
-            );
+              { context: "boat-availability", retries: 0 },
+            ).catch(() => ({ days: [] as BoatDayStatus[] }));
+            daysCache.set(w.operatorId, availability.days);
           }
           // 예보상 같은 악천후 창에 있는 날짜는 대안에서 제외 — 예보
           // 범위(5일) 밖은 판정 불가라 허용.

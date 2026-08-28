@@ -33,6 +33,7 @@ import {
   type SnapshotChange,
 } from "@/services/myBoatService";
 import { getDataService } from "@/services/dataServiceFactory";
+import { apiFetch } from "@/lib/apiClient";
 import {
   summarizeCatchesForBoat,
   type BoatCatchSummary,
@@ -179,9 +180,11 @@ export default function BoatDetailPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError(false);
-    fetch(`/api/boat-calendar?uid=${uid}&ym=${ym}`)
-      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-      .then((data: BoatCalendar & { ok?: boolean }) => {
+    apiFetch<BoatCalendar & { ok?: boolean }>(
+      `/api/boat-calendar?uid=${uid}&ym=${ym}`,
+      { context: "boat-calendar", retries: 0 },
+    )
+      .then((data) => {
         if (cancelled) return;
         if (data.ok === false || !data.meta) {
           throw new Error("malformed boat-calendar response");

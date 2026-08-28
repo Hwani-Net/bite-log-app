@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/apiClient";
 export interface FishPrice {
   species: string;
   unit: string;
@@ -248,14 +249,15 @@ const MOCK_DATA: CatchValueData = {
 
 export async function fetchCatchValue(): Promise<CatchValueData> {
   try {
-    const res = await fetch("/api/catch-value", { cache: "no-store" });
-    if (!res.ok) {
-      return MOCK_DATA;
-    }
-    const json = await res.json();
+    // apiFetch 경유(5차 GOAL-6). 실패는 기존대로 MOCK_DATA 폴백.
+    const json = await apiFetch<{ ok?: boolean; data?: CatchValueData }>(
+      "/api/catch-value",
+      { cache: "no-store", context: "catch-value", retries: 0 },
+    );
     if (!json.ok) {
       return MOCK_DATA;
     }
+    if (!json.data) return MOCK_DATA;
     return { ...json.data, isLive: true };
   } catch {
     return MOCK_DATA;

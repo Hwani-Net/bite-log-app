@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/apiClient";
 /**
  * Fishing News Service
  * Fetches real-time fishing catch reports from multiple sources:
@@ -437,12 +438,11 @@ export async function fetchYouTubeVideos(
   _maxResults: number = 6,
 ): Promise<FishingNewsItem[]> {
   try {
-    const res = await fetch("/api/youtube-rss");
-    if (!res.ok) {
-      console.error(`[YT RSS] /api/youtube-rss returned ${res.status}`);
-      return [];
-    }
-    const items: FishingNewsItem[] = await res.json();
+    // apiFetch 경유(5차 GOAL-6). 실패는 기존대로 빈 목록.
+    const items = await apiFetch<FishingNewsItem[]>("/api/youtube-rss", {
+      context: "youtube-rss",
+      retries: 0,
+    });
     return items;
   } catch (err) {
     console.error(

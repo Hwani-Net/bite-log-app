@@ -1,5 +1,8 @@
 // AI Fish Species Recognition Service
 // Uses Gemini 2.0 Flash via REST API (Free Tier: 1,500 req/day)
+import { apiFetch } from "@/lib/apiClient";
+import { ApiError } from "@/lib/apiError";
+
 
 export interface FishAIResult {
   species: string; // English name
@@ -128,27 +131,28 @@ export async function identifyFish(
       },
     };
 
-    const res = await fetch("/api/gemini", {
+    // apiFetch 경유(5차 GOAL-6) — 503 mock, 그 외 실패 폴백 계약은 유지.
+    const data = await apiFetch<{
+      candidates?: { content?: { parts?: { text?: string }[] } }[];
+    }>("/api/gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
+      context: "fish-ai",
+      retries: 0,
+    }).catch(async (err) => {
+      if (err instanceof ApiError && err.status === 503) {
+        console.warn("[FishAI] No server API key → Mock mode");
+        await new Promise((r) => setTimeout(r, 1500));
+        return null; // → mock
+      }
+      console.error("[FishAI] Gemini API error:", err);
+      return undefined; // → fallback
     });
-
-    // 503 = key not configured on server → fall back to mock
-    if (res.status === 503) {
-      console.warn("[FishAI] No server API key → Mock mode");
-      await new Promise((r) => setTimeout(r, 1500));
+    if (data === null) {
       return MOCK_RESULTS[Math.floor(Math.random() * MOCK_RESULTS.length)];
     }
-
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error("[FishAI] Gemini API error:", res.status, errText);
-      // Graceful fallback to mock on API error
-      return getFallbackResult();
-    }
-
-    const data = await res.json();
+    if (data === undefined) return getFallbackResult();
     const textContent = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!textContent) {

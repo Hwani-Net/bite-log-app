@@ -55,7 +55,7 @@
 - 다크모드: `.dark` class, bg-bg/bg-bg-dark 토큰 사용
 - 공유 UI: `src/components/ui/` (Card, Badge, Button, Skeleton 등 10개)
 - Mock 데이터: `// @mock-data — [설명]` 태그 필수 (grep @mock-data로 검색)
-- 에러 처리: `src/lib/apiError.ts` + `apiClient.ts` (apiFetch 래퍼 사용)
+- 에러 처리: **앱 내부 API 라우트(`/api/*`) 호출은 `apiFetch`(`src/lib/apiClient.ts`) 경유 필수** — 타임아웃·재시도·에러 분류(`apiError.ts`)를 한 곳에서 처리한다. 외부 API 직접 호출(open-meteo 등)은 각 서비스가 이미 자기 폴백 전략을 갖고 있으므로 제외. 검사: `grep -rn 'fetch("/api/\|fetch(\`/api/' src/` 결과가 0이어야 한다(5차 GOAL-6에서 전환 완료)
 
 ## 앱 구조
 ```
