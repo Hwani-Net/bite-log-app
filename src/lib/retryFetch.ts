@@ -31,11 +31,21 @@
 // 그래서 에러 이름 문자열에 의존하지 않는다. 우리가 만든 타이머가
 // 실제로 먼저 울렸는지를 직접 불리언으로 추적해, 그 경우에만 재시도를
 // 건너뛴다 — 런타임이 그 순간의 실패를 뭐라고 부르든 상관없다.
+//
+// 2026-08-29 배포 후 재실측: 이걸로도 boat-calendar 콜드 쿼리 2/3이
+// 여전히 ~21.4~21.8초였다. timeoutMs=12000으로는 우리 타이머가 절대
+// 먼저 안 울린다는 뜻이었다 — 플랫폼 자체의 커넥트 타임아웃이 그보다
+// 짧게(~10.5~10.9초, 최초 발견 때의 "~10.6~10.7초"와 일치) AbortSignal과
+// 무관하게 독자적으로 먼저 발동하고 있었다. 그러면 우리 setTimeout은
+// 결코 안 울리고, ourTimeoutFired는 계속 false로 남아 매번 "재시도할
+// 가치 있는 빠른 연결 실패"로 오판해 그 ~10.6초를 또 반복했다.
+// timeoutMs를 그 플랫폼 한계보다 짧게 잡아야 우리 쪽이 항상 먼저
+// 발동해서 이 판정 자체가 의미를 갖는다.
 export async function fetchWithRetry(
   input: string,
   init: RequestInit,
   retries = 1,
-  timeoutMs = 12_000,
+  timeoutMs = 8_000,
 ): Promise<Response> {
   const controller = new AbortController();
   let ourTimeoutFired = false;
