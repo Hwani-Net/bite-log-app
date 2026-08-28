@@ -117,7 +117,7 @@ export async function preparePhotosForSave(
 /** 업로드 성공 시 다운로드 URL, 불가·실패면 null(호출측이 폴백). */
 async function uploadPhoto(dataUrl: string): Promise<string | null> {
   const uid = getFirebaseAuth()?.currentUser?.uid;
-  const storage = getFirebaseStorage();
+  const storage = await getFirebaseStorage();
   if (!uid || !storage) return null; // 비로그인·미설정 → base64 유지
   const blob = dataUrlToBlob(dataUrl);
   if (!blob) return null;

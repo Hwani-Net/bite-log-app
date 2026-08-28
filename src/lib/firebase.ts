@@ -1,6 +1,7 @@
 import { FirebaseApp, initializeApp, getApps } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { Firestore, getFirestore } from 'firebase/firestore';
+import type { FirebaseStorage } from 'firebase/storage';
 import { Analytics, getAnalytics, isSupported, logEvent } from 'firebase/analytics';
 
 const firebaseConfig = {
@@ -47,16 +48,16 @@ export function getFirebaseDb(): Firestore | null {
   return dbInstance;
 }
 
-// Storage는 사진 업로드 경로에서만 쓰므로 동적 import — 안 쓰는 사용자
-// 번들에 SDK를 얹지 않는다(5차 GOAL-3).
-let storageInstance: unknown = null;
-export function getFirebaseStorage(): unknown {
+// Storage는 사진 업로드 경로에서만 쓰므로 지연 로드 — 안 쓰는 사용자
+// 번들에 SDK를 얹지 않는다(5차 GOAL-3). 타입은 유지해야 호출부가
+// ref()/uploadBytes()에 그대로 넘길 수 있다.
+let storageInstance: FirebaseStorage | null = null;
+export async function getFirebaseStorage(): Promise<FirebaseStorage | null> {
   if (storageInstance) return storageInstance;
   const a = getApp();
   if (!a || !firebaseConfig.storageBucket) return null;
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { getStorage } = require('firebase/storage');
+    const { getStorage } = await import('firebase/storage');
     storageInstance = getStorage(a);
     return storageInstance;
   } catch {
