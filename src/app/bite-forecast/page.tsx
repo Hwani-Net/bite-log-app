@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useAppStore } from "@/store/appStore";
 import { useSubscriptionStore } from "@/store/subscriptionStore";
@@ -1090,6 +1090,15 @@ export default function BiteForecastPage() {
       cancelled = true;
     };
   }, []);
+  const myMatches = useMemo(
+    () =>
+      matchTodayConditions(myRecords, {
+        tempC: weather?.tempC,
+        windSpeed: weather?.windSpeed,
+        tidePhase: tideData ? getCurrentPhase(tideData)?.label : null,
+      }),
+    [myRecords, weather, tideData],
+  );
   const [marine, setMarine] = useState<MarineData | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lng: number }>({
     lat: 33.4996,
@@ -1391,14 +1400,7 @@ export default function BiteForecastPage() {
           {/* ── 내 기록 기준 (3차 GOAL-4) — 오늘 조건이 속한 구간에서의 내
               과거 평균. 일치 구간 표본(3회+)이 없으면 스트립 자체를 안
               그린다(추정 날조 금지). */}
-          {(() => {
-            const matches = matchTodayConditions(myRecords, {
-              tempC: weather?.tempC,
-              windSpeed: weather?.windSpeed,
-              tidePhase: tideData ? getCurrentPhase(tideData)?.label : null,
-            });
-            if (matches.length === 0) return null;
-            return (
+          {myMatches.length > 0 && (
               <section
                 data-testid="my-record-strip"
                 className="glass-morphism rounded-2xl border border-[#7dd3fc]/20 p-4 space-y-2"
@@ -1406,7 +1408,7 @@ export default function BiteForecastPage() {
                 <p className="text-xs font-bold text-[#7dd3fc] uppercase tracking-[0.15em]">
                   내 기록 기준
                 </p>
-                {matches.map((m) => (
+                {myMatches.map((m) => (
                   <p key={m.key} className="text-sm text-white/80">
                     오늘 같은 {m.name} 구간({m.bucketLabel})에서{" "}
                     <span className="font-bold text-white">
@@ -1422,8 +1424,7 @@ export default function BiteForecastPage() {
                   내 조과기록에 저장된 조건과 오늘 예보를 대조한 값이에요.
                 </p>
               </section>
-            );
-          })()}
+          )}
 
           {/* ── Booking CTA (shown when conditions are decent or better) ── */}
           {(biteTime.grade === "excellent" || biteTime.grade === "good") && (

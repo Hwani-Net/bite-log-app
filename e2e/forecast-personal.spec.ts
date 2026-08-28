@@ -14,7 +14,7 @@ test.describe('Personal forecast strip — /bite-forecast + home banner', () => 
     species: '우럭',
     photos: [],
     visibility: 'private',
-    createdAt: '2026-08-01T09:00:00.000Z',
+    createdAt: '2026-09-01T09:00:00.000Z',
   };
   const history = [
     { ...base, id: 'h1', date: '2026-08-01', count: 5, weather: { condition: 'clear', tempC: 18, windSpeed: 2 } },

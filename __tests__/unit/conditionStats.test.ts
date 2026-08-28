@@ -11,7 +11,9 @@ import type { CatchRecord } from '@/types';
 function record(partial: Partial<CatchRecord>): CatchRecord {
   return {
     id: Math.random().toString(36).slice(2),
-    createdAt: '2026-08-01T09:00:00.000Z',
+    // 풍속 단위 정정일(WIND_UNIT_FIX_DATE) 이후 — 풍속 축 표본이 되려면
+    // 정정 이후 저장분이어야 한다.
+    createdAt: '2026-09-01T09:00:00.000Z',
     date: '2026-08-01',
     location: { id: 's', name: '오천항', lat: 36.4, lng: 126.5 },
     species: '우럭',
@@ -87,6 +89,27 @@ describe('conditionStats', () => {
     expect(axis.best?.avgCount).toBe(5);
   });
 
+  it('excludes pre-unit-fix wind samples but keeps their temp samples', () => {
+    // 정정일 이전 저장분 — windSpeed가 km/h 크기일 수 있어 풍속 축에서만 제외.
+    const legacy = record({
+      createdAt: '2026-08-10T09:00:00.000Z',
+      weather: { condition: 'clear', tempC: 18, windSpeed: 12 },
+    });
+    const axes = conditionStats([legacy]);
+    expect(axes.find((a) => a.key === 'wind')!.sampled).toBe(0);
+    expect(axes.find((a) => a.key === 'temp')!.sampled).toBe(1);
+  });
+
+  it('keeps one-decimal averages — 10 fish over 3 trips reads 3.3', () => {
+    const records = [
+      record({ weather: { condition: 'clear', tempC: 18 }, count: 4 }),
+      record({ weather: { condition: 'clear', tempC: 19 }, count: 3 }),
+      record({ weather: { condition: 'clear', tempC: 20 }, count: 3 }),
+    ];
+    const temp = conditionStats(records).find((a) => a.key === 'temp')!;
+    expect(temp.best?.avgCount).toBe(3.3); // 3.3333…이 그대로 새지 않는다
+  });
+
   it('rejects NaN condition values instead of bucketing them as cold', () => {
     const records = [
       record({ weather: { condition: 'clear', tempC: NaN } }),
@@ -136,7 +159,11 @@ describe('matchTodayConditions', () => {
     expect(matches).toEqual([
       { key: 'tide', name: '물때', bucketLabel: '들물 3물', avgCount: 5, records: 3 },
     ]);
+    // 라벨 불일치(다른 물때)와 표본 부족(2회) 둘 다 빈 결과여야 한다.
     expect(matchTodayConditions(withTide, { tidePhase: '조금' })).toEqual([]);
+    expect(
+      matchTodayConditions(withTide.slice(0, 2), { tidePhase: '들물 3물' }),
+    ).toEqual([]);
   });
 
   it('handles null/undefined today values without matching anything', () => {

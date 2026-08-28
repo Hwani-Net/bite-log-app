@@ -9,7 +9,7 @@ test.describe('My condition table — /stats', () => {
     species: '우럭',
     photos: [],
     visibility: 'private',
-    createdAt: '2026-08-01T09:00:00.000Z',
+    createdAt: '2026-09-01T09:00:00.000Z',
   };
 
   test('renders per-bucket averages from seeded condition data', async ({
