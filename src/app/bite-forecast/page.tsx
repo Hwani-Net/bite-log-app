@@ -331,8 +331,16 @@ function TideTimeline({
   tideData: TideData;
   phase: TidePhase | null;
 }) {
-  const now = new Date();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  // 서버(Vercel, UTC)와 사용자 브라우저(KST)는 9시간 어긋난다. "지금" 위치
+  // 표시선을 렌더 중 new Date()로 구하면 서버 HTML과 클라이언트 첫
+  // 하이드레이션이 다른 위치를 그려 React #418로 깨진다(2026-08-28 라이브
+  // 재현). 마운트 후에만 실제 위치를 채운다.
+  const [currentMinutes, setCurrentMinutes] = useState<number | null>(null);
+  useEffect(() => {
+    const d = new Date();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentMinutes(d.getHours() * 60 + d.getMinutes());
+  }, []);
   const totalMinutes = 24 * 60;
 
   return (
@@ -425,13 +433,16 @@ function TideTimeline({
           );
         })}
 
-        {/* Current time indicator */}
-        <div
-          className="absolute top-0 h-full w-0.5 bg-red-400 z-10"
-          style={{ left: `${(currentMinutes / totalMinutes) * 100}%` }}
-        >
-          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-red-400 rounded-full" />
-        </div>
+        {/* Current time indicator — 마운트 전엔 그리지 않는다(서버는
+            사용자의 실제 로컬 시각을 모른다). */}
+        {currentMinutes !== null && (
+          <div
+            className="absolute top-0 h-full w-0.5 bg-red-400 z-10"
+            style={{ left: `${(currentMinutes / totalMinutes) * 100}%` }}
+          >
+            <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-red-400 rounded-full" />
+          </div>
+        )}
       </div>
 
       {/* Tide table */}
@@ -1217,16 +1228,26 @@ export default function BiteForecastPage() {
   }, []);
 
   const phase = tideData ? getCurrentPhase(tideData) : null;
-  const now = new Date();
-  const hour = now.getHours();
-  const timeLabel =
-    hour >= 4 && hour < 9
-      ? "아침"
-      : hour >= 9 && hour < 17
-        ? "낮"
-        : hour >= 17 && hour < 20
-          ? "저녁"
-          : "밤";
+  // 헤더에 바로 그려지는 값이라 위 tideData/marine과 달리 async fetch 뒤에
+  // 숨어 있지 않다 — 렌더 중 new Date()로 시를 구하면 서버(UTC)와
+  // 클라이언트(KST) 첫 렌더가 다른 시간대 라벨을 보여 하이드레이션이
+  // 깨진다. 실제로 이 줄이 /bite-forecast의 React #418 원인이었다
+  // (2026-08-28 라이브 재현 — TideTimeline·WaterTempTimeline의 now는
+  // 각자 tideData/marine이 null인 동안은 안 그려져 무해했다).
+  const [timeLabel, setTimeLabel] = useState<string | null>(null);
+  useEffect(() => {
+    const hour = new Date().getHours();
+    const label =
+      hour >= 4 && hour < 9
+        ? "아침"
+        : hour >= 9 && hour < 17
+          ? "낮"
+          : hour >= 17 && hour < 20
+            ? "저녁"
+            : "밤";
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setTimeLabel(label);
+  }, []);
 
   return (
     <div className="relative flex min-h-dvh w-full flex-col bg-[#080d14] overflow-x-hidden pb-24">
