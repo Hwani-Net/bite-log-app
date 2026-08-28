@@ -86,7 +86,8 @@ function MySpotsSection({
         <>
           {todayScore !== null && (
             <p className="text-[11px] text-[#7dd3fc]/90 mb-2">
-              오늘 조건 {todayScore}점 — 검증된 내 포인트에서 노려보세요.
+              {/* 점수는 지역 전체 예보다 — 포인트별 점수인 척하지 않는다. */}
+              오늘 이 지역 조건 {todayScore}점 — 내 실적 상위 포인트예요.
             </p>
           )}
           <div
@@ -95,6 +96,7 @@ function MySpotsSection({
             {spots.map((spot) => (
               <div
                 key={spot.name}
+                data-testid="my-spot-row"
                 className="flex items-center gap-3 bg-white/5 rounded-xl px-3 py-3"
               >
                 <div className="w-10 h-10 rounded-full bg-[#c9a84c]/10 flex items-center justify-center shrink-0">

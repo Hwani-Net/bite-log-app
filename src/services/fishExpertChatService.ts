@@ -84,14 +84,30 @@ export const CHAT_SPECIES = Object.keys(QUICK_REPLIES_BY_SPECIES);
 
 // 사용자 기록 프로필 → 시스템 프롬프트 컨텍스트(3차 GOAL-5). 순수 함수라
 // 유닛으로 고정한다. 기록이 없으면 null — 일반 답변 그대로.
+// 사용자 입력 문자열(포인트명 등)이 시스템 프롬프트 구조를 깨뜨리지
+// 못하게 — 줄바꿈·마크다운 제어 문자를 제거하고 길이를 자른다.
+function sanitizeForPrompt(s: string): string {
+  return s
+    .replace(/[\r\n]+/g, " ")
+    .replace(/[#>*`]/g, "")
+    .trim()
+    .slice(0, 40);
+}
+
 export function buildProfileContext(
   profile: UserFishingProfile | null,
 ): string | null {
   if (!profile || profile.totalDays === 0) return null;
   const parts = [
-    profile.favoriteSpecies ? `주력 어종: ${profile.favoriteSpecies}` : null,
-    profile.favoriteSpot ? `단골 포인트: ${profile.favoriteSpot}` : null,
-    profile.bestMonth ? `최고 실적 달: ${profile.bestMonth}` : null,
+    profile.favoriteSpecies
+      ? `주력 어종: ${sanitizeForPrompt(profile.favoriteSpecies)}`
+      : null,
+    profile.favoriteSpot
+      ? `단골 포인트: ${sanitizeForPrompt(profile.favoriteSpot)}`
+      : null,
+    profile.bestMonth
+      ? `최고 실적 달: ${sanitizeForPrompt(profile.bestMonth)}`
+      : null,
     `기록한 출조일: ${profile.totalDays}일`,
     profile.avgCatchRate > 0
       ? `출조당 평균 조과: ${profile.avgCatchRate}마리`

@@ -19,7 +19,8 @@ export function topSpotsFromRecords(
     if (!name || name === "위치 미지정" || name === "Unknown") continue;
     const cur = map.get(name) ?? { visits: 0, totalCatch: 0 };
     cur.visits += 1;
-    cur.totalCatch += r.count;
+    // count 누락/비수치 기록이 NaN을 전염시키지 않게.
+    cur.totalCatch += Number.isFinite(r.count) ? r.count : 0;
     map.set(name, cur);
   }
   return [...map.entries()]

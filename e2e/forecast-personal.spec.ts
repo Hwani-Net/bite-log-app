@@ -80,8 +80,11 @@ test.describe('Personal forecast strip — /bite-forecast + home banner', () => 
     // 시딩한 내 포인트가 DOM에 있다(비PRO는 블러라도 내용은 내 것).
     await expect(section).toContainText('오천항');
     await expect(section).toContainText('3회 방문 · 총 12마리');
-    // 옛 하드코딩 포인트는 코드째 사라졌다.
-    await expect(section).not.toContainText('대천항 남단 테트라포드');
+    // 렌더된 포인트 수 = 기록에서 유도된 수(오천항 하나) — 하드코딩이든
+    // 뭐든 기록에 없는 행이 끼어들 수 없다는 걸 개수로 고정한다.
+    await expect(section.locator('[data-testid="my-spot-row"]')).toHaveCount(1);
+    // 블러 게이트는 isPro에 달렸는데 스토어 기본값이 true(개발 기본)라
+    // 여기선 검증하지 않는다 — PRO 게이트 동작은 paywall.spec.ts 영역.
   });
 
   test('no records — the spots section shows the honest empty state, no paywall bait', async ({
