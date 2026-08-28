@@ -4,6 +4,9 @@ import { test, expect } from '@playwright/test';
 // 직접 fetch해 단언하고, A2HS 버튼은 beforeinstallprompt를 시뮬레이션해
 // 노출·prompt() 호출까지 검증한다.
 test.describe('PWA integrity', () => {
+  // 이 스펙만은 서비스워커가 실제로 등록·활성화돼야 검증이 성립한다.
+  test.use({ serviceWorkers: 'allow' });
+
   test('manifest uses the real dark palette — no white install splash', async ({
     request,
   }) => {

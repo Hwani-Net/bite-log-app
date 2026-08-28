@@ -1205,6 +1205,9 @@ export default function BookingPage() {
   const [searchBoats, setSearchBoats] = useState<BoatListing[]>([]);
   const [searchLoading, setSearchLoading] = useState(true);
   const [searchError, setSearchError] = useState(false);
+  // 상류(thefishing.kr)는 간헐적으로 응답하지 않는다 — 실패한 화면이
+  // 새로고침 말고는 되돌릴 방법이 없으면 안 된다.
+  const [retryTick, setRetryTick] = useState(0);
 
   // Auto-pick the user's sea region once, if they haven't chosen one.
   useEffect(() => {
@@ -1239,7 +1242,18 @@ export default function BookingPage() {
         );
       })
       .catch(() => {
-        if (!cancelled) setSearchError(true);
+        if (cancelled) return;
+        setSearchError(true);
+        // 실패한 검색의 이전 결과를 남겨두면 화면이 거짓말을 한다 — 제주를
+        // 골랐는데 항구 칩은 서해 항구 그대로였던 게 이것이다(2026-08-28
+        // 사용자 지적). 항구 칩·정원 칩·개수 라벨이 전부 searchBoats에서
+        // 파생되므로, 결과를 비워야 그것들도 같이 사라진다.
+        // 더 보기(page>1)로 실패한 경우엔 이미 보고 있던 목록이 사용자가
+        // 실제로 받은 결과이므로 지우지 않는다.
+        if (searchPage === 1) {
+          setSearchBoats([]);
+          setSearchResult(null);
+        }
       })
       .finally(() => {
         if (!cancelled) setSearchLoading(false);
@@ -1247,7 +1261,7 @@ export default function BookingPage() {
     return () => {
       cancelled = true;
     };
-  }, [searchDate, searchRegion, searchSpecies, searchPage]);
+  }, [searchDate, searchRegion, searchSpecies, searchPage, retryTick]);
 
   const resetSearchPage = () => setSearchPage(1);
 
@@ -2369,9 +2383,20 @@ export default function BookingPage() {
           )}
 
           {searchError ? (
-            <p className="text-xs text-white/30 py-6 text-center">
-              선박 목록을 지금 불러오지 못했습니다.
-            </p>
+            <div role="status" className="py-6 text-center space-y-2">
+              <p className="text-xs text-white/40">
+                선박 목록을 지금 불러오지 못했습니다. 예약 정보를 가져오는
+                사이트가 응답하지 않을 때가 있어요.
+              </p>
+              <button
+                type="button"
+                data-testid="search-retry"
+                onClick={() => setRetryTick((n) => n + 1)}
+                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-[#c9a84c]/40 text-xs font-semibold text-white/80"
+              >
+                다시 시도
+              </button>
+            </div>
           ) : searchLoading && searchBoats.length === 0 ? (
             <div className="grid grid-cols-2 gap-2">
               {[0, 1, 2, 3].map((i) => (
