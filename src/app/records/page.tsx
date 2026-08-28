@@ -21,6 +21,7 @@ import {
 import { DynamicIcon } from "@/lib/iconMap";
 
 import { fishGradient } from "@/lib/fishColors";
+import { filterRecords, recordsToCsv } from "@/lib/recordFilters";
 
 type SortBy = "date" | "size" | "count";
 type ViewMode = "list" | "gallery";
@@ -35,25 +36,8 @@ function exportRecords(records: CatchRecord[], format: "json" | "csv") {
     filename = `bitelog_records_${new Date().toISOString().slice(0, 10)}.json`;
     mimeType = "application/json";
   } else {
-    const headers = [
-      "날짜",
-      "어종",
-      "마릿수",
-      "크기(cm)",
-      "무게(kg)",
-      "장소",
-      "메모",
-    ];
-    const rows = records.map((r) => [
-      r.date,
-      r.species,
-      r.count,
-      r.sizeCm ?? "",
-      r.weightKg ?? "",
-      r.location.name,
-      (r.memo ?? "").replace(/,/g, "；"),
-    ]);
-    content = [headers, ...rows].map((row) => row.join(",")).join("\n");
+    // 전 필드 CSV — 예전엔 14필드 중 7개만 나갔다(5차 GOAL-1).
+    content = recordsToCsv(records);
     filename = `bitelog_records_${new Date().toISOString().slice(0, 10)}.csv`;
     mimeType = "text/csv;charset=utf-8;";
   }
@@ -75,6 +59,10 @@ export default function RecordsPage() {
   const { t, locale } = useAppStore();
   const [records, setRecords] = useState<CatchRecord[]>([]);
   const [search, setSearch] = useState("");
+  const [speciesFilter, setSpeciesFilter] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [photosOnly, setPhotosOnly] = useState(false);
   const [sortBy, setSortBy] = useState<SortBy>("date");
   const [showFilters, setShowFilters] = useState(false);
   const [showExport, setShowExport] = useState(false);
@@ -93,18 +81,15 @@ export default function RecordsPage() {
   }
 
   const filtered = useMemo(() => {
-    let result = records;
-
-    // Search by species, location, memo
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (r) =>
-          r.species.toLowerCase().includes(q) ||
-          r.location.name.toLowerCase().includes(q) ||
-          r.memo?.toLowerCase().includes(q),
-      );
-    }
+    // 어종 칩은 어종 필드 전용 — 예전엔 검색 문자열을 공유해서 "우럭"
+    // 칩이 메모에만 우럭이 적힌 다른 어종 기록까지 남겼다(5차 GOAL-1).
+    let result = filterRecords(records, {
+      search,
+      species: speciesFilter || undefined,
+      from: dateFrom || undefined,
+      to: dateTo || undefined,
+      photosOnly,
+    });
 
     // Sort
     switch (sortBy) {
@@ -120,7 +105,7 @@ export default function RecordsPage() {
     }
 
     return result;
-  }, [records, search, sortBy]);
+  }, [records, search, speciesFilter, dateFrom, dateTo, photosOnly, sortBy]);
 
   // Unique species for quick filter chips
   const speciesList = useMemo(() => {
@@ -298,13 +283,14 @@ export default function RecordsPage() {
             ))}
           </div>
 
-          {/* Species chips */}
+          {/* Species chips — 어종 필드 전용 필터 */}
           {speciesList.length > 1 && (
             <div className="flex gap-2 flex-wrap">
               <button
-                onClick={() => setSearch("")}
+                onClick={() => setSpeciesFilter("")}
+                aria-pressed={!speciesFilter}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                  !search
+                  !speciesFilter
                     ? "bg-[#c9a84c]/20 text-[#c9a84c]"
                     : "bg-white/5 text-white/60"
                 }`}
@@ -314,9 +300,10 @@ export default function RecordsPage() {
               {speciesList.map((s) => (
                 <button
                   key={s}
-                  onClick={() => setSearch(search === s ? "" : s)}
+                  onClick={() => setSpeciesFilter(speciesFilter === s ? "" : s)}
+                  aria-pressed={speciesFilter === s}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                    search === s
+                    speciesFilter === s
                       ? "bg-[#c9a84c]/20 text-[#c9a84c]"
                       : "bg-white/5 text-white/60"
                   }`}
@@ -326,6 +313,52 @@ export default function RecordsPage() {
               ))}
             </div>
           )}
+
+          {/* 날짜 범위 + 사진 필터 */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <input
+              type="date"
+              aria-label={locale === "ko" ? "시작 날짜" : "From date"}
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              style={{ colorScheme: "dark" }}
+              className="bg-white/5 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white"
+            />
+            <span className="text-white/40 text-xs">~</span>
+            <input
+              type="date"
+              aria-label={locale === "ko" ? "종료 날짜" : "To date"}
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              style={{ colorScheme: "dark" }}
+              className="bg-white/5 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white"
+            />
+            <button
+              onClick={() => setPhotosOnly((v) => !v)}
+              aria-pressed={photosOnly}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                photosOnly
+                  ? "bg-[#7dd3fc]/20 text-[#7dd3fc]"
+                  : "bg-white/5 text-white/60"
+              }`}
+            >
+              {locale === "ko" ? "사진 있는 기록" : "With photos"}
+            </button>
+            {(dateFrom || dateTo || photosOnly || speciesFilter || search) && (
+              <button
+                onClick={() => {
+                  setDateFrom("");
+                  setDateTo("");
+                  setPhotosOnly(false);
+                  setSpeciesFilter("");
+                  setSearch("");
+                }}
+                className="text-xs text-[#c9a84c] underline underline-offset-2"
+              >
+                {locale === "ko" ? "필터 초기화" : "Clear"}
+              </button>
+            )}
+          </div>
         </div>
       )}
 

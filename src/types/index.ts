@@ -64,6 +64,7 @@ export interface CatchRecord extends BaseEntity {
   visibility: RecordVisibility; // 기본값: 'public'
   likeCount?: number;  // 좋아요 기능 (Option B)
   boatUid?: string;    // 더피싱 uid — myBoatService.ts 의 "내 선사 카드"와 같은 키
+  tackle?: string;     // 채비·미끼 (5차 GOAL-2에서 입력 UI 연결)
 }
 
 // ===== Public Feed Item (GPS 좌표 제외) =====

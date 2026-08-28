@@ -46,6 +46,7 @@ function RecordDetailContent() {
   // Edit form state
   const [date, setDate] = useState("");
   const [caughtTime, setCaughtTime] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
   const [locationName, setLocationName] = useState("");
   const [species, setSpecies] = useState("");
   const [count, setCount] = useState(1);
@@ -61,6 +62,7 @@ function RecordDetailContent() {
           setRecord(r);
           setDate(r.date);
           setCaughtTime(r.caughtTime || "");
+          setPhotos(r.photos ?? []);
           setLocationName(r.location.name);
           setSpecies(r.species);
           setCount(r.count);
@@ -77,6 +79,7 @@ function RecordDetailContent() {
       const updated = await getDataService().updateCatchRecord(record.id, {
         date,
         caughtTime: caughtTime || undefined,
+        photos,
         // 기존 location을 스프레드로 보존 — name만 바꿔야지, {name}만 보내면
         // 제목 하나 고칠 때마다 GPS 좌표(lat/lng)가 통째로 지워진다.
         location: { ...record.location, name: locationName.trim() },
@@ -236,6 +239,59 @@ function RecordDetailContent() {
       {editing ? (
         /* ===== EDIT MODE ===== */
         <div className="px-4 pt-4 space-y-4">
+          {/* 사진 편집(5차 GOAL-1) — 편집 모드에 사진 추가/삭제가 아예
+              없어서, 잘못 찍힌 사진을 지우려면 기록째 삭제해야 했다. */}
+          <div className="glass-morphism border border-white/5 rounded-2xl p-4 space-y-2">
+            <span className="text-white/70 text-sm font-semibold">
+              {locale === "ko" ? "사진" : "Photos"} ({photos.length}/3)
+            </span>
+            <div className="flex gap-2 flex-wrap">
+              {photos.map((p, i) => (
+                <div key={i} className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={p}
+                    alt={`${i + 1}`}
+                    className="w-20 h-20 object-cover rounded-xl"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPhotos((prev) => prev.filter((_, idx) => idx !== i))
+                    }
+                    aria-label={locale === "ko" ? "사진 삭제" : "Remove photo"}
+                    className="absolute -top-1.5 -right-1.5 size-6 rounded-full bg-red-500/90 text-white text-xs font-bold flex items-center justify-center"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              {photos.length < 3 && (
+                <label className="w-20 h-20 rounded-xl border border-dashed border-white/20 flex items-center justify-center text-white/40 text-2xl cursor-pointer">
+                  +
+                  <input
+                    type="file"
+                    accept="image/*"
+                    aria-label={locale === "ko" ? "사진 추가" : "Add photo"}
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        if (ev.target?.result) {
+                          setPhotos((prev) =>
+                            [...prev, ev.target!.result as string].slice(0, 3),
+                          );
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
+              )}
+            </div>
+          </div>
           <div className="glass-morphism border border-white/5 rounded-2xl p-4">
             <label className="flex flex-col gap-2">
               <span className="text-white/70 text-sm font-semibold flex items-center gap-2">
