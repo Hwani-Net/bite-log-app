@@ -29,7 +29,7 @@
 
 | GOAL | 항목 | 의존 | 상태 | 증거 |
 |------|------|------|------|------|
-| 1 | 프리플라이트 정리 (P1~P4) | — | TODO | |
+| 1 | 프리플라이트 정리 (P1~P4) | — | DONE | 커밋 1074318(본체)+1커밋(리뷰 반영 e2e 보강). ① GPS 파괴 버그 — 상세 편집의 location을 스프레드 병합으로 수정, 다른 동일 패턴 부재를 grep으로 실증(feedService의 {name,region}은 GPS 의도적 제외 설계라 해당 없음). 이미 유실된 과거 데이터는 복구 불가(좌표가 사라진 상태) — 향후 유실만 차단. ② Gemini 키 노출 — 클라이언트 직접 호출을 /api/gemini 프록시로 교체, src에 NEXT_PUBLIC_GEMINI 참조 0 확인(번들에서 키 제거됨), 프록시는 원본 응답·상태코드 패스스루라 파서 호환, 실패 시 폴백 문구는 키 유무가 아니라 일반 실패 문구로 정확. 프로덕션 env에 서버용 GEMINI_API_KEY 존재 확인. 로컬 .env.local엔 서버 키가 없어 로컬 dev에선 AI 요약이 폴백으로 감(로컬 개발 시 GEMINI_API_KEY 추가 필요 — 사용자 안내 사항). Vercel Preview의 NEXT_PUBLIC_GEMINI_API_KEY는 참조 0이므로 제거 가능(사용자 결정 대기). ③ components/home 5개+mockData.ts 삭제(-870줄), src에 live-dashboard 참조 0 확인, 삭제 후 빌드 그린. ④ CLAUDE.md 구조 표 실제 라우트 일치. e2e 신규 1(위치명 변경+메모 변경 후 lat/lng 보존을 데이터 레벨 단언 — 교차검수가 '메모만 바꾸는 초판은 절반 커버리지' 지적해 핵심 케이스로 재작성, id 기반 조회) + 접근성 이름 기반 셀렉터(dev 오버레이 textarea와의 strict 충돌 회피). 교차검수(z-ai/glm-5.3-flash, $0.0020) 반영 2건(핵심 e2e 케이스, saved[0]→find), 반박/실증 4건(다른 편집 경로 부재 grep, 프록시 계약 소스 확인, 폴백 문구 정확성, 삭제 후 빌드 그린). 유닛 264/264, e2e 대상 spec 통과, 빌드 그린. 커밋 정리 실수 1건 자가 수정: git add -A가 스크래치 산출물을 쓸어 담아 리셋 후 의도 파일 10개만 재커밋. 라이브(https://bite-log-three.vercel.app) 200 — 실제 기록의 위치명 변경 후 좌표 보존(36.4396/126.5194 유지) + trip-plan 브리핑이 /api/gemini 프록시 200으로 실제 AI 총평 렌더까지 확인(screenshots/goals3/goal1/live-edit-gps-kept.png, live-briefing-proxy.png) |
 | 2 | 기록의 시간·물때 축 + DNA 버그 (M1~M3) | — | TODO | |
 | 3 | 나의 조건표 (M4) | 2 | TODO | |
 | 4 | 예보×내 기록 (M5) | 3 | TODO | |
