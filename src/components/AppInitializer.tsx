@@ -7,8 +7,12 @@ import { setDataServiceUser } from '@/services/dataServiceFactory';
 import { migrateLocalToFirestore } from '@/services/migrationService';
 import { syncPendingRecords } from '@/services/offlineQueue';
 import { getDataService } from '@/services/dataServiceFactory';
-import { pendingSeasonOpenAlerts } from '@/lib/seasonOpenAlert';
-import { nextBriefingNotifications } from '@/lib/tripReminders';
+import {
+  pendingSeasonOpenAlerts,
+  unnotifiedAlerts,
+  markFired,
+  SEASON_OPEN_NOTIFIED_KEY,
+} from '@/lib/seasonOpenAlert';
 import { localISODate } from '@/lib/localDate';
 import { sendLocalNotification } from '@/services/pushNotificationService';
 
@@ -63,36 +67,45 @@ export default function AppInitializer() {
       .getCatchRecords()
       .then((records) => {
         if (cancelled) return;
+        // 알려진 경합: 첫 로그인 직후엔 위 effect의 Firestore 마이그레이션이
+        // 진행 중이라 이번 오픈은 빈/부분 기록을 읽을 수 있다 — 그 경우
+        // 마커가 안 찍히므로 다음 앱 오픈에서 자연 복구된다.
         const alerts = pendingSeasonOpenAlerts(records, new Date());
         if (alerts.length === 0) return;
-        const KEY = 'biteLog_seasonOpenNotified';
         let stored: unknown = [];
         try {
-          stored = JSON.parse(localStorage.getItem(KEY) ?? '[]');
+          stored = JSON.parse(
+            localStorage.getItem(SEASON_OPEN_NOTIFIED_KEY) ?? '[]',
+          );
         } catch {
           // 깨진 저장값은 새로 시작
         }
-        const { notify, sent } = nextBriefingNotifications(
-          stored,
-          alerts.map((a) => ({ name: a.species, date: a.openDate })),
-          localISODate(new Date()),
-        );
-        for (const t of notify) {
-          const alert = alerts.find((a) => a.species === t.name);
-          if (!alert) continue;
-          sendLocalNotification(
-            `${t.name} 금어기 해제 임박`,
+        const fired: string[] = [];
+        for (const alert of unnotifiedAlerts(alerts, stored)) {
+          const [, mm, dd] = alert.openDate.split('-');
+          const dateKo = `${Number(mm)}월 ${Number(dd)}일`;
+          const ok = sendLocalNotification(
+            `${alert.species} 금어기 해제 임박`,
             alert.daysLeft === 0
-              ? `오늘부터 ${t.name} 금어기가 풀렸어요. 출조 준비!`
-              : `${alert.daysLeft}일 뒤(${t.date.slice(5).replace('-', '/')}) 해제돼요. 미리 준비하세요!`,
+              ? `오늘부터 ${alert.species} 금어기가 풀렸어요. 출조 준비!`
+              : `${alert.daysLeft}일 뒤(${dateKo}) 해제돼요. 미리 준비하세요!`,
             undefined,
-            `season-open-${t.name}`,
+            `season-open-${alert.species}`,
+          );
+          // 실제 발화만 마킹 — 권한 없음·조용한 시간으로 생략된 알림을
+          // 마킹하면 다음 오픈의 재시도 기회가 사라진다(교차검수 지적).
+          if (ok) fired.push(`${alert.species}|${alert.openDate}`);
+        }
+        if (fired.length > 0) {
+          localStorage.setItem(
+            SEASON_OPEN_NOTIFIED_KEY,
+            JSON.stringify(markFired(stored, fired, localISODate(new Date()))),
           );
         }
-        if (notify.length > 0) localStorage.setItem(KEY, JSON.stringify(sent));
       })
-      .catch(() => {
-        // 기록을 못 읽으면 알림만 조용히 생략 — 초기화의 다른 일은 영향 없음
+      .catch((err) => {
+        // 기록을 못 읽으면 알림만 생략 — 초기화의 다른 일은 영향 없음
+        console.warn('season-open alert check skipped:', err);
       });
     return () => {
       cancelled = true;

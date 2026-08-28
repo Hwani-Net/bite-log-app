@@ -71,6 +71,32 @@ test.describe('Season-open alert — app boot', () => {
     expect(secondLoad).toEqual([]);
   });
 
+  // 교차검수가 잡은 버그의 회귀 고정: 권한이 거부돼 발화가 생략되면
+  // 마커를 찍지 않아야 다음 앱 오픈에서 재시도된다. (수정 전 코드는
+  // 미발화도 마킹해 그 해 내내 침묵하는 버그였다.)
+  test('denied permission — no firing AND no marker, so the retry window stays open', async ({
+    page,
+  }) => {
+    await page.clock.setFixedTime(FIXED_NOW);
+    await seed(page);
+    await page.addInitScript(() => {
+      (window.Notification as unknown as { permission: string }).permission =
+        'denied';
+    });
+    await page.goto('/');
+    await page.waitForTimeout(3000);
+    expect(
+      await page.evaluate(
+        () => (window as unknown as { __notifs?: string[] }).__notifs ?? [],
+      ),
+    ).toEqual([]);
+    expect(
+      await page.evaluate(() =>
+        localStorage.getItem('biteLog_seasonOpenNotified'),
+      ),
+    ).toBeNull();
+  });
+
   test('no records — no alert, no marker', async ({ page }) => {
     await page.clock.setFixedTime(FIXED_NOW);
     await page.addInitScript(() => {

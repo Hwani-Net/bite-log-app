@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { nextOpenDate, pendingSeasonOpenAlerts } from '@/lib/seasonOpenAlert';
+import {
+  nextOpenDate,
+  pendingSeasonOpenAlerts,
+  unnotifiedAlerts,
+  markFired,
+} from '@/lib/seasonOpenAlert';
 import type { CatchRecord } from '@/types';
 
 // 규정DB 실값: 주꾸미 금어기 5/1~8/31(해제 9/1), 감성돔 5/1~6/30(해제 7/1),
@@ -42,10 +47,41 @@ describe('nextOpenDate', () => {
     );
   });
 
-  it('rejects malformed inputs', () => {
+  it('rejects malformed inputs, including days that do not exist in the month', () => {
     expect(nextOpenDate('', new Date())).toBeNull();
     expect(nextOpenDate('13/40', new Date())).toBeNull();
     expect(nextOpenDate('8-31', new Date())).toBeNull();
+    expect(nextOpenDate('2/31', new Date(2026, 0, 1))).toBeNull(); // Date 오버플로 방지
+    expect(nextOpenDate('4/31', new Date(2026, 0, 1))).toBeNull();
+  });
+});
+
+describe('dedupe helpers — only real firings are marked', () => {
+  const alerts = [
+    { species: '주꾸미', openDate: '2026-09-01', daysLeft: 2 },
+    { species: '감성돔', openDate: '2026-09-01', daysLeft: 2 },
+  ];
+
+  it('unnotifiedAlerts filters already-marked entries and survives corrupt storage', () => {
+    expect(unnotifiedAlerts(alerts, ['주꾸미|2026-09-01'])).toEqual([alerts[1]]);
+    expect(unnotifiedAlerts(alerts, 'garbage')).toEqual(alerts);
+    expect(unnotifiedAlerts(alerts, [42, null])).toEqual(alerts);
+  });
+
+  it('markFired appends only fired keys and prunes past openings for next-year rearm', () => {
+    const next = markFired(
+      ['지난어종|2026-08-20', '주꾸미|2026-09-01'],
+      ['감성돔|2026-09-01'],
+      '2026-08-30',
+    );
+    expect(next).toEqual(['주꾸미|2026-09-01', '감성돔|2026-09-01']);
+  });
+
+  it('a skipped send (no fired keys) leaves nothing marked — the retry window stays open', () => {
+    // 권한 거부·조용한 시간으로 발화가 생략되면 fired가 비고, 마커도
+    // 그대로다 — 다음 앱 오픈에서 다시 시도된다.
+    expect(markFired([], [], '2026-08-30')).toEqual([]);
+    expect(unnotifiedAlerts(alerts, [])).toEqual(alerts);
   });
 });
 

@@ -81,31 +81,39 @@ export function getNotificationPermission(): string {
 }
 
 /**
- * Send a local notification (for bite time alerts)
+ * Send a local notification (for bite time alerts).
+ * 실제로 발화했는지 boolean으로 알린다 — 권한 없음·조용한 시간 등으로
+ * 생략된 것을 발화로 착각해 dedupe 마커를 찍으면 그 알림은 영영
+ * 유실된다(4차 GOAL-2 교차검수에서 잡힌 버그 클래스).
  */
 export function sendLocalNotification(
   title: string,
   body: string,
   icon: string = '/icons/icon-192x192.png',
   tag?: string
-): void {
-  if (!isPushSupported() || Notification.permission !== 'granted') return;
+): boolean {
+  if (!isPushSupported() || Notification.permission !== 'granted') return false;
 
   const prefs = getNotificationPreferences();
 
   // Check quiet hours
   const hour = new Date().getHours();
   if (prefs.quietHoursStart < prefs.quietHoursEnd) {
-    if (hour >= prefs.quietHoursStart && hour < prefs.quietHoursEnd) return;
+    if (hour >= prefs.quietHoursStart && hour < prefs.quietHoursEnd) return false;
   } else {
-    if (hour >= prefs.quietHoursStart || hour < prefs.quietHoursEnd) return;
+    if (hour >= prefs.quietHoursStart || hour < prefs.quietHoursEnd) return false;
   }
 
-  new Notification(title, {
-    body,
-    icon,
-    tag: tag || 'fishlog',
-    badge: '/icons/icon-72x72.png' });
+  try {
+    new Notification(title, {
+      body,
+      icon,
+      tag: tag || 'fishlog',
+      badge: '/icons/icon-72x72.png' });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
