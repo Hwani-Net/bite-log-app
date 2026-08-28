@@ -11,6 +11,13 @@ describe('fishGradient', () => {
     }
   });
 
+  it('no two species share a gradient — catches copy-paste color mistakes', () => {
+    const colors = FISH_SPECIES.filter((s) => s !== '기타').map((s) =>
+      fishGradient(s),
+    );
+    expect(new Set(colors).size).toBe(colors.length);
+  });
+
   it('falls back for free-typed species outside the list', () => {
     expect(fishGradient('은갈치외계종')).toBe(DEFAULT_FISH_GRADIENT);
     expect(fishGradient('')).toBe(DEFAULT_FISH_GRADIENT);

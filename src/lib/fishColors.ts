@@ -4,6 +4,9 @@
 // 어종은 존재할 수 없다.
 import { FISH_SPECIES } from "@/types";
 
+// 폴백 톤은 홈 쪽 값으로 통일(기록 목록의 옛 폴백은 slate-600/500로 더
+// 어두웠다) — 목록 밖 자유 입력 어종에서만 쓰이는 희귀 경로라 페이지별
+// 톤 분기를 유지할 가치가 없다(의도적 단순화).
 export const DEFAULT_FISH_GRADIENT = "from-slate-400 to-slate-300";
 
 const FISH_GRADIENTS: Record<(typeof FISH_SPECIES)[number], string> = {
@@ -24,6 +27,8 @@ const FISH_GRADIENTS: Record<(typeof FISH_SPECIES)[number], string> = {
 };
 
 export function fishGradient(species: string): string {
+  // 의도적 러프 캐스트 — 자유 입력 문자열이 흔히 들어오는 함수라 목록
+  // 밖 키 조회가 정상 경로고, 그때의 진짜 방어선은 ?? 폴백이다.
   return (
     FISH_GRADIENTS[species as (typeof FISH_SPECIES)[number]] ??
     DEFAULT_FISH_GRADIENT
