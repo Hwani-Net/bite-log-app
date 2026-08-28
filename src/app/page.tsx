@@ -212,9 +212,31 @@ function StatBar({
 }
 
 // ─── AI Insight Banner (실시간 분석) ─────────────────────────────────────────
-function AIInsightBanner({ profile }: { profile: UserFishingProfile | null }) {
+function AIInsightBanner({
+  profile,
+  biteScore,
+}: {
+  profile: UserFishingProfile | null;
+  biteScore: number | null;
+}) {
   const insight =
     profile && profile.insights.length > 0 ? profile.insights[0] : null;
+  // 개인 프로필 × 오늘 점수 결합 줄(3차 GOAL-4) — analyzeUserRecords()가
+  // 계산해 놓고 insights[0] 한 줄만 쓰이던 필드들을 실제로 쓴다.
+  const personalLine =
+    profile && profile.favoriteSpecies
+      ? [
+          `주력 ${profile.favoriteSpecies}`,
+          biteScore !== null ? `오늘 조건 ${biteScore}점` : null,
+          profile.currentStreak > 1
+            ? `${profile.currentStreak}일 연속 기록 중`
+            : profile.bestMonth
+              ? `${profile.bestMonth}이 최강`
+              : null,
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      : null;
 
   return (
     <Link href="/concierge" className="block">
@@ -245,6 +267,14 @@ function AIInsightBanner({ profile }: { profile: UserFishingProfile | null }) {
                 ? `"${insight.title} — ${insight.description}"`
                 : `"현재 조건을 분석 중입니다. 위치 정보를 허용하면 맞춤 분석을 제공합니다."`}
             </p>
+            {personalLine && (
+              <p
+                data-testid="personal-forecast-line"
+                className="text-[0.7rem] text-[#7dd3fc]/90 mt-1.5 font-medium"
+              >
+                {personalLine}
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -671,7 +701,10 @@ export default function HomePage() {
           <MonthlySummaryCard />
 
           {/* AI Insight Banner */}
-          <AIInsightBanner profile={aiProfile} />
+          <AIInsightBanner
+            profile={aiProfile}
+            biteScore={biteTime && !biteLoading ? biteTime.score : null}
+          />
 
           {/* Species Bite Ranking */}
           {biteTime && !biteLoading && (

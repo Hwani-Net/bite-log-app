@@ -45,7 +45,10 @@ export interface WeatherData extends WeatherInfo {
  */
 export async function fetchWeather(lat: number, lng: number): Promise<WeatherData | null> {
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,pressure_msl&timezone=auto`;
+    // wind_speed_unit=ms — open-meteo 기본은 km/h인데 앱 전체가 이 값을
+    // m/s로 표기·저장·판정해 왔다(기존 단위 버그). 과거 기록의 windSpeed는
+    // km/h 크기일 수 있음을 감안할 것.
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,pressure_msl&wind_speed_unit=ms&timezone=auto`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Weather API error: ${res.status}`);
 

@@ -16,6 +16,9 @@ import { TideData, getCurrentPhase, TidePhase } from "@/services/tideService";
 import { WeatherData } from "@/services/weatherService";
 import PeakTimeline from "@/app/components/concierge/PeakTimeline";
 import { getRegionForCoords } from "@/lib/region";
+import { matchTodayConditions } from "@/lib/conditionStats";
+import { getDataService } from "@/services/dataServiceFactory";
+import type { CatchRecord } from "@/types";
 import {
   ArrowLeft,
   Lock,
@@ -1072,6 +1075,21 @@ export default function BiteForecastPage() {
   const [biteTime, setBiteTime] = useState<BiteTimePrediction | null>(null);
   const [tideData, setTideData] = useState<TideData | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  // "내 기록 기준" 스트립(3차 GOAL-4) — 이 페이지가 처음으로 CatchRecord를
+  // 읽는다. 실패해도 스트립만 조용히 빠진다.
+  const [myRecords, setMyRecords] = useState<CatchRecord[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    getDataService()
+      .getCatchRecords()
+      .then((r) => {
+        if (!cancelled) setMyRecords(r);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [marine, setMarine] = useState<MarineData | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lng: number }>({
     lat: 33.4996,
@@ -1367,6 +1385,43 @@ export default function BiteForecastPage() {
                   </div>
                 </div>
               </div>
+            );
+          })()}
+
+          {/* ── 내 기록 기준 (3차 GOAL-4) — 오늘 조건이 속한 구간에서의 내
+              과거 평균. 일치 구간 표본(3회+)이 없으면 스트립 자체를 안
+              그린다(추정 날조 금지). */}
+          {(() => {
+            const matches = matchTodayConditions(myRecords, {
+              tempC: weather?.tempC,
+              windSpeed: weather?.windSpeed,
+              tidePhase: tideData ? getCurrentPhase(tideData)?.label : null,
+            });
+            if (matches.length === 0) return null;
+            return (
+              <section
+                data-testid="my-record-strip"
+                className="glass-morphism rounded-2xl border border-[#7dd3fc]/20 p-4 space-y-2"
+              >
+                <p className="text-xs font-bold text-[#7dd3fc] uppercase tracking-[0.15em]">
+                  내 기록 기준
+                </p>
+                {matches.map((m) => (
+                  <p key={m.key} className="text-sm text-white/80">
+                    오늘 같은 {m.name} 구간({m.bucketLabel})에서{" "}
+                    <span className="font-bold text-white">
+                      평균 {m.avgCount}마리
+                    </span>
+                    <span className="text-white/50 text-xs">
+                      {" "}
+                      · {m.records}회 기록
+                    </span>
+                  </p>
+                ))}
+                <p className="text-[10px] text-white/45">
+                  내 조과기록에 저장된 조건과 오늘 예보를 대조한 값이에요.
+                </p>
+              </section>
             );
           })()}
 

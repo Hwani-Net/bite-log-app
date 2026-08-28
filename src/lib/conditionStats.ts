@@ -76,6 +76,52 @@ function aggregate(
   return { buckets, best };
 }
 
+export interface ConditionMatch {
+  key: ConditionAxis["key"];
+  name: string;
+  bucketLabel: string;
+  avgCount: number;
+  records: number;
+}
+
+/**
+ * 오늘 조건이 속한 구간에서의 내 과거 실적(GOAL-4). 표본이
+ * MIN_SAMPLES 미만인 구간은 반환하지 않는다 — 추정치를 날조하지 않는
+ * 것이 계약이라, 반환이 비면 호출측은 스트립 자체를 그리지 않는다.
+ */
+export function matchTodayConditions(
+  catchRecords: CatchRecord[],
+  today: {
+    tempC?: number | null;
+    windSpeed?: number | null;
+    tidePhase?: string | null;
+  },
+): ConditionMatch[] {
+  const axes = conditionStats(catchRecords);
+  const wanted: { key: ConditionAxis["key"]; label: string }[] = [];
+  if (Number.isFinite(today.tempC))
+    wanted.push({ key: "temp", label: tempBucket(today.tempC!) });
+  if (Number.isFinite(today.windSpeed))
+    wanted.push({ key: "wind", label: windBucket(today.windSpeed!) });
+  if (today.tidePhase) wanted.push({ key: "tide", label: today.tidePhase });
+
+  const out: ConditionMatch[] = [];
+  for (const w of wanted) {
+    const axis = axes.find((a) => a.key === w.key)!;
+    const bucket = axis.buckets.find((b) => b.label === w.label);
+    if (bucket && bucket.records >= MIN_SAMPLES) {
+      out.push({
+        key: w.key,
+        name: axis.name,
+        bucketLabel: w.label,
+        avgCount: bucket.avgCount,
+        records: bucket.records,
+      });
+    }
+  }
+  return out;
+}
+
 /**
  * 기록 배열 → 축 3개(기온/풍속/물때). 조건 값이 없는 기록은 그 축에서만
  * 조용히 빠진다 — 옛 기록과 자연 공존.

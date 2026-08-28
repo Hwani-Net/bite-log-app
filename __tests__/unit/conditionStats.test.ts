@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   conditionStats,
+  matchTodayConditions,
   tempBucket,
   windBucket,
   MIN_SAMPLES,
@@ -101,5 +102,46 @@ describe('conditionStats', () => {
       expect(axis.best).toBeNull();
       expect(axis.sampled).toBe(0);
     }
+  });
+});
+
+describe('matchTodayConditions', () => {
+  const history = [
+    record({ weather: { condition: 'clear', tempC: 18, windSpeed: 2 }, count: 5 }),
+    record({ weather: { condition: 'clear', tempC: 20, windSpeed: 3 }, count: 4 }),
+    record({ weather: { condition: 'clear', tempC: 22, windSpeed: 2.5 }, count: 3 }),
+    record({ weather: { condition: 'clear', tempC: 12, windSpeed: 9 }, count: 9 }),
+  ];
+
+  it('returns only axes whose today-bucket has enough samples', () => {
+    const matches = matchTodayConditions(history, { tempC: 19, windSpeed: 1 });
+    // 기온 17~24°C: 3회 표본 → 매칭. 풍속 약: 3회 → 매칭.
+    expect(matches.map((m) => m.key).sort()).toEqual(['temp', 'wind']);
+    expect(matches.find((m) => m.key === 'temp')!.avgCount).toBe(4);
+  });
+
+  it('never fabricates from a thin bucket — one 9-fish day is not a forecast', () => {
+    // 오늘이 10~17°C(표본 1회) + 강풍(표본 1회)이면 아무것도 없다.
+    expect(matchTodayConditions(history, { tempC: 12, windSpeed: 9 })).toEqual([]);
+  });
+
+  it('matches the tide axis by exact stored phase label', () => {
+    const tide = (p: string) => ({ stationName: '보령', tides: [], currentPhase: p });
+    const withTide = [
+      record({ tide: tide('들물 3물'), count: 4 }),
+      record({ tide: tide('들물 3물'), count: 6 }),
+      record({ tide: tide('들물 3물'), count: 5 }),
+    ];
+    const matches = matchTodayConditions(withTide, { tidePhase: '들물 3물' });
+    expect(matches).toEqual([
+      { key: 'tide', name: '물때', bucketLabel: '들물 3물', avgCount: 5, records: 3 },
+    ]);
+    expect(matchTodayConditions(withTide, { tidePhase: '조금' })).toEqual([]);
+  });
+
+  it('handles null/undefined today values without matching anything', () => {
+    expect(
+      matchTodayConditions(history, { tempC: null, windSpeed: undefined, tidePhase: null }),
+    ).toEqual([]);
   });
 });
