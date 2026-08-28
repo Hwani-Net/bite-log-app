@@ -15,30 +15,40 @@
 // `"regions": ["icn1"]`(서울)이 그 근본 대응이고, 이 재시도는 그 위에서
 // 남은 간헐 실패를 흡수하는 역할이다. 리전 설정을 지우면 같은 증상이
 // 그대로 돌아온다.
-// 2026-08-29: 그 재시도조차 "타임아웃 없이 재시도"였다는 게 문제였다.
-// init에 signal이 없으면 fetch()는 플랫폼 기본 커넥트 타임아웃(위 주석의
-// ~10.6초)에 걸려서야 실패하는데, 재시도가 그 실패를 또 한 번 그대로
-// 반복해 총 대기가 ~21초까지 갔다(라이브 실측: date=2026-08-31 콜드
-// 쿼리 3회 모두 21140~21160ms). 사용자가 "항구 필터가 느리다"고 한 게
-// 바로 이거였다 — 항구 칩은 이 fetch가 끝나야 뜨는 파생 값이라, fetch가
-// 21초 걸리면 항구 칩도 21초 걸린다.
 //
-// 이제 매 시도마다 명시적 타임아웃을 걸고, 우리가 건 타임아웃으로
-// 실패한 경우엔 재시도하지 않는다 — 똑같이 12초를 또 기다릴 뿐 성공
-// 확률이 오르지 않는다. 재시도는 "연결이 빨리 끊어진" 경우(TLS/DNS
-// 순간 실패 등, 보통 1초 안에 실패)에만 값어치가 있고, 그런 실패는
-// timeoutMs와 무관하게 빠르므로 총 대기에 큰 영향이 없다.
+// 2026-08-29: 그 재시도조차 "타임아웃 없이 재시도"였다는 게 문제였다.
+// init에 signal이 없으면 fetch()는 플랫폼 기본 커넥트 타임아웃에 걸려서야
+// 실패하는데, 재시도가 그 실패를 또 한 번 그대로 반복해 총 대기가
+// ~21초까지 갔다. 처음엔 `AbortSignal.timeout()`이 만드는 에러의
+// `.name === "TimeoutError"`로 "우리가 건 타임아웃"을 가려내려 했는데,
+// 로컬 Node에선 그렇게 나와도 Vercel 프로덕션에서는 **재현되지 않았다**
+// (boat-calendar 콜드 쿼리가 배포 후에도 그대로 ~21.1~21.5초, HTTP 503 —
+// 실측 5회 전부). Next.js가 라우트 핸들러의 fetch()를 캐싱용으로 감싸면서
+// AbortSignal이나 에러 이름 처리를 다르게 할 가능성이 있어, 런타임이
+// 실제로 무엇을 "TimeoutError"라고 부르는지에 기대는 방식 자체가
+// 신뢰할 수 없었다.
+//
+// 그래서 에러 이름 문자열에 의존하지 않는다. 우리가 만든 타이머가
+// 실제로 먼저 울렸는지를 직접 불리언으로 추적해, 그 경우에만 재시도를
+// 건너뛴다 — 런타임이 그 순간의 실패를 뭐라고 부르든 상관없다.
 export async function fetchWithRetry(
   input: string,
   init: RequestInit,
   retries = 1,
   timeoutMs = 12_000,
 ): Promise<Response> {
+  const controller = new AbortController();
+  let ourTimeoutFired = false;
+  const timer = setTimeout(() => {
+    ourTimeoutFired = true;
+    controller.abort();
+  }, timeoutMs);
   try {
-    return await fetch(input, { ...init, signal: AbortSignal.timeout(timeoutMs) });
+    return await fetch(input, { ...init, signal: controller.signal });
   } catch (err) {
-    const isOurTimeout = err instanceof Error && err.name === "TimeoutError";
-    if (retries <= 0 || isOurTimeout) throw err;
+    if (retries <= 0 || ourTimeoutFired) throw err;
     return fetchWithRetry(input, init, retries - 1, timeoutMs);
+  } finally {
+    clearTimeout(timer);
   }
 }

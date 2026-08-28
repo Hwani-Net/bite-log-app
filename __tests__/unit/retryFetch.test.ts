@@ -67,15 +67,35 @@ describe('fetchWithRetry', () => {
     expect(init.signal).toBeInstanceOf(AbortSignal);
   });
 
-  it('does not retry when the failure is our own timeout', async () => {
-    const timeoutErr = new DOMException('signal timed out', 'TimeoutError');
-    const fetchMock = vi.fn().mockRejectedValue(timeoutErr);
-    global.fetch = fetchMock;
-    await expect(
-      fetchWithRetry('https://example.com', {}, 1, 5000),
-    ).rejects.toThrow('signal timed out');
-    // 재시도해봤자 같은 타임아웃을 또 기다릴 뿐이라 1회만 시도한다.
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+  // Vercel 프로덕션에서는 AbortSignal.timeout()이 만드는 에러의
+  // `.name`이 로컬 Node와 다르게 나와(재현: boat-calendar 콜드 쿼리가
+  // 이 방식 배포 후에도 그대로 ~21초) 이름 문자열 비교로는 "우리가 건
+  // 타임아웃"을 못 가려냈다. 지금 구현은 우리 setTimeout이 실제로
+  // 먼저 울렸는지를 불리언으로 직접 추적하므로, 그 시나리오를 가짜
+  // 타이머로 재현해서 검증한다 — 에러 이름은 아무거나 상관없다.
+  it('does not retry when our own timer fires first, regardless of the error name', async () => {
+    vi.useFakeTimers();
+    try {
+      const fetchMock = vi.fn().mockImplementation((_url, init: RequestInit) => {
+        return new Promise((_resolve, reject) => {
+          init.signal?.addEventListener('abort', () => {
+            // 런타임마다 이름이 다를 수 있는 걸 흉내 — 우리 코드는 이
+            // 이름을 보지 않아야 한다.
+            reject(new Error('some runtime-specific abort error'));
+          });
+        });
+      });
+      global.fetch = fetchMock as unknown as typeof fetch;
+
+      const promise = fetchWithRetry('https://example.com', {}, 1, 5000);
+      const assertion = expect(promise).rejects.toThrow();
+      await vi.advanceTimersByTimeAsync(5000);
+      await assertion;
+      // 재시도해봤자 같은 타임아웃을 또 기다릴 뿐이라 1회만 시도한다.
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('still retries a fast connection-level failure (not our timeout)', async () => {
