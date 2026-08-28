@@ -5,7 +5,7 @@
  *     (previously missing — offline visits to those routes had no cache).
  */
 
-const CACHE_NAME = "bitelog-v4";
+const CACHE_NAME = "bitelog-v5";
 const API_CACHE = "bitelog-api-v2"; // bumped: v1 held bad 200-status offline fallbacks
 
 const STATIC_PAGES = [
@@ -82,13 +82,27 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Static assets (JS, CSS, images) — Cache First
+  // Static assets (JS, CSS, images) — Cache First.
+  // 콘텐츠 해시가 파일명에 있어 불변이라 안전하다. 단, HTML이 최신일 때만
+  // 유효한 전제다 — 아래 navigate 분기 참조.
   if (isStaticAsset(url.pathname)) {
     event.respondWith(cacheFirst(request, CACHE_NAME));
     return;
   }
 
-  // Pages — Stale While Revalidate
+  // 페이지(문서) — Network First.
+  // 예전엔 stale-while-revalidate라, 재방문자에게 **옛 HTML**을 먼저 주고
+  // 그 HTML이 가리키는 청크(/_next/static/chunks/<해시>.js)는 새 배포에
+  // 없어 404 → "Application error: a client-side exception has occurred"로
+  // 앱이 통째로 죽었다(2026-08-28 사용자 보고로 확인, 신규 방문자·헤드리스
+  // 에서는 SW가 없어 재현되지 않던 종류). HTML은 항상 배포본과 맞아야
+  // 하므로 네트워크 우선, 오프라인일 때만 캐시로 떨어진다.
+  if (request.mode === "navigate") {
+    event.respondWith(networkFirstWithTimeout(request, CACHE_NAME, 10000));
+    return;
+  }
+
+  // 그 외(문서가 아닌 동일 출처 GET) — Stale While Revalidate
   event.respondWith(staleWhileRevalidate(request, CACHE_NAME));
 });
 
