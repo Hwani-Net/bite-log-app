@@ -430,7 +430,10 @@ async function fetchDayAvailability(
     // apiFetch 경유(5차 GOAL-6) — 실패는 기존대로 unknown(보여주되 확인 불가).
     const data = await apiFetch<{ days?: unknown }>(
       `/api/boat-calendar?uid=${uid}&ym=${ym}`,
-      { context: "boat-calendar", retries: 0 },
+      // thefishing.kr 프록시라 apiFetch 기본 10초보다 오래 걸릴 수 있다
+      // (서버측 fetchWithRetry 자체 타임아웃이 12초) — 짧게 잡으면
+      // 진짜로 곧 성공했을 요청까지 조기 실패로 보고하게 된다.
+      { context: "boat-calendar", retries: 0, timeout: 13_000 },
     );
     if (Array.isArray(data.days)) {
       try {
@@ -1226,7 +1229,9 @@ export default function BookingPage() {
     if (searchSpecies) q.set("species", searchSpecies);
     apiFetch<BoatListingPage & { ok?: boolean }>(
       `/api/boat-listings?${q.toString()}`,
-      { context: "boat-listings", retries: 0 },
+      // thefishing.kr 프록시라 apiFetch 기본 10초보다 오래 걸릴 수 있다
+      // (서버측 fetchWithRetry 자체 타임아웃이 12초).
+      { context: "boat-listings", retries: 0, timeout: 13_000 },
     )
       .then((data) => {
         if (cancelled) return;
