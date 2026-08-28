@@ -1,9 +1,11 @@
 /**
- * BiteLog Service Worker v3
+ * BiteLog Service Worker v4
  * Strategy: Stale-While-Revalidate for pages, Cache-First for assets, Network-First for API
+ * v4: pre-cache list now includes booking/trip-plan/catch-value/fishdex/alerts
+ *     (previously missing — offline visits to those routes had no cache).
  */
 
-const CACHE_NAME = "bitelog-v3";
+const CACHE_NAME = "bitelog-v4";
 const API_CACHE = "bitelog-api-v2"; // bumped: v1 held bad 200-status offline fallbacks
 
 const STATIC_PAGES = [
@@ -19,6 +21,11 @@ const STATIC_PAGES = [
   "/news",
   "/regulations",
   "/season-forecast",
+  "/booking",
+  "/trip-plan",
+  "/catch-value",
+  "/fishdex",
+  "/alerts",
   "/manifest.json",
 ];
 

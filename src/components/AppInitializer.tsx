@@ -14,6 +14,7 @@ import {
   SEASON_OPEN_NOTIFIED_KEY,
 } from '@/lib/seasonOpenAlert';
 import { localISODate } from '@/lib/localDate';
+import { initInstallPrompt } from '@/lib/installPrompt';
 import {
   sendLocalNotification,
   getNotificationPreferences,
@@ -116,6 +117,12 @@ export default function AppInitializer() {
       cancelled = true;
     };
   }, [user]); // 로그인 전환 시 데이터 소스가 바뀌므로 재검사
+
+  // A2HS 설치 프롬프트 캡처(4차 GOAL-6) — 이벤트는 로드 직후 오므로
+  // 여기서 붙잡아 설정 페이지의 설치 버튼이 쓴다.
+  useEffect(() => {
+    initInstallPrompt();
+  }, []);
 
   // Register service worker
   useEffect(() => {

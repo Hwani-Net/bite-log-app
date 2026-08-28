@@ -26,6 +26,12 @@ import {
 import { getDataService } from "@/services/dataServiceFactory";
 import { clearPendingRecords } from "@/services/offlineQueue";
 import { deleteAllRecords } from "@/lib/dataReset";
+import {
+  subscribeInstallPrompt,
+  canInstallSnapshot,
+  promptInstall,
+} from "@/lib/installPrompt";
+import { Smartphone } from "lucide-react";
 
 // "조과 기록 초기화"가 지우는 로컬 키 — 확인 다이얼로그에 그대로 열거해
 // 무엇이 지워지는지 사용자가 알게 한다(예전 구현은 fishlog_catches 하나만
@@ -62,6 +68,14 @@ export default function SettingsPage() {
   };
 
   const [resetting, setResetting] = useState(false);
+
+  // A2HS — beforeinstallprompt가 잡혀 있을 때만 버튼을 보인다(iOS·이미
+  // 설치됨·미지원 환경에선 아예 없음).
+  const canInstall = useSyncExternalStore(
+    subscribeInstallPrompt,
+    canInstallSnapshot,
+    () => false,
+  );
 
   async function handleReset() {
     const listing = RESET_LOCAL_KEYS.map((k) => `· ${k.labelKo}`).join("\n");
@@ -576,6 +590,32 @@ export default function SettingsPage() {
           {locale === "ko" ? "데이터 관리" : "Data Management"}
         </h2>
         <div className="bg-white/5 backdrop-blur-[12px] border border-white/10 rounded-2xl p-4 space-y-3">
+          {/* A2HS — 설치 프롬프트가 잡혀 있을 때만 노출 */}
+          {canInstall && (
+            <>
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <span className="text-sm text-white/80 flex items-center gap-2">
+                    <Smartphone size={15} className="text-white/50" />{" "}
+                    {locale === "ko" ? "홈 화면에 추가" : "Add to Home Screen"}
+                  </span>
+                  <p className="text-[11px] text-white/60 mt-0.5 ml-7">
+                    {locale === "ko"
+                      ? "앱처럼 설치해서 바로 열어요"
+                      : "Install BiteLog like an app"}
+                  </p>
+                </div>
+                <button
+                  onClick={() => promptInstall()}
+                  data-testid="a2hs-install"
+                  className="px-3 py-1.5 rounded-full bg-[#7dd3fc]/20 text-[#7dd3fc] text-xs font-medium transition-colors hover:bg-[#7dd3fc]/30 whitespace-nowrap"
+                >
+                  {locale === "ko" ? "설치" : "Install"}
+                </button>
+              </div>
+              <div className="h-[1px] bg-white/5" />
+            </>
+          )}
           {/* 내 데이터 전부 내려받기 — "사용자의 데이터를 대변"의 가장
               직접적인 형태. */}
           <div className="flex items-center justify-between py-2">
