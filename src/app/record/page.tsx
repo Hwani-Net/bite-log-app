@@ -12,6 +12,7 @@ import {
   getCurrentPhase,
   type TideData,
 } from "@/services/tideService";
+import { legalityWarning, type LegalityWarning } from "@/lib/catchLegality";
 import { identifyFish, FishAIResult } from "@/services/fishAIService";
 import {
   parseVoiceInput,
@@ -62,6 +63,9 @@ export default function RecordPage() {
   // ===== 2-Step: photo → form (or skip straight to form) =====
   const [step, setStep] = useState<"photo" | "form">("photo");
 
+  const [legalWarning, setLegalWarning] = useState<LegalityWarning | null>(
+    null,
+  );
   // ===== Form state =====
   // toISOString()은 UTC라 KST 자정~9시에 어제 날짜가 기본이 되는 함정 —
   // 이 세션에서만 네 번째 발견된 같은 버그 클래스(src/lib/localDate.ts 참조).
@@ -217,9 +221,26 @@ export default function RecordPage() {
     }
   }
 
+  // 저장 직전 규정 검사(3차 GOAL-6) — 금어기·체장 미달이면 경고 패널을
+  // 띄우고 멈춘다. 저장은 패널의 "그래도 저장"으로만 진행(방류했을 수
+  // 있으니 차단이 아니라 확인). 합법·규정DB 밖 어종은 기존 흐름 그대로.
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!species) return;
+    const warning = legalityWarning(
+      species,
+      sizeCm ? Number(sizeCm) : null,
+      date,
+    );
+    if (warning) {
+      setLegalWarning(warning);
+      return;
+    }
+    await persistRecord();
+  }
+
+  async function persistRecord() {
+    setLegalWarning(null);
     setSaving(true);
 
     try {
@@ -1031,6 +1052,57 @@ export default function RecordPage() {
               </button>
             </div>
           </div>
+
+          {/* 규정 경고(3차 GOAL-6) — 금어기·체장 미달을 저장 전에 알린다.
+              벌칙·근거 조항까지 보여주되, 방류했을 수 있으니 저장 자체는
+              사용자의 선택으로 남긴다. */}
+          {legalWarning && (
+            <div
+              role="alert"
+              data-testid="legality-warning"
+              className="rounded-2xl border border-red-400/40 bg-red-400/10 p-4 space-y-2"
+            >
+              <p className="text-sm font-bold text-red-300">
+                저장 전에 확인하세요 — 수산자원 규정에 걸릴 수 있어요
+              </p>
+              {legalWarning.violations.map((v) => (
+                <p key={v} className="text-xs text-white/85">
+                  · {v}
+                </p>
+              ))}
+              {legalWarning.penaltyNote && (
+                <p className="text-xs text-amber-200/90 font-semibold">
+                  {legalWarning.penaltyNote}
+                </p>
+              )}
+              {legalWarning.legalRef && (
+                <p className="text-[10px] text-white/50">
+                  근거: {legalWarning.legalRef}
+                </p>
+              )}
+              <p className="text-[11px] text-white/60">
+                방류하셨다면 그대로 기록하셔도 됩니다 — 기록 자체는 문제가
+                아니에요.
+              </p>
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={persistRecord}
+                  disabled={saving}
+                  className="flex-1 text-sm font-bold py-2.5 rounded-xl bg-red-400/20 border border-red-400/40 text-red-200 disabled:opacity-50"
+                >
+                  {locale === "ko" ? "그래도 저장" : "Save anyway"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLegalWarning(null)}
+                  className="px-4 text-sm py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/60"
+                >
+                  {locale === "ko" ? "다시 확인" : "Review"}
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* #4: 하단은 저장 버튼 하나만 — 풀 와이드 */}
           <div className="fixed bottom-[84px] left-0 right-0 flex justify-center p-4 bg-[#080d14]/60 backdrop-blur-2xl z-50 border-t border-white/5">
