@@ -30,57 +30,55 @@ test.describe('어종 노출 폭 — /booking', () => {
     }
   });
 
-  test('「어종으로 찾기」 칩이 검색 가능한 어종 전부를 담는다', async ({
-    page,
-  }) => {
+  test('어종을 고르는 자리는 화면에 하나뿐이다', async ({ page }) => {
+    // 어종 칩을 두 곳에 같은 목록으로 세우면 "어종 선택이 겹쳐 있다"가
+    // 된다(2026-08-28 사용자 지적). 날짜 추천 패널은 추천 근거가 있는
+    // 어종만 다루는 별개 기능이어야 한다.
     const panel = page.locator('[data-testid="reverse-recommendation"]');
     await expect(panel).toBeVisible({ timeout: 15000 });
-    const chips = panel.locator('button');
-    // 시즌 데이터 5종으로 좁아져 있던 것이 회귀하면 여기서 걸린다.
-    await expect(chips).toHaveCount(SPECIES_FILTERS.length);
+
+    const seasonChips = await panel
+      .locator('[role="group"][aria-label="추천 어종 선택"] button')
+      .allTextContents();
+    const filterChips = await page
+      .locator('[role="group"][aria-label="어종 필터"] button')
+      .allTextContents();
+
+    expect(filterChips.length).toBeGreaterThan(SPECIES_FILTERS.length);
+    // 추천 패널은 검색 필터의 진부분집합이어야 한다 — 같은 크기면 두 벌이다.
+    expect(seasonChips.length).toBeLessThan(filterChips.length / 2);
+    seasonChips.forEach((s) => expect(filterChips).toContain(s));
   });
 
-  test('시즌 데이터가 없는 어종은 추천 날짜를 지어내지 않고 검색만 건다', async ({
+  test('날짜 추천 패널은 근거(방류계획)가 있는 어종만 세운다', async ({
     page,
   }) => {
     const panel = page.locator('[data-testid="reverse-recommendation"]');
     await expect(panel).toBeVisible({ timeout: 15000 });
-
-    // 문어는 FISH_SEASON_DB(방류계획)에 없는 어종이다.
-    await panel.getByRole('button', { name: '문어', exact: true }).click();
+    // 문어는 FISH_SEASON_DB에 없다 — 여기 서 있으면 근거 없는 추천이 된다.
     await expect(
-      panel.getByText('방류계획 시즌 데이터가 없어'),
-    ).toBeVisible();
-    // 추천 날짜 목록은 나오면 안 된다 — 근거 없는 추천이 된다.
-    await expect(panel.locator('ul[aria-label="추천 출조일"]')).toHaveCount(0);
+      panel.getByRole('button', { name: '문어', exact: true }),
+    ).toHaveCount(0);
 
-    const search = panel.locator('[data-testid="reverse-search-only"]');
-    await expect(search).toBeVisible();
-    await search.click();
-
-    // 실제 검색이 걸렸는지는 어종 필터 칩의 선택 상태로 본다 — 업스트림
-    // (thefishing.kr) 응답을 기다리면 외부 지연에 테스트가 끌려간다.
-    await expect(
-      page
-        .locator('[role="group"][aria-label="어종 필터"]')
-        .getByRole('button', { name: '문어', exact: true }),
-    ).toHaveAttribute('aria-pressed', 'true', { timeout: 10000 });
-  });
-
-  test('시즌 데이터가 있는 어종은 기존대로 추천 날짜를 준다', async ({
-    page,
-  }) => {
-    const panel = page.locator('[data-testid="reverse-recommendation"]');
-    await expect(panel).toBeVisible({ timeout: 15000 });
     await panel.getByRole('button', { name: '우럭', exact: true }).click();
     await expect(
       panel.locator('ul[aria-label="추천 출조일"]').or(
         panel.getByText('추천할 만한 물때 데이터를 찾지 못했습니다'),
       ),
     ).toBeVisible({ timeout: 10000 });
-    await expect(
-      panel.locator('[data-testid="reverse-search-only"]'),
-    ).toHaveCount(0);
+  });
+
+  test('어종 필터는 가로 스크롤이 아니라 줄바꿈이라 전부 보인다', async ({
+    page,
+  }) => {
+    const group = page.locator('[role="group"][aria-label="어종 필터"]');
+    await expect(group).toBeVisible({ timeout: 15000 });
+    const geom = await group.evaluate((el) => ({
+      scrollW: el.scrollWidth,
+      clientW: el.clientWidth,
+    }));
+    // 스크롤로 돌아가면 27종 중 대여섯 개만 보인다.
+    expect(geom.scrollW).toBeLessThanOrEqual(geom.clientW + 1);
   });
 });
 

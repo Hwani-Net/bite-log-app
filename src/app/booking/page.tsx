@@ -466,17 +466,15 @@ function formatShortDate(iso: string): string {
 // 넘길 수 있다(새 API 없음) — "라벨이 겹친다"는 걸 주석으로만 가정하면
 // 둘 중 하나가 바뀌었을 때 조용히 "전체 어종"으로 새는 경로가 생긴다.
 // 필터링 자체로 그 경로를 원천 차단한다(옵션에 없는 어종은 애초에 못 고름).
-// 「어종으로 찾기」 칩은 검색 가능한 어종 전부를 보여준다. 예전엔
-// `FISH_SEASON_DB ∩ SPECIES_FILTERS` 라 5종뿐이었는데, 시즌 데이터(FIRA
-// 방류계획)가 5종밖에 없다는 우리 사정이 사용자가 고를 수 있는 어종까지
-// 좁히고 있었다(2026-08-28 사용자 지적).
 //
-// 시즌 데이터가 없는 어종은 추천 날짜를 지어내지 않는다 — 그 어종으로
-// 바로 검색만 걸어 준다. 아래 SEASON_SPECIES 가 그 분기점이다.
-// string[] 로 넓혀 둔다 — `.includes(rem.species)` 처럼 자유 문자열과
-// 대조하는 쓰임이 있어서 리터럴 유니온이면 호출부가 캐스팅 범벅이 된다.
-const REVERSE_SPECIES_OPTIONS: string[] = SPECIES_FILTERS.map((f) => f.label);
-const SEASON_SPECIES = new Set(FISH_SEASON_DB.map((d) => d.species));
+// 이 패널은 어종 선택기가 아니라 **날짜 추천기**다. 어종을 고르는 자리는
+// 아래 검색 필터의 「어종」 줄 하나뿐이어야 한다 — 한때 이 칩을 검색 가능한
+// 어종 전부로 넓혔더니 같은 목록이 한 화면에 두 벌 생겼다(2026-08-28 사용자
+// 지적). 그래서 여기 남는 건 추천할 근거가 실제로 있는 어종, 즉 방류계획
+// 데이터가 있는 어종뿐이다.
+const REVERSE_SPECIES_OPTIONS: string[] = FISH_SEASON_DB.map(
+  (d) => d.species,
+).filter((s) => SPECIES_FILTERS.some((f) => f.label === s));
 
 const SEASON_STATUS_LABEL: Record<
   "peak" | "gold" | "closed" | "offseason",
@@ -1748,20 +1746,6 @@ export default function BookingPage() {
     [reverseSpecies],
   );
 
-  // 시즌 데이터가 없는 어종용 — 날짜는 사용자가 고른 것을 그대로 두고
-  // 어종만 검색에 건다. 추천 날짜를 만들 근거가 없을 뿐이지 그 어종으로
-  // 뜨는 배까지 못 보여줄 이유는 없다.
-  const handleSearchBySpeciesOnly = (species: string) => {
-    const code = SPECIES_FILTERS.find((s) => s.label === species)?.code ?? "";
-    setSearchSpecies(code);
-    resetSearchPage();
-    resetPortFilter();
-    setKeyword("");
-    const heading = document.getElementById("search-results-heading");
-    heading?.scrollIntoView({ behavior: "smooth", block: "start" });
-    heading?.focus();
-  };
-
   const handlePickRecommendedDate = (date: string) => {
     const code = SPECIES_FILTERS.find((s) => s.label === reverseSpecies)?.code ?? "";
     setSearchDate(date);
@@ -2064,9 +2048,13 @@ export default function BookingPage() {
         >
           <h3 className="text-xs text-white/40 font-semibold uppercase tracking-[0.15em] flex items-center gap-1.5">
             <Fish size={12} className="text-[#c9a84c]" aria-hidden="true" />
-            어종으로 찾기
+            제철 어종으로 날짜 찾기
           </h3>
-          <div className="flex gap-1.5 flex-wrap" role="group" aria-label="어종 선택">
+          <div
+            className="flex gap-1.5 flex-wrap"
+            role="group"
+            aria-label="추천 어종 선택"
+          >
             {REVERSE_SPECIES_OPTIONS.map((s) => (
               <button
                 key={s}
@@ -2133,29 +2121,6 @@ export default function BookingPage() {
               <p className="text-[10px] text-white/40">
                 날짜를 고르면 그날 이 어종으로 출조하는 선박을 아래에서 보여드려요
               </p>
-            </div>
-          )}
-
-          {reverseSpecies && !SEASON_SPECIES.has(reverseSpecies) && (
-            <div className="space-y-2">
-              <p className="text-xs text-white/50">
-                {reverseSpecies}는 아직 방류계획 시즌 데이터가 없어 추천 날짜를
-                만들지 않습니다. 대신 이 어종으로 바로 찾아볼게요.
-              </p>
-              <button
-                type="button"
-                data-testid="reverse-search-only"
-                onClick={() => handleSearchBySpeciesOnly(reverseSpecies)}
-                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-[#c9a84c]/40 hover:bg-white/10 transition-colors text-left"
-              >
-                <span className="flex items-center gap-2">
-                  <Search size={13} className="text-[#c9a84c]" aria-hidden="true" />
-                  <span className="text-xs font-bold text-white">
-                    {reverseSpecies} 출조 선박 보기
-                  </span>
-                </span>
-                <ChevronRight size={12} className="text-white/50" aria-hidden="true" />
-              </button>
             </div>
           )}
         </section>
@@ -2251,8 +2216,12 @@ export default function BookingPage() {
                 <Fish size={12} className="inline mr-1 text-[#c9a84c]" aria-hidden="true" />
                 어종
               </span>
+              {/* 어종만 가로 스크롤이 아니라 줄바꿈이다 — 27종이라 스크롤로
+                  두면 대여섯 개만 보여 "어종이 부족하다"로 읽힌다(2026-08-28
+                  사용자 지적). 지역·정원은 4~5개라 한 줄에 들어가고, 항구는
+                  선택한 지역에 따라 개수가 달라져 스크롤이 맞다. */}
               <div
-                className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1"
+                className="flex gap-1.5 flex-wrap"
                 role="group"
                 aria-label="어종 필터"
               >
