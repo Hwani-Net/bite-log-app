@@ -25,6 +25,7 @@ import {
 } from "@/services/pushNotificationService";
 import { getDataService } from "@/services/dataServiceFactory";
 import { clearPendingRecords } from "@/services/offlineQueue";
+import { deleteAllRecords } from "@/lib/dataReset";
 
 // "조과 기록 초기화"가 지우는 로컬 키 — 확인 다이얼로그에 그대로 열거해
 // 무엇이 지워지는지 사용자가 알게 한다(예전 구현은 fishlog_catches 하나만
@@ -74,35 +75,59 @@ export default function SettingsPage() {
     if (
       !window.confirm(
         locale === "ko"
-          ? `${target}를 삭제합니다:\n${listing}\n\n되돌릴 수 없습니다. 계속할까요?`
-          : `This deletes ${target}:\n${listing}\n\nThis cannot be undone. Continue?`,
+          ? `${target}를 삭제합니다:\n${listing}\n\n내 선사 카드·빈자리 알림 등록은 남습니다.\n되돌릴 수 없습니다. 계속할까요?`
+          : `This deletes ${target}:\n${listing}\n\nYour boat cards and slot watches are kept.\nThis cannot be undone. Continue?`,
       )
     )
       return;
     setResetting(true);
     try {
+      // 오프라인 큐를 먼저 비운다 — 삭제 후에 큐가 살아 있으면 다음
+      // 동기화가 지운 기록을 서버에 되살린다(교차검수 지적). 큐 비우기가
+      // 실패하면 진행하지 않는다.
+      await clearPendingRecords();
       // 로그인 상태면 Firestore의 기록도 실제로 지운다 — 예전엔 로컬 키
       // 하나만 지워 "초기화했는데 그대로"인 거짓 버튼이었다.
-      const service = getDataService();
-      const records = await service.getCatchRecords();
-      for (const r of records) {
-        await service.deleteCatchRecord(r.id);
+      const result = await deleteAllRecords(getDataService());
+      if (result.failed) {
+        window.alert(
+          locale === "ko"
+            ? `기록 ${result.total}건 중 ${result.deleted}건만 삭제됐습니다. 네트워크 확인 후 다시 시도해주세요.`
+            : `Only ${result.deleted} of ${result.total} records were deleted. Please retry.`,
+        );
+        setResetting(false);
+        return; // 로컬 키는 남긴다 — 부분 상태를 더 망가뜨리지 않게
       }
       for (const k of RESET_LOCAL_KEYS) {
         localStorage.removeItem(k.key);
       }
-      await clearPendingRecords().catch(() => {});
       window.location.reload();
     } catch (err) {
       console.error("Reset failed:", err);
+      window.alert(
+        locale === "ko"
+          ? "초기화하지 못했습니다. 잠시 후 다시 시도해주세요."
+          : "Reset failed. Please try again.",
+      );
       setResetting(false);
     }
   }
 
   async function handleExportAll() {
-    const records = await getDataService()
-      .getCatchRecords()
-      .catch(() => []);
+    // 조회 실패를 빈 배열로 삼키면 "기록 0건짜리 전체 백업"이라는 거짓
+    // 파일이 된다 — 실패는 실패라고 말한다(교차검수 지적).
+    let records;
+    try {
+      records = await getDataService().getCatchRecords();
+    } catch (err) {
+      console.error("Export failed:", err);
+      window.alert(
+        locale === "ko"
+          ? "기록을 불러오지 못해 내려받기를 취소했습니다."
+          : "Could not load records; export cancelled.",
+      );
+      return;
+    }
     const readJson = (key: string) => {
       try {
         return JSON.parse(localStorage.getItem(key) ?? "null");

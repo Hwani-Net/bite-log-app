@@ -49,27 +49,29 @@ describe('notification preferences', () => {
 
 describe('sendLocalNotification firing report', () => {
   it('returns true and constructs when granted outside quiet hours', () => {
-    const h = new Date().getHours();
-    // 지금 시각을 확실히 비껴가는 1시간짜리 방해 금지 창.
-    saveNotificationPreferences({
-      quietHoursStart: (h + 2) % 24,
-      quietHoursEnd: (h + 3) % 24,
-    });
-    // 창이 자정을 감싸며 지금을 포함해버리는 드문 조합이면 검증 불가 —
-    // 그 경우엔 항상-허용 조합으로 대체(원리는 동일).
-    const p = getNotificationPreferences();
-    const wraps = p.quietHoursStart > p.quietHoursEnd;
-    const blockedNow = wraps
-      ? h >= p.quietHoursStart || h < p.quietHoursEnd
-      : h >= p.quietHoursStart && h < p.quietHoursEnd;
-    if (blockedNow) {
-      saveNotificationPreferences({
-        quietHoursStart: (h + 5) % 24,
-        quietHoursEnd: (h + 6) % 24,
-      });
+    // 시각을 고정하면 창 계산이 결정적이다 — 프로덕트 로직을 테스트에
+    // 복제하던 초판을 교차검수 지적으로 교체.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 8, 1, 10, 0)); // 10:00
+    try {
+      saveNotificationPreferences({ quietHoursStart: 12, quietHoursEnd: 13 });
+      expect(sendLocalNotification('t', 'b')).toBe(true);
+      expect(constructed).toEqual(['t']);
+    } finally {
+      vi.useRealTimers();
     }
-    expect(sendLocalNotification('t', 'b')).toBe(true);
-    expect(constructed).toEqual(['t']);
+  });
+
+  it('returns false inside a midnight-wrapping quiet window', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 8, 1, 2, 0)); // 02:00 — 23~06 창 안
+    try {
+      saveNotificationPreferences({ quietHoursStart: 23, quietHoursEnd: 6 });
+      expect(sendLocalNotification('t', 'b')).toBe(false);
+      expect(constructed).toEqual([]);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('returns false without constructing when permission is denied', () => {
