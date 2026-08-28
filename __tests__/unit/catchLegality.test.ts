@@ -1,9 +1,21 @@
 import { describe, it, expect } from 'vitest';
 import { legalityWarning } from '@/lib/catchLegality';
+import { getRegulation } from '@/data/fishRegulationDB';
 
 // 실제 규정DB 값 기준: 주꾸미 금어기 5/1~8/31(300만원 이하), 우럭 체장
 // 23cm 미만 금지(100만원 이하), 감성돔 금어기 5/1~6/30 + 체장 25cm.
 describe('legalityWarning', () => {
+  it('DB values these tests assume are still what the DB says — fails loudly on regulation edits', () => {
+    expect(getRegulation('주꾸미')?.closedSeason).toMatchObject({
+      start: '5/1',
+      end: '8/31',
+    });
+    expect(getRegulation('감성돔')?.closedSeason).toMatchObject({
+      start: '5/1',
+      end: '6/30',
+    });
+    expect(getRegulation('우럭')?.minSizeCm).toBe(23);
+  });
   it('warns inside a closed season with the penalty and legal reference', () => {
     const w = legalityWarning('주꾸미', null, '2026-08-28')!;
     expect(w.violations.some((v) => v.includes('금어기'))).toBe(true);

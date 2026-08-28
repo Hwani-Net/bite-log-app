@@ -229,7 +229,7 @@ export default function RecordPage() {
     if (!species) return;
     const warning = legalityWarning(
       species,
-      sizeCm ? Number(sizeCm) : null,
+      sizeCm === "" ? null : Number(sizeCm),
       date,
     );
     if (warning) {
@@ -238,6 +238,23 @@ export default function RecordPage() {
     }
     await persistRecord();
   }
+
+  // 경고가 떠 있는 동안 판정에 쓰인 필드가 바뀌면 경고를 무효화한다 —
+  // 안 그러면 "그래도 저장"이 경고받지 않은 새 내용을 그대로 저장한다.
+  useEffect(() => {
+    setLegalWarning(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [species, sizeCm, date]);
+
+  // 저장 버튼이 fixed 하단 바라 경고 패널이 뷰포트 밖에 남을 수 있다 —
+  // 뜨는 순간 패널로 스크롤해 준다.
+  useEffect(() => {
+    if (legalWarning) {
+      document
+        .querySelector('[data-testid="legality-warning"]')
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [legalWarning]);
 
   async function persistRecord() {
     setLegalWarning(null);
@@ -1058,11 +1075,12 @@ export default function RecordPage() {
               사용자의 선택으로 남긴다. */}
           {legalWarning && (
             <div
-              role="alert"
               data-testid="legality-warning"
               className="rounded-2xl border border-red-400/40 bg-red-400/10 p-4 space-y-2"
             >
-              <p className="text-sm font-bold text-red-300">
+              {/* alert는 헤딩에만 — 패널 전체를 걸면 위반·벌칙·안내가 통째로
+                  낭독돼 과하다. */}
+              <p role="alert" className="text-sm font-bold text-red-300">
                 저장 전에 확인하세요 — 수산자원 규정에 걸릴 수 있어요
               </p>
               {legalWarning.violations.map((v) => (
@@ -1081,8 +1099,10 @@ export default function RecordPage() {
                 </p>
               )}
               <p className="text-[11px] text-white/60">
-                방류하셨다면 그대로 기록하셔도 됩니다 — 기록 자체는 문제가
-                아니에요.
+                방류하셨다면 그대로 기록하셔도 됩니다. 본 안내는 현재 고시
+                기준의 참고 정보이며 법적 효력이 없어요 — 과거 날짜 기록은
+                당시 규정과 다를 수 있고, 최신 기준은 해양수산부 고시를
+                확인하세요.
               </p>
               <div className="flex gap-2 pt-1">
                 <button
