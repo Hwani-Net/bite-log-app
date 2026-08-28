@@ -93,7 +93,7 @@ describe('recordsToCsv', () => {
     memo: '입질 좋았음, 야간',
   });
 
-  it('carries every field the record holds — not the old 7 columns', () => {
+  it('carries every value the record holds — not the old 7 columns', () => {
     const [row] = recordsToCsvRows([full]);
     expect(row).toEqual([
       '2026-08-10',
@@ -105,7 +105,7 @@ describe('recordsToCsv', () => {
       '오천항',
       '36.4',
       '126.5',
-      '지그헤드 5g； 웜', // 쉼표는 전각 치환(엑셀 호환 관행 유지)
+      '"지그헤드 5g, 웜"', // RFC 4180 인용 — 쉼표를 값째로 보존
       'Clear',
       '21.5',
       '2.4',
@@ -113,8 +113,37 @@ describe('recordsToCsv', () => {
       '보령',
       '공개',
       '4247',
-      '입질 좋았음； 야간',
+      '"입질 좋았음, 야간"',
     ]);
+  });
+
+  it('quotes embedded quotes and newlines instead of mangling them', () => {
+    const [row] = recordsToCsvRows([
+      record({ memo: '그는 "바다"를 봤다\n둘째줄' }),
+    ]);
+    expect(row[17]).toBe('"그는 ""바다""를 봤다\n둘째줄"');
+  });
+
+  it('defuses spreadsheet formula injection in user-entered fields', () => {
+    const [row] = recordsToCsvRows([
+      record({ species: '=cmd|calc', tackle: '+1+1', memo: '@SUM(A1)' }),
+    ]);
+    expect(row[2]).toBe("'=cmd|calc");
+    expect(row[9]).toBe("'+1+1");
+    expect(row[17]).toBe("'@SUM(A1)");
+  });
+
+  it('handles partially present weather/tide without shifting columns', () => {
+    const [row] = recordsToCsvRows([
+      record({
+        weather: { condition: 'Rain', tempC: 18 }, // windSpeed 없음
+        tide: { stationName: '보령', tides: [] }, // currentPhase 없음
+      }),
+    ]);
+    expect(row).toHaveLength(18);
+    expect(row[12]).toBe(''); // 풍속 빈칸
+    expect(row[13]).toBe(''); // 물때 빈칸
+    expect(row[14]).toBe('보령');
   });
 
   it('emits a header row and one line per record', () => {
@@ -125,8 +154,17 @@ describe('recordsToCsv', () => {
     expect(lines).toHaveLength(3);
   });
 
-  it('flattens newlines so a multi-line memo cannot break the row', () => {
-    const [row] = recordsToCsvRows([record({ memo: '첫줄\n둘째줄' })]);
-    expect(row[17]).toBe('첫줄 둘째줄');
+});
+
+describe('legacy records without a photos array', () => {
+  it('photosOnly does not crash on pre-schema records', () => {
+    const legacy = { ...record({}), photos: undefined } as unknown as CatchRecord;
+    expect(() => filterRecords([legacy], { photosOnly: true })).not.toThrow();
+    expect(filterRecords([legacy], { photosOnly: true })).toHaveLength(0);
+  });
+
+  it('a whitespace-only search is treated as no search', () => {
+    const records = [record({ id: 'a' }), record({ id: 'b' })];
+    expect(filterRecords(records, { search: '   ' })).toHaveLength(2);
   });
 });

@@ -286,6 +286,9 @@ function RecordDetailContent() {
                         }
                       };
                       reader.readAsDataURL(file);
+                      // 같은 파일을 다시 고르면 change가 안 뜨는 고전
+                      // 함정 — 값을 비워 재선택을 허용한다.
+                      e.target.value = "";
                     }}
                   />
                 </label>
