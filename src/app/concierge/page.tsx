@@ -21,6 +21,11 @@ import {
   GearRecommendation,
 } from "@/services/affiliateService";
 import { chatWithExpert, ChatMessage } from "@/services/fishExpertChatService";
+import {
+  analyzeUserRecords,
+  type UserFishingProfile,
+} from "@/services/personalizationService";
+import { getDataService } from "@/services/dataServiceFactory";
 // Import new tab components
 import OverviewTab from "../components/concierge/OverviewTab";
 import AIChatTab from "../components/concierge/AIChatTab";
@@ -54,6 +59,24 @@ export default function ConciergePage() {
 
   // Expert Chat state
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  // AI 마스터가 이 사용자를 알게 한다(3차 GOAL-5) — 기록 프로필을 시스템
+  // 프롬프트에 주입. 기록 없으면 null이라 기존 일반 답변 그대로.
+  const [chatProfile, setChatProfile] = useState<UserFishingProfile | null>(
+    null,
+  );
+  useEffect(() => {
+    let cancelled = false;
+    getDataService()
+      .getCatchRecords()
+      .then((records) => {
+        if (!cancelled && records.length > 0)
+          setChatProfile(analyzeUserRecords(records));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);
@@ -169,7 +192,12 @@ export default function ConciergePage() {
     setChatLoading(true);
 
     try {
-      const resp = await chatWithExpert(chatHistory, msg, selectedSpecies);
+      const resp = await chatWithExpert(
+        chatHistory,
+        msg,
+        selectedSpecies,
+        chatProfile,
+      );
       setChatHistory((prev) => [...prev, { role: "model", text: resp }]);
     } catch (err) {
       setChatHistory((prev) => [

@@ -17,6 +17,7 @@ import { WeatherData } from "@/services/weatherService";
 import PeakTimeline from "@/app/components/concierge/PeakTimeline";
 import { getRegionForCoords } from "@/lib/region";
 import { matchTodayConditions } from "@/lib/conditionStats";
+import { topSpotsFromRecords, type MySpot } from "@/lib/mySpots";
 import { getDataService } from "@/services/dataServiceFactory";
 import type { CatchRecord } from "@/types";
 import {
@@ -45,86 +46,91 @@ function localISODate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function SecretSpotsSection({
+// 3차 GOAL-5 — 예전엔 하드코딩 3곳을 "현지인만 아는 포인트"로 팔았다
+// (가짜 유료 콘텐츠). 이제 사용자 실기록의 상위 포인트 × 오늘 점수다 —
+// 진짜 "누구의 것도 아닌" 시크릿이고, 기록 없으면 정직한 빈 상태.
+function MySpotsSection({
   isPro,
   onOpenPaywall,
+  spots,
+  todayScore,
 }: {
   isPro: boolean;
   onOpenPaywall: () => void;
+  spots: MySpot[];
+  todayScore: number | null;
 }) {
-  const spots = [
-    {
-      name: "대천항 남단 테트라포드",
-      species: "감성돔, 우럭",
-      desc: "들물 타임에 대물 출현 빈도 매우 높음",
-    },
-    {
-      name: "시화방조제 1km 지점 수중여",
-      species: "삼치, 광어",
-      desc: "조류가 바뀌는 시점에 폭발적 피딩",
-    },
-    {
-      name: "영흥도 남서쪽 시크릿 여밭",
-      species: "참돔, 갑오징어",
-      desc: "현지인들만 아는 최고급 포인트",
-    },
-  ];
-
   return (
-    <div className="glass-morphism rounded-2xl border border-white/5 p-4 overflow-hidden relative">
+    <div
+      data-testid="my-spots-section"
+      className="glass-morphism rounded-2xl border border-white/5 p-4 overflow-hidden relative"
+    >
       <div className="flex items-center gap-2 mb-3">
         <MapPin size={16} className="text-[#c9a84c]" />
         <h3 className="text-sm font-bold text-white uppercase tracking-[0.15em]">
-          이 지역 시크릿 포인트
+          나의 시크릿 포인트
         </h3>
-        {!isPro && (
+        {!isPro && spots.length > 0 && (
           <span className="text-[10px] bg-[#c9a84c] text-[#080d14] px-1.5 py-0.5 rounded font-bold ml-1">
             PRO
           </span>
         )}
       </div>
 
-      <div
-        className={`space-y-3 transition-all duration-500 ${!isPro ? "blur-[6px] select-none" : ""}`}
-      >
-        {spots.map((spot, i) => (
-          <div
-            key={i}
-            className="flex items-center gap-3 bg-white/5 rounded-xl px-3 py-3"
-          >
-            <div className="w-10 h-10 rounded-full bg-[#c9a84c]/10 flex items-center justify-center shrink-0">
-              <MapPin size={16} className="text-[#c9a84c]" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-white truncate">
-                {spot.name}
-              </p>
-              <p className="text-[10px] text-[#c9a84c] font-medium">
-                {spot.species}
-              </p>
-              <p className="text-[9px] text-white/60 mt-0.5">{spot.desc}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {!isPro && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-[#080d14]/30 backdrop-blur-[2px] z-10">
-          <div className="glass-morphism shadow-xl rounded-2xl p-5 border border-[#c9a84c]/20 flex flex-col items-center text-center max-w-[200px]">
-            <Lock size={28} className="text-[#c9a84c] mb-2" />
-            <p className="text-[11px] font-bold text-white leading-tight mb-3">
-              고수들만 아는
-              <br />
-              시크릿 포인트 3곳 잠김
+      {spots.length === 0 ? (
+        <p className="text-xs text-white/45 leading-relaxed">
+          조과 기록이 쌓이면 나만의 포인트가 여기 떠요. 내 기록에서 뽑는
+          값이라 그 누구의 것도 아닌 진짜 시크릿 포인트예요.
+        </p>
+      ) : (
+        <>
+          {todayScore !== null && (
+            <p className="text-[11px] text-[#7dd3fc]/90 mb-2">
+              오늘 조건 {todayScore}점 — 검증된 내 포인트에서 노려보세요.
             </p>
-            <button
-              onClick={onOpenPaywall}
-              className="bg-[#c9a84c] text-[#080d14] text-[10px] font-bold px-4 py-2 rounded-full shadow-lg shadow-[#c9a84c]/20 active:scale-95 transition-transform"
-            >
-              포인트 잠금 해제
-            </button>
+          )}
+          <div
+            className={`space-y-3 transition-all duration-500 ${!isPro ? "blur-[6px] select-none" : ""}`}
+          >
+            {spots.map((spot) => (
+              <div
+                key={spot.name}
+                className="flex items-center gap-3 bg-white/5 rounded-xl px-3 py-3"
+              >
+                <div className="w-10 h-10 rounded-full bg-[#c9a84c]/10 flex items-center justify-center shrink-0">
+                  <MapPin size={16} className="text-[#c9a84c]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-white truncate">
+                    {spot.name}
+                  </p>
+                  <p className="text-[10px] text-[#c9a84c] font-medium">
+                    {spot.visits}회 방문 · 총 {spot.totalCatch}마리
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
+
+          {!isPro && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-[#080d14]/30 backdrop-blur-[2px] z-10">
+              <div className="glass-morphism shadow-xl rounded-2xl p-5 border border-[#c9a84c]/20 flex flex-col items-center text-center max-w-[200px]">
+                <Lock size={28} className="text-[#c9a84c] mb-2" />
+                <p className="text-[11px] font-bold text-white leading-tight mb-3">
+                  내 기록으로 검증된
+                  <br />
+                  나의 포인트 {spots.length}곳 잠김
+                </p>
+                <button
+                  onClick={onOpenPaywall}
+                  className="bg-[#c9a84c] text-[#080d14] text-[10px] font-bold px-4 py-2 rounded-full shadow-lg shadow-[#c9a84c]/20 active:scale-95 transition-transform"
+                >
+                  포인트 잠금 해제
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -1482,10 +1488,12 @@ export default function BiteForecastPage() {
           {/* ── Weather Detail ── */}
           {weather && <WeatherDetail weather={weather} />}
 
-          {/* ── Secret Spots (PRO) ── */}
-          <SecretSpotsSection
+          {/* ── 나의 시크릿 포인트 (PRO) ── */}
+          <MySpotsSection
             isPro={isPro}
             onOpenPaywall={() => openPaywall("secret_point")}
+            spots={topSpotsFromRecords(myRecords)}
+            todayScore={biteTime ? biteTime.score : null}
           />
 
           {/* ── Fishing Tips ── */}

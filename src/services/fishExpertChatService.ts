@@ -2,6 +2,8 @@
 // Gemini 2.0 Flash — Korean fishing specialist with conversation history
 // Short, direct answers (< 3 bullets). Anti-hallucination guardrails built in.
 
+import type { UserFishingProfile } from "@/services/personalizationService";
+
 export interface ChatMessage {
   role: "user" | "model";
   text: string;
@@ -80,10 +82,32 @@ export function getQuickReplies(species: string | null): string[] {
 
 export const CHAT_SPECIES = Object.keys(QUICK_REPLIES_BY_SPECIES);
 
+// 사용자 기록 프로필 → 시스템 프롬프트 컨텍스트(3차 GOAL-5). 순수 함수라
+// 유닛으로 고정한다. 기록이 없으면 null — 일반 답변 그대로.
+export function buildProfileContext(
+  profile: UserFishingProfile | null,
+): string | null {
+  if (!profile || profile.totalDays === 0) return null;
+  const parts = [
+    profile.favoriteSpecies ? `주력 어종: ${profile.favoriteSpecies}` : null,
+    profile.favoriteSpot ? `단골 포인트: ${profile.favoriteSpot}` : null,
+    profile.bestMonth ? `최고 실적 달: ${profile.bestMonth}` : null,
+    `기록한 출조일: ${profile.totalDays}일`,
+    profile.avgCatchRate > 0
+      ? `출조당 평균 조과: ${profile.avgCatchRate}마리`
+      : null,
+  ].filter(Boolean);
+  if (parts.length === 0) return null;
+  return `\n\n## 이 사용자의 실제 기록 프로필 (BiteLog 데이터)\n- ${parts.join(
+    "\n- ",
+  )}\n답변할 때 이 프로필을 반영해 이 사용자에게 맞는 조언을 하세요. 프로필에 없는 사실은 지어내지 마세요.`;
+}
+
 export async function chatWithExpert(
   history: ChatMessage[],
   userMessage: string,
   selectedSpecies: string | null,
+  profile: UserFishingProfile | null = null,
 ): Promise<string> {
   // Build context hint for selected species
   const contextHint = selectedSpecies
@@ -108,7 +132,11 @@ export async function chatWithExpert(
     const requestBody = {
       model: "gemini-2.5-flash",
       contents,
-      systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+      systemInstruction: {
+        parts: [
+          { text: SYSTEM_INSTRUCTION + (buildProfileContext(profile) ?? "") },
+        ],
+      },
       generationConfig: {
         temperature: 0.6,
         maxOutputTokens: 200,

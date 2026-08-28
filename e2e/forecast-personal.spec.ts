@@ -64,6 +64,37 @@ test.describe('Personal forecast strip — /bite-forecast + home banner', () => 
     await expect(page.locator('[data-testid="my-record-strip"]')).toHaveCount(0);
   });
 
+  // 3차 GOAL-5 — 가짜 유료 콘텐츠 제거: PRO 섹션이 하드코딩 배열이 아니라
+  // 내 기록의 상위 포인트를 쓴다.
+  test('the PRO spots section is my real top spots, not a hardcoded array', async ({
+    page,
+  }) => {
+    await mockWeather(page);
+    await page.addInitScript((r) => {
+      localStorage.setItem('fishlog_catches', JSON.stringify(r));
+    }, history);
+    await page.goto('/bite-forecast');
+
+    const section = page.locator('[data-testid="my-spots-section"]');
+    await expect(section).toBeVisible({ timeout: 20000 });
+    // 시딩한 내 포인트가 DOM에 있다(비PRO는 블러라도 내용은 내 것).
+    await expect(section).toContainText('오천항');
+    await expect(section).toContainText('3회 방문 · 총 12마리');
+    // 옛 하드코딩 포인트는 코드째 사라졌다.
+    await expect(section).not.toContainText('대천항 남단 테트라포드');
+  });
+
+  test('no records — the spots section shows the honest empty state, no paywall bait', async ({
+    page,
+  }) => {
+    await mockWeather(page);
+    await page.goto('/bite-forecast');
+    const section = page.locator('[data-testid="my-spots-section"]');
+    await expect(section).toBeVisible({ timeout: 20000 });
+    await expect(section).toContainText('조과 기록이 쌓이면');
+    await expect(section).not.toContainText('잠금 해제'); // 빈 상태에 페이월 안 띄움
+  });
+
   test('the home banner composes 주력 어종 with today score', async ({
     page,
   }) => {
