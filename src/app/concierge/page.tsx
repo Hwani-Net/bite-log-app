@@ -74,7 +74,18 @@ export default function ConciergePage() {
   );
   const [report, setReport] = useState<CatchReportData | null>(null);
   async function openReport() {
-    const records = await getDataService().getCatchRecords().catch(() => []);
+    let records;
+    try {
+      records = await getDataService().getCatchRecords();
+    } catch {
+      // 실패를 "기록 없음"으로 위장하지 않는다.
+      window.alert(
+        locale === "ko"
+          ? "기록을 불러오지 못해 리포트를 만들 수 없습니다."
+          : "Could not load records for the report.",
+      );
+      return;
+    }
     setReport(
       generateCatchReport(
         records.map((r) => ({
@@ -102,12 +113,16 @@ export default function ConciergePage() {
   }, []);
 
   // 채팅 영속(5차 GOAL-5) — 예전엔 useState뿐이라 새로고침 한 번에
-  // 대화가 통째로 사라졌다.
+  // 대화가 통째로 사라졌다. 로드가 끝나기 전에는 저장하지 않는다 —
+  // 초기 빈 배열이 저장돼 기존 대화를 지우는 경쟁 상태(교차검수 지적).
+  const chatLoadedRef = useRef(false);
   useEffect(() => {
     const saved = loadChatHistory();
     if (saved.length > 0) setChatHistory(saved);
+    chatLoadedRef.current = true;
   }, []);
   useEffect(() => {
+    if (!chatLoadedRef.current) return;
     saveChatHistory(chatHistory);
   }, [chatHistory]);
   const [chatInput, setChatInput] = useState("");
@@ -392,6 +407,12 @@ export default function ConciergePage() {
       {report && (
         <div
           data-testid="catch-report"
+          role="dialog"
+          aria-modal="true"
+          aria-label={locale === "ko" ? "조황 리포트" : "Catch report"}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setReport(null);
+          }}
           className="fixed inset-0 z-[200] bg-[#080d14]/95 backdrop-blur-xl overflow-y-auto p-5"
         >
           <div className="max-w-lg mx-auto space-y-3">

@@ -644,6 +644,13 @@ export default function HomePage() {
 
       {/* 상단 메뉴 시트(5차 GOAL-5) — 햄버거가 실제로 여는 곳. */}
       {menuOpen && (
+        <>
+          {/* 바깥 클릭으로 닫히는 배경 — 토글로만 닫히면 갇힌 느낌이다. */}
+          <div
+            className="fixed inset-0 top-14 z-[98]"
+            onClick={() => setMenuOpen(false)}
+            aria-hidden="true"
+          />
         <div
           data-testid="home-menu-sheet"
           className="fixed top-14 left-0 right-0 z-[99] bg-[#080d14]/95 backdrop-blur-xl border-b border-white/10 px-4 py-4"
@@ -661,7 +668,8 @@ export default function HomePage() {
               </Link>
             ))}
           </div>
-        </div>
+          </div>
+        </>
       )}
 
       {/* ── Main Content ── */}
