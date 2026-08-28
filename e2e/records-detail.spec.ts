@@ -16,30 +16,41 @@ test.describe('Record detail edit — /records/detail', () => {
     memo: '원래 메모',
   };
 
-  test('editing the memo keeps the GPS coordinates', async ({ page }) => {
+  test('editing the location name and memo keeps the GPS coordinates', async ({
+    page,
+  }) => {
     await page.addInitScript((record) => {
       localStorage.setItem('fishlog_catches', JSON.stringify([record]));
     }, RECORD);
     await page.goto(`/records/detail?id=${RECORD.id}`);
 
     await page.getByRole('button', { name: '수정' }).click();
+    // 버그의 원래 증상이 바로 "위치명을 고치면 좌표가 지워진다"이므로
+    // 위치명 변경이 이 테스트의 핵심 케이스다(메모만 바꾸는 건 절반).
+    const nameField = page.getByRole('textbox', { name: '장소' });
+    await expect(nameField).toHaveValue('오천항');
+    await nameField.fill('대천항 방파제');
     // bare `textarea`는 dev 오버레이의 textarea까지 잡혀 strict 위반 —
     // 앱의 메모 필드를 접근성 이름으로 정확히 지정한다.
-    const memoField = page.getByRole('textbox', { name: '메모' });
-    await expect(memoField).toBeVisible();
-    await memoField.fill('메모만 바꿨다 — 좌표는 그대로여야 한다');
+    await page
+      .getByRole('textbox', { name: '메모' })
+      .fill('위치명을 바꿨다 — 좌표는 그대로여야 한다');
     await page.getByRole('button', { name: '기록 저장' }).click();
 
     // 저장 완료(편집 모드 종료 → 수정 버튼 복귀)까지 기다린 뒤 데이터 검증.
     await expect(page.getByRole('button', { name: '수정' })).toBeVisible({
       timeout: 10000,
     });
-    const saved = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem('fishlog_catches') ?? '[]'),
+    const saved = await page.evaluate(
+      (id) =>
+        JSON.parse(localStorage.getItem('fishlog_catches') ?? '[]').find(
+          (r: { id: string }) => r.id === id,
+        ),
+      RECORD.id,
     );
-    expect(saved[0].memo).toBe('메모만 바꿨다 — 좌표는 그대로여야 한다');
-    expect(saved[0].location.lat).toBe(36.4396);
-    expect(saved[0].location.lng).toBe(126.5194);
-    expect(saved[0].location.name).toBe('오천항');
+    expect(saved.location.name).toBe('대천항 방파제'); // 이름은 바뀌고
+    expect(saved.location.lat).toBe(36.4396); // 좌표는 살아 있다
+    expect(saved.location.lng).toBe(126.5194);
+    expect(saved.memo).toBe('위치명을 바꿨다 — 좌표는 그대로여야 한다');
   });
 });
