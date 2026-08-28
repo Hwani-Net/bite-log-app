@@ -41,11 +41,20 @@
 // 가치 있는 빠른 연결 실패"로 오판해 그 ~10.6초를 또 반복했다.
 // timeoutMs를 그 플랫폼 한계보다 짧게 잡아야 우리 쪽이 항상 먼저
 // 발동해서 이 판정 자체가 의미를 갖는다.
+//
+// thefishing.kr 자체의 정상 응답 시간도 같은 자리(직접 측정으로 부하가
+// 몰릴 때 최대 ~10.5초까지 봤다)에 걸쳐 있어서, 플랫폼 한계보다 확실히
+// 짧으면서 그 정상 응답 범위를 다 덮는 값은 없다 — 두 구간이 사실상
+// 겹친다. 9초는 그 사이 어딘가에 둔 절충이다: 플랫폼 한계보다 확실히
+// 짧아 우리 판정이 대부분 제대로 작동하고, thefishing.kr이 정말 느린
+// 순간(9~10.5초)엔 가끔 그 응답을 놓치고 조기 실패로 처리할 수 있다.
+// 그래도 "실패를 두 배로 기다리는 것"보다는 "느린 걸 빨리, 깔끔하게
+// 실패로 보고하고 다시 시도 버튼을 주는 것"이 낫다는 판단이다.
 export async function fetchWithRetry(
   input: string,
   init: RequestInit,
   retries = 1,
-  timeoutMs = 8_000,
+  timeoutMs = 9_000,
 ): Promise<Response> {
   const controller = new AbortController();
   let ourTimeoutFired = false;
