@@ -6,6 +6,7 @@ import {
   parseBoatListingTotal,
   buildListingUrl,
   filterBoatsBySpecies,
+  SPECIES_FILTERS,
   type BoatListing,
 } from '@/services/boatListingService';
 
@@ -116,6 +117,65 @@ describe('filterBoatsBySpecies', () => {
   it('passes boats through unchanged for an unknown species code', () => {
     const boats = [boat('꽃게')];
     expect(filterBoatsBySpecies(boats, '99999')).toBe(boats);
+  });
+
+  // 어종을 26종으로 넓히면서 생긴 부분문자열 충돌 — 이름이 다른 어종
+  // 안에 통째로 들어 있어서, 단순 includes로는 남의 배가 딸려온다.
+  it('오징어(23) must not swallow 갑오징어·무늬오징어 — 각자 다른 어종이다', () => {
+    const boats = [
+      boat('오징어'),
+      boat('갈치,오징어'),
+      boat('갑오징어'),
+      boat('무늬오징어'),
+    ];
+    expect(filterBoatsBySpecies(boats, '23').map((b) => b.fishTypes)).toEqual([
+      '오징어',
+      '갈치,오징어',
+    ]);
+  });
+
+  it('갑오징어(6) still matches its own boats', () => {
+    const boats = [boat('갑오징어,쭈꾸미'), boat('광어')];
+    expect(filterBoatsBySpecies(boats, '6')).toHaveLength(1);
+  });
+
+  it('볼락(11) matches the 뽈락 spelling but not 불볼락(=열기)', () => {
+    const boats = [boat('볼락'), boat('뽈락'), boat('불볼락')];
+    expect(filterBoatsBySpecies(boats, '11').map((b) => b.fishTypes)).toEqual([
+      '볼락',
+      '뽈락',
+    ]);
+  });
+
+  it('열기(10) matches its 불볼락 alias', () => {
+    const boats = [boat('불볼락'), boat('열기'), boat('볼락')];
+    expect(filterBoatsBySpecies(boats, '10')).toHaveLength(2);
+  });
+
+  it('백조기(8) matches its 보구치 alias', () => {
+    const boats = [boat('보구치'), boat('백조기낚시'), boat('우럭')];
+    expect(filterBoatsBySpecies(boats, '8')).toHaveLength(2);
+  });
+
+  it('광어(5) still matches 대광어 — same fish, bigger marketing', () => {
+    const boats = [boat('대광어(다운샷)'), boat('우럭')];
+    expect(filterBoatsBySpecies(boats, '5')).toHaveLength(1);
+  });
+});
+
+describe('SPECIES_FILTERS coverage', () => {
+  it('carries every species thefishing.kr actually offers', () => {
+    // 2026-08-28 검색 폼 실측: si[] 코드 42개 중 어종 26개 + 타이라바(기법,
+    // 원래 있던 필터라 유지). 이 숫자가 줄면 어떤 어종이 화면에서 사라진
+    // 것이므로 의도한 변경인지 확인해야 한다.
+    expect(SPECIES_FILTERS).toHaveLength(27);
+  });
+
+  it('has no duplicate codes or labels', () => {
+    const codes = SPECIES_FILTERS.map((s) => s.code);
+    const labels = SPECIES_FILTERS.map((s) => s.label);
+    expect(new Set(codes).size).toBe(codes.length);
+    expect(new Set(labels).size).toBe(labels.length);
   });
 });
 

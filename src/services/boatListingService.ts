@@ -44,6 +44,15 @@ export const REGION_FILTERS = [
 
 // `si[]` codes from the same form, limited to the species this app already
 // knows how to talk about (SPECIES_OPTIONS on the booking page).
+// 더피싱이 실제로 제공하는 si[] 어종 코드 전수(2026-08-28 검색 폼 실측 —
+// 코드 42개 중 어종이 아닌 것(체험낚시·대회·이벤트·탐사·갯바위·생미끼·
+// 어초침선·기타)을 뺀 26종). 예전엔 12종만 노출해 백조기(업스트림 218건)·
+// 오징어(225건)·문어(157건)·꽃게(122건)처럼 성수기에 배가 가장 많이 뜨는
+// 어종을 아예 고를 수 없었다.
+//
+// 순서는 사용 빈도 — 앞쪽 12종이 기존 목록이라 쓰던 사람의 위치 감각이
+// 바뀌지 않는다. 타이라바는 어종이 아니라 참돔 기법이지만 원래 있던
+// 필터라 유지한다(빼면 쓰던 사람에겐 기능 삭제다).
 export const SPECIES_FILTERS = [
   { label: "우럭", code: "4" },
   { label: "광어", code: "5" },
@@ -57,6 +66,21 @@ export const SPECIES_FILTERS = [
   { label: "삼치", code: "48" },
   { label: "방어", code: "54" },
   { label: "타이라바", code: "38" },
+  { label: "백조기", code: "8" },
+  { label: "오징어", code: "23" },
+  { label: "문어", code: "7" },
+  { label: "꽃게", code: "56" },
+  { label: "노래미", code: "14" },
+  { label: "한치", code: "24" },
+  { label: "열기", code: "10" },
+  { label: "민어", code: "20" },
+  { label: "부시리", code: "27" },
+  { label: "도다리", code: "13" },
+  { label: "가자미", code: "12" },
+  { label: "낙지", code: "53" },
+  { label: "숭어", code: "26" },
+  { label: "고등어", code: "28" },
+  { label: "대구", code: "9" },
 ] as const;
 
 export interface BoatSearchParams {
@@ -143,8 +167,20 @@ export function parseBoatListingTotal(html: string): number {
 // bug in buildListingUrl/parseBoatListingHtml. We can't fix their tags, but
 // we can stop showing a boat under a species filter its own label disagrees
 // with. Some species are spelled two ways across their pages.
-const SPECIES_LABEL_ALIASES: Record<string, string[]> = {
-  주꾸미: ["주꾸미", "쭈꾸미"],
+// 라벨과 카드 표기가 어긋나는 경우를 정규식으로 다룬다. 별칭이 필요한
+// 것(뽈락/보구치)과, 부분문자열이 다른 어종을 잘못 물어오는 것(오징어가
+// "갑오징어"에 걸린다)을 같은 자리에서 처리해야 한 쪽만 고치고 다른 쪽을
+// 놓치는 일이 없다.
+const SPECIES_MATCHERS: Record<string, RegExp> = {
+  주꾸미: /주꾸미|쭈꾸미/,
+  // 갑오징어·무늬오징어·한치오징어는 다른 어종이고 각자 코드가 있다.
+  // 앞에 한글이 붙은 합성어는 전부 다른 종으로 보고 배제한다 — 갑/한만
+  // 막으면 무늬·화살 같은 표기가 그대로 새어 들어온다.
+  오징어: /(?<![가-힣])오징어/,
+  // "불볼락"은 열기라 따로 코드가 있다 — 볼락 검색에 딸려오면 안 된다.
+  볼락: /(?<!불)볼락|뽈락/,
+  열기: /열기|불볼락/,
+  백조기: /백조기|보구치/,
 };
 
 export function filterBoatsBySpecies(
@@ -154,8 +190,8 @@ export function filterBoatsBySpecies(
   if (!speciesCode) return boats;
   const label = SPECIES_FILTERS.find((s) => s.code === speciesCode)?.label;
   if (!label) return boats;
-  const aliases = SPECIES_LABEL_ALIASES[label] ?? [label];
-  return boats.filter((b) => aliases.some((a) => b.fishTypes.includes(a)));
+  const re = SPECIES_MATCHERS[label] ?? new RegExp(label);
+  return boats.filter((b) => re.test(b.fishTypes));
 }
 
 export function buildListingUrl(params: BoatSearchParams = {}): string {

@@ -21,20 +21,10 @@ import {
   isPushSupported,
 } from "@/services/pushNotificationService";
 import SafeZoneBanner from "@/components/SafeZoneBanner";
+import { SPECIES_LIST } from "@/data/fishSpecies";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const SPECIES_LIST = [
-  "주꾸미",
-  "갑오징어",
-  "우럭",
-  "볼락",
-  "광어",
-  "참돔",
-  "감성돔",
-  "한치",
-  "방어",
-];
 const REGION_LIST = ["서해", "남해", "동해", "제주", "전국"];
 
 const LABELS = {
