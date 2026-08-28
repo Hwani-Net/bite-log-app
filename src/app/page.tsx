@@ -199,6 +199,20 @@ function StatBar({
   );
 }
 
+// 바텀 네비에 없는 라우트 — 상단 햄버거 메뉴와 하단 "더보기" 그리드가
+// 같은 목록을 쓴다(5차 GOAL-5).
+const MORE_ROUTES: { href: string; icon: string; label: string }[] = [
+  { href: "/stats", icon: "bar_chart", label: "낚시 통계" },
+  { href: "/season-forecast", icon: "calendar_month", label: "시즌 예보" },
+  { href: "/feed", icon: "rss_feed", label: "조황 피드" },
+  { href: "/settings", icon: "settings", label: "설정" },
+  { href: "/alerts", icon: "notifications", label: "알림" },
+  { href: "/news", icon: "newspaper", label: "낚시 뉴스" },
+  { href: "/regulations", icon: "shield", label: "낚시 규정" },
+  { href: "/catch-value", icon: "payments", label: "조과 시세" },
+  { href: "/fishdex", icon: "menu_book", label: "어류 도감" },
+];
+
 // ─── AI Insight Banner (실시간 분석) ─────────────────────────────────────────
 function AIInsightBanner({
   profile,
@@ -513,6 +527,7 @@ function CommunityFeedBanner() {
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function HomePage() {
+  const [menuOpen, setMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [records, setRecords] = useState<CatchRecord[]>([]);
   const [recordsLoading, setRecordsLoading] = useState(true);
@@ -598,12 +613,20 @@ export default function HomePage() {
     <div className="relative flex min-h-dvh w-full flex-col bg-[#080d14] text-[#dde2f5] overflow-x-hidden pb-24 selection:bg-[#c9a84c]/30">
       {/* ── Header ── */}
       <header className="fixed top-0 left-0 w-full h-14 flex items-center justify-between px-6 bg-[#080d14]/60 backdrop-blur-xl border-b border-white/5 z-[100]">
-        {/* Hamburger icon */}
-        <div className="w-4 h-4 flex flex-col justify-between">
-          <span className="w-full h-[0.5px] bg-[#c9a84c]/80" />
-          <span className="w-2/3 h-[0.5px] bg-[#c9a84c]/80" />
-          <span className="w-full h-[0.5px] bg-[#c9a84c]/80" />
-        </div>
+        {/* 햄버거 — 예전엔 클릭 핸들러 없는 장식 3줄이었다(5차 GOAL-5).
+            바텀 네비에 없는 라우트로 가는 실제 메뉴가 됐다. */}
+        <button
+          type="button"
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-label="메뉴"
+          aria-expanded={menuOpen}
+          data-testid="home-menu-button"
+          className="w-8 h-8 -ml-2 flex flex-col justify-center items-start gap-[3px] px-1"
+        >
+          <span className="w-4 h-[0.5px] bg-[#c9a84c]/80" />
+          <span className="w-3 h-[0.5px] bg-[#c9a84c]/80" />
+          <span className="w-4 h-[0.5px] bg-[#c9a84c]/80" />
+        </button>
         {/* Title */}
         <div className="flex flex-col items-center">
           <h1 className="text-[#c9a84c] font-bold tracking-[0.3em] text-[0.65rem] uppercase font-[var(--font-display)]">
@@ -618,6 +641,28 @@ export default function HomePage() {
           <Bell size={18} className="text-[#c9a84c]/80" />
         </Link>
       </header>
+
+      {/* 상단 메뉴 시트(5차 GOAL-5) — 햄버거가 실제로 여는 곳. */}
+      {menuOpen && (
+        <div
+          data-testid="home-menu-sheet"
+          className="fixed top-14 left-0 right-0 z-[99] bg-[#080d14]/95 backdrop-blur-xl border-b border-white/10 px-4 py-4"
+        >
+          <div className="grid grid-cols-3 gap-2 max-w-lg mx-auto">
+            {MORE_ROUTES.map(({ href, icon, label }) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setMenuOpen(false)}
+                className="flex flex-col items-center gap-1.5 py-3 rounded-xl bg-white/5 border border-white/10 hover:border-[#c9a84c]/30 transition-all"
+              >
+                <DynamicIcon name={icon} size={20} className="text-[#c9a84c]" />
+                <span className="text-[10px] text-white/70">{label}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Main Content ── */}
       <div className="pt-14 pb-32 w-full max-w-[412px] mx-auto min-h-screen relative">
@@ -737,25 +782,7 @@ export default function HomePage() {
               더보기
             </h2>
             <div className="grid grid-cols-3 gap-2">
-              {(
-                [
-                  { href: "/stats", icon: "bar_chart", label: "낚시 통계" },
-                  {
-                    href: "/season-forecast",
-                    icon: "calendar_month",
-                    label: "시즌 예보",
-                  },
-                  { href: "/feed", icon: "rss_feed", label: "조황 피드" },
-                  { href: "/settings", icon: "settings", label: "설정" },
-                  {
-                    href: "/alerts",
-                    icon: "notifications",
-                    label: "알림",
-                  },
-                  { href: "/news", icon: "newspaper", label: "낚시 뉴스" },
-                  { href: "/regulations", icon: "shield", label: "낚시 규정" },
-                ] as { href: string; icon: string; label: string }[]
-              ).map(({ href, icon, label }) => (
+              {MORE_ROUTES.map(({ href, icon, label }) => (
                 <Link
                   key={href}
                   href={href}

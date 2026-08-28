@@ -26,6 +26,14 @@ import {
   type UserFishingProfile,
 } from "@/services/personalizationService";
 import { getDataService } from "@/services/dataServiceFactory";
+import {
+  generateCatchReport,
+  type CatchReportData,
+} from "@/services/conciergeService";
+import {
+  loadChatHistory,
+  saveChatHistory,
+} from "@/lib/chatHistory";
 // Import new tab components
 import OverviewTab from "../components/concierge/OverviewTab";
 import AIChatTab from "../components/concierge/AIChatTab";
@@ -64,6 +72,21 @@ export default function ConciergePage() {
   const [chatProfile, setChatProfile] = useState<UserFishingProfile | null>(
     null,
   );
+  const [report, setReport] = useState<CatchReportData | null>(null);
+  async function openReport() {
+    const records = await getDataService().getCatchRecords().catch(() => []);
+    setReport(
+      generateCatchReport(
+        records.map((r) => ({
+          date: r.date,
+          species: r.species,
+          location: { name: r.location?.name },
+          quantity: r.count,
+          sizeCm: r.sizeCm,
+        })),
+      ),
+    );
+  }
   useEffect(() => {
     let cancelled = false;
     getDataService()
@@ -77,6 +100,16 @@ export default function ConciergePage() {
       cancelled = true;
     };
   }, []);
+
+  // 채팅 영속(5차 GOAL-5) — 예전엔 useState뿐이라 새로고침 한 번에
+  // 대화가 통째로 사라졌다.
+  useEffect(() => {
+    const saved = loadChatHistory();
+    if (saved.length > 0) setChatHistory(saved);
+  }, []);
+  useEffect(() => {
+    saveChatHistory(chatHistory);
+  }, [chatHistory]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);
@@ -343,12 +376,87 @@ export default function ConciergePage() {
           </button>
 
           <button
-            onClick={() => router.push("/stats")}
+            onClick={openReport}
+            data-testid="catch-report-button"
             className="pointer-events-auto bg-white/5 border border-white/10 text-white/70 px-4 py-2.5 rounded-full text-xs font-bold shadow-lg flex items-center gap-1 hover:scale-105 transition-transform active:scale-95"
           >
             <DynamicIcon name="info" size={14} />
             {locale === "ko" ? "조황 리포트" : "Report"}
           </button>
+        </div>
+      )}
+
+      {/* 조황 리포트(5차 GOAL-5) — generateCatchReport는 작성만 돼 있고
+          호출하는 곳이 없었다. 버튼은 /stats로 도망갔고. 이제 실제로
+          내 기록 요약을 만들어 보여준다. */}
+      {report && (
+        <div
+          data-testid="catch-report"
+          className="fixed inset-0 z-[200] bg-[#080d14]/95 backdrop-blur-xl overflow-y-auto p-5"
+        >
+          <div className="max-w-lg mx-auto space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-[#c9a84c]">
+                {report.period} {locale === "ko" ? "조황 리포트" : "Report"}
+              </h2>
+              <button
+                onClick={() => setReport(null)}
+                aria-label={locale === "ko" ? "닫기" : "Close"}
+                className="size-9 rounded-full bg-white/5 text-white/60"
+              >
+                ×
+              </button>
+            </div>
+            {report.totalTrips === 0 ? (
+              <p className="text-sm text-white/50">
+                {locale === "ko"
+                  ? "이번 달 기록이 아직 없어요. 기록을 남기면 여기서 요약해 드릴게요."
+                  : "No records this month yet."}
+              </p>
+            ) : (
+              <>
+                <p className="text-sm text-white/80">{report.monthSummary}</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { label: "출조", value: `${report.totalTrips}회` },
+                    { label: "조과", value: `${report.totalFish}마리` },
+                    { label: "평균", value: `${report.avgPerTrip}마리` },
+                  ].map((s) => (
+                    <div
+                      key={s.label}
+                      className="rounded-xl bg-white/5 border border-white/10 p-3 text-center"
+                    >
+                      <p className="text-lg font-bold text-white">{s.value}</p>
+                      <p className="text-[10px] text-white/40">{s.label}</p>
+                    </div>
+                  ))}
+                </div>
+                {report.topSpecies.length > 0 && (
+                  <p className="text-xs text-white/60">
+                    {locale === "ko" ? "어종: " : "Species: "}
+                    {report.topSpecies
+                      .map((s) => `${s.name} ${s.count}마리(${s.pct}%)`)
+                      .join(" · ")}
+                  </p>
+                )}
+                {report.topSpots.length > 0 && (
+                  <p className="text-xs text-white/60">
+                    {locale === "ko" ? "포인트: " : "Spots: "}
+                    {report.topSpots
+                      .map((s) => `${s.name} ${s.count}회`)
+                      .join(" · ")}
+                  </p>
+                )}
+                {report.biggestFish && (
+                  <p className="text-xs text-[#c9a84c]">
+                    {locale === "ko" ? "최대어: " : "Biggest: "}
+                    {report.biggestFish.species} {report.biggestFish.sizeCm}cm (
+                    {report.biggestFish.date})
+                  </p>
+                )}
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>
