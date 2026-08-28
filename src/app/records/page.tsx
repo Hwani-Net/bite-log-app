@@ -20,18 +20,7 @@ import {
 } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
-// Fish species color mapping (matches home page palette)
-const FISH_COLORS: Record<string, string> = {
-  농어: "from-blue-500 to-cyan-400",
-  우럭: "from-amber-500 to-orange-400",
-  참돔: "from-rose-400 to-pink-300",
-  감성돔: "from-violet-500 to-purple-400",
-  볼락: "from-emerald-500 to-green-400",
-  광어: "from-yellow-400 to-amber-300",
-  고등어: "from-indigo-500 to-blue-400",
-  방어: "from-sky-500 to-cyan-400",
-  주꾸미: "from-red-400 to-orange-300",
-};
+import { fishGradient } from "@/lib/fishColors";
 
 type SortBy = "date" | "size" | "count";
 type ViewMode = "list" | "gallery";
@@ -371,8 +360,7 @@ export default function RecordsPage() {
             const hasPhoto =
               record.photos.length > 0 &&
               !record.photos[0].startsWith("/fish-");
-            const colorClass =
-              FISH_COLORS[record.species] ?? "from-slate-600 to-slate-500";
+            const colorClass = fishGradient(record.species);
 
             return (
               <Link

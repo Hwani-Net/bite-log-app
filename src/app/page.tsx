@@ -37,19 +37,7 @@ import MonthlySummaryCard from "@/components/MonthlySummaryCard";
 import DailyFishingTip from "@/components/DailyFishingTip";
 import { DynamicIcon } from "@/lib/iconMap";
 
-// Fish species default image/color mapping
-const FISH_COLORS: Record<string, { gradient: string }> = {
-  농어: { gradient: "from-blue-500 to-cyan-400" },
-  우럭: { gradient: "from-amber-500 to-orange-400" },
-  참돔: { gradient: "from-rose-400 to-pink-300" },
-  감성돔: { gradient: "from-violet-500 to-purple-400" },
-  볼락: { gradient: "from-emerald-500 to-green-400" },
-  광어: { gradient: "from-yellow-400 to-amber-300" },
-  고등어: { gradient: "from-indigo-500 to-blue-400" },
-  방어: { gradient: "from-sky-500 to-cyan-400" },
-  주꾸미: { gradient: "from-red-400 to-orange-300" },
-};
-const DEFAULT_FISH = { gradient: "from-slate-400 to-slate-300" };
+import { fishGradient } from "@/lib/fishColors";
 
 // ─── Precision Index Gauge (Hero) ────────────────────────────────────────────
 function PrecisionGauge({
@@ -368,7 +356,7 @@ function CatchGallery({ records }: { records: CatchRecord[] }) {
       </div>
       <div className="grid grid-cols-2 gap-3">
         {items.map((record) => {
-          const fishStyle = FISH_COLORS[record.species] || DEFAULT_FISH;
+          const gradient = fishGradient(record.species);
           const hasRealPhoto =
             record.photos.length > 0 && !record.photos[0].startsWith("/fish-");
 
@@ -388,7 +376,7 @@ function CatchGallery({ records }: { records: CatchRecord[] }) {
                   />
                 ) : (
                   <div
-                    className={`w-full h-full bg-gradient-to-br ${fishStyle.gradient} flex items-center justify-center brightness-75`}
+                    className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center brightness-75`}
                   >
                     <span className="text-lg font-bold text-white/40">
                       {record.species.slice(0, 2)}

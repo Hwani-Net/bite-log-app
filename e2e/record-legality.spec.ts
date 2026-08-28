@@ -29,6 +29,23 @@ test.describe('Catch legality guard — /record', () => {
     expect(saved.some((r: { species: string }) => r.species === '감성돔')).toBe(true);
   });
 
+  // 4차 GOAL-1 — 주꾸미가 기록 폼에서 선택 가능해지면서 규정 지킴이의
+  // 커버가 실제로 넓어졌는지(금어기 5/1~8/31, 300만원 이하).
+  test('주꾸미 is now selectable and its closed season triggers the guard', async ({
+    page,
+  }) => {
+    await page.goto('/record');
+    await page.getByRole('button', { name: '직접 입력' }).click();
+    await page.getByLabel('어종').selectOption('주꾸미');
+    await page.locator('input[type="date"]').fill('2026-08-15');
+    await page.getByRole('button', { name: '기록 저장' }).click();
+
+    const warning = page.locator('[data-testid="legality-warning"]');
+    await expect(warning).toBeVisible();
+    await expect(warning).toContainText('금어기');
+    await expect(warning).toContainText('300만원');
+  });
+
   test('an undersized fish warns; fixing the size clears the path', async ({
     page,
   }) => {

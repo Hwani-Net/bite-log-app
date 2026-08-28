@@ -35,9 +35,13 @@ export interface TideRecordData {
 }
 
 // ===== Fish Species =====
+// 주꾸미·갑오징어: 규정DB(금어기)·시즌DB의 핵심 어종인데 기록 폼에서
+// 선택할 수 없어 "기타"로 적어야 했다 — 규정 지킴이·시즌 리마인더가
+// 그 기록을 못 잡는 정합 구멍(4차 GOAL-1에서 추가).
 export const FISH_SPECIES = [
   '감성돔', '참돔', '농어', '볼락', '광어', '우럭',
-  '방어', '숭어', '고등어', '전갱이', '학꽁치', '기타'
+  '방어', '숭어', '고등어', '전갱이', '학꽁치',
+  '주꾸미', '갑오징어', '기타'
 ] as const;
 export type FishSpecies = (typeof FISH_SPECIES)[number] | string;
 
