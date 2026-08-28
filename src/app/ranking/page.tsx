@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { useAppStore } from "@/store/appStore";
 import { getFirebaseRanking } from "@/services/rankingService";
+import { getDataService } from "@/services/dataServiceFactory";
+import { unrankedCount } from "@/lib/rankingHonesty";
 import { RankingCategory, RankingData } from "@/types/ranking";
 import { useAuth } from "@/hooks/useAuth";
 import { DynamicIcon } from "@/lib/iconMap";
@@ -43,6 +46,14 @@ export default function RankingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 이번 시즌 내 비공개 기록 수 — 랭킹에 반영되지 않는 것들.
+  const [unranked, setUnranked] = useState(0);
+  useEffect(() => {
+    getDataService()
+      .getCatchRecords()
+      .then((records) => setUnranked(unrankedCount(records, new Date())))
+      .catch(() => {});
+  }, []);
   const [days, setDays] = useState(0);
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
@@ -210,6 +221,30 @@ export default function RankingPage() {
                 {locale === "ko" ? c.koLabel : c.enLabel}
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* 랭킹의 출처를 밝힌다(5차 GOAL-4) — 공개 피드만 집계하므로
+            비공개 기록은 아무리 좋아도 순위에 없다. 사실을 말하고,
+            내 미반영 건수와 공개 경로를 같이 준다. */}
+        <div className="px-4 mb-4">
+          <div
+            data-testid="ranking-disclosure"
+            className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3 text-[11px] text-white/55 leading-relaxed"
+          >
+            {locale === "ko"
+              ? "랭킹은 공개된 조과만 집계해요. 기록은 기본이 비공개라 공개로 바꿔야 순위에 반영됩니다."
+              : "Only public catches are ranked. Records are private by default."}
+            {unranked > 0 && (
+              <span className="block mt-1 text-[#c9a84c] font-semibold">
+                {locale === "ko"
+                  ? `이번 시즌 내 비공개 기록 ${unranked}건은 반영되지 않았어요 · `
+                  : `${unranked} private records this season are not counted · `}
+                <Link href="/records" className="underline underline-offset-2">
+                  {locale === "ko" ? "기록에서 공개하기" : "Open records"}
+                </Link>
+              </span>
+            )}
           </div>
         </div>
 

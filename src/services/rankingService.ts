@@ -1,6 +1,8 @@
 import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import { getFirebaseDb, isFirebaseReady } from "@/lib/firebase";
 import { RankingCategory, RankingData, RankingEntry } from "@/types/ranking";
+import { computeBadges, type AchievementBadge } from "@/services/badgeService";
+import type { CatchRecord } from "@/types";
 
 // ====================================================================
 // Firebase Ranking Service
@@ -100,6 +102,32 @@ async function fetchAndAggregate(): Promise<Map<string, UserAggregate>> {
   return aggregates;
 }
 
+/**
+ * 집계값으로 그 사용자의 배지를 계산한다(5차 GOAL-4). 예전엔
+ * level: 1 / badges: [] 하드코딩이라 badgeService가 있는데도 포디움에
+ * 배지가 영영 안 떴다. 피드 집계라 원본 기록 배열이 없으므로, 집계로
+ * 복원 가능한 최소 형태(마릿수·최대 크기·어종 수)만 합성해 넘긴다 —
+ * 날짜 기반 배지(연속 출조 등)는 이 경로에서 판정 불가라 빠진다.
+ */
+function badgesFromAggregate(a: UserAggregate): AchievementBadge[] {
+  const synthetic: CatchRecord[] = [];
+  const species = Array.from(a.speciesSet);
+  for (let i = 0; i < Math.max(a.totalCount, species.length); i++) {
+    synthetic.push({
+      id: `agg-${a.uid}-${i}`,
+      createdAt: "",
+      date: "",
+      location: { name: "" },
+      species: species[i % Math.max(species.length, 1)] ?? "",
+      count: 1,
+      sizeCm: i === 0 ? a.maxSizeCm : undefined,
+      photos: [],
+      visibility: "public",
+    } as CatchRecord);
+  }
+  return computeBadges(synthetic).filter((b) => b.earned);
+}
+
 function buildRealEntries(
   aggregates: Map<string, UserAggregate>,
   category: RankingCategory,
@@ -133,9 +161,10 @@ function buildRealEntries(
         uid: a.uid,
         displayName: a.displayName,
         photoURL: a.photoURL || undefined,
-        level: 1,
+        // 레벨은 이 시즌 집계 조과 기준의 가벼운 지표(10마리당 1).
+        level: Math.max(1, Math.floor(a.totalCount / 10) + 1),
         totalCatch: a.totalCount,
-        badges: [],
+        badges: badgesFromAggregate(a),
         createdAt: "",
         updatedAt: "",
       },
