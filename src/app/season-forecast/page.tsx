@@ -292,9 +292,13 @@ export default function SeasonForecastPage() {
                 {isKo ? "시즌 예측" : "Season Forecast"}
               </h1>
               <p className="text-[10px] text-white/60">
+                {/* 지역 탭을 바꿔도 안 바뀌는 리터럴 "5개 어종"이었다 —
+                    동해를 고르면 실제로는 0종인데도 그대로 떠 있었다
+                    (2026-08-28 사용자 지적으로 시작된 전수조사에서 발견).
+                    sorted.length가 지금 이 탭의 실제 개수다. */}
                 {isKo
-                  ? "치어 방류 계획 기반 · 5개 어종"
-                  : "Based on fry release plans · 5 species"}
+                  ? `치어 방류 계획 기반 · ${sorted.length}개 어종`
+                  : `Based on fry release plans · ${sorted.length} species`}
               </p>
             </div>
           </div>

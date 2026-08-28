@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
@@ -174,6 +174,14 @@ export default function BoatDetailPage() {
     }
   }, []);
 
+  // "방문할 때마다 스냅샷"의 "방문"은 이 uid 페이지를 여는 것이지, 그
+  // 안에서 달력 월을 넘기는 것이 아니다. ym은 그대로 두고 uid가 바뀔 때만
+  // 다시 스냅샷을 찍는다 — 이 ref가 없으면 8월(가격 있음) 보다가 7월(과거
+  // 라 가격 정보 없음)로 달만 넘겨도 "가격 변동: 110,000원 → 정보 없음"이
+  // 찍힌다. 실제로는 가격이 안 바뀌었고 그냥 달력을 구경한 것뿐이다
+  // (2026-08-28 전수조사에서 발견).
+  const snapshottedUidRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (!uid) return;
     let cancelled = false;
@@ -199,21 +207,24 @@ export default function BoatDetailPage() {
           // single hit only counts toward a streak (isGone requires 2+)
           // rather than declaring it gone immediately.
           setBoatGone(isGone(markGoneStreak(uid, true)));
-          setSnapshotChange(null);
+          if (snapshottedUidRef.current !== uid) setSnapshotChange(null);
           return;
         }
         setBoatGone(false);
         markGoneStreak(uid, false);
-        // Auto-snapshot every visit, not just favoriting — this is what
-        // lets a later visit notice the boat got renamed or repriced.
-        const priceLine = data.days.find((d) => d.priceLine)?.priceLine;
-        const boat = recordSnapshot(uid, {
-          name: data.meta.name,
-          areaPath: data.meta.areaPath,
-          imageUrl: data.meta.imageUrl,
-          priceLine,
-        });
-        setSnapshotChange(diffLatestSnapshots(boat));
+        // Auto-snapshot once per visit (uid), not on every month flip — see
+        // snapshottedUidRef above.
+        if (snapshottedUidRef.current !== uid) {
+          snapshottedUidRef.current = uid;
+          const priceLine = data.days.find((d) => d.priceLine)?.priceLine;
+          const boat = recordSnapshot(uid, {
+            name: data.meta.name,
+            areaPath: data.meta.areaPath,
+            imageUrl: data.meta.imageUrl,
+            priceLine,
+          });
+          setSnapshotChange(diffLatestSnapshots(boat));
+        }
       })
       .catch(() => {
         if (cancelled) return;

@@ -937,9 +937,16 @@ function BiteIndexOfficialSection() {
         <h3 className="text-sm font-bold text-white uppercase tracking-[0.15em]">
           해양수산부 공식 낚시지수
         </h3>
-        <span className="text-[9px] bg-[#7dd3fc]/20 border border-[#7dd3fc]/30 text-[#7dd3fc] px-1.5 py-0.5 rounded font-bold ml-1">
-          해수부 공식
-        </span>
+        {/* "해수부 공식" 배지는 실제로 그 기관 데이터를 받았을 때만 붙는다.
+            이전엔 항상 떠 있어서, BITE_INDEX_API_KEY가 배포 환경에
+            설정된 적이 없어 100% 샘플 데이터인 지금도 "공식"이라고
+            주장하고 있었다(2026-08-28 전수조사에서 발견 — "공식"과
+            "샘플" 배지가 나란히 붙어 자기모순이었다). */}
+        {!loading && !mocked && (
+          <span className="text-[9px] bg-[#7dd3fc]/20 border border-[#7dd3fc]/30 text-[#7dd3fc] px-1.5 py-0.5 rounded font-bold ml-1">
+            해수부 공식
+          </span>
+        )}
         {mocked && !loading && (
           <span className="text-[9px] bg-white/10 border border-white/10 text-white/50 px-1.5 py-0.5 rounded font-bold ml-auto">
             샘플

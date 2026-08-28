@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { WeatherData } from "@/services/weatherService";
 import { TideData } from "@/services/tideService";
 import { BiteTimePrediction } from "@/services/biteTimeService";
@@ -37,6 +38,16 @@ export default function OverviewTab({
   const { isPro, openPaywall } = useSubscriptionStore();
   const biteScore = biteTime?.score ?? 0;
   const seasonChipsRef = useDragScroll();
+  // 서버(UTC)와 사용자 브라우저(KST, UTC+9)는 날짜가 어긋날 수 있다 — 매월
+  // 1일 00:00~08:59 KST엔 서버는 아직 지난달이다. 렌더 중 new Date()로
+  // 월을 구하면 그 창에서 서버 HTML과 클라이언트 첫 렌더가 다른 달을
+  // 표시해 하이드레이션이 깨진다(React #418과 같은 클래스의 결함,
+  // PeakTimeline의 currentHour와 동일한 원인).
+  const [now, setNow] = useState<Date | null>(null);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNow(new Date());
+  }, []);
 
   return (
     <div className="space-y-6 pb-24">
@@ -65,9 +76,10 @@ export default function OverviewTab({
       {inSeasonSpecies.length > 0 && (
         <section>
           <p className="text-xs font-semibold text-white/40 mb-2">
-            {locale === "ko"
-              ? `${new Date().getMonth() + 1}월 시즌 어종`
-              : `${new Date().toLocaleString("en", { month: "long" })} Season`}
+            {now &&
+              (locale === "ko"
+                ? `${now.getMonth() + 1}월 시즌 어종`
+                : `${now.toLocaleString("en", { month: "long" })} Season`)}
           </p>
           <div
             ref={seasonChipsRef}

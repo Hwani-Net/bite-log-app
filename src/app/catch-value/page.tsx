@@ -19,9 +19,6 @@ import {
 } from "@/services/catchValueService";
 
 type SortMode = "price" | "trend" | "name";
-type Market = "노량진" | "부산공동" | "제주";
-
-const MARKETS: Market[] = ["노량진", "부산공동", "제주"];
 
 function formatPrice(n: number) {
   return n.toLocaleString("ko-KR");
@@ -130,7 +127,6 @@ function SkeletonCard() {
 export default function CatchValuePage() {
   const [data, setData] = useState<CatchValueData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [market, setMarket] = useState<Market>("노량진");
   const [sortMode, setSortMode] = useState<SortMode>("price");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -143,7 +139,7 @@ export default function CatchValuePage() {
 
   const filtered = useMemo(() => {
     if (!data) return [];
-    let list = data.prices.filter((p) => p.market === market || !data.isLive);
+    let list = data.prices;
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
       list = list.filter((p) => p.species.toLowerCase().includes(q));
@@ -158,7 +154,7 @@ export default function CatchValuePage() {
       list = [...list].sort((a, b) => a.species.localeCompare(b.species, "ko"));
     }
     return list;
-  }, [data, market, sortMode, searchQuery]);
+  }, [data, sortMode, searchQuery]);
 
   const summary = useMemo(() => {
     if (!data) return { up: 0, down: 0, flat: 0 };
@@ -219,23 +215,6 @@ export default function CatchValuePage() {
             </p>
           </div>
         )}
-
-        {/* Market tabs */}
-        <div className="flex h-9 items-center rounded-xl bg-white/5 border border-white/5 p-1 gap-1">
-          {MARKETS.map((m) => (
-            <button
-              key={m}
-              onClick={() => setMarket(m)}
-              className={`flex cursor-pointer h-full grow items-center justify-center rounded-lg text-xs font-semibold transition-all ${
-                market === m
-                  ? "bg-[#c9a84c] text-[#080d14]"
-                  : "text-white/40 hover:text-white/60"
-              }`}
-            >
-              {m}
-            </button>
-          ))}
-        </div>
 
         {/* Summary cards */}
         {!loading && data && (

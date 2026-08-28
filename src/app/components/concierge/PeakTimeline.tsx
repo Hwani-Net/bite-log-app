@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { TideData } from "@/services/tideService";
 import {
   getSpeciesPeakWindows,
@@ -51,7 +51,17 @@ export default function PeakTimeline({ tideData, locale }: PeakTimelineProps) {
     () => getSpeciesPeakWindows(tideData, selectedSpecies),
     [tideData, selectedSpecies],
   );
-  const currentHour = new Date().getHours();
+  // 서버(Vercel, UTC)와 사용자 브라우저(KST, UTC+9)는 시각이 9시간
+  // 어긋난다. 렌더 중 new Date()로 시를 구하면 서버가 그린 HTML과
+  // 클라이언트 첫 렌더가 다른 시를 "지금"으로 표시해 하이드레이션이
+  // 깨진다(React #418, 2026-08-28 전수조사에서 /concierge 진입 시 재현).
+  // 마운트 후에만 실제 값을 채운다 — 마운트 전 렌더는 서버와 똑같이
+  // "지금 시각 강조 없음"으로 일치시킨다.
+  const [currentHour, setCurrentHour] = useState<number | null>(null);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentHour(new Date().getHours());
+  }, []);
 
   // Find best slots for summary — always show ALL peak + good slots (not just golden)
   const peakSlots = slots.filter(

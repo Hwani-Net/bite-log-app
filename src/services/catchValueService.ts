@@ -8,7 +8,6 @@ export interface FishPrice {
   trend: "up" | "down" | "flat";
   trendPct: number;
   date: string;
-  market: string;
 }
 
 export interface CatchValueData {
@@ -28,7 +27,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "up",
     trendPct: 3.2,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "우럭(조피볼락)",
@@ -39,7 +37,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "flat",
     trendPct: 0,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "참돔",
@@ -50,7 +47,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "up",
     trendPct: 5.1,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "광어",
@@ -61,7 +57,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "down",
     trendPct: -1.8,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "방어",
@@ -72,7 +67,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "up",
     trendPct: 8.3,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "삼치",
@@ -83,7 +77,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "flat",
     trendPct: 0,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "고등어",
@@ -94,7 +87,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "down",
     trendPct: -2.1,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "갈치",
@@ -105,7 +97,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "up",
     trendPct: 4.5,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "오징어",
@@ -116,7 +107,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "down",
     trendPct: -3.2,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "주꾸미",
@@ -127,7 +117,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "up",
     trendPct: 6.7,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "볼락",
@@ -138,7 +127,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "flat",
     trendPct: 0,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "노래미",
@@ -149,7 +137,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "flat",
     trendPct: 0,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "농어",
@@ -160,7 +147,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "up",
     trendPct: 2.1,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "숭어",
@@ -171,7 +157,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "down",
     trendPct: -1.5,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "가자미",
@@ -182,7 +167,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "flat",
     trendPct: 0,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "전복",
@@ -193,7 +177,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "up",
     trendPct: 1.2,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "문어",
@@ -204,7 +187,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "down",
     trendPct: -2.8,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "낙지",
@@ -215,7 +197,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "up",
     trendPct: 3.5,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "홍합",
@@ -226,7 +207,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "flat",
     trendPct: 0,
     date: "2026-04-21",
-    market: "노량진",
   },
   {
     species: "굴",
@@ -237,7 +217,6 @@ const MOCK_PRICES: FishPrice[] = [
     trend: "flat",
     trendPct: 0,
     date: "2026-04-21",
-    market: "노량진",
   },
 ];
 
