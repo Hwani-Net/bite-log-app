@@ -27,6 +27,7 @@ import {
 } from "@/types";
 import { listKnownBoats, type FavoriteBoat } from "@/services/myBoatService";
 import { tackleSuggestions } from "@/services/tackleAdviceService";
+import { preparePhotosForSave } from "@/lib/photoStorage";
 import {
   Anchor,
   ArrowLeft,
@@ -265,6 +266,10 @@ export default function RecordPage() {
     setSaving(true);
 
     try {
+      // 사진은 저장 직전에 압축(+가능하면 Storage 업로드) — base64 원본
+      // 3장이면 Firestore 1MiB 문서 한계를 넘겨 저장이 통째로 실패할 수
+      // 있었다(5차 GOAL-3). Storage를 못 쓰면 압축본 base64로 폴백한다.
+      const preparedPhotos = await preparePhotosForSave(photos);
       const recordData: Omit<CatchRecord, "id" | "createdAt" | "updatedAt"> = {
         date,
         caughtTime: caughtTime || undefined,
@@ -278,7 +283,7 @@ export default function RecordPage() {
         species,
         count,
         sizeCm: sizeCm ? Number(sizeCm) : undefined,
-        photos,
+        photos: preparedPhotos,
         memo: memo.trim() || undefined,
         weather: weather
           ? {

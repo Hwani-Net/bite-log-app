@@ -47,6 +47,23 @@ export function getFirebaseDb(): Firestore | null {
   return dbInstance;
 }
 
+// Storage는 사진 업로드 경로에서만 쓰므로 동적 import — 안 쓰는 사용자
+// 번들에 SDK를 얹지 않는다(5차 GOAL-3).
+let storageInstance: unknown = null;
+export function getFirebaseStorage(): unknown {
+  if (storageInstance) return storageInstance;
+  const a = getApp();
+  if (!a || !firebaseConfig.storageBucket) return null;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getStorage } = require('firebase/storage');
+    storageInstance = getStorage(a);
+    return storageInstance;
+  } catch {
+    return null;
+  }
+}
+
 export async function getFirebaseAnalytics(): Promise<Analytics | null> {
   if (analyticsInstance) return analyticsInstance;
   const a = getApp();
