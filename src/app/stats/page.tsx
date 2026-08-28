@@ -780,6 +780,12 @@ export default function StatsPage() {
                     </p>
                     <p className="text-xs text-[#c9a84c] font-semibold">
                       {dna.bestTimePercent}%
+                      {dna.timeSlotEstimated && (
+                        <span className="text-white/35 font-normal">
+                          {" "}
+                          · {locale === "ko" ? "일부 추정" : "partly est."}
+                        </span>
+                      )}
                     </p>
                   </div>
                   <div className="glass-morphism border border-white/5 rounded-xl p-4">

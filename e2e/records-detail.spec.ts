@@ -53,4 +53,47 @@ test.describe('Record detail edit — /records/detail', () => {
     expect(saved.location.lng).toBe(126.5194);
     expect(saved.memo).toBe('위치명을 바꿨다 — 좌표는 그대로여야 한다');
   });
+
+  // GOAL-2(3차): 잡은 시각(caughtTime)의 편집 왕복 + 물때 스냅샷 표시.
+  test('caught time edits round-trip, and a stored tide phase renders', async ({
+    page,
+  }) => {
+    const withPhase = {
+      ...RECORD,
+      id: 'e2e-time-1',
+      caughtTime: '05:20',
+      tide: {
+        stationName: '보령',
+        tides: [{ type: 'High', time: '03:45', level: 620 }],
+        currentPhase: '들물 3물',
+      },
+    };
+    await page.addInitScript((record) => {
+      localStorage.setItem('fishlog_catches', JSON.stringify([record]));
+    }, withPhase);
+    await page.goto(`/records/detail?id=${withPhase.id}`);
+
+    // 보기 모드: 날짜 옆 시각 + 물때 스냅샷이 보인다.
+    await expect(page.getByText('2026-08-01 · 05:20')).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(page.getByText('들물 3물')).toBeVisible();
+
+    // 편집: 시각을 바꿔 저장하면 데이터에 반영된다.
+    await page.getByRole('button', { name: '수정' }).click();
+    await page.getByLabel('잡은 시각').fill('06:40');
+    await page.getByRole('button', { name: '기록 저장' }).click();
+    await expect(page.getByText('2026-08-01 · 06:40')).toBeVisible({
+      timeout: 10000,
+    });
+    const saved = await page.evaluate(
+      (id) =>
+        JSON.parse(localStorage.getItem('fishlog_catches') ?? '[]').find(
+          (r: { id: string }) => r.id === id,
+        ),
+      withPhase.id,
+    );
+    expect(saved.caughtTime).toBe('06:40');
+    expect(saved.tide.currentPhase).toBe('들물 3물'); // 편집이 물때를 안 지운다
+  });
 });

@@ -15,6 +15,9 @@ export interface FishingDna {
   bestTimePercent: number;
   // Best tide (from tide data in records)
   bestTide: string | null;
+  // bestTimeSlot 표본에 createdAt 폴백(저장 시각)이 섞였는가 — true면
+  // "일부 추정" 라벨을 붙여야 한다.
+  timeSlotEstimated: boolean;
   // Top species
   topSpecies: string;
   topSpeciesCount: number;
@@ -51,12 +54,21 @@ export function analyzeFishingDna(records: CatchRecord[]): FishingDna | null {
     '저녁 (17~20시)': 0,
     '밤 (20~04시)': 0 };
 
-  const createdHours = records.map((r) => {
+  // 잡은 시각(caughtTime "HH:mm")이 있으면 그걸 쓰고, 없는 옛 기록만
+  // createdAt(저장 시각)으로 폴백한다 — 저장 시각은 "소파에서 밤에 몰아
+  // 기록"하면 야행성으로 오판되는 값이라, 폴백이 섞이면 추정으로 표시.
+  let fallbackCount = 0;
+  const catchHours = records.map((r) => {
+    if (r.caughtTime && /^\d{2}:\d{2}$/.test(r.caughtTime)) {
+      return Number(r.caughtTime.slice(0, 2));
+    }
+    fallbackCount += 1;
     const d = r.createdAt ? new Date(r.createdAt) : new Date(r.date);
     return d.getHours();
   });
+  const timeSlotEstimated = fallbackCount > 0;
 
-  createdHours.forEach((h) => {
+  catchHours.forEach((h) => {
     if (h >= 4 && h < 6) timeSlots['새벽 (04~06시)']++;
     else if (h >= 6 && h < 8) timeSlots['이른 아침 (06~08시)']++;
     else if (h >= 8 && h < 11) timeSlots['오전 (08~11시)']++;
@@ -104,14 +116,17 @@ export function analyzeFishingDna(records: CatchRecord[]): FishingDna | null {
   const avgSizeCm = sizes.length > 0 ? Math.round(sizes.reduce((s, v) => s + v, 0) / sizes.length) : null;
 
   // ── 6. Tide analysis ─────────────────────────────────────────────
-  // Simple: check if tide data exists in records
+  // 물때는 tide.currentPhase("들물 3물" 등) 기준이다. 예전 구현은
+  // stationName(관측소 지명)을 집계해 항상 "인천" 같은 지명이 최고
+  // 물때로 나오는 버그였다. phase가 없는 옛 기록은 집계에서 빼고,
+  // 하나도 없으면 항목 자체를 생략(null)한다.
   let bestTide: string | null = null;
-  const tideRecords = records.filter((r) => r.tide?.stationName);
+  const tideRecords = records.filter((r) => r.tide?.currentPhase);
   if (tideRecords.length > 0) {
     const tideMap = new Map<string, number>();
     tideRecords.forEach((r) => {
-      const station = r.tide?.stationName ?? '';
-      tideMap.set(station, (tideMap.get(station) ?? 0) + r.count);
+      const phase = r.tide!.currentPhase!;
+      tideMap.set(phase, (tideMap.get(phase) ?? 0) + r.count);
     });
     const sortedTides = Array.from(tideMap.entries()).sort((a, b) => b[1] - a[1]);
     bestTide = sortedTides[0]?.[0] ?? null;
@@ -143,6 +158,7 @@ export function analyzeFishingDna(records: CatchRecord[]): FishingDna | null {
     bestTimeSlot,
     bestTimePercent,
     bestTide,
+    timeSlotEstimated,
     topSpecies,
     topSpeciesCount,
     topLocation,

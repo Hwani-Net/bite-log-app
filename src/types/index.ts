@@ -29,6 +29,9 @@ export interface TideRecordData {
     time: string; // HH:mm
     level: number; // cm
   }[];
+  // 기록 시점 물흐름 스냅샷 (예: "들물 3물") — 저장할 때 이미 계산되던
+  // getCurrentPhase() 결과를 버리지 않고 담는다. 옛 기록엔 없다(optional).
+  currentPhase?: string;
 }
 
 // ===== Fish Species =====
@@ -44,6 +47,7 @@ export type RecordVisibility = 'private' | 'public';
 export interface CatchRecord extends BaseEntity {
   userId?: string;       // Firebase Auth UID (확장용)
   date: string;          // YYYY-MM-DD
+  caughtTime?: string;   // HH:mm — 잡은 시각(로컬). 옛 기록엔 없다(optional)
   location: FishingSpot;
   species: FishSpecies;
   count: number;

@@ -7,7 +7,11 @@ import { getDataService } from "@/services/dataServiceFactory";
 import { enqueueOfflineRecord } from "@/services/offlineQueue";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { fetchWeather, WeatherData } from "@/services/weatherService";
-import { fetchTideData } from "@/services/tideService";
+import {
+  fetchTideData,
+  getCurrentPhase,
+  type TideData,
+} from "@/services/tideService";
 import { identifyFish, FishAIResult } from "@/services/fishAIService";
 import {
   parseVoiceInput,
@@ -59,9 +63,18 @@ export default function RecordPage() {
   const [step, setStep] = useState<"photo" | "form">("photo");
 
   // ===== Form state =====
-  const [date, setDate] = useState(
-    () => new Date().toISOString().split("T")[0],
-  );
+  // toISOString()은 UTC라 KST 자정~9시에 어제 날짜가 기본이 되는 함정 —
+  // 이 세션에서만 네 번째 발견된 같은 버그 클래스(src/lib/localDate.ts 참조).
+  const [date, setDate] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  });
+  // 잡은 시각 — 기본값은 폼을 연 지금 시각. 기록 데이터에 시간 축을 넣는
+  // 첫 필드(이전엔 "저장 버튼 누른 시각"만 있어 시간 분석이 전부 오염).
+  const [caughtTime, setCaughtTime] = useState(() => {
+    const d = new Date();
+    return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  });
   const [locationName, setLocationName] = useState("");
   const [species, setSpecies] = useState("");
   // "탄 배" — booking에서 쌓인 "내 선사 카드" 이력(myBoatService)에서 고른다.
@@ -78,7 +91,9 @@ export default function RecordPage() {
   const [saving, setSaving] = useState(false);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
-  const [tide, setTide] = useState<TideRecordData | null>(null);
+  // fetchTideData의 원본 TideData를 그대로 든다 — 저장 시점에 필요한
+  // 필드만 TideRecordData로 추려 담는다.
+  const [tide, setTide] = useState<TideData | null>(null);
   const [tideLoading, setTideLoading] = useState(false);
   const [gpsLat, setGpsLat] = useState<number | undefined>();
   const [gpsLng, setGpsLng] = useState<number | undefined>();
@@ -210,6 +225,7 @@ export default function RecordPage() {
     try {
       const recordData: Omit<CatchRecord, "id" | "createdAt" | "updatedAt"> = {
         date,
+        caughtTime: caughtTime || undefined,
         location: {
           name:
             locationName.trim() ||
@@ -230,7 +246,15 @@ export default function RecordPage() {
               humidity: weather.humidity,
             }
           : undefined,
-        tide: tide || undefined,
+        // 물흐름 스냅샷을 함께 보존 — getCurrentPhase는 지금까지 화면
+        // 표시용으로만 계산되고 저장 시점에 버려지고 있었다.
+        tide: tide
+          ? {
+              stationName: tide.stationName,
+              tides: tide.tides,
+              currentPhase: getCurrentPhase(tide)?.label ?? undefined,
+            }
+          : undefined,
         visibility,
         boatUid: boatUid || undefined,
       };
@@ -924,20 +948,33 @@ export default function RecordPage() {
             </div>
           )}
 
-          {/* Date */}
+          {/* Date + 잡은 시각 */}
           <div className="glass-morphism border border-white/5 rounded-2xl p-4">
-            <label className="flex flex-col gap-2">
-              <span className="text-white/70 text-sm font-semibold flex items-center gap-2">
-                <Calendar size={16} className="text-[#c9a84c]" />
-                {t("record.date")}
-              </span>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className={inputCls}
-              />
-            </label>
+            <div className="flex gap-3">
+              <label className="flex flex-col gap-2 flex-1">
+                <span className="text-white/70 text-sm font-semibold flex items-center gap-2">
+                  <Calendar size={16} className="text-[#c9a84c]" />
+                  {t("record.date")}
+                </span>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className={inputCls}
+                />
+              </label>
+              <label className="flex flex-col gap-2 w-32">
+                <span className="text-white/70 text-sm font-semibold">
+                  {locale === "ko" ? "잡은 시각" : "Time"}
+                </span>
+                <input
+                  type="time"
+                  value={caughtTime}
+                  onChange={(e) => setCaughtTime(e.target.value)}
+                  className={inputCls}
+                />
+              </label>
+            </div>
           </div>
 
           {/* Memo */}

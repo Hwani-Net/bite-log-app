@@ -45,6 +45,7 @@ function RecordDetailContent() {
 
   // Edit form state
   const [date, setDate] = useState("");
+  const [caughtTime, setCaughtTime] = useState("");
   const [locationName, setLocationName] = useState("");
   const [species, setSpecies] = useState("");
   const [count, setCount] = useState(1);
@@ -59,6 +60,7 @@ function RecordDetailContent() {
         if (r) {
           setRecord(r);
           setDate(r.date);
+          setCaughtTime(r.caughtTime || "");
           setLocationName(r.location.name);
           setSpecies(r.species);
           setCount(r.count);
@@ -74,6 +76,7 @@ function RecordDetailContent() {
     try {
       const updated = await getDataService().updateCatchRecord(record.id, {
         date,
+        caughtTime: caughtTime || undefined,
         // 기존 location을 스프레드로 보존 — name만 바꿔야지, {name}만 보내면
         // 제목 하나 고칠 때마다 GPS 좌표(lat/lng)가 통째로 지워진다.
         location: { ...record.location, name: locationName.trim() },
@@ -239,12 +242,21 @@ function RecordDetailContent() {
                 <Calendar size={16} className="text-[#c9a84c]" />
                 {t("record.date")}
               </span>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className={inputCls}
-              />
+              <span className="flex gap-2">
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className={`${inputCls} flex-1`}
+                />
+                <input
+                  type="time"
+                  aria-label={locale === "ko" ? "잡은 시각" : "Time caught"}
+                  value={caughtTime}
+                  onChange={(e) => setCaughtTime(e.target.value)}
+                  className={`${inputCls} w-28`}
+                />
+              </span>
             </label>
           </div>
 
@@ -379,7 +391,12 @@ function RecordDetailContent() {
                 <Calendar size={14} className="text-[#c9a84c]" />
                 {t("record.date")}
               </div>
-              <p className="text-sm font-semibold text-white">{record.date}</p>
+              <p className="text-sm font-semibold text-white">
+                {record.date}
+                {record.caughtTime && (
+                  <span className="text-white/60"> · {record.caughtTime}</span>
+                )}
+              </p>
             </div>
             <div className="glass-morphism border border-white/5 rounded-2xl p-4">
               <div className="flex items-center gap-2 text-white/60 text-xs mb-1">
@@ -448,6 +465,11 @@ function RecordDetailContent() {
                   className="text-[#7dd3fc]"
                 />
                 {locale === "ko" ? "물때 정보" : "Tide"}
+                {record.tide.currentPhase && (
+                  <span className="text-[#7dd3fc] font-bold">
+                    {record.tide.currentPhase}
+                  </span>
+                )}
                 <span className="text-[10px] text-white/30 ml-auto">
                   {record.tide.stationName} 관측소
                 </span>
