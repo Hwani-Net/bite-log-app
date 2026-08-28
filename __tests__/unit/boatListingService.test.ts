@@ -6,6 +6,7 @@ import {
   parseBoatListingTotal,
   buildListingUrl,
   filterBoatsBySpecies,
+  filterBoatsByRegion,
   SPECIES_FILTERS,
   type BoatListing,
 } from '@/services/boatListingService';
@@ -160,6 +161,56 @@ describe('filterBoatsBySpecies', () => {
   it('광어(5) still matches 대광어 — same fish, bigger marketing', () => {
     const boats = [boat('대광어(다운샷)'), boat('우럭')];
     expect(filterBoatsBySpecies(boats, '5')).toHaveLength(1);
+  });
+});
+
+describe('filterBoatsByRegion', () => {
+  // 2026-08-29 사용자 지적 — 남해를 골랐는데 항구 필터에 서해 항구(신진도항·
+  // 무창포항 등)가 섞여 나왔다. thefishing.kr에 sa[]=3(남해권)을 직접
+  // 질의해도 결과의 상당수가 areaPath상 서해권이었다(thefishing.kr을
+  // 우회해 실측 확인) — si[]/fishTypes 불일치와 같은 클래스의 결함이다.
+  const boat = (uid: string, areaPath: string, seaRegion: string): BoatListing => ({
+    uid,
+    name: `배${uid}`,
+    imageUrl: '',
+    areaPath,
+    seaRegion: seaRegion as BoatListing['seaRegion'],
+    fishTypes: '',
+    capacity: '',
+    detailUrl: '',
+  });
+
+  it('drops boats whose own seaRegion disagrees with the queried region code', () => {
+    const boats = [
+      boat('1', '서해권 > 경기도 > 평택시 > 평택항', '서해권'),
+      boat('2', '남해권 > 전라남도 > 목포', '남해권'),
+      boat('3', '서해권 > 충청남도 > 보령시 > 무창포항', '서해권'),
+    ];
+    // sa[]=3 (남해) 로 질의했다는 상황을 흉내 — 실제로 남해권인 배만 남아야 한다.
+    expect(filterBoatsByRegion(boats, '3').map((b) => b.uid)).toEqual(['2']);
+  });
+
+  it('passes boats through unchanged when no region code is given', () => {
+    const boats = [boat('1', '', '서해권'), boat('2', '', '남해권')];
+    expect(filterBoatsByRegion(boats, undefined)).toBe(boats);
+  });
+
+  it('passes boats through unchanged for an unknown region code', () => {
+    const boats = [boat('1', '', '기타')];
+    expect(filterBoatsByRegion(boats, '999')).toBe(boats);
+  });
+
+  it('covers all four regions used by REGION_FILTERS', () => {
+    const boats = [
+      boat('1', '', '서해권'),
+      boat('2', '', '남해권'),
+      boat('3', '', '동해권'),
+      boat('4', '', '제주권'),
+    ];
+    expect(filterBoatsByRegion(boats, '1').map((b) => b.uid)).toEqual(['1']);
+    expect(filterBoatsByRegion(boats, '3').map((b) => b.uid)).toEqual(['2']);
+    expect(filterBoatsByRegion(boats, '2').map((b) => b.uid)).toEqual(['3']);
+    expect(filterBoatsByRegion(boats, '130').map((b) => b.uid)).toEqual(['4']);
   });
 });
 

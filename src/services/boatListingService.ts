@@ -194,6 +194,25 @@ export function filterBoatsBySpecies(
   return boats.filter((b) => re.test(b.fishTypes));
 }
 
+// sa[]도 si[]와 같은 문제가 있다 — thefishing.kr에 sa[]=3(남해권)을 직접
+// 질의해도 결과의 상당수가 areaPath상으로는 서해권 배였다(예: "서해권 >
+// 경기도 > 평택시 > 평택항", "서해권 > 충청남도 > 보령시 > 무창포항" 등,
+// thefishing.kr 자체를 우회해 확인). 그 결과가 항구 필터 칩까지 그대로
+// 새서, 남해를 골랐는데 서해 항구(신진도항·무창포항·홍원항 등)가 섞여
+// 나오는 걸로 드러났다(2026-08-29 사용자 지적). si[]와 마찬가지로 그쪽
+// 태그를 고칠 수는 없지만, 배 자신의 표시 지역(seaRegion, areaPath 첫
+// 구간에서 그대로 뽑은 값)과 다르면 그 필터 아래 보여주지 않을 수는 있다.
+export function filterBoatsByRegion(
+  boats: BoatListing[],
+  regionCode?: string,
+): BoatListing[] {
+  if (!regionCode) return boats;
+  const label = REGION_FILTERS.find((r) => r.code === regionCode)?.label;
+  if (!label) return boats;
+  const expected = `${label}권` as SeaRegionGroup;
+  return boats.filter((b) => b.seaRegion === expected);
+}
+
 export function buildListingUrl(params: BoatSearchParams = {}): string {
   const q = new URLSearchParams();
   if (params.date) q.set("search_date", params.date);
@@ -216,8 +235,12 @@ export async function fetchBoatListings(
     throw new Error(`boat listing fetch failed: ${res.status}`);
   }
   const html = await res.text();
+  const parsed = filterBoatsByRegion(
+    filterBoatsBySpecies(parseBoatListingHtml(html), params.speciesCode),
+    params.regionCode,
+  );
   return {
-    boats: filterBoatsBySpecies(parseBoatListingHtml(html), params.speciesCode),
+    boats: parsed,
     total: parseBoatListingTotal(html),
     page: params.page ?? 1,
   };
