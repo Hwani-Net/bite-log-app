@@ -52,13 +52,6 @@ describe('fetchWithRetry', () => {
     expect(fetchMock).toHaveBeenCalledTimes(4); // initial + 3 retries
   });
 
-  // 2026-08-29 — retries=1(기본값)에 타임아웃이 없어, thefishing.kr이 정말
-  // 응답하지 않는(연결 실패가 아니라 그냥 느린) 콜드 쿼리마다 플랫폼 기본
-  // 커넥트 타임아웃(~10.6초)을 두 번 그대로 반복해 실측 21초가 나왔다
-  // (사용자가 "항구 필터가 느리다"고 지적한 원인 — 항구 칩은 이 fetch의
-  // 파생값이다). 매 시도에 명시적 timeoutMs를 걸고, 그 타임아웃 자체로
-  // 실패했을 땐 재시도하지 않아야 한다 — 재시도해도 똑같이 그 시간을 또
-  // 기다릴 뿐이다.
   it('passes an AbortSignal so each attempt has an explicit timeout', async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response('ok'));
     global.fetch = fetchMock;
@@ -67,20 +60,21 @@ describe('fetchWithRetry', () => {
     expect(init.signal).toBeInstanceOf(AbortSignal);
   });
 
-  // Vercel 프로덕션에서는 AbortSignal.timeout()이 만드는 에러의
-  // `.name`이 로컬 Node와 다르게 나와(재현: boat-calendar 콜드 쿼리가
-  // 이 방식 배포 후에도 그대로 ~21초) 이름 문자열 비교로는 "우리가 건
-  // 타임아웃"을 못 가려냈다. 지금 구현은 우리 setTimeout이 실제로
-  // 먼저 울렸는지를 불리언으로 직접 추적하므로, 그 시나리오를 가짜
-  // 타이머로 재현해서 검증한다 — 에러 이름은 아무거나 상관없다.
-  it('does not retry when our own timer fires first, regardless of the error name', async () => {
+  // 2026-08-29 — 세 번의 시도가 전부 "실패 이유"로 판정하려다 실패했다:
+  // (1) 에러 이름 문자열은 Vercel 프로덕션에서 로컬과 다르게 나왔고,
+  // (2) "우리 setTimeout이 먼저 울렸나"는 그 타임아웃 값이 플랫폼 자체
+  // 한계(~10.6~10.9초)보다 짧아야만 의미가 있었는데, 짧게 잡으면(9초)
+  // thefishing.kr의 정상 응답(그날 실측 9.4~9.6초)까지 잘라내 실사용
+  // 장애("선박 목록을 불러오지 못했습니다")로 이어졌다. "왜"가 아니라
+  // "얼마나 빨리" 실패했는지만 보는 지금 방식은 그 경계 자체가 필요
+  // 없다 — 느리게 실패한 시도는 재시도해도 똑같이 느릴 뿐이라는 사실은
+  // 실패 이유와 무관하게 항상 참이다.
+  it('does not retry a failure that took a while (not worth repeating)', async () => {
     vi.useFakeTimers();
     try {
       const fetchMock = vi.fn().mockImplementation((_url, init: RequestInit) => {
         return new Promise((_resolve, reject) => {
           init.signal?.addEventListener('abort', () => {
-            // 런타임마다 이름이 다를 수 있는 걸 흉내 — 우리 코드는 이
-            // 이름을 보지 않아야 한다.
             reject(new Error('some runtime-specific abort error'));
           });
         });
@@ -91,14 +85,13 @@ describe('fetchWithRetry', () => {
       const assertion = expect(promise).rejects.toThrow();
       await vi.advanceTimersByTimeAsync(5000);
       await assertion;
-      // 재시도해봤자 같은 타임아웃을 또 기다릴 뿐이라 1회만 시도한다.
       expect(fetchMock).toHaveBeenCalledTimes(1);
     } finally {
       vi.useRealTimers();
     }
   });
 
-  it('still retries a fast connection-level failure (not our timeout)', async () => {
+  it('still retries a failure that happened quickly (a real connection blip)', async () => {
     const ok = new Response('ok', { status: 200 });
     const fetchMock = vi
       .fn()
