@@ -7,6 +7,7 @@ import {
   toggleLike,
   getLikedSet,
   addComment,
+  getComments,
 } from "@/services/feedService";
 import { PublicFeedItem } from "@/types";
 import { Heart, MessageCircle, MapPin } from "lucide-react";
@@ -87,19 +88,18 @@ export default function FeedPage() {
 
   async function handleComment(item: PublicFeedItem) {
     if (!commentText.trim()) return;
-    const firestoreComment = await addComment(
-      item.id,
-      "me",
-      locale === "ko" ? "나" : "Me",
-      commentText.trim(),
-    );
-    const newComment = firestoreComment || {
-      id: `c-${Date.now()}`,
-      userId: "me",
-      userDisplayName: locale === "ko" ? "나" : "Me",
-      content: commentText.trim(),
-      createdAt: new Date().toISOString(),
-    };
+    // 신원은 서비스가 정한다(로그인 실이름 또는 익명 인증 + 익명 낚시인).
+    // 예전 ("me","나") 하드코딩은 모든 댓글이 서로에게 "나"로 보이는
+    // 버그였고, 규칙과 필드명도 어긋나 Firestore 쓰기 자체가 죽어 있었다.
+    const newComment = await addComment(item.id, commentText.trim());
+    if (!newComment) {
+      window.alert(
+        locale === "ko"
+          ? "댓글을 등록하지 못했습니다. 잠시 후 다시 시도해주세요."
+          : "Could not post the comment. Please try again.",
+      );
+      return;
+    }
     setFeed((prev) =>
       prev.map((fi) =>
         fi.id === item.id
@@ -113,6 +113,19 @@ export default function FeedPage() {
     );
     setCommentText("");
     setCommentInputId(null);
+  }
+
+  // 댓글 지연 로드 — 목록에선 수(비정규화)만 보이고, 펼칠 때 그 아이템의
+  // 댓글만 읽는다(51 왕복 N+1의 반대편 절반).
+  async function openComments(item: PublicFeedItem) {
+    setCommentInputId(item.id);
+    if (item.comments !== undefined) return; // 이미 로드됨
+    const loaded = await getComments(item.id).catch(() => []);
+    setFeed((prev) =>
+      prev.map((fi) =>
+        fi.id === item.id ? { ...fi, comments: loaded } : fi,
+      ),
+    );
   }
 
   function handleFilterChange(type: FilterType) {
@@ -376,7 +389,7 @@ export default function FeedPage() {
                   </button>
                   <button
                     onClick={() =>
-                      setCommentInputId(showComments ? null : item.id)
+                      showComments ? setCommentInputId(null) : openComments(item)
                     }
                     aria-label={`${locale === "ko" ? "댓글" : "Comment"} ${item.commentCount > 0 ? item.commentCount : ""}`}
                     className="flex items-center gap-1.5 text-sm font-medium text-white/30 hover:text-[#7dd3fc] transition-colors"

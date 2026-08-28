@@ -21,8 +21,10 @@ service cloud.firestore {
                     && request.resource.data.species is string
                     && request.resource.data.species.size() <= 50;
 
-      // Like updates: any authenticated user can update ONLY likeCount
-      // Owner can update all fields of their own entry
+      // Like updates: any authenticated user can update ONLY likeCount.
+      // commentCount +1 is allowed for any authenticated user — it moves
+      // together with a comment create (denormalized counter that removed
+      // the feed's 51-read N+1). Owner can update all fields.
       allow update: if request.auth != null
                     && (
                       // Owner can update anything
@@ -35,19 +37,34 @@ service cloud.firestore {
                         && (request.resource.data.likeCount == resource.data.likeCount + 1
                             || request.resource.data.likeCount == resource.data.likeCount - 1)
                       )
+                      ||
+                      // ...or bump commentCount by exactly one (comment write path)
+                      (
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['commentCount'])
+                        && request.resource.data.commentCount is int
+                        && request.resource.data.commentCount == resource.data.get('commentCount', 0) + 1
+                      )
                     );
 
       // Only the owner can delete
       allow delete: if request.auth != null
                     && resource.data.userId == request.auth.uid;
 
-      // Comments sub-collection
+      // Comments sub-collection. NOTE: the old rule validated a `text`
+      // field the client never wrote (the schema is `content`) — comment
+      // creation was silently impossible against Firestore until this was
+      // aligned (4차 GOAL-4).
       match /comments/{commentId} {
         allow read: if true;
         allow create: if request.auth != null
                       && request.resource.data.userId == request.auth.uid
-                      && request.resource.data.text is string
-                      && request.resource.data.text.size() <= 500;
+                      && request.resource.data.keys().hasOnly(['userId', 'userDisplayName', 'content', 'createdAt'])
+                      && request.resource.data.content is string
+                      && request.resource.data.content.size() >= 1
+                      && request.resource.data.content.size() <= 500
+                      && request.resource.data.userDisplayName is string
+                      && request.resource.data.userDisplayName.size() <= 30
+                      && request.resource.data.createdAt is string;
         allow delete: if request.auth != null
                       && resource.data.userId == request.auth.uid;
       }

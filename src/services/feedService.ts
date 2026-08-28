@@ -14,6 +14,7 @@ import {
   runTransaction,
   Firestore } from 'firebase/firestore';
 import { getFirebaseDb, isFirebaseReady, getFirebaseAuth } from '@/lib/firebase';
+import { ensureAuthUid } from '@/services/companionService';
 import { getDataService, isUsingFirestore } from '@/services/dataServiceFactory';
 import { CatchRecord, PublicFeedItem, FeedComment } from '@/types';
 
@@ -68,13 +69,9 @@ export async function getPublicFeed(): Promise<PublicFeedItem[]> {
       const items: PublicFeedItem[] = [];
       for (const docSnap of snapshot.docs) {
         const data = docSnap.data();
-        // Load comments sub-collection
-        const commentsRef = collection(db, 'publicFeed', docSnap.id, 'comments');
-        const commentsSnap = await getDocs(query(commentsRef, orderBy('createdAt', 'asc')));
-        const comments: FeedComment[] = commentsSnap.docs.map((c) => ({
-          id: c.id,
-          ...c.data() })) as FeedComment[];
-
+        // 댓글은 여기서 읽지 않는다 — 아이템당 getDocs 1회 = 50개 피드에
+        // 51 왕복이던 N+1(4차 GOAL-4에서 제거). 수는 비정규화된
+        // commentCount, 본문은 펼칠 때 getComments()로 지연 로드.
         items.push({
           id: docSnap.id,
           userId: data.userId || 'anonymous',
@@ -89,9 +86,9 @@ export async function getPublicFeed(): Promise<PublicFeedItem[]> {
           tide: data.tide,
           createdAt: data.createdAt,
           likeCount: data.likeCount || 0,
-          commentCount: comments.length,
+          commentCount: data.commentCount || 0,
           sourceRecordId: data.sourceRecordId,
-          comments });
+          comments: undefined });
       }
       return items;
     } catch (err) {
@@ -137,6 +134,7 @@ export async function publishToFeed(record: CatchRecord): Promise<void> {
     tide: record.tide || null,
     createdAt: record.createdAt,
     likeCount: 0,
+    commentCount: 0,
     sourceRecordId: record.id });
 }
 
@@ -228,22 +226,39 @@ export async function toggleLike(feedItemId: string): Promise<{ liked: boolean; 
 // 5. COMMENTS (Firestore sub-collection)
 // ====================================================================
 
+/**
+ * 댓글 작성 — 신원은 호출자가 지어내지 않고 여기서 정한다: 로그인
+ * 사용자는 실제 uid/displayName, 비로그인은 익명 인증 uid + "익명
+ * 낚시인"(동출 모집과 같은 전례). 예전엔 페이지가 ("me","나")를
+ * 하드코딩해 모든 댓글 작성자가 서로에게 "나"로 보였다(4차 GOAL-4).
+ * 부모 문서의 commentCount도 +1 — 목록의 N+1 제거를 지탱하는 비정규화.
+ */
 export async function addComment(
   feedItemId: string,
-  userId: string,
-  displayName: string,
   content: string
 ): Promise<FeedComment | null> {
   const db = getDb();
   if (!db) return null;
+  const uid = await ensureAuthUid();
+  if (!uid) return null;
+  const auth = getFirebaseAuth();
+  const displayName = auth?.currentUser?.displayName || '익명 낚시인';
 
   const commentsRef = collection(db, 'publicFeed', feedItemId, 'comments');
   const newComment = {
-    userId,
-    userDisplayName: displayName,
-    content,
+    userId: uid,
+    userDisplayName: displayName.slice(0, 30),
+    content: content.slice(0, 500),
     createdAt: new Date().toISOString() };
   const docRef = await addDoc(commentsRef, newComment);
+  // 카운트 증분 실패(경합 등)는 댓글 자체를 무효화하지 않는다 — 수는
+  // 최선 노력 비정규화 값.
+  try {
+    await updateDoc(doc(db, 'publicFeed', feedItemId), {
+      commentCount: increment(1) });
+  } catch {
+    // best-effort
+  }
   return { id: docRef.id, ...newComment };
 }
 
