@@ -29,10 +29,17 @@ const STATIC_PAGES = [
   "/manifest.json",
 ];
 
-// Install — pre-cache critical pages
+// Install — pre-cache critical pages.
+// addAll은 한 페이지만 실패해도 install 전체가 죽어 SW 업데이트가 막힌다
+// (약전계 — 방파제·선상 — 사용자에게 치명). 페이지별로 격리해 실패한
+// 것만 빠지고 업데이트는 진행되게 한다.
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_PAGES)),
+    caches
+      .open(CACHE_NAME)
+      .then((cache) =>
+        Promise.allSettled(STATIC_PAGES.map((page) => cache.add(page))),
+      ),
   );
   self.skipWaiting();
 });

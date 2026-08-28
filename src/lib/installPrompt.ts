@@ -44,9 +44,19 @@ export function canInstallSnapshot(): boolean {
 export async function promptInstall(): Promise<boolean> {
   if (!deferredPrompt) return false;
   const evt = deferredPrompt;
-  await evt.prompt();
-  const choice = await evt.userChoice;
+  // 소진을 먼저 — prompt()가 뜬 동안 버튼 연타로 이벤트를 두 번 쓰면
+  // 스펙상 rejection이 난다(교차검수 지적). UI도 즉시 내려간다.
   deferredPrompt = null;
   notify();
+  await evt.prompt();
+  const choice = await evt.userChoice;
   return choice.outcome === "accepted";
+}
+
+// beforeinstallprompt는 hydration보다 먼저 올 수 있다 — effect 시점
+// 등록만으로는 유실 레이스가 있어, 모듈이 클라이언트 번들에 평가되는
+// 즉시 리스너를 건다(AppInitializer의 initInstallPrompt 호출은 가드로
+// 무해한 중복이 된다).
+if (typeof window !== "undefined") {
+  initInstallPrompt();
 }
