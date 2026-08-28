@@ -72,6 +72,7 @@ test.describe('My condition table — /stats', () => {
     const table = page.locator('[data-testid="condition-table"]');
     await expect(table).toBeVisible({ timeout: 15000 });
     const emptyMsgs = table.getByText(/기록이 쌓이면/);
-    await expect(emptyMsgs).toHaveCount(3); // 세 축 전부
+    // 기온·풍속·물때 + 채비(5차 GOAL-2) 네 축 전부 빈 상태.
+    await expect(emptyMsgs).toHaveCount(4);
   });
 });

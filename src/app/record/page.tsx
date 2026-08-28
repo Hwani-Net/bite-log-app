@@ -1038,6 +1038,7 @@ export default function RecordPage() {
               <input
                 type="text"
                 list="tackle-suggestions"
+                maxLength={60}
                 value={tackle}
                 onChange={(e) => setTackle(e.target.value)}
                 placeholder={

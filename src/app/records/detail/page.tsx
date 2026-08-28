@@ -6,6 +6,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAppStore } from "@/store/appStore";
 import { getDataService } from "@/services/dataServiceFactory";
+import { tackleSuggestions } from "@/services/tackleAdviceService";
 import { shareCatchRecord } from "@/services/shareService";
 import { toggleVisibility } from "@/services/feedService";
 import { CatchRecord, FISH_SPECIES } from "@/types";
@@ -329,10 +330,17 @@ function RecordDetailContent() {
               </span>
               <input
                 type="text"
+                list="tackle-suggestions-detail"
+                maxLength={60}
                 value={tackle}
                 onChange={(e) => setTackle(e.target.value)}
                 className={inputCls}
               />
+              <datalist id="tackle-suggestions-detail">
+                {tackleSuggestions(species).map((s) => (
+                  <option key={s} value={s} />
+                ))}
+              </datalist>
             </label>
           </div>
 

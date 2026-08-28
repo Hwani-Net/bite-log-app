@@ -23,6 +23,15 @@ export interface ConditionAxis {
 // 최고로 승격하지 않기 위한 하한.
 export const MIN_SAMPLES = 3;
 
+/** 자유 입력 채비 문자열의 그룹핑 키 — 없으면 빈 문자열. */
+export function normalizeTackle(tackle?: string): string {
+  return (tackle ?? "")
+    .normalize("NFC")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+}
+
 const TEMP_BUCKETS = ["10°C 미만", "10~17°C", "17~24°C", "24°C 이상"] as const;
 const WIND_BUCKETS = ["바람 약(4m/s 미만)", "바람 중(4~8m/s)", "바람 강(8m/s 이상)"] as const;
 
@@ -166,15 +175,35 @@ export function conditionStats(records: CatchRecord[]): ConditionAxis[] {
     withTide.map((r) => ({ label: r.tide!.currentPhase!, count: r.count })),
   );
   // 채비 축(5차 GOAL-2) — "그날 뭘로 잡았나"가 기록의 재독 가치 핵심.
-  // 대소문자·앞뒤 공백만 정규화해 같은 채비를 한 구간으로 모은다.
-  const withTackle = records.filter((r) => r.tackle?.trim());
+  // 유일한 자유 입력 축이라 정규화가 곧 표본 품질이다: NFC·앞뒤 공백·
+  // 연속 공백·대소문자까지 맞춘다("지그헤드 5G"와 "지그헤드  5g"는 한
+  // 구간). 그래도 "5g+웜" 같은 표기 차이는 갈라지므로, 표시 라벨은 그
+  // 구간에서 처음 본 원문을 쓴다(사용자가 쓴 대로 보여주기).
+  const withTackle = records.filter((r) => normalizeTackle(r.tackle));
   const tackle = aggregate(
-    withTackle.map((r) => ({ label: r.tackle!.trim(), count: r.count })),
+    withTackle.map((r) => ({
+      label: normalizeTackle(r.tackle),
+      count: r.count,
+    })),
   );
+  // 정규화 키 → 원문 라벨 복원(첫 등장 기준).
+  const originalByKey = new Map<string, string>();
+  for (const r of withTackle) {
+    const key = normalizeTackle(r.tackle);
+    if (!originalByKey.has(key)) originalByKey.set(key, r.tackle!.trim());
+  }
+  const relabel = (b: ConditionBucket): ConditionBucket => ({
+    ...b,
+    label: originalByKey.get(b.label) ?? b.label,
+  });
+  const tackleAxis = {
+    buckets: tackle.buckets.map(relabel),
+    best: tackle.best ? relabel(tackle.best) : null,
+  };
   return [
     { key: "temp", name: "기온", ...temp, sampled: withTemp.length },
     { key: "wind", name: "풍속", ...wind, sampled: withWind.length },
     { key: "tide", name: "물때", ...tide, sampled: withTide.length },
-    { key: "tackle", name: "채비", ...tackle, sampled: withTackle.length },
+    { key: "tackle", name: "채비", ...tackleAxis, sampled: withTackle.length },
   ];
 }

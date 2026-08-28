@@ -6,6 +6,13 @@ test.describe('Tackle field — /record → detail → stats', () => {
   test('a tackle entry saves, shows on the detail page, and is searchable', async ({
     page,
   }) => {
+    // 테스트 간 격리 — 이전 테스트가 남긴 기록이 검색 카운트를 흔들지
+    // 않게 빈 저장소로 시작한다.
+    await page.addInitScript(() => {
+      if (localStorage.getItem('__e2e_seeded')) return;
+      localStorage.setItem('__e2e_seeded', '1');
+      localStorage.setItem('fishlog_catches', '[]');
+    });
     await page.goto('/record');
     await page.getByRole('button', { name: '직접 입력' }).click();
     await page.getByLabel('어종').selectOption('우럭');
@@ -13,12 +20,14 @@ test.describe('Tackle field — /record → detail → stats', () => {
     await page.getByRole('button', { name: '기록 저장' }).click();
     await page.waitForURL('/', { timeout: 15000 });
 
-    const saved = await page.evaluate(() =>
+    const all = await page.evaluate(() =>
       JSON.parse(localStorage.getItem('fishlog_catches') ?? '[]'),
     );
-    expect(saved[0].tackle).toBe('지그헤드 5g + 웜');
+    expect(all).toHaveLength(1); // 격리 확인
+    const saved = all[0];
+    expect(saved.tackle).toBe('지그헤드 5g + 웜');
 
-    await page.goto(`/records/detail?id=${saved[0].id}`);
+    await page.goto(`/records/detail?id=${saved.id}`);
     await expect(page.getByText('지그헤드 5g + 웜')).toBeVisible({
       timeout: 10000,
     });
