@@ -20,8 +20,24 @@ test.describe('Dead-code & honesty cleanup', () => {
     await context.setGeolocation({ latitude: 36.33, longitude: 126.51 });
     await context.grantPermissions(['geolocation']);
     // KHOA 경로 차단 → tideService가 mock 폴백으로 떨어진다.
+    // (tideService는 로컬 /api/tide 프록시를 거친다 — 소스 확인 완료.)
     await page.route('**/api/tide**', (r) =>
       r.fulfill({ status: 503, json: { error: 'blocked' } }),
+    );
+    // 날씨는 고정 — 이 테스트의 관심사(물때 정직화)와 무관한 외부 API
+    // 실패로 흔들리지 않게.
+    await page.route('**/api.open-meteo.com/**', (r) =>
+      r.fulfill({
+        json: {
+          current: {
+            temperature_2m: 20,
+            relative_humidity_2m: 60,
+            wind_speed_10m: 2,
+            weather_code: 0,
+            pressure_msl: 1013,
+          },
+        },
+      }),
     );
 
     // bite-forecast: 조석 시간표에 "예시" 배지.

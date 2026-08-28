@@ -121,7 +121,11 @@ export function analyzeFishingDna(records: CatchRecord[]): FishingDna | null {
   // 물때로 나오는 버그였다. phase가 없는 옛 기록은 집계에서 빼고,
   // 하나도 없으면 항목 자체를 생략(null)한다.
   let bestTide: string | null = null;
-  const tideRecords = records.filter((r) => r.tide?.currentPhase);
+  // "(예측)" 관측소명 = mock 폴백이 저장되던 시절의 오염 기록 — 지어낸
+  // 물때를 통계에 넣지 않는다(4차 GOAL-5부터는 저장 자체가 안 됨).
+  const tideRecords = records.filter(
+    (r) => r.tide?.currentPhase && !r.tide.stationName?.includes('(예측)'),
+  );
   if (tideRecords.length > 0) {
     const tideMap = new Map<string, number>();
     tideRecords.forEach((r) => {

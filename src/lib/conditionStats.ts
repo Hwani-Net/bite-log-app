@@ -147,7 +147,10 @@ export function conditionStats(records: CatchRecord[]): ConditionAxis[] {
       Number.isFinite(r.weather?.windSpeed) &&
       (r.createdAt ?? "") >= WIND_UNIT_FIX_DATE,
   );
-  const withTide = records.filter((r) => r.tide?.currentPhase);
+  // "(예측)" 관측소명은 mock 폴백이 저장되던 시절의 지어낸 물때 — 제외.
+  const withTide = records.filter(
+    (r) => r.tide?.currentPhase && !r.tide.stationName?.includes("(예측)"),
+  );
   const temp = aggregate(
     withTemp.map((r) => ({ label: tempBucket(r.weather!.tempC), count: r.count })),
     TEMP_BUCKETS,

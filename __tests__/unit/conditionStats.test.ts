@@ -75,6 +75,18 @@ describe('conditionStats', () => {
     expect(axes.find((a) => a.key === 'tide')!.sampled).toBe(1);
   });
 
+  it('excludes legacy mock tides — a "(예측)" station is fabricated data', () => {
+    const records = [
+      record({
+        tide: { stationName: '보령 (예측)', tides: [], currentPhase: '들물 3물' },
+      }),
+      record({
+        tide: { stationName: '보령', tides: [], currentPhase: '들물 3물' },
+      }),
+    ];
+    expect(conditionStats(records).find((a) => a.key === 'tide')!.sampled).toBe(1);
+  });
+
   it('groups tide by the stored phase label, most-sampled first', () => {
     const tide = (p: string) => ({ stationName: '보령', tides: [], currentPhase: p });
     const records = [
