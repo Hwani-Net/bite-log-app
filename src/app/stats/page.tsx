@@ -692,44 +692,70 @@ export default function StatsPage() {
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-semibold text-white/50 uppercase tracking-[0.1em]">
-                        {axis.name}
+                        {locale === "ko"
+                          ? axis.name
+                          : { temp: "Air Temp", wind: "Wind", tide: "Tide" }[
+                              axis.key
+                            ]}
                       </span>
-                      <span className="text-[10px] text-white/30">
+                      <span className="text-[10px] text-white/45">
                         {axis.sampled > 0
-                          ? `표본 ${axis.sampled}회`
+                          ? locale === "ko"
+                            ? `표본 ${axis.sampled}회`
+                            : `${axis.sampled} samples`
                           : ""}
                       </span>
                     </div>
-                    {axis.best ? (
+                    {axis.best && (
+                      <p className="text-sm font-bold text-white">
+                        {axis.best.label}
+                        <span className="text-[#7dd3fc]">
+                          {" "}
+                          평균 {axis.best.avgCount}마리
+                        </span>
+                        <span className="text-white/50 text-xs font-normal">
+                          {" "}
+                          ({axis.best.records}회)
+                        </span>
+                      </p>
+                    )}
+                    {axis.buckets.length > 0 ? (
                       <>
-                        <p className="text-sm font-bold text-white">
-                          {axis.best.label}
-                          <span className="text-[#7dd3fc]">
-                            {" "}
-                            평균 {axis.best.avgCount}마리
-                          </span>
-                          <span className="text-white/35 text-xs font-normal">
-                            {" "}
-                            ({axis.best.records}회)
-                          </span>
-                        </p>
-                        <div className="mt-2 flex flex-wrap gap-1.5">
+                        <ul
+                          className="mt-2 flex flex-wrap gap-1.5 list-none p-0"
+                          aria-label={
+                            locale === "ko"
+                              ? `${axis.name} 구간별 평균`
+                              : "per-bucket averages"
+                          }
+                        >
                           {axis.buckets.map((b) => (
-                            <span
+                            <li
                               key={b.label}
                               className={`text-[10px] px-2 py-1 rounded-lg border ${
-                                b.label === axis.best!.label
+                                axis.best && b.label === axis.best.label
                                   ? "bg-[#7dd3fc]/15 border-[#7dd3fc]/40 text-[#7dd3fc] font-semibold"
-                                  : "bg-white/4 border-white/8 text-white/50"
+                                  : b.records >= 3
+                                    ? "bg-white/4 border-white/8 text-white/60"
+                                    : // 표본 부족 구간 — 1회 요행 수치가 눈에
+                                      // 띄지 않게 흐린다(수치는 그대로 공개).
+                                      "bg-white/4 border-white/8 text-white/35"
                               }`}
                             >
                               {b.label} · {b.avgCount}마리/{b.records}회
-                            </span>
+                            </li>
                           ))}
-                        </div>
+                        </ul>
+                        {!axis.best && (
+                          <p className="text-[11px] text-white/45 mt-2">
+                            {locale === "ko"
+                              ? "구간당 3회 이상 쌓이면 최고 조건을 골라드려요"
+                              : "3+ records per bucket unlock your best condition"}
+                          </p>
+                        )}
                       </>
                     ) : (
-                      <p className="text-xs text-white/35">
+                      <p className="text-xs text-white/45">
                         {locale === "ko"
                           ? "기록이 쌓이면 이 조건에서의 내 평균이 나타나요 (구간당 3회 이상)"
                           : "Log more catches to see your averages (3+ per bucket)"}

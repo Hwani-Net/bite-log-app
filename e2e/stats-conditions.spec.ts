@@ -37,6 +37,26 @@ test.describe('My condition table — /stats', () => {
     await expect(table).toContainText('기록이 쌓이면');
   });
 
+  test('sampled-but-below-minimum axes list buckets without crowning a best', async ({
+    page,
+  }) => {
+    // 기온 표본 2회 — 구간 칩은 보이되 best는 안 뽑히고 안내가 나온다.
+    const records = [
+      { ...base, id: 'p1', date: '2026-08-01', count: 5, weather: { condition: 'clear', tempC: 18 } },
+      { ...base, id: 'p2', date: '2026-08-02', count: 4, weather: { condition: 'clear', tempC: 20 } },
+    ];
+    await page.addInitScript((r) => {
+      localStorage.setItem('fishlog_catches', JSON.stringify(r));
+    }, records);
+    await page.goto('/stats');
+
+    const table = page.locator('[data-testid="condition-table"]');
+    await expect(table).toBeVisible({ timeout: 15000 });
+    await expect(table).toContainText('17~24°C · 4.5마리/2회'); // 칩은 공개
+    await expect(table).toContainText('구간당 3회 이상 쌓이면'); // best 없음 안내
+    await expect(table).not.toContainText('평균 4.5마리'); // best 승격은 안 됨
+  });
+
   test('all axes show the honest empty state when records carry no conditions', async ({
     page,
   }) => {

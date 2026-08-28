@@ -52,7 +52,7 @@ describe('conditionStats', () => {
     expect(temp.sampled).toBe(5);
     expect(temp.best?.label).toBe('17~24°C'); // 표본 1회짜리 9마리에 안 속는다
     expect(temp.best?.avgCount).toBe(4);
-    expect(temp.best?.records).toBeGreaterThanOrEqual(MIN_SAMPLES);
+    expect(temp.best?.records).toBe(4);
     // 구간 자체는 표본 부족이어도 나열엔 나온다.
     expect(temp.buckets.map((b) => b.label)).toContain('10~17°C');
   });
@@ -84,6 +84,16 @@ describe('conditionStats', () => {
     expect(axis.buckets[0].label).toBe('들물 3물');
     expect(axis.best?.label).toBe('들물 3물');
     expect(axis.best?.avgCount).toBe(5);
+  });
+
+  it('rejects NaN condition values instead of bucketing them as cold', () => {
+    const records = [
+      record({ weather: { condition: 'clear', tempC: NaN } }),
+      record({ weather: { condition: 'clear', tempC: 18 } }),
+    ];
+    const temp = conditionStats(records).find((a) => a.key === 'temp')!;
+    expect(temp.sampled).toBe(1); // NaN 기록은 표본이 아니다
+    expect(temp.buckets.map((b) => b.label)).not.toContain('10°C 미만');
   });
 
   it('yields empty axes with null best on no records', () => {

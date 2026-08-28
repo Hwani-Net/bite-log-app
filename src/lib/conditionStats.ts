@@ -67,6 +67,8 @@ function aggregate(
     buckets = buckets.sort((a, b) => b.records - a.records);
   }
   const eligible = buckets.filter((b) => b.records >= MIN_SAMPLES);
+  // 동률이면 buckets 정렬 순서상 앞 구간이 남는다 — temp/wind는 구간 정의
+  // 순, tide는 표본 많은 순이므로 "동률 시 표본 많은 쪽/앞 구간" 규칙.
   const best =
     eligible.length > 0
       ? eligible.reduce((m, b) => (b.avgCount > m.avgCount ? b : m))
@@ -79,45 +81,31 @@ function aggregate(
  * 조용히 빠진다 — 옛 기록과 자연 공존.
  */
 export function conditionStats(records: CatchRecord[]): ConditionAxis[] {
+  // Number.isFinite — typeof 검사만으론 NaN이 "10°C 미만"으로 새어든다
+  // (모든 < 비교가 false). 저장 경로가 여럿인 localStorage 데이터라 실제
+  // 들어올 수 있는 값.
+  const withTemp = records.filter((r) => Number.isFinite(r.weather?.tempC));
+  const withWind = records.filter((r) =>
+    Number.isFinite(r.weather?.windSpeed),
+  );
+  const withTide = records.filter((r) => r.tide?.currentPhase);
   const temp = aggregate(
-    records
-      .filter((r) => typeof r.weather?.tempC === "number")
-      .map((r) => ({ label: tempBucket(r.weather!.tempC), count: r.count })),
+    withTemp.map((r) => ({ label: tempBucket(r.weather!.tempC), count: r.count })),
     TEMP_BUCKETS,
   );
   const wind = aggregate(
-    records
-      .filter((r) => typeof r.weather?.windSpeed === "number")
-      .map((r) => ({
-        label: windBucket(r.weather!.windSpeed!),
-        count: r.count,
-      })),
+    withWind.map((r) => ({
+      label: windBucket(r.weather!.windSpeed!),
+      count: r.count,
+    })),
     WIND_BUCKETS,
   );
   const tide = aggregate(
-    records
-      .filter((r) => r.tide?.currentPhase)
-      .map((r) => ({ label: r.tide!.currentPhase!, count: r.count })),
+    withTide.map((r) => ({ label: r.tide!.currentPhase!, count: r.count })),
   );
   return [
-    {
-      key: "temp",
-      name: "기온",
-      ...temp,
-      sampled: records.filter((r) => typeof r.weather?.tempC === "number").length,
-    },
-    {
-      key: "wind",
-      name: "풍속",
-      ...wind,
-      sampled: records.filter((r) => typeof r.weather?.windSpeed === "number")
-        .length,
-    },
-    {
-      key: "tide",
-      name: "물때",
-      ...tide,
-      sampled: records.filter((r) => r.tide?.currentPhase).length,
-    },
+    { key: "temp", name: "기온", ...temp, sampled: withTemp.length },
+    { key: "wind", name: "풍속", ...wind, sampled: withWind.length },
+    { key: "tide", name: "물때", ...tide, sampled: withTide.length },
   ];
 }
