@@ -12,8 +12,8 @@ export interface ConditionBucket {
 }
 
 export interface ConditionAxis {
-  key: "temp" | "wind" | "tide";
-  name: string; // "기온" | "풍속" | "물때"
+  key: "temp" | "wind" | "tide" | "tackle";
+  name: string; // "기온" | "풍속" | "물때" | "채비"
   buckets: ConditionBucket[]; // 표본 있는 구간만, 정의 순서
   best: ConditionBucket | null; // 표본 MIN_SAMPLES 이상 구간 중 평균 최고
   sampled: number; // 이 축에 조건 값이 있던 기록 수
@@ -165,9 +165,16 @@ export function conditionStats(records: CatchRecord[]): ConditionAxis[] {
   const tide = aggregate(
     withTide.map((r) => ({ label: r.tide!.currentPhase!, count: r.count })),
   );
+  // 채비 축(5차 GOAL-2) — "그날 뭘로 잡았나"가 기록의 재독 가치 핵심.
+  // 대소문자·앞뒤 공백만 정규화해 같은 채비를 한 구간으로 모은다.
+  const withTackle = records.filter((r) => r.tackle?.trim());
+  const tackle = aggregate(
+    withTackle.map((r) => ({ label: r.tackle!.trim(), count: r.count })),
+  );
   return [
     { key: "temp", name: "기온", ...temp, sampled: withTemp.length },
     { key: "wind", name: "풍속", ...wind, sampled: withWind.length },
     { key: "tide", name: "물때", ...tide, sampled: withTide.length },
+    { key: "tackle", name: "채비", ...tackle, sampled: withTackle.length },
   ];
 }

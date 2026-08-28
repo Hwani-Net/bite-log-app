@@ -102,3 +102,19 @@ describe('commentIdentity', () => {
     expect(commentIdentity('가'.repeat(40))).toHaveLength(30);
   });
 });
+
+describe('tackleSuggestions (5차 GOAL-2)', () => {
+  it('puts the selected species vocabulary first and dedupes across species', async () => {
+    const { tackleSuggestions } = await import('@/services/tackleAdviceService');
+    const forJukumi = tackleSuggestions('주꾸미');
+    expect(forJukumi[0]).toMatch(/에기/); // 주꾸미 어휘가 선두
+    expect(new Set(forJukumi).size).toBe(forJukumi.length); // 중복 없음
+    expect(forJukumi.length).toBeGreaterThan(3); // 다른 어종 어휘도 뒤따름
+  });
+
+  it('still returns a usable list for an unknown or missing species', async () => {
+    const { tackleSuggestions } = await import('@/services/tackleAdviceService');
+    expect(tackleSuggestions('은갈치외계종').length).toBeGreaterThan(0);
+    expect(tackleSuggestions().length).toBeGreaterThan(0);
+  });
+});

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/store/appStore";
 import { getDataService } from "@/services/dataServiceFactory";
@@ -26,7 +26,9 @@ import {
   RecordVisibility,
 } from "@/types";
 import { listKnownBoats, type FavoriteBoat } from "@/services/myBoatService";
+import { tackleSuggestions } from "@/services/tackleAdviceService";
 import {
+  Anchor,
   ArrowLeft,
   X,
   Plus,
@@ -49,7 +51,6 @@ import {
   AlertTriangle,
   Loader2,
   Waves,
-  Anchor,
 } from "lucide-react";
 import { DynamicIcon } from "@/lib/iconMap";
 
@@ -66,6 +67,7 @@ export default function RecordPage() {
   const [legalWarning, setLegalWarning] = useState<LegalityWarning | null>(
     null,
   );
+  const [tackle, setTackle] = useState("");
   // ===== Form state =====
   // toISOString()은 UTC라 KST 자정~9시에 어제 날짜가 기본이 되는 함정 —
   // 이 세션에서만 네 번째 발견된 같은 버그 클래스(src/lib/localDate.ts 참조).
@@ -81,6 +83,8 @@ export default function RecordPage() {
   });
   const [locationName, setLocationName] = useState("");
   const [species, setSpecies] = useState("");
+  // 선택한 어종의 채비 어휘가 앞에 오도록 — species가 바뀌면 갱신.
+  const tackleOptions = useMemo(() => tackleSuggestions(species), [species]);
   // "탄 배" — booking에서 쌓인 "내 선사 카드" 이력(myBoatService)에서 고른다.
   // localStorage 라 client-only, 빈 배열로 시작해도 무해(필드 자체가 안 보임).
   const [boatUid, setBoatUid] = useState("");
@@ -297,6 +301,7 @@ export default function RecordPage() {
           : undefined,
         visibility,
         boatUid: boatUid || undefined,
+        tackle: tackle.trim() || undefined,
       };
 
       try {
@@ -1020,6 +1025,34 @@ export default function RecordPage() {
                 />
               </label>
             </div>
+          </div>
+
+          {/* 채비·미끼 (5차 GOAL-2) — 1년 뒤 이 기록을 다시 읽을 이유가
+              되는 필드. 후보는 TACKLE_DB 어휘, 자유 입력도 허용. */}
+          <div className="glass-morphism border border-white/5 rounded-2xl p-4">
+            <label className="flex flex-col gap-2">
+              <span className="text-white/70 text-sm font-semibold flex items-center gap-2">
+                <Anchor size={16} className="text-[#c9a84c]" />
+                {locale === "ko" ? "채비·미끼" : "Tackle / Bait"}
+              </span>
+              <input
+                type="text"
+                list="tackle-suggestions"
+                value={tackle}
+                onChange={(e) => setTackle(e.target.value)}
+                placeholder={
+                  locale === "ko"
+                    ? "예: 지그헤드 5g + 웜 (선택)"
+                    : "e.g. 5g jighead + worm (optional)"
+                }
+                className={inputCls}
+              />
+              <datalist id="tackle-suggestions">
+                {tackleOptions.map((s) => (
+                  <option key={s} value={s} />
+                ))}
+              </datalist>
+            </label>
           </div>
 
           {/* Memo */}

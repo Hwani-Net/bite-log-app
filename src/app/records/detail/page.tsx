@@ -47,6 +47,7 @@ function RecordDetailContent() {
   const [date, setDate] = useState("");
   const [caughtTime, setCaughtTime] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
+  const [tackle, setTackle] = useState("");
   const [locationName, setLocationName] = useState("");
   const [species, setSpecies] = useState("");
   const [count, setCount] = useState(1);
@@ -63,6 +64,7 @@ function RecordDetailContent() {
           setDate(r.date);
           setCaughtTime(r.caughtTime || "");
           setPhotos(r.photos ?? []);
+          setTackle(r.tackle || "");
           setLocationName(r.location.name);
           setSpecies(r.species);
           setCount(r.count);
@@ -80,6 +82,7 @@ function RecordDetailContent() {
         date,
         caughtTime: caughtTime || undefined,
         photos,
+        tackle: tackle.trim() || undefined,
         // 기존 location을 스프레드로 보존 — name만 바꿔야지, {name}만 보내면
         // 제목 하나 고칠 때마다 GPS 좌표(lat/lng)가 통째로 지워진다.
         location: { ...record.location, name: locationName.trim() },
@@ -321,6 +324,20 @@ function RecordDetailContent() {
 
           <div className="glass-morphism border border-white/5 rounded-2xl p-4">
             <label className="flex flex-col gap-2">
+              <span className="text-white/70 text-sm font-semibold">
+                {locale === "ko" ? "채비·미끼" : "Tackle / Bait"}
+              </span>
+              <input
+                type="text"
+                value={tackle}
+                onChange={(e) => setTackle(e.target.value)}
+                className={inputCls}
+              />
+            </label>
+          </div>
+
+          <div className="glass-morphism border border-white/5 rounded-2xl p-4">
+            <label className="flex flex-col gap-2">
               <span className="text-white/70 text-sm font-semibold flex items-center gap-2">
                 <MapPin size={16} className="text-[#c9a84c]" />
                 {t("record.location")}
@@ -511,6 +528,17 @@ function RecordDetailContent() {
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* 채비·미끼 (5차 GOAL-2) */}
+          {record.tackle && (
+            <div className="glass-morphism border border-white/5 rounded-2xl p-4">
+              <div className="flex items-center gap-2 text-white/60 text-xs mb-1">
+                <DynamicIcon name="anchor" size={14} />
+                {locale === "ko" ? "채비·미끼" : "Tackle"}
+              </div>
+              <p className="text-sm font-semibold text-white">{record.tackle}</p>
             </div>
           )}
 

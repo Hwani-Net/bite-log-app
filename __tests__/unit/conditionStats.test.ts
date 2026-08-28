@@ -184,3 +184,27 @@ describe('matchTodayConditions', () => {
     ).toEqual([]);
   });
 });
+
+describe('tackle axis (5차 GOAL-2)', () => {
+  it('groups by the stored tackle string and needs the same sample floor', () => {
+    const records = [
+      record({ tackle: '지그헤드 5g', count: 6 }),
+      record({ tackle: ' 지그헤드 5g ', count: 4 }), // 공백만 다르면 같은 구간
+      record({ tackle: '지그헤드 5g', count: 5 }),
+      record({ tackle: '에기 2.5호', count: 9 }), // 1회 — best 후보 아님
+    ];
+    const axis = conditionStats(records).find((a) => a.key === 'tackle')!;
+    expect(axis.sampled).toBe(4);
+    expect(axis.best?.label).toBe('지그헤드 5g');
+    expect(axis.best?.records).toBe(3);
+    expect(axis.best?.avgCount).toBe(5);
+  });
+
+  it('skips records with no tackle, and stays empty when nobody logged one', () => {
+    expect(
+      conditionStats([record({}), record({ tackle: '   ' })]).find(
+        (a) => a.key === 'tackle',
+      )!.sampled,
+    ).toBe(0);
+  });
+});

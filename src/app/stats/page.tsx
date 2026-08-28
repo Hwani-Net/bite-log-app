@@ -694,9 +694,12 @@ export default function StatsPage() {
                       <span className="text-xs font-semibold text-white/50 uppercase tracking-[0.1em]">
                         {locale === "ko"
                           ? axis.name
-                          : { temp: "Air Temp", wind: "Wind", tide: "Tide" }[
-                              axis.key
-                            ]}
+                          : {
+                              temp: "Air Temp",
+                              wind: "Wind",
+                              tide: "Tide",
+                              tackle: "Tackle",
+                            }[axis.key]}
                       </span>
                       <span className="text-[10px] text-white/45">
                         {axis.sampled > 0

@@ -438,3 +438,21 @@ export function getWeatherChecklist(params: {
 
   return [...items, ...essentials];
 }
+
+/**
+ * 기록 폼의 "채비·미끼" 자동완성 후보(5차 GOAL-2). TACKLE_DB에 이미
+ * 있는 루어 타입 어휘를 재사용한다 — 지금까지 이 440줄 지식베이스는
+ * 출조 브리핑 하나만 소비했다. 어종을 주면 그 어종 것 먼저.
+ */
+export function tackleSuggestions(species?: string): string[] {
+  const pick = (name: string): string[] => {
+    const entry = TACKLE_DB[name];
+    if (!entry?.lure) return [];
+    return Object.values(entry.lure).map((l) => l.type);
+  };
+  const mine = species ? pick(species) : [];
+  const others = Object.keys(TACKLE_DB)
+    .filter((s) => s !== species)
+    .flatMap(pick);
+  return [...new Set([...mine, ...others])];
+}
