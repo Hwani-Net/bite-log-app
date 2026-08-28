@@ -345,6 +345,16 @@ function TideTimeline({
         <span className="text-[10px] text-white/60 ml-auto">
           {tideData.stationName}
         </span>
+        {/* @mock-data 폴백이면 실측인 척하지 않는다 — 뉴스 페이지의
+            실시간→예시 배지 관행과 동일(4차 GOAL-5). */}
+        {tideData.mocked && (
+          <span
+            data-testid="tide-mock-badge"
+            className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-bold"
+          >
+            예시
+          </span>
+        )}
       </div>
 
       {/* Current phase banner */}

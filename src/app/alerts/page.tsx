@@ -70,8 +70,12 @@ const LABELS = {
     allSpecies: "전 어종",
     allRegions: "전국",
     howTitle: "어떻게 작동하나요?",
+    // 예전 문구는 한 번도 실행된 적 없는 "공지 파서"를 설명하는 거짓말
+    // 이었다(4차 GOAL-5). 실제 동작만 말한다: 구독은 조건 저장이고, 지금
+    // 실제로 울리는 알림은 금어기 해제 임박(내 기록 상위 어종, 앱을 열
+    // 때 확인)이며, 알림은 앱이 열려 있을 때 도달한다.
     howDesc:
-      "공지 파서가 선사 공지를 분석하면, 구독 조건과 일치할 때 즉시 알림을 보내드립니다.",
+      "구독을 저장해 두면 관심 조건을 앱이 기억합니다. 지금 실제로 울리는 알림은 '금어기 해제 임박'(내 기록 상위 어종 기준, 앱을 열 때 확인)이며, 알림은 앱이 열려 있는 동안 도달해요. 선사 공지 연동 알림은 준비 중입니다.",
     subscribeChip: "구독하기",
     deleteConfirm: "이 구독을 삭제할까요?",
   },
@@ -108,7 +112,7 @@ const LABELS = {
     allRegions: "Nationwide",
     howTitle: "How it works",
     howDesc:
-      "When our notice parser detects a booking opening matching your subscription, you&apos;ll get an instant alert.",
+      "Subscriptions store your interests. The alert that fires today is the season-opening reminder (top species from your records, checked when you open the app) while the app is open. Operator-notice alerts are in the works.",
     subscribeChip: "Subscribe",
     deleteConfirm: "Delete this subscription?",
   },

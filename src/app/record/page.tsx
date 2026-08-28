@@ -286,7 +286,9 @@ export default function RecordPage() {
           : undefined,
         // 물흐름 스냅샷을 함께 보존 — getCurrentPhase는 지금까지 화면
         // 표시용으로만 계산되고 저장 시점에 버려지고 있었다.
-        tide: tide
+        // mock 폴백 물때는 저장하지 않는다 — 지어낸 값이 통계·조건표를
+        // 오염시키면 안 된다(4차 GOAL-5).
+        tide: tide && !tide.mocked
           ? {
               stationName: tide.stationName,
               tides: tide.tides,
@@ -959,6 +961,11 @@ export default function RecordPage() {
                 <div>
                   <div className="text-[10px] text-white/30 mb-1">
                     {tide.stationName}
+                    {tide.mocked && (
+                      <span className="ml-1 px-1.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-bold">
+                        예시 — 기록엔 저장 안 됨
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-wrap gap-2 text-xs">
                     {tide.tides.map((t, i) => (

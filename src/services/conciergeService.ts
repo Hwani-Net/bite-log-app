@@ -53,6 +53,7 @@ export interface ConciergeRecommendation {
 
 // ─── Data: Korean Fishing Spots ───────────────────────────────
 
+// @mock-data — 에디토리얼 포인트 지식베이스(하드코딩). 실측 API가 아니다.
 const FISHING_SPOTS: FishingSpot[] = [
   {
     name: "인천 소래포구 방파제",
@@ -158,6 +159,7 @@ const FISHING_SPOTS: FishingSpot[] = [
 
 // ─── Data: Secret PRO Spots ──────────────────────────────────
 
+// @mock-data — PRO용 에디토리얼 포인트(하드코딩).
 const SECRET_FISHING_SPOTS: FishingSpot[] = [
   {
     name: "거문도 서쪽 콧부리",
@@ -193,6 +195,7 @@ const SECRET_FISHING_SPOTS: FishingSpot[] = [
 
 // ─── Data: Fish Species by Season ─────────────────────────────
 
+// @mock-data — 어종 지식베이스(하드코딩 에디토리얼).
 const SPECIES_DB: SpeciesInfo[] = [
   {
     name: "감성돔",
@@ -304,6 +307,7 @@ const SPECIES_DB: SpeciesInfo[] = [
 
 // ─── Data: Trending Gear ──────────────────────────────────────
 
+// @mock-data — 장비 지식베이스(하드코딩 에디토리얼).
 const GEAR_DB: GearItem[] = [
   // Rods
   {

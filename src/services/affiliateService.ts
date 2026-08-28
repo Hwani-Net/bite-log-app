@@ -20,6 +20,7 @@ export interface GearRecommendation {
 }
 
 // Species-specific gear recommendations
+// @mock-data — 쿠팡 파트너스 링크 13개 하드코딩. 링크는 소리 없이 썩으므로 주기 점검 필요.
 const GEAR_DATABASE: Record<string, GearRecommendation[]> = {
   감성돔: [
     {

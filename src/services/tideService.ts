@@ -20,6 +20,11 @@ export interface TideData {
   stationName: string;
   tides: TideInfo[];
   currentPhase?: TidePhase; // calculated client-side
+  // @mock-data — KHOA 키 부재·요청 실패 시 시간 형태만 흉내낸 가짜가
+  // 4개 경로에서 반환된다. 이 플래그가 true면 UI는 "예시"를 표시하고
+  // 기록 저장은 물때를 저장하지 않아야 한다(가짜가 통계·조건표를
+  // 오염시키지 않게 — 4차 GOAL-5에서 무표시 반환을 정직화).
+  mocked?: boolean;
 }
 
 export interface TideStation {
@@ -74,6 +79,8 @@ function findNearestStation(lat: number, lng: number): TideStation {
   return nearest;
 }
 
+// @mock-data — 실측이 아니라 현재 시각 기반으로 지어낸 물때. mocked
+// 플래그로 소비자가 구분한다.
 function getMockTideData(stationName: string): TideData {
   // Generate time-aware mock data based on current time
   const now = new Date();
@@ -107,6 +114,7 @@ function getMockTideData(stationName: string): TideData {
         },
       ] as TideInfo[]
     ).sort((a, b) => a.time.localeCompare(b.time)),
+    mocked: true,
   };
 }
 
