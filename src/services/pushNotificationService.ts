@@ -55,6 +55,26 @@ export function saveNotificationPreferences(prefs: Partial<NotificationPreferenc
   const current = getNotificationPreferences();
   const updated = { ...current, ...prefs };
   localStorage.setItem(PREFS_STORAGE_KEY, JSON.stringify(updated));
+  prefsCache = updated;
+  prefsListeners.forEach((cb) => cb());
+}
+
+// ── useSyncExternalStore 어댑터 (설정 UI용) ──────────────────────────
+// localStorage는 외부 스토어다 — effect에서 setState로 미러링하면 React
+// 19 린트가 막고, suppressHydrationWarning은 하이드레이션 때 속성 패치를
+// 건너뛰어 서버의 disabled가 DOM에 눌어붙는다(4차 GOAL-3에서 실측).
+// 스냅샷은 참조 안정성이 필요해서 캐시로 관리한다.
+let prefsCache: NotificationPreferences | null = null;
+const prefsListeners = new Set<() => void>();
+
+export function subscribeNotificationPreferences(cb: () => void): () => void {
+  prefsListeners.add(cb);
+  return () => prefsListeners.delete(cb);
+}
+
+export function getNotificationPreferencesSnapshot(): NotificationPreferences {
+  if (!prefsCache) prefsCache = getNotificationPreferences();
+  return prefsCache;
 }
 
 /**

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useAppStore } from "@/store/appStore";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
@@ -19,6 +19,8 @@ import {
 import {
   getNotificationPreferences,
   saveNotificationPreferences,
+  subscribeNotificationPreferences,
+  getNotificationPreferencesSnapshot,
   type NotificationPreferences,
 } from "@/services/pushNotificationService";
 import { getDataService } from "@/services/dataServiceFactory";
@@ -43,15 +45,19 @@ export default function SettingsPage() {
 
   // 실제로 읽히고 강제되는 저장소(fishlog_notification_prefs)와 연결 —
   // 예전 토글은 아무도 읽지 않는 biteLog_notif_* 키에 써서 전부
-  // 무동작이었다(4차 GOAL-3). SSR에선 null(비활성 렌더), 클라이언트
-  // 첫 렌더에서 저장값 — 서버/클라이언트 속성 차이는 해당 입력에
-  // suppressHydrationWarning으로 한정 흡수한다.
-  const [prefs, setPrefs] = useState<NotificationPreferences | null>(() =>
-    typeof window === "undefined" ? null : getNotificationPreferences(),
+  // 무동작이었다(4차 GOAL-3). localStorage는 외부 스토어이므로
+  // useSyncExternalStore가 정석: SSR 스냅샷은 null(비활성 렌더),
+  // 하이드레이션 직후 React가 클라이언트 스냅샷으로 재렌더해 속성을
+  // 패치한다(suppressHydrationWarning 우회는 disabled가 DOM에 눌어붙는
+  // 함정이 있어 폐기 — 실측).
+  const prefs = useSyncExternalStore<NotificationPreferences | null>(
+    subscribeNotificationPreferences,
+    getNotificationPreferencesSnapshot,
+    () => null,
   );
   const updatePref = (patch: Partial<NotificationPreferences>) => {
+    // 저장이 스냅샷 캐시를 갱신하고 구독자에게 알리므로 재렌더는 자동.
     saveNotificationPreferences(patch);
-    setPrefs((p) => (p ? { ...p, ...patch } : p));
   };
 
   const [resetting, setResetting] = useState(false);
@@ -372,7 +378,6 @@ export default function SettingsPage() {
                     type="checkbox"
                     checked={prefs?.[item.key] ?? true}
                     disabled={!prefs}
-                    suppressHydrationWarning
                     onChange={(e) => updatePref({ [item.key]: e.target.checked })}
                     className="sr-only peer"
                   />
@@ -396,7 +401,6 @@ export default function SettingsPage() {
                 aria-label={locale === "ko" ? "방해 금지 시작" : "Quiet start"}
                 value={prefs?.quietHoursStart ?? 23}
                 disabled={!prefs}
-                suppressHydrationWarning
                 onChange={(e) =>
                   updatePref({ quietHoursStart: Number(e.target.value) })
                 }
@@ -413,7 +417,6 @@ export default function SettingsPage() {
                 aria-label={locale === "ko" ? "방해 금지 종료" : "Quiet end"}
                 value={prefs?.quietHoursEnd ?? 6}
                 disabled={!prefs}
-                suppressHydrationWarning
                 onChange={(e) =>
                   updatePref({ quietHoursEnd: Number(e.target.value) })
                 }

@@ -14,8 +14,9 @@ test.describe('Settings honesty — /settings', () => {
     await expect(seasonToggle).toBeVisible({ timeout: 15000 });
     await expect(seasonToggle).toBeChecked(); // 기본 on
 
-    // sr-only(peer 패턴) 체크박스는 시각 크기가 0이라 force로 클릭한다.
-    await seasonToggle.click({ force: true });
+    // sr-only(clip) 체크박스는 물리 좌표 클릭이 닿지 않는다 — 요소에
+    // 직접 click()을 보내 토글+change 이벤트를 발생시킨다.
+    await seasonToggle.evaluate((el) => (el as HTMLInputElement).click());
     await expect
       .poll(() =>
         page.evaluate(
