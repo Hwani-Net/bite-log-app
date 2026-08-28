@@ -172,6 +172,7 @@ export async function chatWithExpert(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
       context: "gemini-chat",
+      // POST는 멱등하지 않다 — 재시도하면 같은 질문이 두 번 과금된다.
       retries: 0,
     });
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -181,7 +182,7 @@ export async function chatWithExpert(
       await new Promise((r) => setTimeout(r, 800));
       return getMockAnswer(selectedSpecies, userMessage);
     }
-    if (err instanceof ApiError && err.status) {
+    if (err instanceof ApiError && typeof err.status === "number") {
       console.error("Gemini Chat API error:", err.status);
       return `[API 오류 ${err.status}] 잠시 후 다시 시도해주세요.`;
     }

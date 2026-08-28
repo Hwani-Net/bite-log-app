@@ -215,7 +215,10 @@ ${params.communitySummary}
       ` ${params.species} ${params.location} 출조 준비! 채비 점검 후 안전 출조하세요.`
     );
   } catch (err) {
-    // 프록시 실패(키 없음 503 포함)는 기존대로 기본 채비 문구로 폴백.
+    // 프록시 실패(키 없음 503 포함)는 기본 채비 문구로 폴백.
+    // 주의: 예전엔 !res.ok 경로와 네트워크 예외 경로가 서로 다른 문구를
+    // 냈는데, 사용자 입장에서 구분 가치가 없어 한 문구로 통합했다
+    // (5차 GOAL-6 — 의도된 변경, 교차검수 지적으로 명시).
     console.error("Gemini briefing generation failed:", err);
     return ` ${params.species} 출조 준비! ${params.tideNum}물 기준 채비를 세팅하고, ${params.location} 현지 날씨를 출발 전 재확인하세요.`;
   }

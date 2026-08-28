@@ -254,7 +254,9 @@ export async function fetchCatchValue(): Promise<CatchValueData> {
       "/api/catch-value",
       { cache: "no-store", context: "catch-value", retries: 0 },
     );
-    if (!json.ok) {
+    // 서버가 ok:false로 실패를 표시한 경우만 폴백 — ok 필드 자체가 없는
+    // 응답은 데이터 유무로 판단한다(아래 !json.data).
+    if (json.ok === false) {
       return MOCK_DATA;
     }
     if (!json.data) return MOCK_DATA;

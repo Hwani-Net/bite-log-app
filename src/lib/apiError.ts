@@ -83,7 +83,10 @@ export function classifyError(err: unknown, context?: string): ApiError {
       context ? `[${context}] ${err.message}` : err.message,
     );
   }
-  if (err instanceof DOMException && err.name === "AbortError") {
+  // AbortError는 브라우저에선 DOMException이지만 다른 런타임(undici/node,
+  // 폴리필)에선 그냥 Error다 — 이름으로 판정해야 타임아웃이 "unknown"으로
+  // 새지 않는다(5차 GOAL-6 유닛이 잡은 실결함).
+  if (err instanceof Error && err.name === "AbortError") {
     return ApiError.timeout(
       context ? `[${context}] Request timed out` : "Request timed out",
     );

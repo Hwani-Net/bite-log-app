@@ -48,3 +48,54 @@ describe('apiFetch', () => {
     expect(err).toBeInstanceOf(ApiError);
   });
 });
+
+describe('apiFetch timeout & classification detail', () => {
+  it('aborts after the timeout and classifies it as a retryable ApiError', async () => {
+    // fetch가 abort 신호를 받으면 AbortError를 던지는 실제 동작을 흉내낸다.
+    vi.stubGlobal('fetch', (_url: string, init?: RequestInit) => {
+      return new Promise((_resolve, reject) => {
+        init?.signal?.addEventListener('abort', () => {
+          const err = new Error('The operation was aborted');
+          err.name = 'AbortError';
+          reject(err);
+        });
+      });
+    });
+    const err = await apiFetch('/api/slow', { timeout: 20, retries: 0 }).catch(
+      (e) => e,
+    );
+    expect(err).toBeInstanceOf(ApiError);
+    expect((err as ApiError).type).toBe('timeout');
+    expect((err as ApiError).retryable).toBe(true);
+  });
+
+  it('passes fetch options (method/headers/body/cache) straight through', async () => {
+    let seen: RequestInit | undefined;
+    vi.stubGlobal('fetch', (_url: string, init?: RequestInit) => {
+      seen = init;
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+    });
+    await apiFetch('/api/x', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{"a":1}',
+      cache: 'no-store',
+      retries: 0,
+    });
+    expect(seen?.method).toBe('POST');
+    expect(seen?.cache).toBe('no-store');
+    expect(seen?.body).toBe('{"a":1}');
+    expect(seen?.signal).toBeTruthy(); // 타임아웃용 AbortSignal이 붙는다
+  });
+
+  it('surfaces a malformed JSON body as an ApiError, not a raw crash', async () => {
+    vi.stubGlobal('fetch', () =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.reject(new SyntaxError('Unexpected token')),
+      }),
+    );
+    const err = await apiFetch('/api/x', { retries: 0 }).catch((e) => e);
+    expect(err).toBeInstanceOf(ApiError);
+  });
+});

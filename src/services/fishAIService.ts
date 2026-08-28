@@ -139,6 +139,7 @@ export async function identifyFish(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
       context: "fish-ai",
+      // POST 멱등성 없음 + 이미지 분석은 호출당 비용이 크다 → 재시도 금지.
       retries: 0,
     }).catch(async (err) => {
       if (err instanceof ApiError && err.status === 503) {
