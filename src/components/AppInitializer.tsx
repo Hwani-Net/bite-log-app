@@ -14,7 +14,10 @@ import {
   SEASON_OPEN_NOTIFIED_KEY,
 } from '@/lib/seasonOpenAlert';
 import { localISODate } from '@/lib/localDate';
-import { sendLocalNotification } from '@/services/pushNotificationService';
+import {
+  sendLocalNotification,
+  getNotificationPreferences,
+} from '@/services/pushNotificationService';
 
 export default function AppInitializer() {
   const initFromStorage = useAppStore((s) => s.initFromStorage);
@@ -62,6 +65,8 @@ export default function AppInitializer() {
   // 지난 해제일 키는 자동 정리돼 내년에 다시 알린다). 알림 권한이 없거나
   // 조용한 시간대면 sendLocalNotification이 알아서 생략한다.
   useEffect(() => {
+    // 설정의 금어기 해제 토글이 이 게이트를 통해 실제로 작동한다(4차 GOAL-3).
+    if (!getNotificationPreferences().seasonOpenAlert) return;
     let cancelled = false;
     getDataService()
       .getCatchRecords()

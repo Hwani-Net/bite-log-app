@@ -78,3 +78,14 @@ export async function syncPendingRecords(
 
   return synced;
 }
+
+/** 오프라인 큐 전체 비우기 — 설정의 "조과 기록 초기화"가 호출한다. */
+export async function clearPendingRecords(): Promise<void> {
+  const db = await openDB();
+  const tx = db.transaction(STORE_NAME, 'readwrite');
+  tx.objectStore(STORE_NAME).clear();
+  await new Promise((resolve, reject) => {
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  });
+}

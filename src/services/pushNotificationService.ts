@@ -13,6 +13,7 @@ export interface NotificationPreferences {
   biteTimeAlert: boolean;
   newsAlert: boolean;
   badgeAlert: boolean;
+  seasonOpenAlert: boolean; // 금어기 해제 임박(4차 GOAL-2 알림)
   quietHoursStart: number; // 0-23
   quietHoursEnd: number;   // 0-23
   regions: string[];       // ['east', 'west', 'south', 'jeju']
@@ -22,6 +23,7 @@ const DEFAULT_PREFERENCES: NotificationPreferences = {
   biteTimeAlert: true,
   newsAlert: true,
   badgeAlert: true,
+  seasonOpenAlert: true,
   quietHoursStart: 23,
   quietHoursEnd: 6,
   regions: ['all'] };

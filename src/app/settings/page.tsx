@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppStore } from "@/store/appStore";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
@@ -14,54 +14,116 @@ import {
   Trophy,
   Trash2,
   Heart,
+  Download,
 } from "lucide-react";
+import {
+  getNotificationPreferences,
+  saveNotificationPreferences,
+  type NotificationPreferences,
+} from "@/services/pushNotificationService";
+import { getDataService } from "@/services/dataServiceFactory";
+import { clearPendingRecords } from "@/services/offlineQueue";
 
-const NOTIF_KEYS = {
-  biteTimeAlert: "biteLog_notif_biteTime",
-  newsAlert: "biteLog_notif_news",
-  badgeAlert: "biteLog_notif_badge",
-} as const;
+// "조과 기록 초기화"가 지우는 로컬 키 — 확인 다이얼로그에 그대로 열거해
+// 무엇이 지워지는지 사용자가 알게 한다(예전 구현은 fishlog_catches 하나만
+// 지워서 로그인 사용자에겐 사실상 아무 일도 안 했다).
+const RESET_LOCAL_KEYS: { key: string; labelKo: string }[] = [
+  { key: "fishlog_catches", labelKo: "조과 기록(로컬)" },
+  { key: "bitelog_alert_subscriptions", labelKo: "알림 구독" },
+  { key: "fishlog_likes", labelKo: "피드 좋아요 표시" },
+  { key: "biteLog_tripAlert", labelKo: "출조 브리핑 예약" },
+  { key: "biteLog_briefingNotified", labelKo: "브리핑 알림 이력" },
+  { key: "biteLog_cancelAlertNotified", labelKo: "출항 취소 경보 이력" },
+  { key: "biteLog_seasonOpenNotified", labelKo: "금어기 해제 알림 이력" },
+];
 
 export default function SettingsPage() {
   const { t, theme, setTheme, locale, setLocale } = useAppStore();
   const { user, isLoggedIn, signInWithGoogle, signOut, loading } = useAuth();
 
-  const [notifBiteTime, setNotifBiteTime] = useState(
-    () =>
-      typeof window === "undefined" ||
-      localStorage.getItem(NOTIF_KEYS.biteTimeAlert) !== "false",
+  // 실제로 읽히고 강제되는 저장소(fishlog_notification_prefs)와 연결 —
+  // 예전 토글은 아무도 읽지 않는 biteLog_notif_* 키에 써서 전부
+  // 무동작이었다(4차 GOAL-3). SSR에선 null(비활성 렌더), 클라이언트
+  // 첫 렌더에서 저장값 — 서버/클라이언트 속성 차이는 해당 입력에
+  // suppressHydrationWarning으로 한정 흡수한다.
+  const [prefs, setPrefs] = useState<NotificationPreferences | null>(() =>
+    typeof window === "undefined" ? null : getNotificationPreferences(),
   );
-  const [notifNews, setNotifNews] = useState(
-    () =>
-      typeof window === "undefined" ||
-      localStorage.getItem(NOTIF_KEYS.newsAlert) !== "false",
-  );
-  const [notifBadge, setNotifBadge] = useState(
-    () =>
-      typeof window === "undefined" ||
-      localStorage.getItem(NOTIF_KEYS.badgeAlert) !== "false",
-  );
-
-  const notifStates: Record<
-    string,
-    { value: boolean; setter: (v: boolean) => void; key: string }
-  > = {
-    biteTimeAlert: {
-      value: notifBiteTime,
-      setter: setNotifBiteTime,
-      key: NOTIF_KEYS.biteTimeAlert,
-    },
-    newsAlert: {
-      value: notifNews,
-      setter: setNotifNews,
-      key: NOTIF_KEYS.newsAlert,
-    },
-    badgeAlert: {
-      value: notifBadge,
-      setter: setNotifBadge,
-      key: NOTIF_KEYS.badgeAlert,
-    },
+  const updatePref = (patch: Partial<NotificationPreferences>) => {
+    saveNotificationPreferences(patch);
+    setPrefs((p) => (p ? { ...p, ...patch } : p));
   };
+
+  const [resetting, setResetting] = useState(false);
+
+  async function handleReset() {
+    const listing = RESET_LOCAL_KEYS.map((k) => `· ${k.labelKo}`).join("\n");
+    const target = isLoggedIn
+      ? locale === "ko"
+        ? "계정에 저장된 조과 기록 전체와 아래 로컬 데이터"
+        : "all catch records in your account and the local data below"
+      : locale === "ko"
+        ? "이 기기의 아래 데이터"
+        : "the local data below";
+    if (
+      !window.confirm(
+        locale === "ko"
+          ? `${target}를 삭제합니다:\n${listing}\n\n되돌릴 수 없습니다. 계속할까요?`
+          : `This deletes ${target}:\n${listing}\n\nThis cannot be undone. Continue?`,
+      )
+    )
+      return;
+    setResetting(true);
+    try {
+      // 로그인 상태면 Firestore의 기록도 실제로 지운다 — 예전엔 로컬 키
+      // 하나만 지워 "초기화했는데 그대로"인 거짓 버튼이었다.
+      const service = getDataService();
+      const records = await service.getCatchRecords();
+      for (const r of records) {
+        await service.deleteCatchRecord(r.id);
+      }
+      for (const k of RESET_LOCAL_KEYS) {
+        localStorage.removeItem(k.key);
+      }
+      await clearPendingRecords().catch(() => {});
+      window.location.reload();
+    } catch (err) {
+      console.error("Reset failed:", err);
+      setResetting(false);
+    }
+  }
+
+  async function handleExportAll() {
+    const records = await getDataService()
+      .getCatchRecords()
+      .catch(() => []);
+    const readJson = (key: string) => {
+      try {
+        return JSON.parse(localStorage.getItem(key) ?? "null");
+      } catch {
+        return null;
+      }
+    };
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      app: "BiteLog",
+      records,
+      alertSubscriptions: readJson("bitelog_alert_subscriptions"),
+      myBoats: readJson("biteLog_myBoats"),
+      boatWatchlist: readJson("biteLog_boatWatchlist"),
+      tripAlert: readJson("biteLog_tripAlert"),
+      notificationPreferences: getNotificationPreferences(),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `bitelog-data-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   const themes = [
     {
@@ -271,24 +333,34 @@ export default function SettingsPage() {
           {locale === "ko" ? "알림 설정" : "Notifications"}
         </h2>
         <div className="bg-white/5 backdrop-blur-[12px] border border-white/10 rounded-2xl p-4 space-y-3">
-          {[
-            {
-              Icon: Fish,
-              label:
-                locale === "ko" ? "입질 최적 시간 알림" : "Bite Time Alert",
-              key: "biteTimeAlert",
-            },
-            {
-              Icon: Newspaper,
-              label: locale === "ko" ? "조과 뉴스 알림" : "News Alert",
-              key: "newsAlert",
-            },
-            {
-              Icon: Trophy,
-              label: locale === "ko" ? "배지 획득 알림" : "Badge Alert",
-              key: "badgeAlert",
-            },
-          ].map((item, i) => (
+          {(
+            [
+              {
+                Icon: Fish,
+                label:
+                  locale === "ko" ? "입질 최적 시간 알림" : "Bite Time Alert",
+                key: "biteTimeAlert",
+              },
+              {
+                Icon: Newspaper,
+                label: locale === "ko" ? "조과 뉴스 알림" : "News Alert",
+                key: "newsAlert",
+              },
+              {
+                Icon: Trophy,
+                label: locale === "ko" ? "배지 획득 알림" : "Badge Alert",
+                key: "badgeAlert",
+              },
+              {
+                Icon: Anchor,
+                label:
+                  locale === "ko"
+                    ? "금어기 해제 임박 알림"
+                    : "Season Opening Alert",
+                key: "seasonOpenAlert",
+              },
+            ] as const
+          ).map((item, i) => (
             <div key={item.key}>
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm text-white/80 flex items-center gap-2">
@@ -298,21 +370,63 @@ export default function SettingsPage() {
                   <span className="sr-only">{item.label}</span>
                   <input
                     type="checkbox"
-                    checked={notifStates[item.key]?.value ?? true}
-                    onChange={(e) => {
-                      const s = notifStates[item.key];
-                      if (!s) return;
-                      s.setter(e.target.checked);
-                      localStorage.setItem(s.key, String(e.target.checked));
-                    }}
+                    checked={prefs?.[item.key] ?? true}
+                    disabled={!prefs}
+                    suppressHydrationWarning
+                    onChange={(e) => updatePref({ [item.key]: e.target.checked })}
                     className="sr-only peer"
                   />
                   <div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#c9a84c]" />
                 </label>
               </div>
-              {i < 2 && <div className="h-[1px] bg-white/5" />}
+              {i < 3 && <div className="h-[1px] bg-white/5" />}
             </div>
           ))}
+
+          {/* 방해 금지 시간 — 저장 계층엔 이미 구현·강제되고 있었는데 UI만
+              없었다. sendLocalNotification이 이 구간의 알림을 전부 막는다. */}
+          <div className="h-[1px] bg-white/5" />
+          <div className="flex items-center justify-between py-2">
+            <span className="text-sm text-white/80 flex items-center gap-2">
+              <DynamicIcon name="dark_mode" size={15} />
+              {locale === "ko" ? "방해 금지 시간" : "Quiet Hours"}
+            </span>
+            <span className="flex items-center gap-1 text-sm text-white/70">
+              <select
+                aria-label={locale === "ko" ? "방해 금지 시작" : "Quiet start"}
+                value={prefs?.quietHoursStart ?? 23}
+                disabled={!prefs}
+                suppressHydrationWarning
+                onChange={(e) =>
+                  updatePref({ quietHoursStart: Number(e.target.value) })
+                }
+                className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs"
+              >
+                {Array.from({ length: 24 }, (_, h) => (
+                  <option key={h} value={h}>
+                    {h}시
+                  </option>
+                ))}
+              </select>
+              ~
+              <select
+                aria-label={locale === "ko" ? "방해 금지 종료" : "Quiet end"}
+                value={prefs?.quietHoursEnd ?? 6}
+                disabled={!prefs}
+                suppressHydrationWarning
+                onChange={(e) =>
+                  updatePref({ quietHoursEnd: Number(e.target.value) })
+                }
+                className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs"
+              >
+                {Array.from({ length: 24 }, (_, h) => (
+                  <option key={h} value={h}>
+                    {h}시
+                  </option>
+                ))}
+              </select>
+            </span>
+          </div>
         </div>
       </section>
 
@@ -434,6 +548,29 @@ export default function SettingsPage() {
           {locale === "ko" ? "데이터 관리" : "Data Management"}
         </h2>
         <div className="bg-white/5 backdrop-blur-[12px] border border-white/10 rounded-2xl p-4 space-y-3">
+          {/* 내 데이터 전부 내려받기 — "사용자의 데이터를 대변"의 가장
+              직접적인 형태. */}
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <span className="text-sm text-white/80 flex items-center gap-2">
+                <Download size={15} className="text-white/50" />{" "}
+                {locale === "ko" ? "내 데이터 전부 내려받기" : "Export All Data"}
+              </span>
+              <p className="text-[11px] text-white/60 mt-0.5 ml-7">
+                {locale === "ko"
+                  ? "기록·내 선사 카드·알림 구독을 JSON 한 파일로"
+                  : "Records, boats, and alert subscriptions as one JSON"}
+              </p>
+            </div>
+            <button
+              onClick={handleExportAll}
+              data-testid="export-all"
+              className="px-3 py-1.5 rounded-full bg-[#c9a84c]/20 text-[#c9a84c] text-xs font-medium transition-colors hover:bg-[#c9a84c]/30 whitespace-nowrap"
+            >
+              {locale === "ko" ? "내려받기" : "Download"}
+            </button>
+          </div>
+          <div className="h-[1px] bg-white/5" />
           <div className="flex items-center justify-between py-2">
             <div>
               <span className="text-sm text-white/80 flex items-center gap-2">
@@ -442,26 +579,25 @@ export default function SettingsPage() {
               </span>
               <p className="text-[11px] text-white/60 mt-0.5 ml-7">
                 {locale === "ko"
-                  ? "로컬에 저장된 모든 조과 기록을 삭제합니다"
-                  : "Delete all locally saved catch records"}
+                  ? isLoggedIn
+                    ? "계정의 기록과 이 기기의 관련 데이터를 삭제합니다"
+                    : "이 기기에 저장된 기록과 관련 데이터를 삭제합니다"
+                  : "Delete records and related data"}
               </p>
             </div>
             <button
-              onClick={() => {
-                if (
-                  window.confirm(
-                    locale === "ko"
-                      ? "모든 조과 기록이 삭제됩니다. 계속할까요?"
-                      : "All catch records will be deleted. Continue?",
-                  )
-                ) {
-                  localStorage.removeItem("fishlog_catches");
-                  window.location.reload();
-                }
-              }}
-              className="px-3 py-1.5 rounded-full bg-red-500/20 text-red-400 text-xs font-medium transition-colors hover:bg-red-500/30 whitespace-nowrap"
+              onClick={handleReset}
+              disabled={resetting}
+              data-testid="reset-data"
+              className="px-3 py-1.5 rounded-full bg-red-500/20 text-red-400 text-xs font-medium transition-colors hover:bg-red-500/30 whitespace-nowrap disabled:opacity-50"
             >
-              {locale === "ko" ? "초기화" : "Reset"}
+              {resetting
+                ? locale === "ko"
+                  ? "삭제 중..."
+                  : "Deleting..."
+                : locale === "ko"
+                  ? "초기화"
+                  : "Reset"}
             </button>
           </div>
         </div>
