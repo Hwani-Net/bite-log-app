@@ -1284,6 +1284,12 @@ export default function BookingPage() {
     let cancelled = false;
     setDirectoryLoading(true);
     setDirectoryError(false);
+    // portOptions가 이 목록의 harbor도 섞어 쓰므로(항구 필터 폭 넓히기),
+    // 이전 지역 데이터를 들고 있으면 지역을 바꾼 순간부터 새 데이터가
+    // 도착할 때까지 이전 지역 항구가 그대로 섞여 보인다 — 남해를 골랐는데
+    // 서해 항구가 남아 있던 원인이 이거였다(2026-08-29). searchBoats에
+    // 이미 적용한 것과 같은 원칙: 지역이 바뀌면 즉시 비운다.
+    setDirectoryBoats([]);
     const q = searchRegion ? `?region=${searchRegion}` : "";
     apiFetch<{ ok?: boolean; boats?: unknown; totalCached?: number }>(
       `/api/boat-directory${q}`,
@@ -1298,7 +1304,12 @@ export default function BookingPage() {
         setDirectoryTotalCached(data.totalCached ?? 0);
       })
       .catch(() => {
-        if (!cancelled) setDirectoryError(true);
+        if (cancelled) return;
+        setDirectoryError(true);
+        // 실패해도 이전 지역의 항구가 새 지역 밑에 남아 있으면 안 된다 —
+        // 위와 같은 이유로, 실패는 곧 "지금은 낚시뚜 데이터 없음"이어야
+        // 한다.
+        setDirectoryBoats([]);
       })
       .finally(() => {
         if (!cancelled) setDirectoryLoading(false);
