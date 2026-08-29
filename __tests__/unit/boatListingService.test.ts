@@ -162,6 +162,32 @@ describe('filterBoatsBySpecies', () => {
     const boats = [boat('대광어(다운샷)'), boat('우럭')];
     expect(filterBoatsBySpecies(boats, '5')).toHaveLength(1);
   });
+
+  // 2026-08-29 사용자 지적 — si[]=8(백조기)+sa[]=1(서해)로 112건이 잡히는데
+  // 화면엔 3척뿐이었다. 카드 표기는 "쭈꾸미,갑오징어 외 4종"처럼 앞의
+  // 1~2종만 보여주고 나머지는 "외 N종"으로 가리는데, si[]가 이미 골라낸
+  // 배 대부분이 백조기를 그 가려진 자리에 숨기고 있었다 — "안 보인다"를
+  // "없다"로 오판해 걸러낸 게 진짜 원인.
+  it('does not drop a boat whose fishTypes is truncated ("외 N종") — si[] already vetted it', () => {
+    const boats = [
+      boat('쭈꾸미,갑오징어 외 4종'), // 백조기가 가려진 자리에 있을 수 있다
+      boat('★꽃게낚시★ 외 9종'),
+      boat('☆가을 쭈꾸미☆'), // 안 가려짐 — 완결된 목록, 백조기 없음
+    ];
+    const kept = filterBoatsBySpecies(boats, '8').map((b) => b.fishTypes);
+    expect(kept).toContain('쭈꾸미,갑오징어 외 4종');
+    expect(kept).toContain('★꽃게낚시★ 외 9종');
+    expect(kept).not.toContain('☆가을 쭈꾸미☆');
+  });
+
+  it('still drops a boat whose complete (untruncated) fishTypes genuinely excludes the species', () => {
+    // 원래 이 함수가 잡으려던 사례: si[]=3(주꾸미)인데 "광어,우럭"만
+    // 있고 "외"도 없어(전체 표기 확정) 주꾸미가 없는 게 확실하다.
+    const boats = [boat('광어,우럭'), boat('주꾸미,갑오징어')];
+    expect(filterBoatsBySpecies(boats, '3').map((b) => b.fishTypes)).toEqual([
+      '주꾸미,갑오징어',
+    ]);
+  });
 });
 
 describe('filterBoatsByRegion', () => {

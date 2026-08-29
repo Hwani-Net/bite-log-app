@@ -84,10 +84,21 @@ test.describe('Booking search — /booking', () => {
     // returning boats whose displayed species has nothing to do with the
     // one selected (e.g. si[]=3 주꾸미 returning 꽃게 boats). Assert the
     // actual response content, not just that a number moved.
+    //
+    // fishTypes is itself a truncated card summary ("쭈꾸미,갑오징어 외
+    // 4종") that only shows the first species or two — a boat can
+    // legitimately offer 우럭 hidden behind "외 N종" (2026-08-29: si[]=8
+    // 백조기+sa[]=1 matched 112 boats upstream, but the literal-text-only
+    // check here would have kept only 3). A boat's fishTypes must either
+    // show the species directly, or be truncated (so we can't disprove it).
     const body = await response.json();
     expect(Array.isArray(body.boats)).toBe(true);
     for (const boat of body.boats) {
-      expect(boat.fishTypes).toContain('우럭');
+      const truncated = /외\s*\d+\s*종/.test(boat.fishTypes);
+      expect(
+        boat.fishTypes.includes('우럭') || truncated,
+        `boat "${boat.name}" fishTypes "${boat.fishTypes}" neither shows 우럭 nor is truncated`,
+      ).toBe(true);
     }
   });
 

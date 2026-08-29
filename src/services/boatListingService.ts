@@ -183,6 +183,19 @@ const SPECIES_MATCHERS: Record<string, RegExp> = {
   백조기: /백조기|보구치/,
 };
 
+// fishTypes 카드 표기는 "쭈꾸미,갑오징어 외 4종"처럼 앞의 1~2개만 보여주고
+// 나머지는 "외 N종"으로 가린다(2026-08-29 사용자 지적 — si[]=8(백조기)+
+// sa[]=1로 112건이 잡히는데 화면엔 3척뿐이었다. 원인 확인: si[]가 이미
+// 정확히 골라낸 배들의 대부분이 백조기를 "외 N종" 뒤에 숨기고 있었고,
+// 아래 정규식은 화면에 안 보이면 없는 걸로 판정해 그 배들을 통째로
+// 걸러냈다). "외 N종"이 있으면 실제로 무엇을 더 파는지 알 방법이
+// 없으므로 — 안 보인다고 없다고 단정할 수 없다 — 그런 배는 이 검증을
+// 건너뛰고 si[]의 판정을 그대로 믿는다. "외"가 없어(전체 목록이 다
+// 보여) 안 보이는 게 확정인 경우에만 걸러낸다 — 원래 이 함수가 잡으려던
+// si[]=3(주꾸미)이 "광어,우럭"(전체 표기, 안 가려짐)만 있는 배를 물어온
+// 사례가 바로 이 경우였다.
+const TRUNCATED_FISH_TYPES = /외\s*\d+\s*종/;
+
 export function filterBoatsBySpecies(
   boats: BoatListing[],
   speciesCode?: string,
@@ -191,7 +204,9 @@ export function filterBoatsBySpecies(
   const label = SPECIES_FILTERS.find((s) => s.code === speciesCode)?.label;
   if (!label) return boats;
   const re = SPECIES_MATCHERS[label] ?? new RegExp(label);
-  return boats.filter((b) => re.test(b.fishTypes));
+  return boats.filter(
+    (b) => re.test(b.fishTypes) || TRUNCATED_FISH_TYPES.test(b.fishTypes),
+  );
 }
 
 // sa[]도 si[]와 같은 문제가 있다 — thefishing.kr에 sa[]=3(남해권)을 직접
