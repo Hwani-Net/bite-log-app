@@ -3,8 +3,13 @@
 // date/region/species filters its own search form exposes. ~50 boats per
 // page, real photos/region/target species/capacity, no login. Same honest,
 // non-browser-impersonating User-Agent as boatCalendarService.ts; see that
-// file for why. sunsang24.com is not touched here for the same reason it
-// isn't touched there — its robots.txt explicitly disallows /ship/.
+// file for why.
+//
+// 2026-08-29: 선상24(sunsang24.com)는 계속 별도 파일(sunsang24ListingService.ts)
+// 이다 — robots.txt가 그쪽은 api.sunsang24.com 전체를 막아 이 파일의
+// thefishing.kr(전체 허용)과 신뢰 수준이 다르다. 사용자가 그 차단 신호를
+// 직접 보고 진행을 요청해 연동했지만, 같은 파일에 섞으면 "여긴 전부 허용된
+// 곳"이라는 이 주석의 전제가 깨진다.
 
 import { fetchWithRetry } from "@/lib/retryFetch";
 

@@ -84,6 +84,7 @@ import {
   type BoatListingPage,
 } from "@/services/boatListingService";
 import { type FishappBoat } from "@/services/fishappListingService";
+import { type Sunsang24Schedule } from "@/services/sunsang24ListingService";
 import {
   requestNotificationPermission,
   sendLocalNotification,
@@ -1067,6 +1068,54 @@ function FishappBoatCard({ boat }: { boat: FishappBoat }) {
   );
 }
 
+function Sunsang24Card({ schedule }: { schedule: Sunsang24Schedule }) {
+  const full = schedule.remainSeats <= 0;
+  return (
+    <a
+      href={schedule.detailUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`bg-white/3 border border-white/8 rounded-2xl overflow-hidden hover:border-blue-400/40 transition-all ${full ? "opacity-60" : ""}`}
+    >
+      <div className="relative w-full h-28 bg-white/5">
+        {schedule.imageUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={schedule.imageUrl}
+            alt={schedule.shipName}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = "none";
+            }}
+          />
+        )}
+        <span className="absolute top-1.5 left-1.5 text-[9px] px-1.5 py-0.5 rounded-full bg-blue-500/80 text-[#080d14] font-bold">
+          선상24
+        </span>
+        <span className="absolute bottom-1.5 right-1.5 text-[9px] px-1.5 py-0.5 rounded-full bg-black/60 text-white/80">
+          {full ? "마감" : `잔여 ${schedule.remainSeats}석`}
+        </span>
+      </div>
+      <div className="p-2.5">
+        <h4 className="text-xs font-bold text-white truncate mb-0.5">
+          {schedule.shipName}
+        </h4>
+        <p className="text-[10px] text-white/40 truncate">
+          {schedule.areaMain} · {schedule.portName || schedule.areaSub}
+        </p>
+        <p className="text-[10px] text-white/50 truncate mt-0.5">
+          {schedule.stime?.slice(0, 5)} 출항 · {schedule.fishType || "어종 미표기"}
+        </p>
+        {schedule.price > 0 && (
+          <p className="text-[10px] text-[#c9a84c] font-semibold mt-0.5">
+            {schedule.price.toLocaleString()}원
+          </p>
+        )}
+      </div>
+    </a>
+  );
+}
+
 export default function BookingPage() {
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
@@ -1318,6 +1367,54 @@ export default function BookingPage() {
       cancelled = true;
     };
   }, [searchRegion]);
+
+  // 선상24 — 날짜별 실시간 스케줄이 있는 세 번째 소스(2026-08-29, 사용자
+  // 지시로 조사 후 연동). 지역·날짜가 바뀌면 즉시 비운다 — directoryBoats와
+  // 같은 이유(위 주석): 새 조건의 응답이 오기 전까지 이전 조건의 배가
+  // 남아 있으면 화면이 거짓말을 한다.
+  const [sunsang24Schedules, setSunsang24Schedules] = useState<
+    Sunsang24Schedule[]
+  >([]);
+  const [sunsang24Loading, setSunsang24Loading] = useState(true);
+  const [sunsang24Error, setSunsang24Error] = useState(false);
+
+  useEffect(() => {
+    if (!searchDate) return;
+    let cancelled = false;
+    setSunsang24Loading(true);
+    setSunsang24Error(false);
+    setSunsang24Schedules([]);
+    const q = new URLSearchParams({ date: searchDate });
+    if (searchRegion) q.set("region", searchRegion);
+    if (searchSpecies) {
+      const label = SPECIES_FILTERS.find((s) => s.code === searchSpecies)?.label;
+      if (label) q.set("keyword", label);
+    }
+    apiFetch<{ ok?: boolean; schedules?: unknown }>(
+      `/api/sunsang24-listings?${q.toString()}`,
+      // thefishing.kr과 같은 이유로 넉넉하게 — retryFetch 기본 타임아웃이
+      // 15초라 클라이언트가 그보다 짧으면 곧 성공했을 응답을 먼저 포기한다.
+      { context: "sunsang24-listings", retries: 0, timeout: 17_000 },
+    )
+      .then((data) => {
+        if (cancelled) return;
+        if (data.ok === false || !Array.isArray(data.schedules)) {
+          throw new Error("malformed sunsang24-listings response");
+        }
+        setSunsang24Schedules(data.schedules);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setSunsang24Error(true);
+        setSunsang24Schedules([]);
+      })
+      .finally(() => {
+        if (!cancelled) setSunsang24Loading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [searchDate, searchRegion, searchSpecies]);
 
   const loadOperatorAvailability = async (operatorId: BoatOperatorId) => {
     setAvailabilityLoading((prev) => ({ ...prev, [operatorId]: true }));
@@ -1721,6 +1818,19 @@ export default function BookingPage() {
         matchesKeyword(debouncedKeyword, b.name, b.province, b.area, b.harbor),
       ),
     [directoryBoats, debouncedKeyword],
+  );
+  const keywordFilteredSunsang24 = useMemo(
+    () =>
+      sunsang24Schedules.filter((s) =>
+        matchesKeyword(
+          debouncedKeyword,
+          s.shipName,
+          s.areaMain,
+          s.portName,
+          s.fishType,
+        ),
+      ),
+    [sunsang24Schedules, debouncedKeyword],
   );
   // 항구 칩은 "지금 이 조건에서 뭐가 있는지"를 보여줘야 하니 항구/정원
   // 필터를 적용하기 전, 키워드까지만 거른 목록에서 뽑는다 — 이미 항구를
@@ -2560,6 +2670,47 @@ export default function BookingPage() {
           <p className="text-[10px] text-white/25 px-1">
             낚시뚜 등록 선사 목록 · 날짜별 예약 가능 여부는 선박을 눌러 낚시뚜
             페이지에서 확인하세요
+          </p>
+        </section>
+
+        {/* 선상24 — 세 번째 소스. 낚시뚜와 달리 날짜별 실제 스케줄(잔여
+            좌석·시간·가격)이 있어 더피싱 그리드에 가깝지만, 지역 코드
+            파라미터가 없는 API라 서버에서 seaRegion으로 한 번 더 걸러도
+            그 페이지(30건) 표본 안에서만 걸러진다 — 어종 없이 지역만
+            고르면 표본이 작을 수 있는 게 알려진 한계다. */}
+        <section className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-xs text-white/40 font-semibold uppercase tracking-[0.15em]">
+              선상24 실시간 예약
+            </h3>
+          </div>
+          {sunsang24Error ? (
+            <p className="text-xs text-white/30 py-4 text-center">
+              선박 목록을 지금 불러오지 못했습니다.
+            </p>
+          ) : sunsang24Loading && sunsang24Schedules.length === 0 ? (
+            <div className="grid grid-cols-2 gap-2">
+              {[0, 1].map((i) => (
+                <div key={i} className="h-40 rounded-2xl bg-white/3 animate-pulse" />
+              ))}
+            </div>
+          ) : sunsang24Schedules.length === 0 ? (
+            <p className="text-xs text-white/30 py-4 text-center">
+              이 조건으로 출조하는 선박이 없습니다.
+            </p>
+          ) : keywordFilteredSunsang24.length === 0 ? (
+            <p role="status" className="text-xs text-white/30 py-4 text-center">
+              검색어와 일치하는 선박이 없습니다. 다른 키워드를 시도해보세요.
+            </p>
+          ) : (
+            <div data-testid="sunsang24-results" className="grid grid-cols-2 gap-2">
+              {keywordFilteredSunsang24.map((s) => (
+                <Sunsang24Card key={s.scheduleNo} schedule={s} />
+              ))}
+            </div>
+          )}
+          <p className="text-[10px] text-white/25 px-1">
+            선상24 예약 시스템 기준 · 예약은 선상24 페이지에서 이루어집니다
           </p>
         </section>
 
