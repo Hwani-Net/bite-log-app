@@ -36,6 +36,16 @@
 // 않는다. timeoutMs는 넉넉하게(15초) 잡아 정상 응답을 더는 조기에
 // 잘라내지 않는다 — 그래도 플랫폼 자체 한계(~10.6~10.9초)가 대개 먼저
 // 걸려 실질 상한은 비슷하게 유지된다.
+//
+// 2026-08-30 교차검수(OpenRouter)로 발견: fetch()는 헤더만 도착하면
+// resolve되고, 본문(res.text()/res.json())은 호출자가 나중에 별도로
+// 읽는다. 그런데 이전 코드는 fetch()가 resolve되자마자 finally에서
+// 타이머를 지웠다 — 헤더 이후 본문을 읽는 동안은 아무 타임아웃 보호도
+// 없었다는 뜻. 그래서 타이머를 성공 경로에서는 지우지 않고 그대로 살려
+// 본문 읽기까지 같은 AbortController가 지키게 한다. 본문을 이미 다 읽은
+// 뒤에 뒤늦게 abort()가 울려도 그건 완료된 요청에 대한 아무 효과 없는
+// 호출이라 해롭지 않다. 실패(catch) 경로는 지킬 Response가 없으니 그
+// 자리에서만 지운다.
 const FAST_FAILURE_MS = 2_000;
 
 export async function fetchWithRetry(
@@ -50,10 +60,9 @@ export async function fetchWithRetry(
   try {
     return await fetch(input, { ...init, signal: controller.signal });
   } catch (err) {
+    clearTimeout(timer);
     const failedFast = Date.now() - startedAt < FAST_FAILURE_MS;
     if (retries <= 0 || !failedFast) throw err;
     return fetchWithRetry(input, init, retries - 1, timeoutMs);
-  } finally {
-    clearTimeout(timer);
   }
 }

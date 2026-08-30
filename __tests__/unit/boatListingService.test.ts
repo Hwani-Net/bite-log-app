@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import {
@@ -7,6 +7,7 @@ import {
   buildListingUrl,
   filterBoatsBySpecies,
   filterBoatsByRegion,
+  fetchBoatListings,
   SPECIES_FILTERS,
   type BoatListing,
 } from '@/services/boatListingService';
@@ -237,6 +238,31 @@ describe('filterBoatsByRegion', () => {
     expect(filterBoatsByRegion(boats, '3').map((b) => b.uid)).toEqual(['2']);
     expect(filterBoatsByRegion(boats, '2').map((b) => b.uid)).toEqual(['3']);
     expect(filterBoatsByRegion(boats, '130').map((b) => b.uid)).toEqual(['4']);
+  });
+});
+
+describe('fetchBoatListings', () => {
+  const realFetch = global.fetch;
+  afterEach(() => {
+    global.fetch = realFetch;
+  });
+
+  // 2026-08-30 교차검수(Codex) Finding 1 — region/species post-filter가
+  // 배를 줄여도 `total`은 upstream 원본 건수 그대로라, `boats.length < total`
+  // 로 "더 보기" 종료를 판단하면 필터가 하나라도 배를 걸러낸 순간부터
+  // total을 절대 못 따라잡아 버튼이 영원히 남는다. `rawCount`가 필터 이전
+  // 원본 페이지 건수를 정확히 담아야 그 판단을 total 없이도 할 수 있다.
+  it('reports rawCount as the pre-filter page size even when a filter narrows boats', async () => {
+    global.fetch = vi.fn().mockResolvedValue(new Response(fixture));
+
+    const rawBoats = parseBoatListingHtml(fixture);
+    const expectedFiltered = filterBoatsByRegion(rawBoats, '3'); // 남해
+
+    const result = await fetchBoatListings({ regionCode: '3' });
+
+    expect(result.rawCount).toBe(rawBoats.length);
+    expect(result.boats.length).toBe(expectedFiltered.length);
+    expect(result.boats.length).toBeLessThan(result.rawCount);
   });
 });
 

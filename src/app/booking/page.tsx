@@ -1273,6 +1273,15 @@ export default function BookingPage() {
     let cancelled = false;
     setSearchLoading(true);
     setSearchError(false);
+    // directoryBoats/선상24 effect와 같은 이유(위 주석 참고) — 새 검색
+    // (page 1)이 시작되는 순간 이전 조건의 결과를 비워야 지역을 바꾼
+    // 직후에도 화면이 옛 지역 카드·항구 칩을 계속 보여주지 않는다
+    // (2026-08-30 교차검수 Finding 3). page>1(더 보기)은 이어붙이는
+    // 것이므로 비우지 않는다.
+    if (searchPage === 1) {
+      setSearchBoats([]);
+      setSearchResult(null);
+    }
     const q = new URLSearchParams({ date: searchDate, page: String(searchPage) });
     if (searchRegion) q.set("region", searchRegion);
     if (searchSpecies) q.set("species", searchSpecies);
@@ -1874,7 +1883,8 @@ export default function BookingPage() {
   // fraction stop meaning "what you're looking at" — the count label and
   // the 더 보기 label both fall back to a plain filtered count once true.
   const hasClientFilter = Boolean(
-    searchSpecies ||
+    searchRegion ||
+      searchSpecies ||
       debouncedKeyword.trim() ||
       selectedPort ||
       selectedCapacity ||
@@ -2520,7 +2530,7 @@ export default function BookingPage() {
             </p>
           )}
 
-          {searchError ? (
+          {searchError && searchBoats.length === 0 ? (
             <div role="status" className="py-6 text-center space-y-2">
               <p className="text-xs text-white/40">
                 선박 목록을 지금 불러오지 못했습니다. 예약 정보를 가져오는
@@ -2600,18 +2610,39 @@ export default function BookingPage() {
                   />
                 ))}
               </div>
-              {searchResult && searchBoats.length < searchResult.total && (
-                <button
-                  onClick={() => setSearchPage((p) => p + 1)}
-                  disabled={searchLoading}
-                  className="w-full py-2.5 rounded-xl border border-white/10 text-white/60 text-sm font-semibold hover:bg-white/5 transition-colors disabled:opacity-40"
-                >
-                  {searchLoading
-                    ? "불러오는 중..."
-                    : hasClientFilter
-                      ? "더 보기"
-                      : `더 보기 (${searchBoats.length}/${searchResult.total})`}
-                </button>
+              {searchError ? (
+                // 더 보기(page>1) 실패 — 이미 읽은 목록은 위에 그대로 두고
+                // (2026-08-30 교차검수 Finding 2), 다음 페이지 재시도만
+                // 별도로 안내한다. 이 상태에서 "더 보기"를 그대로 두면
+                // 실패한 페이지를 건너뛰고 다음 페이지로 넘어가 버린다.
+                <div role="status" className="py-2 text-center space-y-2">
+                  <p className="text-xs text-white/40">
+                    다음 페이지를 지금 불러오지 못했습니다.
+                  </p>
+                  <button
+                    type="button"
+                    data-testid="search-retry"
+                    onClick={() => setRetryTick((n) => n + 1)}
+                    className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-[#c9a84c]/40 text-xs font-semibold text-white/80"
+                  >
+                    다시 시도
+                  </button>
+                </div>
+              ) : (
+                searchResult &&
+                searchResult.rawCount > 0 && (
+                  <button
+                    onClick={() => setSearchPage((p) => p + 1)}
+                    disabled={searchLoading}
+                    className="w-full py-2.5 rounded-xl border border-white/10 text-white/60 text-sm font-semibold hover:bg-white/5 transition-colors disabled:opacity-40"
+                  >
+                    {searchLoading
+                      ? "불러오는 중..."
+                      : hasClientFilter
+                        ? "더 보기"
+                        : `더 보기 (${searchBoats.length}/${searchResult.total})`}
+                  </button>
+                )
               )}
             </>
           )}

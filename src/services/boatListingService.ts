@@ -35,6 +35,13 @@ export interface BoatListingPage {
   boats: BoatListing[];
   total: number; // "검색 N건" from the page header; 0 when unparseable
   page: number;
+  // 이 페이지에서 species/region post-filter 이전 원본 파싱 건수. `total`은
+  // upstream이 애초에 매긴 건수라 우리 post-filter로 줄어든 `boats.length`와
+  // 다르게 유지된다 — 그래서 "더 보기" 종료 여부를 `boats.length < total`로
+  // 판단하면 필터가 하나라도 배를 걸러낸 순간부터 절대 total을 못 따라잡아
+  // 버튼이 영원히 남는다(2026-08-30 교차검수 Finding 1). 대신 "방금 받은
+  // 페이지가 원본 기준으로 비어 있었는가"만 보면 필터와 무관하게 정확하다.
+  rawCount: number;
 }
 
 // Values are the `sa[]` codes from thefishing.kr's own search form. The four
@@ -255,13 +262,15 @@ export async function fetchBoatListings(
     throw new Error(`boat listing fetch failed: ${res.status}`);
   }
   const html = await res.text();
+  const rawBoats = parseBoatListingHtml(html);
   const parsed = filterBoatsByRegion(
-    filterBoatsBySpecies(parseBoatListingHtml(html), params.speciesCode),
+    filterBoatsBySpecies(rawBoats, params.speciesCode),
     params.regionCode,
   );
   return {
     boats: parsed,
     total: parseBoatListingTotal(html),
     page: params.page ?? 1,
+    rawCount: rawBoats.length,
   };
 }

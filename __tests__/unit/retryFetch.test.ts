@@ -102,4 +102,29 @@ describe('fetchWithRetry', () => {
     expect(res).toBe(ok);
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+
+  // 2026-08-30 — OpenRouter 교차검수가 발견: 헤더 도착(fetch resolve) 후
+  // 본문을 읽는 동안 타임아웃 보호가 사라지는 결함이 있었다. 이 테스트는
+  // 그 결함이 있던 코드(성공 즉시 finally에서 타이머 clear)에서는 실패하고,
+  // 고친 코드(성공해도 타이머를 살려둠)에서만 통과한다.
+  it('keeps the timeout guard alive after returning so a slow body read still aborts', async () => {
+    vi.useFakeTimers();
+    try {
+      let capturedSignal: AbortSignal | undefined;
+      const fetchMock = vi.fn().mockImplementation((_url, init: RequestInit) => {
+        capturedSignal = init.signal ?? undefined;
+        return Promise.resolve(new Response('ok'));
+      });
+      global.fetch = fetchMock as unknown as typeof fetch;
+
+      const res = await fetchWithRetry('https://example.com', {}, 1, 5000);
+      expect(res.status).toBe(200);
+      expect(capturedSignal?.aborted).toBe(false);
+
+      await vi.advanceTimersByTimeAsync(5000);
+      expect(capturedSignal?.aborted).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
