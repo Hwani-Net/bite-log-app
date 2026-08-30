@@ -19,6 +19,9 @@ import {
   ChevronRight,
   BarChart3,
   BarChart2,
+  // recharts 도 PieChart 라는 이름을 쓴다 — 별칭 없이 들여오면 차트 컴포넌트를
+  // 아이콘이 덮어써 빌드가 깨진다.
+  PieChart as PieChartIcon,
   Loader2,
   Trophy,
   Dna,
@@ -600,7 +603,7 @@ export default function StatsPage() {
                   </ResponsiveContainer>
                 ) : (
                   <div className="flex flex-col items-center justify-center gap-3 py-8">
-                    <BarChart2 size={36} className="text-[#c9a84c]/40" />
+                    <PieChartIcon size={36} className="text-[#c9a84c]/40" />
                     <p className="text-sm font-bold text-white/60">
                       {locale === "ko"
                         ? "아직 기록이 없습니다"
@@ -655,7 +658,7 @@ export default function StatsPage() {
                   ))
                 ) : (
                   <div className="flex flex-col items-center justify-center gap-3 py-8">
-                    <BarChart2 size={36} className="text-[#c9a84c]/40" />
+                    <MapPin size={36} className="text-[#c9a84c]/40" />
                     <p className="text-sm font-bold text-white/60">
                       {locale === "ko"
                         ? "아직 기록이 없습니다"

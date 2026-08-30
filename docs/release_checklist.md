@@ -32,10 +32,10 @@
 
 ## 미완료 / Deferred (P2 이하)
 
-- [ ] **[P1 Deferred]** `rankingService`: timeout vs 권한 오류 구분 없이 동일 폴백 처리 — 디버깅 난이도 증가. 다음 릴리즈에서 에러 타입별 분기 권고
+- [x] **[P1]** `rankingService`: timeout vs 권한 오류 구분 없이 동일 폴백 처리 — **해결** (2026-08-30, `47c5ffb`). 실측에서 전제보다 넓은 결함이 나왔다: Firestore 는 백엔드에 못 닿아도 예외를 던지지 않고 **캐시로 빈 결과를 성공 응답**해, 장애가 "아직 아무도 안 올림"으로 위장됐다. `RankingData.unavailable`(timeout/permission/offline/error)로 사유를 실어 화면에 별도 배너와 재시도를 띄우고, 캐시발 빈 스냅샷을 실패로 판정한다. 유닛 7건 + e2e(Firestore 차단) 추가.
 - [x] **[P1 Deferred → 완료]** `/news` 페이지 실제 콘텐츠 — 빌드 라우트 목록에서 `/news` 정적 렌더 확인
 - [x] **[P2]** Windy iframe CSP — **재현되지 않아 변경 없이 닫음** (2026-08-30). 이 저장소에는 CSP 자체가 없고(`next.config.ts`·`vercel.json`·`firebase.json`·미들웨어 전수 확인), 배포본 https://bite-log-app.web.app 에서 임베드가 정상 렌더된다(CSP 위반 콘솔 0건, e2e `windy-embed-live.spec.ts`, 스크린샷 `e2e/__screenshots__/windy-embed-live.png`). CSP 가 없는 곳에 `frame-src` 만 넣으면 없던 제약이 생겨 다른 외부 리소스를 깨뜨리므로 추가하지 않는다.
-- [ ] **[P2]** `stats/page.tsx` 파이차트 빈 상태에 `BarChart2` 아이콘 사용 — 의미 불일치 (PieChart 아이콘으로 교체 권고)
+- [x] **[P2]** `stats/page.tsx` 빈 상태 아이콘 의미 불일치 — **해결** (2026-08-30). 지목된 어종 도넛뿐 아니라 **인기 포인트 TOP 5 도 같은 결함**이라 둘 다 고쳤다(도넛 → `PieChart`, 포인트 → `MapPin`; 월별 추이는 `BarChart2` 가 맞아 유지). recharts 가 `PieChart` 이름을 이미 쓰므로 `PieChart as PieChartIcon` 별칭으로 들여온다. e2e `stats-empty-icons.spec.ts` 가 세 아이콘을 못박는다.
 - [ ] **[P2]** 포맷 변경과 기능 변경 혼재 커밋 — 다음 PR부터 분리 권고
 
 ---
