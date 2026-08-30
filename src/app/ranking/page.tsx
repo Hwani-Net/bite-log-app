@@ -359,18 +359,22 @@ export default function RankingPage() {
                 )}
               </div>
             ) : (
-              <div className="px-4 py-8 text-center">
-                <p className="text-white/50 font-semibold">
-                  {locale === "ko"
-                    ? "이번 시즌 첫 번째 조과를 기록하세요!"
-                    : "Be the first to log a catch this season!"}
-                </p>
-                <p className="text-white/30 text-sm mt-1">
-                  {locale === "ko"
-                    ? "공개로 올린 조과가 랭킹에 반영됩니다"
-                    : "Public catches appear in the ranking"}
-                </p>
-              </div>
+              /* 조회에 실패했을 때는 권유 문구를 띄우지 않는다 — 실패를
+                 "아무도 아직 안 올림"으로 읽히게 만드는 것이 이 화면의 결함이었다. */
+              !data.unavailable && (
+                <div className="px-4 py-8 text-center">
+                  <p className="text-white/50 font-semibold">
+                    {locale === "ko"
+                      ? "이번 시즌 첫 번째 조과를 기록하세요!"
+                      : "Be the first to log a catch this season!"}
+                  </p>
+                  <p className="text-white/30 text-sm mt-1">
+                    {locale === "ko"
+                      ? "공개로 올린 조과가 랭킹에 반영됩니다"
+                      : "Public catches appear in the ranking"}
+                  </p>
+                </div>
+              )
             )}
 
             {/* Leaderboard List (4th~) */}
@@ -418,8 +422,30 @@ export default function RankingPage() {
               </div>
             )}
 
+            {/* 불러오기 실패 — "아직 아무도 안 올렸다"와 반드시 다르게 보여야 한다.
+                같은 문구로 덮으면 권한 설정 실수가 정상 상태로 위장된다. */}
+            {data.unavailable && (
+              <div className="mx-4 my-3 p-3 rounded-xl border border-amber-400/30 bg-amber-400/5 text-center">
+                <p className="text-xs text-amber-200/80">
+                  {locale === "ko"
+                    ? data.unavailable === "timeout"
+                      ? "랭킹을 불러오지 못했습니다 — 응답이 늦습니다. 잠시 후 다시 시도해 주세요."
+                      : data.unavailable === "offline"
+                        ? "랭킹을 불러오지 못했습니다 — 연결을 확인해 주세요. 순위가 비어 있는 것이 아니라 조회에 실패했습니다."
+                        : "랭킹을 불러오지 못했습니다. 순위가 비어 있는 것이 아니라 조회에 실패했습니다."
+                    : "Couldn't load the ranking. This is a load failure, not an empty ranking."}
+                </p>
+                <button
+                  onClick={load}
+                  className="mt-2 px-4 py-1.5 rounded-full border border-amber-400/40 text-amber-200 text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-amber-400/10 transition-colors"
+                >
+                  {locale === "ko" ? "다시 시도" : "Retry"}
+                </button>
+              </div>
+            )}
+
             {/* Empty state for real data with no entries beyond top 3 */}
-            {data.isRealData && data.topThree.length === 0 && (
+            {data.isRealData && !data.unavailable && data.topThree.length === 0 && (
               <div className="px-4 py-4 text-center text-xs text-white/30">
                 {locale === "ko"
                   ? "아직 랭킹에 올라온 조과가 없습니다. 조과를 공개로 올려보세요!"

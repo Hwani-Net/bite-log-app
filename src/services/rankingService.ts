@@ -1,6 +1,11 @@
 import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import { getFirebaseDb, isFirebaseReady } from "@/lib/firebase";
-import { RankingCategory, RankingData, RankingEntry } from "@/types/ranking";
+import {
+  RankingCategory,
+  RankingData,
+  RankingEntry,
+  RankingUnavailableReason,
+} from "@/types/ranking";
 import { computeBadges } from "@/services/badgeService";
 import type { Badge, BadgeType, CatchRecord } from "@/types";
 
@@ -30,8 +35,14 @@ interface UserAggregate {
   speciesSet: Set<string>;
 }
 
+/** 타임아웃 판별을 문자열 비교 한 곳으로 모은다 — 던지는 쪽과 읽는 쪽이 갈리면 조용히 어긋난다. */
+const RANKING_TIMEOUT_MESSAGE = "ranking fetch timeout";
+
 // --------------- Empty ranking (no real data) ---------------
-function getEmptyRanking(category: RankingCategory): RankingData {
+function getEmptyRanking(
+  category: RankingCategory,
+  unavailable?: RankingUnavailableReason,
+): RankingData {
   const now = new Date();
   const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
   return {
@@ -42,7 +53,26 @@ function getEmptyRanking(category: RankingCategory): RankingData {
     topThree: [],
     rest: [],
     isRealData: true,
+    ...(unavailable ? { unavailable } : {}),
   };
+}
+
+/**
+ * 실패 원인을 화면·로그가 구분할 수 있는 값으로 좁힌다.
+ * 원인을 뭉뚱그리면 권한 설정 실수가 "아직 아무도 안 잡았네"로 보여 몇 주씩 묻힌다.
+ */
+function classifyRankingError(err: unknown): RankingUnavailableReason {
+  if (err instanceof Error && err.message === RANKING_TIMEOUT_MESSAGE) {
+    return "timeout";
+  }
+  const code = (err as { code?: unknown } | null)?.code;
+  if (typeof code === "string") {
+    if (code.includes("permission")) return "permission";
+    // code=unavailable 은 백엔드 미도달이다. 사용자가 할 수 있는 일(연결 확인)이
+    // 권한 오류와 다르므로 같은 값으로 뭉치지 않는다.
+    if (code.includes("unavailable")) return "offline";
+  }
+  return "error";
 }
 
 // --------------- Season window ---------------
@@ -70,6 +100,15 @@ async function fetchAndAggregate(): Promise<Map<string, UserAggregate>> {
   // Fetch recent public catches (max 500 for aggregation)
   const q = query(feedRef, orderBy("createdAt", "desc"), limit(500));
   const snapshot = await getDocs(q);
+
+  // Firestore 는 백엔드에 못 닿아도 예외를 던지지 않고 로컬 캐시로 응답한다.
+  // 캐시가 비어 있는 채로 성공한 척 돌려주면 "서버가 안 됨"이 "아직 아무도 안 잡음"으로
+  // 위장된다 — 실측 2026-08-30, 연결을 끊자 code=unavailable 로그만 남고 화면은 빈 순위였다.
+  if (snapshot.docs.length === 0 && snapshot.metadata?.fromCache) {
+    throw Object.assign(new Error("ranking unavailable: served from cache"), {
+      code: "unavailable",
+    });
+  }
 
   const aggregates = new Map<string, UserAggregate>();
 
@@ -207,7 +246,7 @@ export async function getFirebaseRanking(
   if (isFirebaseReady()) {
     try {
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("ranking fetch timeout")), 5000),
+        setTimeout(() => reject(new Error(RANKING_TIMEOUT_MESSAGE)), 5000),
       );
       const aggregates = await Promise.race([
         fetchAndAggregate(),
@@ -236,8 +275,9 @@ export async function getFirebaseRanking(
         isRealData: true,
       };
     } catch (err) {
-      console.error("[RankingService] Firebase read failed:", err);
-      return getEmptyRanking(category);
+      const reason = classifyRankingError(err);
+      console.error(`[RankingService] Firebase read failed (${reason}):`, err);
+      return getEmptyRanking(category, reason);
     }
   }
 
