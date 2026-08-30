@@ -186,4 +186,44 @@ test.describe('지역 전환 — /booking', () => {
     await expect(page.getByText('다음 페이지를 지금 불러오지 못했습니다')).toBeVisible();
     await expect(page.getByText('선박 목록을 지금 불러오지 못했습니다')).toHaveCount(0);
   });
+
+  // 2026-08-31 사용자 지적 — 배 상세로 들어갔다 브라우저 뒤로가기로
+  // /booking에 돌아오면 지역·어종·키워드 등 검색 필터가 전부 초기화돼
+  // 있었다. 이 페이지는 클라이언트 컴포넌트라 뒤로가기 시 리마운트되면
+  // useState 기본값으로 되돌아가는 게 원인 — sessionStorage에 저장해
+  // 복원한다.
+  test('배 상세를 봤다가 뒤로가기로 돌아오면 검색 필터가 남아 있다', async ({
+    page,
+  }) => {
+    await page.route('**/api/boat-listings*', (r) => {
+      const region = new URL(r.request().url()).searchParams.get('region') ?? '';
+      const boats =
+        region === '3'
+          ? [boat('9', '남해호', '남해권 > 경상남도 > 통영 > 통영항')]
+          : [];
+      return r.fulfill({
+        json: { ok: true, boats, total: boats.length, page: 1, rawCount: boats.length },
+      });
+    });
+
+    await page.goto('/booking');
+    await page
+      .locator('[role="group"][aria-label="지역 필터"]')
+      .getByRole('button', { name: '남해', exact: true })
+      .click();
+
+    const card = page.locator('[data-testid="boat-card"]').first();
+    await expect(card).toBeVisible({ timeout: 15000 });
+    const detailLink = card.locator('a[href^="/booking/boat/"]');
+    await detailLink.click();
+    await page.waitForURL(/\/booking\/boat\/\d+/, { timeout: 10000 });
+
+    await page.goBack();
+    await expect(
+      page
+        .locator('[role="group"][aria-label="지역 필터"]')
+        .getByRole('button', { name: '남해', exact: true }),
+    ).toHaveAttribute('aria-pressed', 'true', { timeout: 15000 });
+    await expect(page.locator('[data-testid="boat-card"]').first()).toBeVisible();
+  });
 });

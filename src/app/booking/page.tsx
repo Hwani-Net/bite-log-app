@@ -370,6 +370,12 @@ interface WatchedSlot {
 }
 
 const WATCHLIST_KEY = "biteLog_boatWatchlist";
+// 배 상세로 들어갔다 뒤로가기로 돌아오면 검색 필터가 초기화됐다(2026-08-31
+// 사용자 지적) — 이 페이지가 "use client" 컴포넌트라 뒤로가기 시 리마운트되면
+// 전부 useState 기본값으로 되돌아간다. 탭을 닫으면 사라지는 sessionStorage에
+// 저장해 같은 세션의 재방문·뒤로가기만 복원하고, 새 탭/새 세션은 오늘
+// 날짜·빈 필터로 새로 시작한다.
+const SEARCH_FILTERS_KEY = "biteLog_bookingSearchFilters";
 
 function loadWatchlist(): WatchedSlot[] {
   try {
@@ -1204,6 +1210,37 @@ export default function BookingPage() {
   // 달력을 조회한다. sessionStorage에 (uid,월) 단위로 캐시해 같은 세션에선
   // 재요청하지 않고, 확실히 마감(full)인 배만 숨긴다.
   const [availableOnly, setAvailableOnly] = useState(false);
+  // 뒤로가기로 돌아왔을 때 위 mount effect가 복원할 수 있도록 필터가 바뀔
+  // 때마다 세션에 적어둔다. `searchDate`가 아직 빈 문자열인 첫 렌더(mount
+  // effect가 복원하기 전)에는 쓰지 않는다 — 그때 쓰면 방금 불러온 저장값을
+  // 빈 상태로 덮어써 버린다.
+  useEffect(() => {
+    if (!searchDate) return;
+    try {
+      sessionStorage.setItem(
+        SEARCH_FILTERS_KEY,
+        JSON.stringify({
+          date: searchDate,
+          region: searchRegion,
+          species: searchSpecies,
+          keyword,
+          port: selectedPort,
+          capacity: selectedCapacity,
+          availableOnly,
+        }),
+      );
+    } catch {
+      // sessionStorage 접근 불가 — 이 세션에서만 복원이 안 될 뿐, 조용히 넘어간다.
+    }
+  }, [
+    searchDate,
+    searchRegion,
+    searchSpecies,
+    keyword,
+    selectedPort,
+    selectedCapacity,
+    availableOnly,
+  ]);
   const [dayAvail, setDayAvail] = useState<Record<string, DayAvailability>>({});
   const dayAvailRef = useRef<Record<string, DayAvailability>>({});
   const [availProgress, setAvailProgress] = useState<{
@@ -1500,8 +1537,36 @@ export default function BookingPage() {
     // to 2026-08-26 while the clock read 2026-08-27 00:03 KST, and
     // thefishing.kr correctly had zero listings for a date already past.
     const today = localISODate(new Date());
-    setSearchDate(today);
     setTodayDate(today);
+
+    let savedFilters: {
+      date?: string;
+      region?: string;
+      species?: string;
+      keyword?: string;
+      port?: string;
+      capacity?: string;
+      availableOnly?: boolean;
+    } | null = null;
+    try {
+      const raw = sessionStorage.getItem(SEARCH_FILTERS_KEY);
+      savedFilters = raw ? JSON.parse(raw) : null;
+    } catch {
+      // sessionStorage 접근 불가(시크릿 모드 등) — 복원 없이 오늘 날짜로 시작.
+    }
+    setSearchDate(
+      savedFilters?.date && /^\d{4}-\d{2}-\d{2}$/.test(savedFilters.date)
+        ? savedFilters.date
+        : today,
+    );
+    if (savedFilters?.region) setSearchRegion(savedFilters.region);
+    if (savedFilters?.species) setSearchSpecies(savedFilters.species);
+    if (savedFilters?.keyword) setKeyword(savedFilters.keyword);
+    if (savedFilters?.port) setSelectedPort(savedFilters.port);
+    if (savedFilters?.capacity) {
+      setSelectedCapacity(savedFilters.capacity as CapacityBucket);
+    }
+    if (savedFilters?.availableOnly) setAvailableOnly(true);
 
     const params = new URLSearchParams(window.location.search);
     const species = params.get("species");
