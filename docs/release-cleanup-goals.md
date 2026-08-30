@@ -64,8 +64,8 @@
 
 | GOAL | 항목 | 의존 | 상태 | 증거 |
 |------|------|------|------|------|
-| 1 | rankingService 실패 원인 구분 | — | TODO | |
-| 2 | Windy iframe 배포 환경 렌더 확인 | — | TODO | |
+| 1 | rankingService 실패 원인 구분 | — | **DONE** | `47c5ffb` · lint 0 · 유닛 411 통과(신규 7) · build ✓ · e2e 통과 · 스크린샷 `e2e/__screenshots__/ranking-failure-state.png` |
+| 2 | Windy iframe 배포 환경 렌더 확인 | — | **DONE (재현 안 됨 · 코드 변경 없음)** | 라이브 렌더 정상, CSP 위반 0건. e2e `windy-embed-live.spec.ts` · 스크린샷 `e2e/__screenshots__/windy-embed-live.png` · 체크리스트 37행 닫음 |
 | 3 | 빈 상태 아이콘 섹션 일치 | — | TODO | |
 
 상태표가 단일 진실이다. 세션이 바뀌어도 이 표만 읽으면 이어서 실행 가능해야 한다.
