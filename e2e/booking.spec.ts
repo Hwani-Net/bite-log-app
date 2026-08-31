@@ -512,10 +512,8 @@ test.describe('Boat calendar — /booking/boat/[uid]', () => {
   test('clicking a bookable day shows remaining seats and a per-day reserve link', async ({
     page,
   }) => {
-    // No ?date= this time — day 1 (or whichever day the query param names)
-    // starts pre-selected on that route, and clicking an already-selected
-    // day toggles it off instead of opening the detail panel.
-    await page.goto('/booking/boat/4247');
+    // Keep the beforeEach target month. Opening the current month here can
+    // leave only past/full days, making the UI assertion depend on live data.
     const availableDay = page
       .locator('button')
       .filter({ hasText: /남은 \d+명/ })
