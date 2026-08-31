@@ -226,4 +226,67 @@ test.describe('지역 전환 — /booking', () => {
     ).toHaveAttribute('aria-pressed', 'true', { timeout: 15000 });
     await expect(page.locator('[data-testid="boat-card"]').first()).toBeVisible();
   });
+
+  // 2026-08-31 OpenRouter 교차검수 발견 — 위 복원 로직이 날짜 형식만
+  // 검증하고 지난 날짜인지는 안 봐서, 자정을 넘겨 세션이 이어지면 지난
+  // 날짜가 그대로 복원돼 검색이 0건이 되는(원래 버그의 변형) 결함이 있었다.
+  test('세션에 저장된 검색 날짜가 이미 지났으면 복원하지 않고 오늘 날짜로 시작한다', async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      sessionStorage.setItem(
+        'biteLog_bookingSearchFilters',
+        JSON.stringify({
+          date: '2020-01-01',
+          region: '',
+          species: '',
+          keyword: '',
+          port: '',
+          capacity: '',
+          availableOnly: false,
+        }),
+      );
+    });
+    await page.goto('/booking');
+    // 페이지에 date input이 여러 개(출조 문의·동행 구하기 폼 등) 있어
+    // "출조 날짜" 라벨이 붙은 검색 필터 것으로 좁힌다.
+    const dateInput = page
+      .locator('section', { has: page.getByText('출조 날짜') })
+      .locator('input[type="date"]');
+    await expect(dateInput).toBeVisible({ timeout: 15000 });
+    // mount effect가 값을 채우기 전까지 잠깐 빈 문자열이다 — 안정될 때까지 기다린다.
+    await expect(dateInput).not.toHaveValue('', { timeout: 15000 });
+    const value = await dateInput.inputValue();
+    expect(value).not.toBe('2020-01-01');
+    expect(new Date(value).getTime()).toBeGreaterThan(new Date('2026-01-01').getTime());
+  });
+
+  // 같은 검수에서 함께 발견 — capacity를 무검증으로 캐스팅해 넣었다.
+  // 지금 쓰는 버킷 목록(CAPACITY_OPTIONS)에 없는 값이 세션에 남아 있으면
+  // 칩은 아무것도 안 눌린 채 필터만 조용히 걸려 결과가 사라질 수 있었다.
+  test('세션에 저장된 정원 값이 지금 버킷 목록에 없으면 무시한다', async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      sessionStorage.setItem(
+        'biteLog_bookingSearchFilters',
+        JSON.stringify({
+          date: '',
+          region: '',
+          species: '',
+          keyword: '',
+          port: '',
+          capacity: 'xlarge',
+          availableOnly: false,
+        }),
+      );
+    });
+    await page.goto('/booking');
+    await expect(
+      page.locator('section', { has: page.getByText('출조 날짜') }).locator('input[type="date"]'),
+    ).toBeVisible({ timeout: 15000 });
+    await expect(
+      page.locator('[data-testid="capacity-filter"] button[aria-pressed="true"]'),
+    ).toHaveText('전체');
+  });
 });

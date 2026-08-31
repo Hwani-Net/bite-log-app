@@ -1554,8 +1554,14 @@ export default function BookingPage() {
     } catch {
       // sessionStorage 접근 불가(시크릿 모드 등) — 복원 없이 오늘 날짜로 시작.
     }
+    // 저장된 날짜가 형식은 맞아도 이미 지난 날짜일 수 있다 — 자정을 넘겨
+    // 뒤로가기로 돌아온 경우가 그렇다. 지난 날짜는 thefishing.kr이 항상
+    // 0건을 반환해(위 주석 참고) "복원했더니 결과가 사라졌다"는 원래
+    // 버그의 변형이 재발한다(2026-08-31 OpenRouter 교차검수 발견).
     setSearchDate(
-      savedFilters?.date && /^\d{4}-\d{2}-\d{2}$/.test(savedFilters.date)
+      savedFilters?.date &&
+        /^\d{4}-\d{2}-\d{2}$/.test(savedFilters.date) &&
+        savedFilters.date >= today
         ? savedFilters.date
         : today,
     );
@@ -1563,7 +1569,14 @@ export default function BookingPage() {
     if (savedFilters?.species) setSearchSpecies(savedFilters.species);
     if (savedFilters?.keyword) setKeyword(savedFilters.keyword);
     if (savedFilters?.port) setSelectedPort(savedFilters.port);
-    if (savedFilters?.capacity) {
+    // capacity도 화이트리스트로 검증한다 — CAPACITY_OPTIONS에 없는 값이면
+    // 무시(전체)한다. 미래에 버킷 종류가 바뀌면 이전 세션이 저장해 둔 값이
+    // 더 이상 유효하지 않을 수 있는데, 그걸 그대로 캐스팅해 넣으면 칩은
+    // 아무것도 안 눌린 채 필터만 조용히 적용돼 결과가 사라진다.
+    if (
+      savedFilters?.capacity &&
+      CAPACITY_OPTIONS.some((c) => c.value === savedFilters!.capacity)
+    ) {
       setSelectedCapacity(savedFilters.capacity as CapacityBucket);
     }
     if (savedFilters?.availableOnly) setAvailableOnly(true);
