@@ -41,17 +41,20 @@ export async function apiFetch<T = unknown>(
   let lastError: ApiError | null = null;
 
   for (let attempt = 0; attempt <= retries; attempt++) {
+    // controller/timer live outside the try so the catch block can also
+    // clear it. 헤더 도착(fetch resolve) 후 res.json()이 멈추면 그동안
+    // 아무 타임아웃 보호도 없었다(2026-08-31 Codex 교차검수 발견, retryFetch.ts
+    // 에서 이미 같은 클래스로 고친 버그) — 그래서 본문을 다 읽을 때까지는
+    // 지우지 않고, 응답이 실패라 본문을 안 읽는 경로와 catch에서만 지운다.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
     try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeout);
-
       const res = await fetch(url, {
         ...fetchOptions,
         signal: controller.signal });
 
-      clearTimeout(timer);
-
       if (!res.ok) {
+        clearTimeout(timer);
         const apiErr = ApiError.fromResponse(res, context);
         if (apiErr.retryable && attempt < retries) {
           lastError = apiErr;
@@ -62,8 +65,10 @@ export async function apiFetch<T = unknown>(
       }
 
       const data = await res.json();
+      clearTimeout(timer);
       return data as T;
     } catch (err) {
+      clearTimeout(timer);
       if (err instanceof ApiError) {
         if (err.retryable && attempt < retries) {
           lastError = err;

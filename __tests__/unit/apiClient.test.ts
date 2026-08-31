@@ -98,4 +98,34 @@ describe('apiFetch timeout & classification detail', () => {
     const err = await apiFetch('/api/x', { retries: 0 }).catch((e) => e);
     expect(err).toBeInstanceOf(ApiError);
   });
+
+  // 2026-08-31 Codex 교차검수 발견 — fetch()가 헤더 도착으로 resolve되자마자
+  // 타이머를 지워서, 그 다음 res.json()이 멈추는 동안은 아무 타임아웃 보호도
+  // 없었다(retryFetch.ts에서 이미 고친 것과 같은 클래스의 결함). 이 테스트는
+  // 그 결함이 있던 코드에서는 절대 reject되지 않고 멈춰 있다 — 고친 코드에서만
+  // 타임아웃이 res.json() 단계까지 살아남아 정상적으로 실패한다.
+  it('keeps the timeout guard alive through res.json() so a stalled body read still aborts', async () => {
+    vi.useFakeTimers();
+    try {
+      vi.stubGlobal('fetch', (_url: string, init?: RequestInit) => {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            new Promise((_resolve, reject) => {
+              init?.signal?.addEventListener('abort', () => {
+                const err = new Error('The operation was aborted');
+                err.name = 'AbortError';
+                reject(err);
+              });
+            }),
+        });
+      });
+      const promise = apiFetch('/api/x', { timeout: 5000, retries: 0 });
+      const assertion = expect(promise).rejects.toBeInstanceOf(ApiError);
+      await vi.advanceTimersByTimeAsync(5000);
+      await assertion;
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
