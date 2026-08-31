@@ -289,4 +289,71 @@ test.describe('지역 전환 — /booking', () => {
       page.locator('[data-testid="capacity-filter"] button[aria-pressed="true"]'),
     ).toHaveText('전체');
   });
+
+  // 2026-08-31 Codex 교차검수 — 로컬 실제 프로브로 재현: keyword가 문자열이
+  // 아닌 값(예: 숫자)으로 세션에 저장돼 있으면 복원 시 그대로 state에
+  // 들어가고, debouncedKeyword.trim() 호출에서 "keyword.trim is not a
+  // function"으로 던져 전역 에러 화면("화면을 불러오지 못했습니다")으로
+  // 떨어졌다.
+  test('세션에 저장된 keyword가 문자열이 아니면 복원하지 않고 정상 렌더된다', async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      sessionStorage.setItem(
+        'biteLog_bookingSearchFilters',
+        JSON.stringify({
+          date: '',
+          region: '',
+          species: '',
+          keyword: 12345,
+          port: '',
+          capacity: '',
+          availableOnly: false,
+        }),
+      );
+    });
+    await page.goto('/booking');
+    await expect(
+      page.locator('section', { has: page.getByText('출조 날짜') }).locator('input[type="date"]'),
+    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('화면을 불러오지 못했습니다')).toHaveCount(0);
+    await expect(
+      page.locator('input[placeholder="배 이름·항구·어종으로 검색 (더피싱+낚시뚜 통합)"]'),
+    ).toHaveValue('');
+  });
+
+  // 2026-08-31 Codex 교차검수 — 1페이지 원본에 배가 있었지만(rawCount>0)
+  // 어종/지역 후필터에 전부 걸러지면, 기존 코드는 searchBoats.length===0만
+  // 보고 "이 조건에 맞는 선박이 없습니다"로 단정해 뒤 페이지의 실제 매칭을
+  // 사용자가 영영 확인할 방법이 없었다.
+  test('1페이지가 필터로 전부 걸러져도 rawCount가 있으면 다음 페이지를 확인할 수 있다', async ({
+    page,
+  }) => {
+    let requestedPage = '';
+    await page.route('**/api/boat-listings*', (r) => {
+      requestedPage = new URL(r.request().url()).searchParams.get('page') ?? '1';
+      if (requestedPage === '2') {
+        return r.fulfill({
+          json: {
+            ok: true,
+            boats: [boat('7', '남해호', '남해권 > 경상남도 > 통영 > 통영항')],
+            total: 25,
+            page: 2,
+            rawCount: 5,
+          },
+        });
+      }
+      return r.fulfill({ json: { ok: true, boats: [], total: 25, page: 1, rawCount: 20 } });
+    });
+
+    await page.goto('/booking');
+    await expect(page.getByText('이 페이지에는 조건에 맞는 선박이 없어요')).toBeVisible({
+      timeout: 15000,
+    });
+    await expect(page.getByText('이 조건으로 출조하는 선박이 없습니다')).toHaveCount(0);
+
+    await page.getByRole('button', { name: '다음 페이지 확인' }).click();
+    await expect.poll(() => requestedPage, { timeout: 10000 }).toBe('2');
+    await expect(page.getByText('남해호')).toBeVisible({ timeout: 15000 });
+  });
 });

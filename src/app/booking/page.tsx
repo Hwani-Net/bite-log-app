@@ -1567,7 +1567,14 @@ export default function BookingPage() {
     );
     if (savedFilters?.region) setSearchRegion(savedFilters.region);
     if (savedFilters?.species) setSearchSpecies(savedFilters.species);
-    if (savedFilters?.keyword) setKeyword(savedFilters.keyword);
+    // keyword는 문자열일 때만 복원한다 — 다른 필드는 문자열이 아니어도
+    // (===로만 비교되니) 그냥 매칭 안 되고 넘어가지만, keyword는 이후
+    // debouncedKeyword.trim()으로 직접 호출돼 문자열이 아니면 그 자리에서
+    // 던져 전역 에러 화면으로 떨어진다(2026-08-31 Codex 교차검수가 실제
+    // 로컬 재현으로 확인 — "keyword.trim is not a function").
+    if (typeof savedFilters?.keyword === "string" && savedFilters.keyword) {
+      setKeyword(savedFilters.keyword);
+    }
     if (savedFilters?.port) setSelectedPort(savedFilters.port);
     // capacity도 화이트리스트로 검증한다 — CAPACITY_OPTIONS에 없는 값이면
     // 무시(전체)한다. 미래에 버킷 종류가 바뀌면 이전 세션이 저장해 둔 값이
@@ -2629,10 +2636,28 @@ export default function BookingPage() {
                 <div key={i} className="h-48 rounded-2xl bg-white/3 animate-pulse" />
               ))}
             </div>
-          ) : searchBoats.length === 0 ? (
+          ) : searchBoats.length === 0 && (searchResult?.rawCount ?? 0) === 0 ? (
             <p role="status" className="text-xs text-white/30 py-6 text-center">
               이 조건으로 출조하는 선박이 없습니다. 날짜나 필터를 바꿔보세요.
             </p>
+          ) : searchBoats.length === 0 ? (
+            // 이 페이지의 원본에는 배가 있었지만(rawCount>0) 어종/지역
+            // 후필터에 전부 걸러졌다 — 뒤 페이지엔 있을 수 있는데 "결과
+            // 없음"으로 단정하면 실제 매칭을 사용자가 못 보고 끝난다
+            // (2026-08-31 Codex 교차검수가 로컬 재현으로 발견).
+            <div role="status" className="py-6 text-center space-y-2">
+              <p className="text-xs text-white/30">
+                이 페이지에는 조건에 맞는 선박이 없어요. 다음 페이지를 확인해보세요.
+              </p>
+              <button
+                type="button"
+                onClick={() => setSearchPage((p) => p + 1)}
+                disabled={searchLoading}
+                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-[#c9a84c]/40 text-xs font-semibold text-white/80 disabled:opacity-40"
+              >
+                {searchLoading ? "불러오는 중..." : "다음 페이지 확인"}
+              </button>
+            </div>
           ) : visibleSearchBoats.length === 0 ? (
             <div role="status" className="py-6 text-center space-y-2">
               <p className="text-xs text-white/30">
