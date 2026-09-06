@@ -28,13 +28,12 @@ test.describe('Home page', () => {
   });
 
   test('should display catch summary section', async ({ page }) => {
-    // Home shows total catch, this month, max size cards
-    const statCards = page.locator('[class*="card"], [class*="stat"], [class*="summary"]');
-    // If no catch records, a no-catches message should be shown
-    const noCatches = page.getByText(/아직 조과 기록이 없습니다|No catches recorded yet/);
-    const hasStatCards = await statCards.count() > 0;
-    const hasNoCatches = await noCatches.count() > 0;
-    expect(hasStatCards || hasNoCatches).toBe(true);
+    // StatBar(총 조과·이번 달·최대 사이즈)는 로딩 중엔 "--"로, 그 뒤엔 실제
+    // 값으로 항상 렌더된다 — class 이름 추측이나 즉석 count() 스냅샷 대신
+    // 늘 있는 라벨 텍스트를 toBeVisible()로 기다린다(2026-09-06 Grok e2e
+    // 전수검수 발견 — 옛 마크업 기준 class 문자열이라 아무것도 매칭 못 했고,
+    // 대체 어서션인 "기록 없음" 문구도 로딩 완료를 기다리지 않아 race였다).
+    await expect(page.getByText('조과 (마리)')).toBeVisible({ timeout: 10000 });
   });
 
   test('should be responsive on mobile viewport', async ({ page }) => {
