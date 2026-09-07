@@ -1869,44 +1869,6 @@ export default function BookingPage() {
     [catchRecords],
   );
 
-  // "예약 가능만" 토글이 켜져 있는 동안 현재 결과 페이지 배들의 달력을
-  // 동시성 3으로 확인한다. dayAvailRef는 state 미러 — deps에 dayAvail을
-  // 넣으면 판정 하나 도착할 때마다 효과가 재시작돼 진행 중 요청을 끊는다.
-  useEffect(() => {
-    if (!availableOnly || searchBoats.length === 0 || !searchDate) {
-      setAvailProgress(null);
-      return;
-    }
-    const need = searchBoats.filter(
-      (b) => dayAvailRef.current[`${b.uid}|${searchDate}`] === undefined,
-    );
-    if (need.length === 0) return;
-    let cancelled = false;
-    setAvailProgress({ done: 0, total: need.length });
-    (async () => {
-      let done = 0;
-      const queue = [...need];
-      const worker = async () => {
-        for (;;) {
-          const boat = queue.shift();
-          if (!boat || cancelled) return;
-          const avail = await fetchDayAvailability(boat.uid, searchDate);
-          if (cancelled) return;
-          const key = `${boat.uid}|${searchDate}`;
-          dayAvailRef.current = { ...dayAvailRef.current, [key]: avail };
-          setDayAvail(dayAvailRef.current);
-          done += 1;
-          setAvailProgress({ done, total: need.length });
-        }
-      };
-      await Promise.all([worker(), worker(), worker()]);
-      if (!cancelled) setAvailProgress(null);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [availableOnly, searchBoats, searchDate]);
-
   const spotOfMonth = useMemo(
     () => getMonthlyRecommendation(currentMonth, currentDay, userRegion),
     [currentMonth, currentDay, userRegion],
@@ -1974,6 +1936,46 @@ export default function BookingPage() {
       }),
     [keywordFilteredSearchBoats, selectedPort, selectedCapacity],
   );
+  // "예약 가능만" 토글이 켜져 있는 동안 현재 화면에 남은 결과의 달력만
+  // 동시성 3으로 확인한다. 이전에는 searchBoats 전체를 순회해 홍원항을
+  // 고른 뒤에도 숨겨진 다른 항구 배까지 요청했고, 원본 연결을 불필요하게
+  // 몰아 503/unknown을 만들었다. dayAvailRef는 state 미러 — deps에
+  // dayAvail을 넣으면 판정 하나 도착할 때마다 효과가 재시작돼 진행 중
+  // 요청을 끊는다.
+  useEffect(() => {
+    if (!availableOnly || finalFilteredSearchBoats.length === 0 || !searchDate) {
+      setAvailProgress(null);
+      return;
+    }
+    const need = finalFilteredSearchBoats.filter(
+      (b) => dayAvailRef.current[`${b.uid}|${searchDate}`] === undefined,
+    );
+    if (need.length === 0) return;
+    let cancelled = false;
+    setAvailProgress({ done: 0, total: need.length });
+    (async () => {
+      let done = 0;
+      const queue = [...need];
+      const worker = async () => {
+        for (;;) {
+          const boat = queue.shift();
+          if (!boat || cancelled) return;
+          const avail = await fetchDayAvailability(boat.uid, searchDate);
+          if (cancelled) return;
+          const key = `${boat.uid}|${searchDate}`;
+          dayAvailRef.current = { ...dayAvailRef.current, [key]: avail };
+          setDayAvail(dayAvailRef.current);
+          done += 1;
+          setAvailProgress({ done, total: need.length });
+        }
+      };
+      await Promise.all([worker(), worker(), worker()]);
+      if (!cancelled) setAvailProgress(null);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [availableOnly, finalFilteredSearchBoats, searchDate]);
   // "예약 가능만" — 확실히 마감(full)로 판정된 배만 숨긴다. 아직 판정
   // 전이거나 확인 실패(unknown)면 남겨서 "확인 불가"로 표시.
   const visibleSearchBoats = useMemo(

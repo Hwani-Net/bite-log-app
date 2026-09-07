@@ -690,10 +690,14 @@ test.describe('Distance sort — /booking (2차 GOAL-1)', () => {
 test.describe('Available-only toggle — /booking (2차 GOAL-2)', () => {
   // listings + 달력을 전부 mock — 판정 3종(가능/마감/확인실패)이 한 화면에
   // 결정적으로 나오게 한다. 91=잔여 5석, 92=마감, 93=503 실패.
-  const fixture = (uid: string, name: string) => ({
+  const fixture = (
+    uid: string,
+    name: string,
+    areaPath = '서해권 > 충청남도 > 보령시 > 대천항',
+  ) => ({
     uid,
     name,
-    areaPath: '서해권 > 충청남도 > 보령시 > 대천항',
+    areaPath,
     fishTypes: '우럭',
     capacity: '12인승',
     imageUrl: '',
@@ -773,6 +777,55 @@ test.describe('Available-only toggle — /booking (2차 GOAL-2)', () => {
     await expect
       .poll(() => calendarRequests, { timeout: 10000 })
       .toBe(4);
+  });
+
+  test('checks availability only for boats left by the selected port filter', async ({
+    page,
+  }) => {
+    const requestedUids: string[] = [];
+    await page.route('**/api/boat-listings**', (r) =>
+      r.fulfill({
+        json: {
+          ok: true,
+          page: 1,
+          total: 2,
+          boats: [
+            fixture('91', '홍원가능호', '서해권 > 충청남도 > 보령시 > 홍원항'),
+            fixture('92', '오천가능호', '서해권 > 충청남도 > 보령시 > 오천항'),
+          ],
+        },
+      }),
+    );
+    await page.route('**/api/boat-calendar**', (r) => {
+      const uid = new URL(r.request().url()).searchParams.get('uid');
+      if (uid) requestedUids.push(uid);
+      const today = new Date();
+      const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      return r.fulfill({
+        json: {
+          ok: true,
+          ym: date.slice(0, 7).replace('-', ''),
+          days: [calDay(date, 'available', 5)],
+        },
+      });
+    });
+    await page.goto('/booking');
+    const grid = page.locator('[data-testid="search-results"]');
+    await expect(grid.locator('[data-testid="boat-card"]')).toHaveCount(2, {
+      timeout: 20000,
+    });
+
+    await page
+      .locator('[data-testid="port-filter"]')
+      .getByRole('button', { name: '홍원항', exact: true })
+      .click();
+    await expect(grid.locator('[data-testid="boat-card"] h4')).toHaveText([
+      '홍원가능호',
+    ]);
+
+    await page.getByRole('button', { name: '예약 가능만' }).click();
+    await expect(grid.getByText('잔여 5석')).toBeVisible({ timeout: 15000 });
+    expect(requestedUids).toEqual(['91']);
   });
 });
 
