@@ -84,6 +84,12 @@ describe('parseBoatCalendarHtml — month-ajax response', () => {
 });
 
 describe('parseBoatCalendarHtml — degenerate input', () => {
+  it('treats an upstream reservation button with zero seats as sold out', () => {
+    const html = '<td><div class="dayline"><span class="day">7</span></div><a>예약하기</a><p>남은인원 <span class="num">0</span>명</p></td>';
+    expect(parseBoatCalendarHtml(html, '202609')[0]).toMatchObject({ date: '2026-09-07', status: 'full', remainingSeats: 0 });
+    expect(parseBoatCalendarHtml(html.replace('>0<', '>1<'), '202609')[0]).toMatchObject({ status: 'available', remainingSeats: 1 });
+  });
+
   it('returns [] for HTML with no calendar', () => {
     expect(parseBoatCalendarHtml('<html><body>nope</body></html>', '202609')).toEqual([]);
   });

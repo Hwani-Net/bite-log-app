@@ -3,9 +3,8 @@ import { test, expect } from '@playwright/test';
 // 2026-08-29 사용자 지적 — "동해,남해 등 항구명도 사라지고 서해에도 항구명
 // 몇개만 나오고 아주 엉망이네". 원인: 항구 칩은 thefishing.kr 검색의
 // 페이지 1(20척)에서만 뽑았는데, 실제로는 347척처럼 훨씬 많을 수 있어 그
-// 20척에 없는 항구는 애초에 칩으로 뜰 수가 없었다. 낚시뚜(/api/boat
-// -directory)는 이미 전수(177/177) 동기화돼 있고 같은 지역 필터를 쓰므로,
-// 추가 요청 없이 그 항구까지 합쳐서 폭을 넓힌다.
+// 20척에 없는 항구는 애초에 칩으로 뜰 수가 없었다. 두 공급자의 항구와
+// 기존 항구 좌표 테이블을 합친다. 디렉터리 캐시도 부분 로딩일 수 있다.
 
 const boat = (uid: string, areaPath: string) => ({
   uid,
@@ -29,7 +28,7 @@ const fishappBoat = (shipId: string, harbor: string, seaRegion: string) => ({
   seaRegion,
 });
 
-test('항구 칩은 페이지 1(thefishing.kr)뿐 아니라 낚시뚜 전수 데이터도 합친다', async ({
+test('항구 칩은 페이지 1(thefishing.kr)뿐 아니라 낚시뚜 데이터도 합친다', async ({
   page,
 }) => {
   // thefishing.kr 페이지 1엔 대천항 하나뿐이지만(실제로는 347척 중 20척만
@@ -73,7 +72,7 @@ test('지역을 바꾸면 낚시뚜 항구도 즉시 비워지고, 이전 지역
   // boat-listings보다 늦게 도착하는 동안 이전(서해) 낚시뚜 데이터를
   // 계속 들고 있었다.
   let directoryRegion = '';
-  let releaseSouth: (() => void) | null = null;
+  let releaseSouth: () => void = () => { throw new Error('남해 요청이 아직 시작되지 않았습니다'); };
   await page.route('**/api/boat-listings*', (r) =>
     r.fulfill({ json: { ok: true, boats: [], total: 0, page: 1 } }),
   );
@@ -108,7 +107,7 @@ test('지역을 바꾸면 낚시뚜 항구도 즉시 비워지고, 이전 지역
     .toBe('3');
   await expect(page.getByRole('button', { name: '신진도항', exact: true })).toHaveCount(0);
 
-  releaseSouth?.();
+  releaseSouth();
   await expect(page.getByRole('button', { name: '삼천포항', exact: true })).toBeVisible({
     timeout: 15000,
   });

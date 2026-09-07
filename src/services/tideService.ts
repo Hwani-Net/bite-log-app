@@ -1,4 +1,6 @@
-import { CatchRecord } from "@/types";
+import { localISODate, parseLocalISODate } from "@/lib/localDate";
+import { haversineKm } from "@/lib/portDistance";
+import { apiFetch } from "@/lib/apiClient";
 
 export interface TideInfo {
   type: "High" | "Low";
@@ -34,49 +36,32 @@ export interface TideStation {
   lng: number;
 }
 
-// 주요 관측소 목록 (KHOA)
-const TIDE_STATIONS: TideStation[] = [
-  { code: "DT_0001", name: "인천", lat: 37.4536, lng: 126.6006 },
-  { code: "DT_0002", name: "안산", lat: 37.2148, lng: 126.6088 },
-  { code: "DT_0004", name: "부산", lat: 35.0911, lng: 129.0358 },
-  { code: "DT_0005", name: "여수", lat: 34.7356, lng: 127.7658 },
-  { code: "DT_0006", name: "통영", lat: 34.8251, lng: 128.4344 },
-  { code: "DT_0011", name: "동해", lat: 37.4975, lng: 129.1436 },
-  { code: "DT_0013", name: "속초", lat: 38.2045, lng: 128.6015 },
-  { code: "DT_0041", name: "제주", lat: 33.5256, lng: 126.5432 },
-  { code: "DT_0042", name: "서귀포", lat: 33.2405, lng: 126.5638 },
-  { code: "DT_0018", name: "보령", lat: 36.3255, lng: 126.4816 },
-  { code: "DT_0033", name: "목포", lat: 34.7816, lng: 126.38 },
-  { code: "DT_0019", name: "군산", lat: 35.9764, lng: 126.5658 },
-  { code: "DT_0020", name: "태안", lat: 36.8923, lng: 126.1381 },
-  { code: "DT_0025", name: "완도", lat: 34.3111, lng: 126.7561 },
-  { code: "DT_0029", name: "포항", lat: 36.0493, lng: 129.3802 },
+// Codes, names and coordinates verified against KHOA responses on 2026-09-07.
+// https://www.data.go.kr/data/15156018/openapi.do
+export const TIDE_STATIONS: TideStation[] = [
+  { code: "DT_0001", name: "인천", lat: 37.45194, lng: 126.59222 },
+  { code: "DT_0002", name: "평택", lat: 36.96694, lng: 126.82277 },
+  { code: "DT_0018", name: "군산", lat: 35.97555, lng: 126.56305 },
+  { code: "DT_0025", name: "보령", lat: 36.40638, lng: 126.48611 },
+  { code: "DT_0003", name: "영광", lat: 35.42611, lng: 126.42055 },
+  { code: "DT_0014", name: "통영", lat: 34.82777, lng: 128.43472 },
+  { code: "DT_0027", name: "완도", lat: 34.31555, lng: 126.75972 },
+  { code: "DT_0029", name: "거제도", lat: 34.80138, lng: 128.69916 },
+  { code: "DT_0031", name: "거문도", lat: 34.02833, lng: 127.30888 },
+  { code: "DT_0005", name: "부산", lat: 35.09638, lng: 129.03527 },
+  { code: "DT_0020", name: "울산", lat: 35.50194, lng: 129.38722 },
+  { code: "DT_0011", name: "후포", lat: 36.6775, lng: 129.45305 },
+  { code: "DT_0006", name: "묵호", lat: 37.55027, lng: 129.11638 },
+  { code: "DT_0012", name: "속초", lat: 38.20722, lng: 128.59416 },
+  { code: "DT_0013", name: "울릉도", lat: 37.49138, lng: 130.91361 },
+  { code: "DT_0004", name: "제주", lat: 33.5275, lng: 126.54305 },
 ];
 
-function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const p = 0.017453292519943295; // Math.PI / 180
-  const c = Math.cos;
-  const a =
-    0.5 -
-    c((lat2 - lat1) * p) / 2 +
-    (c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))) / 2;
-  return 12742 * Math.asin(Math.sqrt(a)); // 2 * R; R = 6371 km
-}
-
-function findNearestStation(lat: number, lng: number): TideStation {
-  let nearest = TIDE_STATIONS[0];
-  let minDistance = getDistance(lat, lng, nearest.lat, nearest.lng);
-
-  for (let i = 1; i < TIDE_STATIONS.length; i++) {
-    const station = TIDE_STATIONS[i];
-    const distance = getDistance(lat, lng, station.lat, station.lng);
-    if (distance < minDistance) {
-      minDistance = distance;
-      nearest = station;
-    }
-  }
-
-  return nearest;
+export function findNearestStation(lat: number, lng: number): TideStation {
+  return TIDE_STATIONS.reduce((nearest, station) =>
+    haversineKm(lat, lng, station.lat, station.lng) < haversineKm(lat, lng, nearest.lat, nearest.lng)
+      ? station : nearest,
+  );
 }
 
 // @mock-data — 실측이 아니라 현재 시각 기반으로 지어낸 물때. mocked
@@ -86,7 +71,6 @@ function getMockTideData(stationName: string): TideData {
   const now = new Date();
   const hour = now.getHours();
   const baseHigh = (hour + 6) % 24;
-  const baseLow = (hour + 12) % 24;
 
   return {
     stationName: `${stationName} (예측)`,
@@ -118,100 +102,69 @@ function getMockTideData(stationName: string): TideData {
   };
 }
 
-export async function fetchTideData(
-  lat: number,
-  lng: number,
-  date?: string,
-): Promise<TideData | null> {
-  const nearest = findNearestStation(lat, lng);
-
-  try {
-    const targetDate =
-      date || new Date().toISOString().split("T")[0].replace(/-/g, ""); // YYYYMMDD
-
-    const params = new URLSearchParams({
-      obsCode: nearest.code,
-      reqDate: targetDate,
-    });
-    const apiUrl = `/api/tide?${params.toString()}`;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let data: any = null;
-
-    try {
-      const res = await fetch(apiUrl, { cache: "no-store" });
-      if (res.ok) {
-        data = await res.json();
-      }
-    } catch {
-      console.warn("Tide API proxy failed.");
-    }
-
-    if (!data) {
-      return getMockTideData(nearest.name);
-    }
-
-    // Parse API response
-    const items =
-      data?.response?.body?.items?.item ||
-      data?.getTideFcstHghLw?.body?.items?.item ||
-      data?.result?.data ||
-      null;
-
-    if (!items || !Array.isArray(items)) {
-      console.warn("KHOA API returned unexpected format. Using mock data.");
-      return getMockTideData(nearest.name);
-    }
-
-    interface KhoaTideItem {
-      // New API (GetTideFcstHghLwApiService, 2026.4+)
-      predcDt?: string; // "2026-04-21 01:30"
-      predcTdlvVl?: number; // 183.0 (cm)
-      extrSe?: number; // 1=오전고조 2=오전저조 3=오후고조 4=오후저조
-      obsvtrNm?: string; // 예보지점명
-      // Legacy fields (fallback)
-      tph_time?: string;
-      obs_time?: string;
-      hl_code?: string;
-      tph_level?: string;
-      tide_level?: string;
-    }
-
-    const tides = items
-      .map((item: KhoaTideItem) => {
-        // New API: predcDt "2026-04-21 01:30" → "01:30"
-        const timeStr = item.predcDt || item.tph_time || item.obs_time || "";
-        const time = timeStr.split(" ")[1]?.substring(0, 5) || "";
-
-        // extrSe: 1=오전고조, 3=오후고조 → High; 2=오전저조, 4=오후저조 → Low
-        let type: "High" | "Low";
-        if (item.extrSe !== undefined) {
-          type = item.extrSe === 1 || item.extrSe === 3 ? "High" : "Low";
-        } else {
-          type =
-            item.hl_code === "고조" || item.hl_code === "H" ? "High" : "Low";
-        }
-
-        const level =
-          item.predcTdlvVl !== undefined
-            ? Math.round(item.predcTdlvVl)
-            : parseInt(item.tph_level || item.tide_level || "0", 10);
-
-        return { type, time, level };
-      })
-      .filter((t: TideInfo) => t.time !== "")
-      .sort((a: TideInfo, b: TideInfo) => a.time.localeCompare(b.time));
-
-    if (tides.length === 0) return getMockTideData(nearest.name);
-
-    return {
-      stationName: nearest.name,
-      tides,
-    };
-  } catch (err) {
-    console.warn("Failed to fetch tide data, falling back to mock:", err);
-    return getMockTideData(nearest.name);
+/** Parse only complete, same-date observations. Missing heights are not zero. */
+export function parseTideResponse(data: unknown, date: string): TideData | null {
+  if (!data || typeof data !== "object") return null;
+  const payload = data as Record<string, unknown>;
+  const root = (payload.response ?? payload.getTideFcstHghLw ?? payload) as {
+    header?: { resultCode?: string };
+    body?: { items?: { item?: unknown } };
+  };
+  if (root.header?.resultCode && !["00", "0000"].includes(root.header.resultCode)) return null;
+  const raw = root.body?.items?.item;
+  const items = Array.isArray(raw) ? raw : raw && typeof raw === "object" ? [raw] : [];
+  const iso = `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}`;
+  if (!/^\d{8}$/.test(date) || !parseLocalISODate(iso)) return null;
+  let stationName = "";
+  const tides: TideInfo[] = [];
+  for (const item of items) {
+    if (!item || typeof item !== "object") return null;
+    const { predcDt, predcTdlvVl, extrSe, obsvtrNm } = item;
+    const code = Number(extrSe);
+    const time = typeof predcDt === "string" ? predcDt.slice(11, 16) : "";
+    if (typeof predcDt !== "string" || !predcDt.startsWith(iso + " ") ||
+        !/^([01]\d|2[0-3]):[0-5]\d$/.test(time) ||
+        typeof predcTdlvVl !== "number" || !Number.isFinite(predcTdlvVl) ||
+        ![1, 2, 3, 4].includes(code) || typeof obsvtrNm !== "string" || !obsvtrNm.trim()) return null;
+    if (stationName && stationName !== obsvtrNm) return null;
+    stationName = obsvtrNm;
+    tides.push({ type: code === 1 || code === 3 ? "High" : "Low", time, level: predcTdlvVl });
   }
+  return tides.length ? { stationName, tides: tides.sort((a, b) => a.time.localeCompare(b.time)) } : null;
+}
+
+/** Daily max high minus min low, cm. Not a measured current velocity. */
+export function tideRangeCm(data: TideData | null): number | null {
+  if (!data || data.mocked) return null;
+  const high = data.tides.filter(t => t.type === "High").map(t => t.level);
+  const low = data.tides.filter(t => t.type === "Low").map(t => t.level);
+  if (!high.length || !low.length || [...high, ...low].some(v => !Number.isFinite(v))) return null;
+  const range = Math.max(...high) - Math.min(...low);
+  return range >= 0 ? Math.round(range) : null;
+}
+
+/** Booking calendar: failures stay unavailable; never returns sample tides. */
+export async function fetchStationTides(code: string, date: string, signal?: AbortSignal): Promise<TideData | null> {
+  const station = TIDE_STATIONS.find(s => s.code === code);
+  if (!station) return null;
+  try {
+    const params = new URLSearchParams({ obsCode: code, reqDate: date });
+    const response = await apiFetch(`/api/tide?${params}`, {
+      signal, timeout: 10000, retries: 0, context: "Tide forecast",
+    });
+    const result = parseTideResponse(response, date);
+    return result?.stationName === station.name ? result : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchTideData(lat: number, lng: number, date?: string): Promise<TideData | null> {
+  const nearest = findNearestStation(lat, lng);
+  const result = await fetchStationTides(nearest.code, date || localISODate(new Date()).replaceAll("-", ""));
+  // Existing forecast/record screens explicitly mark samples and exclude them from records.
+  // Booking calls fetchStationTides directly and never uses this legacy preview fallback.
+  return result ?? getMockTideData(nearest.name);
 }
 
 /**

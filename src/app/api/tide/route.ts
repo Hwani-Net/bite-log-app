@@ -1,92 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
+import { unstable_cache } from "next/cache";
+import { parseLocalISODate } from "@/lib/localDate";
+import { parseTideResponse, TIDE_STATIONS } from "@/services/tideService";
 
-export const dynamic = "force-dynamic";
+// Official Swagger: https://www.data.go.kr/data/15156018/openapi.do
+const KHOA_URL = "https://apis.data.go.kr/1192136/tideFcstHghLw/GetTideFcstHghLwApiService";
 
-// Migrated 2026-04-21: old oceangrid/ API terminated 2026.3.31
-// New endpoint: khoa.go.kr/oceandata/odmiapi (serviceKey = data.go.kr key)
-const KHOA_TIDE_BASE =
-  "http://www.khoa.go.kr/oceandata/odmiapi/GetTideFcstHghLwApiService";
+// Cache validated successes only. KHOA also returns API errors with HTTP 200;
+// caching raw fetch responses would preserve a temporary error for a full day.
+const readTides = unstable_cache(async (code: string, date: string) => {
+  const key = process.env.KHOA_API_KEY || process.env.NEXT_PUBLIC_KHOA_API_KEY;
+  if (!key) throw new Error("tide_not_configured");
+  const params = new URLSearchParams({
+    serviceKey: decodeURIComponent(key), obsCode: code, reqDate: date, type: "json", numOfRows: "10",
+  });
+  const response = await fetch(`${KHOA_URL}?${params}`, {
+    cache: "no-store", signal: AbortSignal.timeout(8000),
+  });
+  if (!response.ok) throw new Error("upstream_http_error");
+  const data = await response.json();
+  const resultCode = data.header?.resultCode ?? data.response?.header?.resultCode;
+  if (resultCode === "03") throw new Error("tide_not_available");
+  const parsed = parseTideResponse(data, date);
+  if (!parsed || parsed.stationName !== TIDE_STATIONS.find(s => s.code === code)?.name) {
+    throw new Error("upstream_api_error");
+  }
+  return data;
+}, ["khoa-tides-validated-v1"], { revalidate: 86400 });
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const obs_post_id =
-    searchParams.get("obs_post_id") || searchParams.get("obsCode");
-  const date = searchParams.get("date") || searchParams.get("reqDate");
-  const serviceKey = process.env.NEXT_PUBLIC_KHOA_API_KEY;
-
-  if (!obs_post_id || !date) {
-    return NextResponse.json(
-      { error: "Missing required query params: obsCode, reqDate" },
-      { status: 400 },
-    );
+  const sp = request.nextUrl.searchParams;
+  const code = sp.get("obsCode") ?? sp.get("obs_post_id");
+  const date = sp.get("reqDate") ?? sp.get("date") ?? "";
+  const iso = `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}`;
+  if (!TIDE_STATIONS.some(s => s.code === code) || !/^\d{8}$/.test(date) || !parseLocalISODate(iso)) {
+    return NextResponse.json({ error: "invalid_station_or_date" }, { status: 400 });
   }
-
-  if (!serviceKey) {
-    console.error("[tide/route] NEXT_PUBLIC_KHOA_API_KEY is not set");
-    return NextResponse.json({ result: { data: [] } });
-  }
-
-  const url = `${KHOA_TIDE_BASE}?serviceKey=${encodeURIComponent(serviceKey)}&obsCode=${obs_post_id}&reqDate=${date}&type=json&numOfRows=10`;
-
   try {
-    console.log(
-      `[tide/route] Calling KHOA API: obs_post_id=${obs_post_id} date=${date}`,
-    );
-    const res = await fetch(url, { cache: "no-store" });
-
-    if (!res.ok) {
-      console.error(
-        `[tide/route] KHOA API HTTP error: ${res.status} ${res.statusText}`,
-      );
-      return NextResponse.json({ result: { data: [] } });
+    const data = await readTides(code!, date);
+    return NextResponse.json(data, { headers: { "Cache-Control": "public, max-age=3600" } });
+  } catch (error) {
+    // Upstream errors/URLs can contain the service key; don't log them.
+    if (error instanceof Error && error.message === "tide_not_available") {
+      return NextResponse.json({ error: "tide_not_available" }, { status: 404 });
     }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let json: any;
-    try {
-      json = await res.json();
-    } catch (parseErr) {
-      const raw = await res.text().catch(() => "");
-      console.error(
-        "[tide/route] Failed to parse JSON response:",
-        parseErr,
-        "raw:",
-        raw.slice(0, 300),
-      );
-      return NextResponse.json({ result: { data: [] } });
-    }
-
-    // Detect "invalid ServiceKey" or other API-level errors
-    const resultCode: string =
-      json?.result?.code ?? json?.response?.header?.resultCode ?? "";
-    const resultMsg: string =
-      json?.result?.msg ?? json?.response?.header?.resultMsg ?? "";
-
-    if (resultCode && resultCode !== "0000" && resultCode !== "00") {
-      console.error(
-        `[tide/route] KHOA API error — code: ${resultCode}, msg: ${resultMsg}`,
-      );
-      // Return the error payload so tideService can decide, but also include empty data fallback
-      return NextResponse.json({
-        result: { data: [], code: resultCode, msg: resultMsg },
-      });
-    }
-
-    if (
-      resultMsg.toLowerCase().includes("invalid") ||
-      resultMsg.toLowerCase().includes("servicekey")
-    ) {
-      console.error(
-        `[tide/route] KHOA API invalid ServiceKey response: ${resultMsg}`,
-      );
-      return NextResponse.json({
-        result: { data: [], code: resultCode, msg: resultMsg },
-      });
-    }
-
-    return NextResponse.json(json);
-  } catch (err) {
-    console.error("[tide/route] Network error calling KHOA API:", err);
-    return NextResponse.json({ result: { data: [] } });
+    return NextResponse.json({ error: "tide_fetch_failed" }, { status: 503 });
   }
 }

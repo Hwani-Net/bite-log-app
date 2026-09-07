@@ -82,8 +82,10 @@ test.describe('지역 전환 — /booking', () => {
       timeout: 15000,
     });
     await expect(
-      page.locator('[role="group"][aria-label="항구 필터"]'),
+      page.getByRole('group', { name: '항구 필터', exact: true }).getByRole('button', { name: '대천항', exact: true }),
     ).toHaveCount(0);
+    // 알려진 새 지역 항구는 상류 장애 중에도 선택할 수 있다.
+    await expect(page.getByRole('group', { name: '항구 필터', exact: true }).getByRole('button', { name: '제주항', exact: true })).toBeVisible();
 
     // 되돌릴 수단이 있어야 한다 — 새로고침만이 답이면 안 된다.
     fail = false;
@@ -100,7 +102,7 @@ test.describe('지역 전환 — /booking', () => {
   test('지역을 바꾸면 새 응답이 올 때까지 이전 지역의 검색 결과가 남지 않는다', async ({
     page,
   }) => {
-    let releaseJeju: (() => void) | null = null;
+    let releaseJeju: () => void = () => { throw new Error('제주 요청이 아직 시작되지 않았습니다'); };
     await page.route('**/api/boat-listings*', async (r) => {
       const region = new URL(r.request().url()).searchParams.get('region') ?? '';
       if (region === '130') {
@@ -140,7 +142,7 @@ test.describe('지역 전환 — /booking', () => {
     // 거짓말을 하는 것이다(사용자는 이미 제주를 골랐다).
     await expect(page.getByText('서해호')).toHaveCount(0, { timeout: 5000 });
 
-    releaseJeju?.();
+    releaseJeju();
     await expect(page.getByText('제주호')).toBeVisible({ timeout: 15000 });
   });
 

@@ -50,6 +50,19 @@ describe('apiFetch', () => {
 });
 
 describe('apiFetch timeout & classification detail', () => {
+  it('honors caller cancellation without retrying or starting an already-cancelled request', async () => {
+    const controller = new AbortController();
+    const fetchMock = vi.fn((_url: string, init?: RequestInit) => new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener('abort', () => reject(init.signal?.reason), { once: true });
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+    const request = apiFetch('/api/tide', { signal: controller.signal, retries: 2 });
+    controller.abort();
+    await expect(request).rejects.toMatchObject({ name: 'AbortError' });
+    await expect(apiFetch('/api/tide', { signal: controller.signal })).rejects.toMatchObject({ name: 'AbortError' });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it('aborts after the timeout and classifies it as a retryable ApiError', async () => {
     // fetch가 abort 신호를 받으면 AbortError를 던지는 실제 동작을 흉내낸다.
     vi.stubGlobal('fetch', (_url: string, init?: RequestInit) => {

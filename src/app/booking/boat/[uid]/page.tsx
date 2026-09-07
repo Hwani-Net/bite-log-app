@@ -19,6 +19,7 @@ import type {
   BoatCalendar,
   BoatCalendarDay,
 } from "@/services/boatCalendarService";
+import { BOAT_CALENDAR_TIMEOUT_MS } from "@/services/boatCalendarService";
 import {
   getMyBoat,
   updateMyBoat,
@@ -34,6 +35,7 @@ import {
 } from "@/services/myBoatService";
 import { getDataService } from "@/services/dataServiceFactory";
 import { apiFetch } from "@/lib/apiClient";
+import { localISODate, parseLocalISODate } from "@/lib/localDate";
 import {
   summarizeCatchesForBoat,
   type BoatCatchSummary,
@@ -56,12 +58,6 @@ const VERDICT_OPTIONS: { value: BoatVerdict; label: string }[] = [
   { value: "never", label: "안 탄다" },
 ];
 
-// Local date, not toISOString() — see booking/page.tsx for why UTC is wrong
-// for a KST default.
-function localISODate(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
 function ymToLabel(ym: string): string {
@@ -75,19 +71,15 @@ function shiftYm(ym: string, delta: number): string {
   return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
-function currentYm(): string {
-  const d = new Date();
-  return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}`;
-}
-
 export default function BoatDetailPage() {
   const params = useParams<{ uid: string }>();
   const uid = params?.uid ?? "";
 
-  const [ym, setYm] = useState<string>(currentYm);
+  const [ym, setYm] = useState("");
   const [calendar, setCalendar] = useState<BoatCalendar | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [retryTick, setRetryTick] = useState(0);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [myBoat, setMyBoat] = useState<MyBoat | null>(null);
   const [memoDraft, setMemoDraft] = useState("");
@@ -105,7 +97,12 @@ export default function BoatDetailPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMyBoat(boat);
     setMemoDraft(boat?.memo ?? "");
-    setRideDate(localISODate(new Date()));
+    const queryDate = new URLSearchParams(window.location.search).get("date");
+    const date = queryDate && parseLocalISODate(queryDate) ? queryDate : localISODate(new Date());
+    setRideDate(date);
+    setYm(date.slice(0, 4) + date.slice(5, 7));
+    setSelectedDate(queryDate && parseLocalISODate(queryDate) ? queryDate : null);
+    setCalendar(null);
   }, [uid]);
 
   // "이 배에서 내 조과" — records/page.tsx의 "탄 배" 태그와 조인한다.
@@ -162,18 +159,6 @@ export default function BoatDetailPage() {
     setMyBoat(addRide(uid, { date: rideDate }));
   };
 
-  // ?date=YYYY-MM-DD from the search grid jumps the calendar to that month
-  // and pre-selects the day. Read after mount so server HTML and the
-  // client's first render agree (see booking/page.tsx for the same note).
-  useEffect(() => {
-    const date = new URLSearchParams(window.location.search).get("date");
-    if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setYm(date.slice(0, 4) + date.slice(5, 7));
-      setSelectedDate(date);
-    }
-  }, []);
-
   // "방문할 때마다 스냅샷"의 "방문"은 이 uid 페이지를 여는 것이지, 그
   // 안에서 달력 월을 넘기는 것이 아니다. ym은 그대로 두고 uid가 바뀔 때만
   // 다시 스냅샷을 찍는다 — 이 ref가 없으면 8월(가격 있음) 보다가 7월(과거
@@ -183,7 +168,7 @@ export default function BoatDetailPage() {
   const snapshottedUidRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!uid) return;
+    if (!uid || !ym) return;
     let cancelled = false;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
@@ -193,14 +178,14 @@ export default function BoatDetailPage() {
       // thefishing.kr 프록시라 apiFetch 기본 10초보다 오래 걸릴 수 있다 —
       // 서버측 fetchWithRetry 자체 타임아웃이 15초라, 클라이언트가 그보다
       // 먼저 포기하면 서버가 곧 성공했을 응답까지 실패로 보고하게 된다.
-      { context: "boat-calendar", retries: 0, timeout: 17_000 },
+      { context: "boat-calendar", retries: 1, timeout: BOAT_CALENDAR_TIMEOUT_MS },
     )
       .then((data) => {
         if (cancelled) return;
-        if (data.ok === false || !data.meta) {
+        if (data.ok === false || !data.meta || !Array.isArray(data.days) ||
+          !Array.isArray(data.meta.fishTags) || data.ym !== ym) {
           throw new Error("malformed boat-calendar response");
         }
-        setCalendar(data);
 
         if (!data.meta.name) {
           // The fetch succeeded — this isn't the network/parse failure the
@@ -211,8 +196,9 @@ export default function BoatDetailPage() {
           // rather than declaring it gone immediately.
           setBoatGone(isGone(markGoneStreak(uid, true)));
           if (snapshottedUidRef.current !== uid) setSnapshotChange(null);
-          return;
+          throw new Error("boat identity unavailable");
         }
+        setCalendar(data);
         setBoatGone(false);
         markGoneStreak(uid, false);
         // Auto-snapshot once per visit (uid), not on every month flip — see
@@ -239,11 +225,11 @@ export default function BoatDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [uid, ym]);
+  }, [uid, ym, retryTick]);
 
   // Lay the month out on a 7-col grid starting at the correct weekday.
   const grid = useMemo(() => {
-    if (!calendar) return [];
+    if (!calendar || calendar.ym !== ym) return [];
     const y = Number(ym.slice(0, 4));
     const m = Number(ym.slice(4, 6)) - 1;
     const firstDow = new Date(y, m, 1).getDay();
@@ -265,8 +251,9 @@ export default function BoatDetailPage() {
   }, [calendar, ym]);
 
   const selected = useMemo(
-    () => calendar?.days.find((d) => d.date === selectedDate) ?? null,
-    [calendar, selectedDate],
+    () => !loading && !error && calendar?.ym === ym
+      ? calendar.days.find((d) => d.date === selectedDate) ?? null : null,
+    [calendar, selectedDate, loading, error, ym],
   );
 
   const meta = calendar?.meta;
@@ -375,8 +362,10 @@ export default function BoatDetailPage() {
               </a>
             </div>
           </section>
+        ) : error ? (
+          <h1 className="text-lg font-bold text-white leading-tight">선박 정보를 확인하지 못했습니다</h1>
         ) : (
-          <div className="h-72 rounded-2xl bg-white/3 animate-pulse" />
+          <div data-testid="boat-header-loading" role="status" aria-label="선박 정보 불러오는 중" className="h-72 rounded-2xl bg-white/3 animate-pulse" />
         )}
 
         {/* 내 기록 — 예약 플랫폼은 만들 수 없는, 이 배에 대한 내 판단과 이력.
@@ -491,14 +480,16 @@ export default function BoatDetailPage() {
         <div className="flex items-center justify-between px-1">
           <button
             onClick={() => setYm((v) => shiftYm(v, -1))}
+            disabled={!ym}
             className="size-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white"
             aria-label="이전 달"
           >
             <ChevronLeft size={16} />
           </button>
-          <span className="text-sm font-bold">{ymToLabel(ym)}</span>
+          <span className="text-sm font-bold">{ym ? ymToLabel(ym) : "달력 불러오는 중"}</span>
           <button
             onClick={() => setYm((v) => shiftYm(v, 1))}
+            disabled={!ym}
             className="size-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white"
             aria-label="다음 달"
           >
@@ -507,7 +498,7 @@ export default function BoatDetailPage() {
         </div>
 
         {/* Calendar */}
-        <section className="rounded-2xl bg-white/3 border border-white/8 p-2">
+        <section aria-label="예약 달력" aria-busy={loading} className="rounded-2xl bg-white/3 border border-white/8 p-2">
           <div className="grid grid-cols-7 text-center text-[10px] text-white/40 mb-1">
             {WEEKDAYS.map((w, i) => (
               <div
@@ -519,26 +510,32 @@ export default function BoatDetailPage() {
             ))}
           </div>
 
-          {loading && !calendar ? (
-            <div className="grid grid-cols-7 gap-1">
+          {loading || (!error && calendar?.ym !== ym) ? (
+            <div className="grid grid-cols-7 gap-1" role="status" aria-label="예약 현황 불러오는 중">
               {Array.from({ length: 35 }).map((_, i) => (
                 <div key={i} className="h-16 rounded-lg bg-white/3 animate-pulse" />
               ))}
             </div>
           ) : error ? (
-            <p className="text-xs text-white/40 text-center py-8">
+            <div role="alert" className="text-xs text-white/40 text-center py-8">
               예약 현황을 불러오지 못했습니다.{" "}
-              {meta && (
                 <a
-                  href={meta.detailUrl}
+                  href={meta?.detailUrl || `https://thefishing.kr/reservation/list.php?uid=${uid}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline"
                 >
                   더피싱에서 직접 보기
                 </a>
-              )}
-            </p>
+              <button
+                type="button"
+                aria-label="예약 현황 다시 시도"
+                onClick={() => setRetryTick((n) => n + 1)}
+                className="mt-2 flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-[#c9a84c] text-[#080d14] text-sm font-bold hover:brightness-110 transition-all"
+              >
+                다시 시도
+              </button>
+            </div>
           ) : (
             <div className={`grid grid-cols-7 gap-1 ${loading ? "opacity-50" : ""}`}>
               {grid.map((cell, i) => {

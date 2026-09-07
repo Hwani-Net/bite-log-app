@@ -35,12 +35,14 @@ export async function apiFetch<T = unknown>(
     retries = DEFAULT_RETRIES,
     retryDelay = DEFAULT_RETRY_DELAY,
     context,
+    signal,
     ...fetchOptions
   } = options;
 
   let lastError: ApiError | null = null;
 
   for (let attempt = 0; attempt <= retries; attempt++) {
+    signal?.throwIfAborted();
     // controller/timer live outside the try so the catch block can also
     // clear it. 헤더 도착(fetch resolve) 후 res.json()이 멈추면 그동안
     // 아무 타임아웃 보호도 없었다(2026-08-31 Codex 교차검수 발견, retryFetch.ts
@@ -51,7 +53,7 @@ export async function apiFetch<T = unknown>(
     try {
       const res = await fetch(url, {
         ...fetchOptions,
-        signal: controller.signal });
+        signal: signal ? AbortSignal.any([signal, controller.signal]) : controller.signal });
 
       if (!res.ok) {
         clearTimeout(timer);
@@ -69,6 +71,8 @@ export async function apiFetch<T = unknown>(
       return data as T;
     } catch (err) {
       clearTimeout(timer);
+      // A caller changing month/station cancels work; it is not a retryable outage.
+      if (signal?.aborted) throw err;
       if (err instanceof ApiError) {
         if (err.retryable && attempt < retries) {
           lastError = err;

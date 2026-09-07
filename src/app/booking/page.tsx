@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import BookingDatePicker from "@/components/BookingDatePicker";
+import { BOAT_CALENDAR_TIMEOUT_MS } from "@/services/boatCalendarService";
 import {
   Anchor,
   ArrowLeft,
@@ -22,6 +24,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { matchesKeyword } from "@/lib/keywordMatch";
+import { PORT_COORDS } from "@/data/portCoords";
 import {
   capacityBucket,
   extractPorts,
@@ -228,7 +231,7 @@ function getMonthlyRecommendation(
       species: best.species,
       location: site.city,
       region: site.region,
-      tip: `${statusLabel} · ${cityCount}개 지역 총 ${total.toLocaleString()}마리 방류 계획 · 서식수심 ${best.habitatDepth}`,
+      tip: `${statusLabel} · ${cityCount}개 지역 총 ${total.toLocaleString("ko-KR")}마리 방류 계획 · 서식수심 ${best.habitatDepth}`,
       image: best.image,
       sourced: true,
     };
@@ -437,10 +440,7 @@ async function fetchDayAvailability(
     // apiFetch 경유(5차 GOAL-6) — 실패는 기존대로 unknown(보여주되 확인 불가).
     const data = await apiFetch<{ days?: unknown }>(
       `/api/boat-calendar?uid=${uid}&ym=${ym}`,
-      // thefishing.kr 프록시라 apiFetch 기본 10초보다 오래 걸릴 수 있다
-      // (서버측 fetchWithRetry 자체 타임아웃이 12초) — 짧게 잡으면
-      // 진짜로 곧 성공했을 요청까지 조기 실패로 보고하게 된다.
-      { context: "boat-calendar", retries: 0, timeout: 17_000 },
+      { context: "boat-calendar", retries: 0, timeout: BOAT_CALENDAR_TIMEOUT_MS },
     );
     if (Array.isArray(data.days)) {
       try {
@@ -1123,9 +1123,10 @@ function Sunsang24Card({ schedule }: { schedule: Sunsang24Schedule }) {
 }
 
 export default function BookingPage() {
-  const now = new Date();
-  const currentMonth = now.getMonth() + 1;
-  const currentDay = now.getDate();
+  // Static HTML may have been built in a different month from this visit.
+  const [now, setNow] = useState<Date | null>(null);
+  const currentMonth = now ? now.getMonth() + 1 : 1;
+  const currentDay = now?.getDate() ?? 1;
 
   const [userRegion, setUserRegion] = useState<SeaRegion | "기타" | null>(
     null,
@@ -1174,6 +1175,7 @@ export default function BookingPage() {
   const [searchDate, setSearchDate] = useState<string>("");
   const [todayDate, setTodayDate] = useState<string>(""); // for both date inputs' `min`
   const [searchRegion, setSearchRegion] = useState<string>(""); // REGION_FILTERS code
+  const regionChosenRef = useRef(false);
   const [searchSpecies, setSearchSpecies] = useState<string>(""); // SPECIES_FILTERS code
   // 통합 검색 — 서버에 새 요청을 보내지 않고, 이미 불러온 더피싱+낚시뚜
   // 결과를 클라이언트에서 이름·항구·어종으로 한 번 더 거른다. 입력창은
@@ -1300,9 +1302,12 @@ export default function BookingPage() {
 
   // Auto-pick the user's sea region once, if they haven't chosen one.
   useEffect(() => {
-    if (!userRegion || userRegion === "기타" || searchRegion) return;
+    if (!userRegion || userRegion === "기타" || searchRegion || regionChosenRef.current) return;
     const match = REGION_FILTERS.find((r) => r.label === userRegion);
-    if (match) setSearchRegion(match.code);
+    if (match) {
+      regionChosenRef.current = true;
+      setSearchRegion(match.code);
+    }
   }, [userRegion, searchRegion]);
 
   useEffect(() => {
@@ -1327,7 +1332,7 @@ export default function BookingPage() {
       // thefishing.kr 프록시라 apiFetch 기본 10초보다 오래 걸릴 수 있다 —
       // 서버측 fetchWithRetry 자체 타임아웃이 15초라, 클라이언트가 그보다
       // 먼저 포기하면 서버가 곧 성공했을 응답까지 실패로 보고하게 된다.
-      { context: "boat-listings", retries: 0, timeout: 17_000 },
+      { context: "boat-listings", retries: 1, timeout: 17_000 },
     )
       .then((data) => {
         if (cancelled) return;
@@ -1339,7 +1344,9 @@ export default function BookingPage() {
         }
         setSearchResult(data);
         setSearchBoats((prev) =>
-          searchPage === 1 ? data.boats : [...prev, ...data.boats],
+          // Upstream ordering can move the same boat onto two pages.
+          [...new Map((searchPage === 1 ? data.boats : [...prev, ...data.boats])
+            .map((boat) => [boat.uid, boat])).values()],
         );
       })
       .catch(() => {
@@ -1365,6 +1372,19 @@ export default function BookingPage() {
   }, [searchDate, searchRegion, searchSpecies, searchPage, retryTick]);
 
   const resetSearchPage = () => setSearchPage(1);
+  const resetSearchFilters = () => {
+    regionChosenRef.current = true;
+    setSearchRegion("");
+    setSearchSpecies("");
+    setKeyword("");
+    setDebouncedKeyword("");
+    setSelectedPort("");
+    setSelectedCapacity("");
+    setAvailableOnly(false);
+    setSortByDist(false);
+    setGeoError(false);
+    resetSearchPage();
+  };
 
   // ── 낚시뚜 directory: region-only filter, no date/species (their search
   // API doesn't expose either) — kept in its own labeled section rather
@@ -1536,7 +1556,9 @@ export default function BookingPage() {
     // every day (00:00–08:59 KST). Caught live: the search grid defaulted
     // to 2026-08-26 while the clock read 2026-08-27 00:03 KST, and
     // thefishing.kr correctly had zero listings for a date already past.
-    const today = localISODate(new Date());
+    const mountedAt = new Date();
+    setNow(mountedAt);
+    const today = localISODate(mountedAt);
     setTodayDate(today);
 
     let savedFilters: {
@@ -1565,7 +1587,11 @@ export default function BookingPage() {
         ? savedFilters.date
         : today,
     );
-    if (savedFilters?.region) setSearchRegion(savedFilters.region);
+    if (typeof savedFilters?.region === "string" &&
+      (savedFilters.region === "" || REGION_FILTERS.some((r) => r.code === savedFilters.region))) {
+      regionChosenRef.current = true;
+      setSearchRegion(savedFilters.region);
+    }
     if (savedFilters?.species) setSearchSpecies(savedFilters.species);
     // keyword는 문자열일 때만 복원한다 — 다른 필드는 문자열이 아니어도
     // (===로만 비교되니) 그냥 매칭 안 되고 넘어가지만, keyword는 이후
@@ -1926,23 +1952,19 @@ export default function BookingPage() {
       ),
     [sunsang24Schedules, debouncedKeyword],
   );
-  // 항구 칩은 "지금 이 조건에서 뭐가 있는지"를 보여줘야 하니 항구/정원
-  // 필터를 적용하기 전, 키워드까지만 거른 목록에서 뽑는다 — 이미 항구를
-  // 골랐다고 칩 목록이 그 항구 하나로 쪼그라들면 다른 항구로 못 바꾼다.
-  //
-  // thefishing.kr 쪽만 뽑으면 첫 페이지(20척)에 있는 항구만 보인다 —
-  // 전체가 347척이어도 화면엔 그중 몇 개뿐이라 "동해·남해는 항구가 아예
-  // 없고 서해도 몇 개뿐"으로 보였다(2026-08-29 사용자 지적). 낚시뚜는
-  // Firestore에 이미 전수(177/177) 동기화돼 있고 같은 searchRegion으로
-  // 이미 걸러져 있으니, 추가 요청 없이 여기 합치면 실제 있는 항구 폭을
-  // 훨씬 더 보여줄 수 있다.
+  // 두 공급자 모두 일부 페이지만 캐시돼 있을 수 있다. 이미 확인한 항구는
+  // 캐시 상태와 무관하게 선택 가능하게 하고, 새 항구는 응답에서 추가한다.
+  // 항구/정원 필터 전 목록을 사용해야 다른 항구로 다시 바꿀 수 있다.
   const portOptions = useMemo(
     () =>
       extractPorts([
         ...keywordFilteredSearchBoats.map((b) => b.areaPath),
         ...keywordFilteredDirectoryBoats.map((b) => b.harbor),
+        ...Object.entries(PORT_COORDS)
+          .filter(([name, coords]) => (!searchRegion || coords.regionCode === searchRegion) && matchesKeyword(debouncedKeyword, name))
+          .map(([name]) => name),
       ]),
-    [keywordFilteredSearchBoats, keywordFilteredDirectoryBoats],
+    [keywordFilteredSearchBoats, keywordFilteredDirectoryBoats, searchRegion, debouncedKeyword],
   );
   const finalFilteredSearchBoats = useMemo(
     () =>
@@ -1976,21 +1998,16 @@ export default function BookingPage() {
       availableOnly,
   );
 
+  const hasMoreSearchPages = (searchResult?.rawCount ?? 0) > 0;
   const reverseSeasonData = reverseSpecies
     ? (FISH_SEASON_DB.find((d) => d.species === reverseSpecies) ?? null)
     : null;
   const reverseSeasonStatus = reverseSeasonData
     ? getSeasonStatus(reverseSeasonData, currentMonth, currentDay)
     : null;
-  // `now`를 deps에서 뺀 채로 둔다 — 같은 종을 껐다 다시 켜면(토글)
-  // reverseSpecies가 바뀌므로 그때마다 이 시점의 최신 now로 다시 계산된다.
-  // 재계산 없이 남는 경우는 "같은 종을 선택한 패널을 자정 넘게 열어
-  // 둔다" 뿐인데, 14일 창이 겹치는 범위가 커서 실질적으로 하루 어긋나도
-  // 추천이 크게 달라지지 않는다.
   const recommendedDates = useMemo(
-    () => (reverseSpecies ? recommendDates(now, 14, 3) : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [reverseSpecies],
+    () => (reverseSpecies && now ? recommendDates(now, 14, 3) : []),
+    [reverseSpecies, now],
   );
 
   const handlePickRecommendedDate = (date: string) => {
@@ -2062,7 +2079,7 @@ export default function BookingPage() {
 
       <div className="max-w-lg mx-auto px-4 space-y-6 pb-24">
         {/* Monthly Highlight */}
-        <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#c9a84c]/20 via-[#0f141b] to-[#7dd3fc]/10 border border-[#c9a84c]/30 p-5">
+        {now && <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#c9a84c]/20 via-[#0f141b] to-[#7dd3fc]/10 border border-[#c9a84c]/30 p-5">
           <div className="absolute -right-4 -top-4 opacity-10">
             <Star size={80} className="text-[#c9a84c]" />
           </div>
@@ -2108,7 +2125,7 @@ export default function BookingPage() {
               )}
             </div>
           </div>
-        </section>
+        </section>}
 
         {/* 즐겨찾는 선사 — 별표한 배를 uid로 저장해 두므로 선사가 이름·모항을
             바꿔도(GOAL-3) 계속 같은 배로 따라간다. 즐겨찾기 없으면 섹션 자체를
@@ -2411,25 +2428,17 @@ export default function BookingPage() {
         {/* 더피싱-style search: pick a date, filter by region/species, see the
             boats sailing that day, tap one to open its month calendar with
             per-day 예약하기 → the boat's own booking page. */}
-        <section className="space-y-3">
+        <section className="space-y-3" data-testid="boat-search" aria-busy={searchLoading}>
           <div className="glass-morphism border border-white/5 rounded-2xl p-4 space-y-3">
-            <label className="block">
-              <span className="block text-xs text-white/50 mb-1.5 font-medium">
-                <Calendar size={12} className="inline mr-1 text-[#c9a84c]" />
-                출조 날짜
-              </span>
-              <input
-                type="date"
-                value={searchDate}
-                min={todayDate || undefined}
-                onChange={(e) => {
-                  setSearchDate(e.target.value);
-                  resetSearchPage();
-                  resetPortFilter();
-                }}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#c9a84c]/50 transition-colors"
-              />
-            </label>
+            <button
+              type="button"
+              onClick={resetSearchFilters}
+              className="text-xs text-[#c9a84c] underline underline-offset-2"
+            >
+              필터 초기화
+            </button>
+            <BookingDatePicker value={searchDate} min={todayDate} region={searchRegion} port={selectedPort}
+              onChange={(date) => { setSearchDate(date); resetSearchPage(); }} />
 
             <div>
               <span className="block text-xs text-white/50 mb-1.5 font-medium">
@@ -2441,6 +2450,7 @@ export default function BookingPage() {
                   <button
                     key={r.id}
                     onClick={() => {
+                      regionChosenRef.current = true;
                       setSearchRegion(r.code);
                       resetSearchPage();
                       resetPortFilter();
@@ -2501,7 +2511,7 @@ export default function BookingPage() {
                 </span>
                 <div
                   data-testid="port-filter"
-                  className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1"
+                  className="flex flex-wrap gap-1.5 pb-1 -mx-1 px-1"
                   role="group"
                   aria-label="항구 필터"
                 >
@@ -2530,13 +2540,13 @@ export default function BookingPage() {
                 <Users size={12} className="inline mr-1 text-[#c9a84c]" aria-hidden="true" />
                 정원
               </span>
-              <div data-testid="capacity-filter" className="flex gap-1.5" role="group" aria-label="정원 필터">
+              <div data-testid="capacity-filter" className="flex flex-wrap gap-1.5" role="group" aria-label="정원 필터">
                 {CAPACITY_OPTIONS.map((c) => (
                   <button
                     key={c.value || "all"}
                     onClick={() => setSelectedCapacity(c.value)}
                     aria-pressed={selectedCapacity === c.value}
-                    className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                    className={`flex-1 whitespace-nowrap px-2 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                       selectedCapacity === c.value
                         ? "bg-[#c9a84c] text-[#080d14] border-[#c9a84c]"
                         : "bg-white/5 text-white/60 border-white/10 hover:border-white/30"
@@ -2631,7 +2641,7 @@ export default function BookingPage() {
               </button>
             </div>
           ) : searchLoading && searchBoats.length === 0 ? (
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2" role="status" aria-label="선박 목록 불러오는 중">
               {[0, 1, 2, 3].map((i) => (
                 <div key={i} className="h-48 rounded-2xl bg-white/3 animate-pulse" />
               ))}
@@ -2649,19 +2659,13 @@ export default function BookingPage() {
               <p className="text-xs text-white/30">
                 이 페이지에는 조건에 맞는 선박이 없어요. 다음 페이지를 확인해보세요.
               </p>
-              <button
-                type="button"
-                onClick={() => setSearchPage((p) => p + 1)}
-                disabled={searchLoading}
-                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-[#c9a84c]/40 text-xs font-semibold text-white/80 disabled:opacity-40"
-              >
-                {searchLoading ? "불러오는 중..." : "다음 페이지 확인"}
-              </button>
             </div>
           ) : visibleSearchBoats.length === 0 ? (
             <div role="status" className="py-6 text-center space-y-2">
               <p className="text-xs text-white/30">
-                {availableOnly && finalFilteredSearchBoats.length > 0
+                {hasMoreSearchPages
+                  ? "현재 불러온 선박 중에는 조건에 맞는 배가 없어요. 다음 페이지를 확인해보세요."
+                  : availableOnly && finalFilteredSearchBoats.length > 0
                   ? "이 날짜에 잔여석이 확인된 배가 없습니다. 다른 날짜를 시도해보세요."
                   : debouncedKeyword.trim()
                     ? "검색어와 일치하는 선박이 없습니다. 다른 키워드를 시도해보세요."
@@ -2713,43 +2717,41 @@ export default function BookingPage() {
                   />
                 ))}
               </div>
-              {searchError ? (
-                // 더 보기(page>1) 실패 — 이미 읽은 목록은 위에 그대로 두고
-                // (2026-08-30 교차검수 Finding 2), 다음 페이지 재시도만
-                // 별도로 안내한다. 이 상태에서 "더 보기"를 그대로 두면
-                // 실패한 페이지를 건너뛰고 다음 페이지로 넘어가 버린다.
-                <div role="status" className="py-2 text-center space-y-2">
-                  <p className="text-xs text-white/40">
-                    다음 페이지를 지금 불러오지 못했습니다.
-                  </p>
-                  <button
-                    type="button"
-                    data-testid="search-retry"
-                    onClick={() => setRetryTick((n) => n + 1)}
-                    className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-[#c9a84c]/40 text-xs font-semibold text-white/80"
-                  >
-                    다시 시도
-                  </button>
-                </div>
-              ) : (
-                searchResult &&
-                searchResult.rawCount > 0 && (
-                  <button
-                    onClick={() => setSearchPage((p) => p + 1)}
-                    disabled={searchLoading}
-                    className="w-full py-2.5 rounded-xl border border-white/10 text-white/60 text-sm font-semibold hover:bg-white/5 transition-colors disabled:opacity-40"
-                  >
-                    {searchLoading
-                      ? "불러오는 중..."
-                      : hasClientFilter
-                        ? "더 보기"
-                        : `더 보기 (${searchBoats.length}/${searchResult.total})`}
-                  </button>
-                )
-              )}
             </>
           )}
+          {/* Pagination must survive every client-side empty-result branch. */}
+          {searchError && searchBoats.length > 0 ? (
+            <div role="status" className="py-2 text-center space-y-2">
+              <p className="text-xs text-white/40">
+                다음 페이지를 지금 불러오지 못했습니다.
+              </p>
+              <button
+                type="button"
+                data-testid="search-retry"
+                onClick={() => setRetryTick((n) => n + 1)}
+                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-[#c9a84c]/40 text-xs font-semibold text-white/80"
+              >
+                다시 시도
+              </button>
+            </div>
+          ) : !searchError && hasMoreSearchPages && (
+            <button
+              type="button"
+              onClick={() => setSearchPage((p) => p + 1)}
+              disabled={searchLoading}
+              className="w-full py-2.5 rounded-xl border border-white/10 text-white/60 text-sm font-semibold hover:bg-white/5 transition-colors disabled:opacity-40"
+            >
+              {searchLoading
+                ? "불러오는 중..."
+                : visibleSearchBoats.length === 0
+                  ? "다음 페이지 확인"
+                  : hasClientFilter
+                    ? "더 보기"
+                    : `더 보기 (${searchBoats.length}/${searchResult?.total})`}
+            </button>
+          )}
           <p className="text-[10px] text-white/25 px-1">
+            {hasMoreSearchPages && "현재 불러온 선박 기준입니다. 다음 페이지에 더 있을 수 있어요. "}
             더피싱 예약 시스템 기준 · 선박을 누르면 달력과 남은 자리가 보이고,
             예약은 선사 홈페이지에서 이루어집니다
           </p>

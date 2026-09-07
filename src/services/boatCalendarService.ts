@@ -16,6 +16,10 @@
 
 import { fetchWithRetry } from "@/lib/retryFetch";
 
+// Another month requires detail + month POST: up to 2 × (15s + a fast retry),
+// plus the app round trip. A 17s client deadline cut the second request short.
+export const BOAT_CALENDAR_TIMEOUT_MS = 37_000;
+
 const USER_AGENT =
   "BiteLog/1.0 (+https://bite-log-three.vercel.app; fishing app, low-frequency read-only)";
 
@@ -148,6 +152,9 @@ export function parseBoatCalendarHtml(html: string, ym: string): BoatCalendarDay
       status = "available";
       const seats = chunk.match(/남은인원\s*<span[^>]*>(\d+)</)?.[1];
       if (seats) remainingSeats = Number(seats);
+      // Some live cells still say 예약하기 with zero seats. Normalize once
+      // for both the detail calendar and the search availability filter.
+      if (remainingSeats === 0) status = "full";
     } else if (/예약마감|예약완료/.test(chunk)) {
       status = "full";
       if (/대기하기/.test(chunk)) hasWaitlist = true;

@@ -60,3 +60,5 @@ resize_*.js
 nul
 
 .vercel
+.gstack/
+.firecrawl/
