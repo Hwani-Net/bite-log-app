@@ -156,6 +156,49 @@ describe('fetchWithRetry', () => {
     }
   });
 
+  it('alternates back to HTTPS when both endpoints have a connection timeout', async () => {
+    vi.useFakeTimers();
+    try {
+      const ok = new Response('ok', { status: 200 });
+      const fetchMock = vi.fn().mockImplementation((url: string) => {
+        if (url.startsWith('https://thefishing.kr/')) {
+          if (fetchMock.mock.calls.length === 3) return Promise.resolve(ok);
+          return new Promise((_resolve, reject) => {
+            setTimeout(
+              () => reject(Object.assign(new TypeError('fetch failed'), { cause: { code: 'ETIMEDOUT' } })),
+              5000,
+            );
+          });
+        }
+        return new Promise((_resolve, reject) => {
+          setTimeout(
+            () => reject(Object.assign(new TypeError('fetch failed'), { cause: { code: 'UND_ERR_CONNECT_TIMEOUT' } })),
+            5000,
+          );
+        });
+      });
+      global.fetch = fetchMock as unknown as typeof fetch;
+
+      const promise = fetchWithRetry(
+        'https://thefishing.kr/reservation/list.php?uid=4834',
+        {},
+        2,
+        10000,
+      );
+      const assertion = expect(promise).resolves.toBe(ok);
+      await vi.advanceTimersByTimeAsync(5000);
+      await vi.advanceTimersByTimeAsync(5000);
+      await assertion;
+      expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+        'https://thefishing.kr/reservation/list.php?uid=4834',
+        'http://thefishing.kr/reservation/list.php?uid=4834',
+        'https://thefishing.kr/reservation/list.php?uid=4834',
+      ]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('still retries a failure that happened quickly (a real connection blip)', async () => {
     const ok = new Response('ok', { status: 200 });
     const fetchMock = vi

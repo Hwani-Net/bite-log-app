@@ -20,6 +20,7 @@ import { fetchWithRetry } from "@/lib/retryFetch";
 // 300s; allow each real source request to finish instead of cutting a cold
 // Seoul-region connection at the old 15s budget.
 const THEFISHING_TIMEOUT_MS = 45_000;
+const THEFISHING_RETRIES = 2;
 export const BOAT_CALENDAR_TIMEOUT_MS = 95_000;
 
 const USER_AGENT =
@@ -195,7 +196,7 @@ export async function fetchBoatCalendar(
   const detailRes = await fetchWithRetry(`${DETAIL_URL}?uid=${uid}`, {
     headers: { "User-Agent": USER_AGENT },
     next: { revalidate: 1800 },
-  }, 1, THEFISHING_TIMEOUT_MS);
+  }, THEFISHING_RETRIES, THEFISHING_TIMEOUT_MS);
   if (!detailRes.ok) {
     throw new Error(`boat detail fetch failed: ${detailRes.status}`);
   }
@@ -227,7 +228,7 @@ export async function fetchBoatCalendar(
     },
     body,
     next: { revalidate: 1800 },
-  }, 1, THEFISHING_TIMEOUT_MS);
+  }, THEFISHING_RETRIES, THEFISHING_TIMEOUT_MS);
   if (!monthRes.ok) {
     throw new Error(`boat month fetch failed: ${monthRes.status}`);
   }

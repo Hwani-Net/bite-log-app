@@ -83,7 +83,9 @@ export async function fetchWithRetry(
     const retryInput =
       connectionTimeout && input.startsWith("https://thefishing.kr/")
         ? `http://${input.slice("https://".length)}`
-        : input;
+        : connectionTimeout && input.startsWith("http://thefishing.kr/")
+          ? `https://${input.slice("http://".length)}`
+          : input;
     return fetchWithRetry(retryInput, init, retries - 1, timeoutMs);
   }
 }
