@@ -23,14 +23,14 @@
 
 ## 상태
 
-로컬 구현·프로덕션 빌드 검증 완료. 공개 운영 반영은 승인 대기이며 운영 복구로 보고하지 않는다.
+구현·프로덕션 빌드·공개 운영 반영과 라이브 복구 검증을 완료했다. 배포 `dpl_12iwnj6UGkyHgdSkh1Uk4u4YnLQ2` 이후 9월 25일·28일 홍원항/오천항 실제 여정을 다시 실행해 선박·물때 API 오류가 없는 것을 확인했다.
 
 ## 변경과 검증 근거
 
 - `BookingDatePicker`: 기존 예약 상세 달력의 스타일을 재사용한 인라인 월 달력. 음력 물때, 추정 조류 세기, 실제 조석예보 고저차·만조/간조를 구분한다. 월당 날짜별 요청 동시성 3, 성공 캐시 재사용, 변경 시 취소, 실패 재시도. 날짜 변경 시 선택 항구를 유지한다.
 - KHOA: [공식 예측 고저조 API](https://www.data.go.kr/data/15156018/openapi.do)와 실제 16개 관측소 응답 확인. 주소·관측소 표·응답 파서를 수정하고 검증된 성공만 캐시한다.
-- Vercel 운영 로그에서 `UND_ERR_CONNECT_TIMEOUT`의 10초 연결 제한을 확인했다. `src/instrumentation.ts`는 더피싱 origin만 15초로 조정한다([Node fetch dispatcher](https://nodejs.org/api/globals.html)). 로컬 Node 24.15.0에서 디스패처 연결을 독립 실측했으나, 운영 해결 여부는 배포 후 로그·실제 화면 확인이 필요하다.
-- 다른 달의 예약 현황은 상세 GET 후 월 POST를 이어서 실행하므로 클라이언트 예산을 37초로 맞췄다. 잔여 0석은 파서에서 마감으로 통일한다.
+- Vercel 운영 로그에서 `UND_ERR_CONNECT_TIMEOUT`의 15초 Undici 연결 제한과 fetch 중단을 확인했다. `src/instrumentation.ts`와 `fetchWithRetry`는 더피싱 origin만 45초로 조정하고, 호출자 달력 예산은 95초로 맞췄다([Node fetch dispatcher](https://nodejs.org/api/globals.html)). 최신 배포 로그와 실제 여정에서 같은 연결 오류가 재현되지 않았다.
+- 다른 달의 예약 현황은 상세 GET 후 월 POST를 이어서 실행하므로 클라이언트 예산을 95초로 맞췄다. 잔여 0석은 파서에서 마감으로 통일한다.
 - 디렉터리가 부분 캐시일 때 홍원항 선택지가 사라지는 실데이터 회귀를 발견했다. 기존 항구 좌표 테이블의 권역별 알려진 항구를 합쳐 복구했다. 추가 공급자 크롤링을 늘리지 않았다.
 - 단위: `node node_modules/vitest/vitest.mjs run` → 42파일, 422개 통과.
 - 브라우저: 기존 Playwright Chromium의 예약·복구·지역·항구 25개와 달력·사진·연관 예약 14개, 총 39개 통과. 달력은 390px/1280px에서 9월 7~30일을 모두 클릭했다. 결정론적 장애 테스트의 응답 대체와 실제 API 여정은 구별한다.
@@ -38,6 +38,7 @@
 - 9/28 홍원항(군산 기준) 660cm, 오천항(보령 기준) 710cm가 실제 API 응답과 일치했다. 원본: `.codex/visual-evidence/20260907130841278-hongwon-390/result.json`, `.codex/visual-evidence/20260907130835780-ocheon-1280/result.json`.
 - 같은 최종 빌드에서 9월 25일 홍원항 1280px/390px, 오천항 1280px도 3개 통과(17.3초). 군산 528cm, 보령 562cm. 원본: `.codex/visual-evidence/20260907131219662-hongwon-390/result.json`, `.codex/visual-evidence/20260907131214251-ocheon-1280/result.json`. 최종 실데이터 여정 합계 6개이며 실제 결제는 0회다.
 - `tsc --noEmit`, 변경 파일 ESLint, `next build` 성공. `npx --no-install drift-guard check` 0.08%(2/2436): 기존 globals.css의 font/shadow 차이이며 이번에 보호 CSS를 변경하지 않았다.
+- 최신 프로덕션: `https://bite-log-three.vercel.app`에서 `BOOKING_DATE=2026-09-25`와 `2026-09-28` 각각 홍원항 데스크톱/모바일·오천항 데스크톱 3개씩 PASS. 전수 클릭 프로브는 컨트롤 307개, 항구 조합 213개, 선박 목록 API 43건 모두 200, issues 0이었다. 모바일 상세·오천항 페이지네이션·주꾸미/예약 가능만 프로브도 오류 없이 완료했다.
 
 ## 독립 검수와 한계
 
@@ -49,3 +50,4 @@ Codex 내부 브라우저 부트스트랩은 `Importing module "node:process" is
 
 - pitfall: 항구 캐시 적재율은 항구 선택지의 완전성을 보장하지 않음 → `docs/booking-port-cache-pitfall.md`.
 - pitfall: 조석예보의 지점·날짜·수위 검증과 결측 처리 → `docs/booking-tide-data-contract.md`.
+- pitfall: fetch 예산만 늘리고 Undici origin 연결 제한을 남겨 두면 콜드 연결이 같은 시점에 끊김 → `docs/booking-upstream-timeout-pitfall.md`.

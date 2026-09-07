@@ -17,7 +17,7 @@ it("extends only the fishing source TLS deadline, in the Node runtime", async ()
   await register();
   const options = Agent.mock.calls[0][0] as { factory: (origin: string, opts: object) => void };
   options.factory("https://thefishing.kr", {});
-  expect(Pool).toHaveBeenLastCalledWith("https://thefishing.kr", { connectTimeout: 15000 });
+  expect(Pool).toHaveBeenLastCalledWith("https://thefishing.kr", { connectTimeout: 45000 });
   options.factory("https://another.example", {});
   expect(Pool).toHaveBeenLastCalledWith("https://another.example", { connectTimeout: 10000 });
   expect(setGlobalDispatcher).toHaveBeenCalledTimes(1);
