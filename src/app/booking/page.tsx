@@ -1330,9 +1330,8 @@ export default function BookingPage() {
     apiFetch<BoatListingPage & { ok?: boolean }>(
       `/api/boat-listings?${q.toString()}`,
       // thefishing.kr 프록시라 apiFetch 기본 10초보다 오래 걸릴 수 있다 —
-      // 서버측 fetchWithRetry 자체 타임아웃이 15초라, 클라이언트가 그보다
-      // 먼저 포기하면 서버가 곧 성공했을 응답까지 실패로 보고하게 된다.
-      { context: "boat-listings", retries: 1, timeout: 17_000 },
+      // 서버측 원본 호출 예산(45초)보다 먼저 포기하지 않는다.
+      { context: "boat-listings", retries: 1, timeout: 50_000 },
     )
       .then((data) => {
         if (cancelled) return;

@@ -17,6 +17,11 @@ const USER_AGENT =
   "BiteLog/1.0 (+https://bite-log-three.vercel.app; fishing app, low-frequency read-only)";
 
 const LISTING_URL = "https://thefishing.kr/reservation/list.php";
+// The source can take more than 15s from a cold Seoul-region function even
+// when the same URL is fast locally. Vercel gives this function 300s, so keep
+// the proxy alive long enough for the real response instead of manufacturing
+// a 503 at the old client-sized budget.
+const THEFISHING_TIMEOUT_MS = 45_000;
 
 export type SeaRegionGroup = "서해권" | "남해권" | "동해권" | "제주권" | "기타";
 
@@ -257,7 +262,7 @@ export async function fetchBoatListings(
   const res = await fetchWithRetry(url, {
     headers: { "User-Agent": USER_AGENT },
     next: { revalidate: 1800 },
-  });
+  }, 1, THEFISHING_TIMEOUT_MS);
   if (!res.ok) {
     throw new Error(`boat listing fetch failed: ${res.status}`);
   }
