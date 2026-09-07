@@ -27,15 +27,12 @@
 // AbortSignal과 무관하게 발동)이 항상 먼저 이겨서 "우리 타임아웃인지"
 // 판정 자체가 죽은 코드가 됐다.
 //
-// 그래서 "왜 실패했는지" 판정을 접었다. 대신 "얼마나 빨리 실패했는지"만
-// 본다 — 재시도가 값어치 있는 유일한 경우는 TLS/DNS 핸드셰이크가 그
-// 자리에서 바로 끊어지는 것(보통 1~2초 안에 일어난다)뿐이고, 그건 원인이
-// 무엇으로 불리든 "빠른 실패"라는 사실 자체로 구분된다. 응답이 오래
-// 걸리다 실패한 경우(우리 타임아웃이든 플랫폼 것이든 thefishing.kr이 그냥
-// 느린 것이든) 재시도해봤자 같은 시간을 또 기다릴 뿐이니 재시도하지
-// 않는다. timeoutMs는 넉넉하게(15초) 잡아 정상 응답을 더는 조기에
-// 잘라내지 않는다 — 그래도 플랫폼 자체 한계(~10.6~10.9초)가 대개 먼저
-// 걸려 실질 상한은 비슷하게 유지된다.
+// 그래서 기본은 "얼마나 빨리 실패했는지"만 본다 — 응답이 오래 걸리다
+// 실패한 일반 오류는 재시도해봤자 같은 시간을 또 기다릴 뿐이다. 다만
+// 프로덕션에서 thefishing.kr이 빠른 로컬 요청과 달리 약 15초 뒤
+// `cause.code=ETIMEDOUT`로 끊기는 사례가 확인됐다. 이건 느린 응답이 아니라
+// 연결 자체가 성립하지 않은 것이므로, 코드가 명시된 연결 타임아웃만 한 번
+// 더 시도한다. timeoutMs는 호출부가 원본 응답에 맞춰 넉넉하게 정한다.
 //
 // 2026-08-30 교차검수(OpenRouter)로 발견: fetch()는 헤더만 도착하면
 // resolve되고, 본문(res.text()/res.json())은 호출자가 나중에 별도로
@@ -47,6 +44,23 @@
 // 호출이라 해롭지 않다. 실패(catch) 경로는 지킬 Response가 없으니 그
 // 자리에서만 지운다.
 const FAST_FAILURE_MS = 2_000;
+
+function isConnectionTimeout(error: unknown): boolean {
+  let current: unknown = error;
+  for (let depth = 0; depth < 3 && current; depth += 1) {
+    if (typeof current === "object" && current !== null) {
+      const code = "code" in current ? String(current.code) : "";
+      if (code === "ETIMEDOUT" || code === "UND_ERR_CONNECT_TIMEOUT") return true;
+      current = "cause" in current ? current.cause : undefined;
+      continue;
+    }
+    if (typeof current === "string" && /ETIMEDOUT|connect timeout/i.test(current)) {
+      return true;
+    }
+    break;
+  }
+  return false;
+}
 
 export async function fetchWithRetry(
   input: string,
@@ -62,7 +76,7 @@ export async function fetchWithRetry(
   } catch (err) {
     clearTimeout(timer);
     const failedFast = Date.now() - startedAt < FAST_FAILURE_MS;
-    if (retries <= 0 || !failedFast) throw err;
+    if (retries <= 0 || (!failedFast && !isConnectionTimeout(err))) throw err;
     return fetchWithRetry(input, init, retries - 1, timeoutMs);
   }
 }
