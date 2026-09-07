@@ -120,6 +120,42 @@ describe('fetchWithRetry', () => {
     }
   });
 
+  it('falls back to the fishing source HTTP endpoint after a TLS timeout', async () => {
+    vi.useFakeTimers();
+    try {
+      const ok = new Response('ok', { status: 200 });
+      const fetchMock = vi.fn().mockImplementation((url: string) => {
+        if (url.startsWith('https://thefishing.kr/')) {
+          return new Promise((_resolve, reject) => {
+            setTimeout(
+              () => reject(Object.assign(new TypeError('fetch failed'), { cause: { code: 'ETIMEDOUT' } })),
+              5000,
+            );
+          });
+        }
+        return Promise.resolve(ok);
+      });
+      global.fetch = fetchMock as unknown as typeof fetch;
+
+      const promise = fetchWithRetry(
+        'https://thefishing.kr/reservation/list.php?uid=4834',
+        {},
+        1,
+        10000,
+      );
+      const assertion = expect(promise).resolves.toBe(ok);
+      await vi.advanceTimersByTimeAsync(5000);
+      await assertion;
+      expect(fetchMock).toHaveBeenNthCalledWith(
+        2,
+        'http://thefishing.kr/reservation/list.php?uid=4834',
+        expect.anything(),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('still retries a failure that happened quickly (a real connection blip)', async () => {
     const ok = new Response('ok', { status: 200 });
     const fetchMock = vi

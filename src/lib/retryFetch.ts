@@ -32,7 +32,9 @@
 // 프로덕션에서 thefishing.kr이 빠른 로컬 요청과 달리 약 15초 뒤
 // `cause.code=ETIMEDOUT`로 끊기는 사례가 확인됐다. 이건 느린 응답이 아니라
 // 연결 자체가 성립하지 않은 것이므로, 코드가 명시된 연결 타임아웃만 한 번
-// 더 시도한다. timeoutMs는 호출부가 원본 응답에 맞춰 넉넉하게 정한다.
+// 더 시도한다. HTTPS 연결만 막힌 경우가 있어, 더피싱의 공개 읽기 전용
+// 데이터에 한해서만 두 번째 시도는 같은 호스트의 HTTP로 우회한다.
+// timeoutMs는 호출부가 원본 응답에 맞춰 넉넉하게 정한다.
 //
 // 2026-08-30 교차검수(OpenRouter)로 발견: fetch()는 헤더만 도착하면
 // resolve되고, 본문(res.text()/res.json())은 호출자가 나중에 별도로
@@ -76,7 +78,12 @@ export async function fetchWithRetry(
   } catch (err) {
     clearTimeout(timer);
     const failedFast = Date.now() - startedAt < FAST_FAILURE_MS;
-    if (retries <= 0 || (!failedFast && !isConnectionTimeout(err))) throw err;
-    return fetchWithRetry(input, init, retries - 1, timeoutMs);
+    const connectionTimeout = isConnectionTimeout(err);
+    if (retries <= 0 || (!failedFast && !connectionTimeout)) throw err;
+    const retryInput =
+      connectionTimeout && input.startsWith("https://thefishing.kr/")
+        ? `http://${input.slice("https://".length)}`
+        : input;
+    return fetchWithRetry(retryInput, init, retries - 1, timeoutMs);
   }
 }
