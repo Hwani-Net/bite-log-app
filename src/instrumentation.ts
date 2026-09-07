@@ -4,9 +4,10 @@ export async function register() {
   setGlobalDispatcher(new Agent({
     factory: (origin, options) => new Pool(origin, {
       ...options,
-      // Production logs: UND_ERR_CONNECT_TIMEOUT at 10s, before our 15s
-      // request budget. Keep Next's fetch/cache; raise only this origin's limit.
-      connectTimeout: String(origin) === "https://thefishing.kr" ? 15_000 : 10_000,
+      // Production logs showed the source's cold TLS connection taking more
+      // than 15s, before the matching fetch budget. Keep Next's fetch/cache;
+      // raise only this origin's connection limit.
+      connectTimeout: String(origin) === "https://thefishing.kr" ? 45_000 : 10_000,
     }),
   }));
 }
