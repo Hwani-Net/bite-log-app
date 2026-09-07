@@ -2,7 +2,7 @@
 
 ## 요청과 범위
 
-2026-09-07 사용자 화면: 출조일 2026-09-28에서 선박 목록 로딩 오류. 출조일 달력 안에서 물때, 조류 세기와 고저차를 확인하도록 요청했다. 이전 세션의 예약 화면 수정은 현재 작업 파일에만 있으며 운영 반영 여부와 외부 데이터 장애를 따로 검증한다.
+2026-09-07 사용자 화면: 출조일 2026-09-28에서 선박 목록 로딩 오류. 출조일 달력 안에서 물때, 조류 세기와 고저차를 확인하도록 요청했다. 후속 라이브 조작에서 항구 필터 뒤 숨은 선박까지 가용성 API를 호출하는 누락과 더피싱 연결 타임아웃도 발견해 함께 수정했다.
 
 기존 상세 달력, 날짜·항구 좌표·해양 API 도우미, 디자인 토큰과 설치된 의존성을 재사용한다. 실제 예약·결제·게시물 작성, 임의 수위 생성, 무단 공개 배포는 하지 않는다.
 
@@ -23,22 +23,23 @@
 
 ## 상태
 
-구현·프로덕션 빌드·공개 운영 반영과 라이브 복구 검증을 완료했다. 배포 `dpl_12iwnj6UGkyHgdSkh1Uk4u4YnLQ2` 이후 9월 25일·28일 홍원항/오천항 실제 여정을 다시 실행해 선박·물때 API 오류가 없는 것을 확인했다.
+구현·프로덕션 빌드·공개 운영 반영과 라이브 복구 검증을 완료했다. 최종 배포 `dpl_G1ptwRC9nXeDaGj4LL8Bps6y159L`에서 9월 25일·28일 홍원항/오천항 실제 여정을 다시 실행해 선박·물때·상세 달력 API가 동시 요청에서도 정상임을 확인했다.
 
 ## 변경과 검증 근거
 
 - `BookingDatePicker`: 기존 예약 상세 달력의 스타일을 재사용한 인라인 월 달력. 음력 물때, 추정 조류 세기, 실제 조석예보 고저차·만조/간조를 구분한다. 월당 날짜별 요청 동시성 3, 성공 캐시 재사용, 변경 시 취소, 실패 재시도. 날짜 변경 시 선택 항구를 유지한다.
 - KHOA: [공식 예측 고저조 API](https://www.data.go.kr/data/15156018/openapi.do)와 실제 16개 관측소 응답 확인. 주소·관측소 표·응답 파서를 수정하고 검증된 성공만 캐시한다.
-- Vercel 운영 로그에서 `UND_ERR_CONNECT_TIMEOUT`의 15초 Undici 연결 제한과 fetch 중단을 확인했다. `src/instrumentation.ts`와 `fetchWithRetry`는 더피싱 origin만 45초로 조정하고, 호출자 달력 예산은 95초로 맞췄다([Node fetch dispatcher](https://nodejs.org/api/globals.html)). 최신 배포 로그와 실제 여정에서 같은 연결 오류가 재현되지 않았다.
+- Vercel 운영 로그에서 `UND_ERR_CONNECT_TIMEOUT`의 15초 연결 실패를 확인했다. `fetchWithRetry`는 더피싱 origin에서 HTTPS 실패 시 HTTP를 거쳐 다시 HTTPS로 최대 3회 시도하고, fetch 예산은 45초로 유지한다. 호출자 달력 예산은 95초다([Node fetch dispatcher](https://nodejs.org/api/globals.html)). 최종 배포의 9월 28일 재실행 직후 `error`/5xx 로그는 0건이었다.
+- 항구·정원·검색어 필터 이후에는 화면에 남은 `finalFilteredSearchBoats`만 가용성 조회한다. 숨은 UID를 요청하지 않는 회귀 테스트를 추가했다.
 - 다른 달의 예약 현황은 상세 GET 후 월 POST를 이어서 실행하므로 클라이언트 예산을 95초로 맞췄다. 잔여 0석은 파서에서 마감으로 통일한다.
 - 디렉터리가 부분 캐시일 때 홍원항 선택지가 사라지는 실데이터 회귀를 발견했다. 기존 항구 좌표 테이블의 권역별 알려진 항구를 합쳐 복구했다. 추가 공급자 크롤링을 늘리지 않았다.
-- 단위: `node node_modules/vitest/vitest.mjs run` → 42파일, 422개 통과.
+- 단위: `node node_modules/vitest/vitest.mjs run` → 42파일, 425개 통과.
 - 브라우저: 기존 Playwright Chromium의 예약·복구·지역·항구 25개와 달력·사진·연관 예약 14개, 총 39개 통과. 달력은 390px/1280px에서 9월 7~30일을 모두 클릭했다. 결정론적 장애 테스트의 응답 대체와 실제 API 여정은 구별한다.
-- 실제 데이터: 로컬 프로덕션 빌드 `http://localhost:3014`에서 9월 28일 홍원항 1280px/390px, 오천항 1280px 여정 통과. API 대체 없음. 날짜별 물때 화면, 항구 선택, 후속 페이지, 상세의 양수 잔여석 날짜, 선사 링크, 뒤로가기 필터 복원, 홈 복귀를 확인했다. 조회일의 모든 배가 예약 가능하다는 뜻은 아니다.
+- 실제 데이터: 최종 production `https://bite-log-three.vercel.app`에서 9월 25일과 9월 28일 각각 홍원항 1280px/390px, 오천항 1280px 여정 3개씩 통과했다. API 대체 없음. 날짜별 물때 화면, 항구 선택, 후속 페이지, 상세의 양수 잔여석 날짜, 선사 링크, 뒤로가기 필터 복원, 홈 복귀를 확인했다. 조회일의 모든 배가 예약 가능하다는 뜻은 아니다.
 - 9/28 홍원항(군산 기준) 660cm, 오천항(보령 기준) 710cm가 실제 API 응답과 일치했다. 원본: `.codex/visual-evidence/20260907130841278-hongwon-390/result.json`, `.codex/visual-evidence/20260907130835780-ocheon-1280/result.json`.
-- 같은 최종 빌드에서 9월 25일 홍원항 1280px/390px, 오천항 1280px도 3개 통과(17.3초). 군산 528cm, 보령 562cm. 원본: `.codex/visual-evidence/20260907131219662-hongwon-390/result.json`, `.codex/visual-evidence/20260907131214251-ocheon-1280/result.json`. 최종 실데이터 여정 합계 6개이며 실제 결제는 0회다.
+- 최종 배포의 9월 25일 결과는 군산 528cm·보령 562cm, 9월 28일 결과는 군산 660cm·보령 710cm였다. 각 실행 모두 `mockedApis:false`, `errors:[]`, `completeJourney:true`이며 실제 결제는 0회다. 원본 결과는 `.codex/visual-evidence/20260907152431567-hongwon-390/result.json`, `.codex/visual-evidence/20260907152431562-ocheon-1280/result.json`, `.codex/visual-evidence/20260907152313493-hongwon-390/result.json`, `.codex/visual-evidence/20260907152313484-ocheon-1280/result.json`에 보존했다.
 - `tsc --noEmit`, 변경 파일 ESLint, `next build` 성공. `npx --no-install drift-guard check` 0.08%(2/2436): 기존 globals.css의 font/shadow 차이이며 이번에 보호 CSS를 변경하지 않았다.
-- 최신 프로덕션: `https://bite-log-three.vercel.app`에서 `BOOKING_DATE=2026-09-25`와 `2026-09-28` 각각 홍원항 데스크톱/모바일·오천항 데스크톱 3개씩 PASS. 전수 클릭 프로브는 컨트롤 307개, 항구 조합 213개, 선박 목록 API 43건 모두 200, issues 0이었다. 모바일 상세·오천항 페이지네이션·주꾸미/예약 가능만 프로브도 오류 없이 완료했다.
+- 최종 프로덕션: `dpl_G1ptwRC9nXeDaGj4LL8Bps6y159L`에서 날짜별 3개씩 PASS. 기존 전수 클릭 프로브(307개 컨트롤·213개 항구 조합)는 수정 전 배포의 범위를 확인한 자료이고, 후속 수정은 숨은 UID 회귀 테스트와 최종 6개 실데이터 여정으로 재검증했다. 예약·결제는 선사 사이트 링크 목적지만 확인했다.
 
 ## 독립 검수와 한계
 
