@@ -40,6 +40,7 @@
 - 최종 배포의 9월 25일 결과는 군산 528cm·보령 562cm, 9월 28일 결과는 군산 660cm·보령 710cm였다. 각 실행 모두 `mockedApis:false`, `errors:[]`, `completeJourney:true`이며 실제 결제는 0회다. 원본 결과는 `.codex/visual-evidence/20260907152431567-hongwon-390/result.json`, `.codex/visual-evidence/20260907152431562-ocheon-1280/result.json`, `.codex/visual-evidence/20260907152313493-hongwon-390/result.json`, `.codex/visual-evidence/20260907152313484-ocheon-1280/result.json`에 보존했다.
 - `tsc --noEmit`, 변경 파일 ESLint, `next build` 성공. `npx --no-install drift-guard check` 0.08%(2/2436): 기존 globals.css의 font/shadow 차이이며 이번에 보호 CSS를 변경하지 않았다.
 - 최종 프로덕션: `dpl_G1ptwRC9nXeDaGj4LL8Bps6y159L`에서 날짜별 3개씩 PASS. 기존 전수 클릭 프로브(307개 컨트롤·213개 항구 조합)는 수정 전 배포의 범위를 확인한 자료이고, 후속 수정은 숨은 UID 회귀 테스트와 최종 6개 실데이터 여정으로 재검증했다. 예약·결제는 선사 사이트 링크 목적지만 확인했다.
+- 같은 최종 배포에서 확장 홍원항 프로브(전체·예약 가능만 데스크톱/390px·주꾸미·오천항 전환)도 `completed:true`, `errors:[]`로 통과했다. 원본: `.codex/visual-evidence/2026-09-07T15-30-38-272Z-hongwon-live-report.json`.
 
 ## 독립 검수와 한계
 

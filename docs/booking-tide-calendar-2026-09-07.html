@@ -48,7 +48,7 @@ booking-full-journey-live.spec.ts --project=chromium → 프로덕션 날짜별 
 node e2e/live-booking-exhaustive-probe.mjs → 수정 전 배포에서 컨트롤 307 / 항구 조합 213 / issues 0
 node e2e/live-booking-detail-mobile-probe.mjs → 데스크톱·390px·홍원항/오천항 PASS
 node e2e/live-ocheon-pagination-probe.mjs → 3페이지·API 200 PASS
-node e2e/hongwon-live-probe.mjs → 9/25 홍원항·예약 가능만·주꾸미·오천항 PASS</pre>
+node e2e/hongwon-live-probe.mjs → 최종 배포에서 9/25 홍원항 전체·예약 가능만(1280/390px)·주꾸미·오천항 PASS, errors=[]</pre>
       <p><a href="../src/components/BookingDatePicker.tsx">달력 컴포넌트</a> · <a href="../src/app/api/tide/route.ts">물때 API</a> · <a href="../src/services/tideService.ts">검증·지점 표</a> · <a href="../src/instrumentation.ts">연결 설정</a> · <a href="../src/app/booking/page.tsx">예약 화면</a></p></details>
     </section>
     <section class="card"><h2>검증 경계</h2><p>기존 Playwright Chromium을 사용했습니다. Codex 내부 브라우저는 초기화 오류로 사용할 수 없어 iab 통과로 보고하지 않습니다. 390px는 모바일 크기 검증이며 실제 iOS/WebKit 실기기 검증은 아닙니다.</p><p>새 Claude 검수 세션이 단위·브라우저 테스트를 재실행했고, 지적 사항 수정 후 <a href="booking-tide-review-result-2026-09-07.md">93/100</a>으로 판정했습니다. 이후 필터 누락과 연결 재시도까지 수정한 최종 배포 <code>dpl_G1ptwRC9nXeDaGj4LL8Bps6y159L</code>에서 9월 25일·28일 실제 프로덕션 여정을 각각 3개씩 재검증했습니다.</p></section>
